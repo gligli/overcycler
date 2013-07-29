@@ -24,7 +24,7 @@ RUN_MODE=ROM_RUN
 ## - Exception vectors in ROM:
 ##VECTOR_LOCATION=VECTORS_IN_ROM
 ## - Exception vectors in RAM:
-##VECTOR_LOCATION=VECTORS_IN_RAM
+VECTOR_LOCATION=VECTORS_IN_RAM
 
 # Target file name (without extension).
 TARGET = main
@@ -40,9 +40,6 @@ SRC += system.c
 SRC += $(SYSPATH)syscalls.c 
 SRC += $(SYSPATH)rprintf.c 
 SRC += $(SYSPATH)serial.c
-
-#Functions for bootloading
-SRC += $(SYSPATH)firmware.c
 
 #Functions for SD interaction
 SRC += $(SYSPATH)rootdir.c
@@ -88,6 +85,7 @@ ASRCARM = Startup.S
 #ASRCARM = crt.S
 #ASRCARM += $(WINARM_COMMON)\Common_WinARM/src/swi_handler.S
 
+ASRCARM += dacspi_fiq.S
 
 ## Output format. (can be ihex or binary)
 ## (binary i.e. for openocd and SAM-BA, hex i.e. for lpc21isp and uVision)

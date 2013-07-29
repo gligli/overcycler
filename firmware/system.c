@@ -14,28 +14,6 @@
 unsigned char charY;
 unsigned char charX;
 
-/* Routine Block for startup code */
-/* Define catchall routines for vector table */
-void IRQ_Routine (void)   __attribute__ ((interrupt("IRQ")));
-void IRQ_Routine (void)
-{
-}
-
-void FIQ_Routine (void)   __attribute__ ((interrupt("FIQ")));
-void FIQ_Routine (void)
-{
-}
-
-void SWI_Routine (void)   __attribute__ ((interrupt("SWI")));
-void SWI_Routine (void)
-{
-}
-
-void UNDEF_Routine (void) __attribute__ ((interrupt("UNDEF")));
-void UNDEF_Routine (void)
-{
-};
-
 //Short delay
 void delay_ms(int count)
 {
@@ -52,9 +30,6 @@ void boot_up(void)
     //Initialize the MCU clock PLL
     system_init();
 
-	IODIR0 |= (1 << 31);
-	IOCLR0 |= (1 << 31); //Turn on USB LED
-
     //Init UART0 for debug
     PINSEL0 |= 0x00000005; //enable uart0
     U0LCR = 0x83; // 8 bits, no Parity, 1 Stop bit, DLAB = 1 
@@ -64,9 +39,7 @@ void boot_up(void)
 
     //Init rprintf
     rprintf_devopen(putc_serial0); 
-    rprintf("\n\n\nOverCycler\n");
-
-	//IOSET0 |= (1 << 31); //Turn off USB LED
+    rprintf("\nOverCycler\n");
 }
 
 /**********************************************************
@@ -93,9 +66,8 @@ void system_init(void)
     feed();
 
     // Enabling MAM and setting number of clocks used for Flash memory fetch (4 cclks in this case)
-    //MAMTIM=0x3; //VCOM?
+    MAMTIM=0x3;
     MAMCR=0x2;
-    MAMTIM=0x4; //Original
 
     // Setting peripheral Clock (pclk) to System Clock (cclk)
     VPBDIV=0x1;
@@ -115,4 +87,47 @@ void reset(void)
     WDFEED = 0x55;
     WDFEED = 0xAA;
     WDFEED = 0x00;
+}
+
+#define IRQ_MASK 0x00000080
+#define FIQ_MASK 0x00000040
+#define INT_MASK (IRQ_MASK | FIQ_MASK)
+
+static inline unsigned long __get_cpsr(void)
+{
+	unsigned long retval;
+	asm volatile (" mrs %0, cpsr" : "=r" (retval) : /* no inputs */ );
+	return retval;
+}
+
+static inline void __set_cpsr(unsigned long val)
+{
+	asm volatile (" msr cpsr, %0" : /* no outputs */ : "r" (val) );
+}
+
+unsigned long disableInts(void)
+{
+	unsigned long _cpsr;
+
+	_cpsr = __get_cpsr();
+	__set_cpsr(_cpsr | INT_MASK);
+	return _cpsr;
+}
+
+unsigned long enableInts(void)
+{
+	unsigned _cpsr;
+
+	_cpsr = __get_cpsr();
+	__set_cpsr(_cpsr & ~INT_MASK);
+	return _cpsr;
+}
+
+unsigned long restoreInts(unsigned long oldCPSR)
+{
+	unsigned long _cpsr;
+
+	_cpsr = __get_cpsr();
+	__set_cpsr((_cpsr & ~INT_MASK) | (oldCPSR & INT_MASK));
+	return _cpsr;
 }

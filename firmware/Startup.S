@@ -109,7 +109,7 @@
         .set UND_Stack_Size, 0x00000080
         .set SVC_Stack_Size, 0x00000080
         .set ABT_Stack_Size, 0x00000080
-        .set FIQ_Stack_Size, 0x00000080
+        .set FIQ_Stack_Size, 0x00000200
         .set IRQ_Stack_Size, 0x00000200
         .set USR_Stack_Size, 0x00000800
 
@@ -259,40 +259,35 @@ EXTERN CODE32 (FIQ_Handler?A)
 .extern IRQ_Handler
 .extern FIQ_Handler
 
+.extern FIQ_Init
 
 // Exception Vectors
 // Mapped to Address 0.
 // Absolute addressing mode must be used.
 
-__Vectors:        LDR     PC,Reset_Addr         
+__Vectors:      LDR     PC,Reset_Addr         
                 LDR     PC,Undef_Addr
                 LDR     PC,SWI_Addr
                 LDR     PC,PAbt_Addr
                 LDR     PC,DAbt_Addr
                 NOP                            /* Reserved Vector */
-//                LDR     PC,IRQ_Addr
-//                LDR     PC,[PC, #-0x0FF0]      /* Vector from VicVectAddr */
                 LDR     PC,IRQ_Wrapper_Addr
                 LDR     PC,FIQ_Addr
 
 Reset_Addr:       .word     Reset_Handler
 Undef_Addr:       .word     Undef_Handler
-// SWI_Addr:         .word     SWI_Handler
-// SWI_Wrapper_Addr: .word     SWI_Wrapper
 SWI_Addr:         .word     0      /* in swi_handler.S */
 PAbt_Addr:        .word     PAbt_Handler
 DAbt_Addr:        .word     DAbt_Handler
                   .word     0                      /* Reserved Address */
-// IRQ_Addr:         .word     __IRQ_Handler
 IRQ_Wrapper_Addr: .word    __IRQ_Wrapper
 FIQ_Addr:         .word     FIQ_Handler
-
 Undef_Handler:  B       Undef_Handler
 /* SWI_Handler:    B       SWI_Handler */
 PAbt_Handler:   B       PAbt_Handler
 DAbt_Handler:   B       DAbt_Handler
 /* IRQ_Handler:    B       IRQ_Handler */
-FIQ_Handler:    B       FIQ_Handler
+/* FIQ_Handler:    B       FIQ_Handler */
 
 .size   __Vectors, . - __Vectors
 
@@ -357,6 +352,9 @@ Reset_Handler:
                 MSR     CPSR_c, #Mode_FIQ|I_Bit|F_Bit
                 MOV     SP, R0
                 SUB     R0, R0, #FIQ_Stack_Size
+				
+				// fiq init
+				BL		FIQ_Init
 
 // Enter IRQ Mode and set its Stack Pointer
                 MSR     CPSR_c, #Mode_IRQ|I_Bit|F_Bit
@@ -369,8 +367,8 @@ Reset_Handler:
                 SUB     R0, R0, #SVC_Stack_Size
 
 // Enter User Mode and set its Stack Pointer
-                MSR     CPSR_c, #Mode_SYS /* Interrupts enabled */
-//				MSR     CPSR_c, #Mode_USR|I_Bit|F_Bit /* Interrupts disabled */
+//                MSR     CPSR_c, #Mode_SYS /* Interrupts enabled */
+				MSR     CPSR_c, #Mode_SYS|I_Bit|F_Bit /* Interrupts disabled */
                 MOV     SP, R0
 
 
