@@ -42,7 +42,6 @@ SRC += $(SYSPATH)rprintf.c
 SRC += $(SYSPATH)serial.c
 
 #Functions for SD interaction
-SRC += $(SYSPATH)rootdir.c
 SRC += $(SYSPATH)sd_raw.c
 SRC += $(SYSPATH)fat16.c
 SRC += $(SYSPATH)partition.c 
@@ -57,6 +56,12 @@ SRC += $(USBPATH)usbinit.c
 SRC += $(USBPATH)usbhw_lpc.c 
 SRC += $(USBPATH)usbcontrol.c 
 SRC += $(USBPATH)usbstdreq.c
+
+#
+SRC += dacspi.c
+SRC += wtosc.c
+SRC += synth.c
+
 
 # List C source files here which must be compiled in ARM-Mode.
 # use file-extension c for "c-only"-files

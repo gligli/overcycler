@@ -28,9 +28,13 @@
         <in>serial.c</in>
         <in>syscalls.c</in>
       </df>
-      <in>dacspi_fiq.S</in>
+      <in>dacspi.c</in>
       <in>main.c</in>
+      <in>main.h</in>
+      <in>synth.c</in>
       <in>system.c</in>
+      <in>wtosc.c</in>
+      <in>wtosc.h</in>
     </df>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -60,13 +64,6 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>../../firmware/FW.SFE</executablePath>
-          <cTool>
-            <incDir>
-              <pElem>../../firmware</pElem>
-              <pElem>../../firmware/LPCUSB</pElem>
-              <pElem>../../firmware/System</pElem>
-            </incDir>
-          </cTool>
         </makeTool>
       </makefileType>
       <item path="../../firmware/LPCUSB/blockdev_sd.c"
@@ -129,10 +126,6 @@
       </item>
       <item path="../../firmware/System/partition.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../firmware/System/rootdir.c" ex="false" tool="0" flavor2="2">
-        <cTool>
-        </cTool>
-      </item>
       <item path="../../firmware/System/rprintf.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
@@ -151,9 +144,17 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../../firmware/dacspi_fiq.S" ex="false" tool="4" flavor2="0">
+      <item path="../../firmware/dacspi.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
       <item path="../../firmware/main.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../../firmware/main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../firmware/synth.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
@@ -161,6 +162,45 @@
         <cTool>
         </cTool>
       </item>
+      <item path="../../firmware/wtosc.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../../firmware/wtosc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <folder path="firmware">
+        <cTool>
+          <incDir>
+            <pElem>../../firmware</pElem>
+            <pElem>../../firmware/System</pElem>
+          </incDir>
+          <inheritIncValues>false</inheritIncValues>
+          <inheritPreValues>false</inheritPreValues>
+          <inheritUndefValues>false</inheritUndefValues>
+        </cTool>
+      </folder>
+      <folder path="firmware/LPCUSB">
+        <cTool>
+          <incDir>
+            <pElem>../../firmware</pElem>
+            <pElem>../../firmware/LPCUSB</pElem>
+          </incDir>
+          <inheritIncValues>false</inheritIncValues>
+          <inheritPreValues>false</inheritPreValues>
+          <inheritUndefValues>false</inheritUndefValues>
+        </cTool>
+      </folder>
+      <folder path="firmware/System">
+        <cTool>
+          <incDir>
+            <pElem>../../firmware</pElem>
+            <pElem>../../firmware/System</pElem>
+          </incDir>
+          <inheritIncValues>false</inheritIncValues>
+          <inheritPreValues>false</inheritPreValues>
+          <inheritUndefValues>false</inheritUndefValues>
+        </cTool>
+      </folder>
     </conf>
   </confs>
 </configurationDescriptor>
