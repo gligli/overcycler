@@ -9,55 +9,6 @@
 struct
 {
 	struct wtosc_s osc[SYNTH_OSC_COUNT];
-	uint32_t lastCounter;
-} wtsynth;
-
-void wtsynth_init(void);
-void wtsynth_setParameters(int8_t osc, uint16_t cv, uint16_t increment);
-
-void wtsynth_init(void)
-{
-	int i;
-	int16_t sineShape[600];
-	
-	dacspi_setMasterPeriod(SYNTH_OSC_COUNT*CPU_FREQ/WTOSC_MASTER_CLOCK);
-	
-	for(i=0;i<600;++i)
-	{
-		sineShape[i]=sin((i/300.0)*M_PI)/2.0*65535.0;
-//		rprintf("%d\n",sineShape[i]);
-	}
-
-	for(i=0;i<SYNTH_OSC_COUNT;++i)
-	{
-		wtosc_init(&wtsynth.osc[i],i,0x7000);
-		wtosc_setSampleData(&wtsynth.osc[i],sineShape,600);
-	}
-	
-	PWMPR=0;
-	PWMPC=0;
-	PWMTCR=1;
-	
-	T0TC=0;	
-	T0MR0=CPU_FREQ/WTOSC_MASTER_CLOCK-1;
-	T0MCR=3; // int & reset for MR0
-
-	T0PR=0;
-	T0PC=0;
-	T0TCR=1;
-	
-	// setup TIMER0 vector as FIQ
-	VICIntSelect|=1<<4;
-	VICIntEnable|=1<<4; // enable interrupt
-}
-
-void wtsynth_setParameters(int8_t osc, uint16_t cv, uint16_t increment)
-{
-	 wtosc_setParameters(&wtsynth.osc[osc],cv,increment);
-}
-
-struct
-{
 	struct fat16_dir_entry_struct dir_entry;
 	struct fat16_dir_struct* dd;
 } synth;
@@ -82,17 +33,42 @@ static void loadWaveTable(void)
 		fat16_close_file(f);
 
 		for(i=0;i<SYNTH_OSC_COUNT;++i)
-			wtosc_setSampleData(&wtsynth.osc[i],data,600);
+			wtosc_setSampleData(&synth.osc[i],data,600);
 	}
 }
 
+//#define BANK "AKWF_bw_hvoice"
+//#define BANK "AKWF_bw_squ"
 #define BANK "AKWF_bw_perfectwaves"
-#define BANK "AKWF_bw_hvoice"
-#define BANK "AKWF_bw_squ"
 
 void synth_init(void)
 {
-	wtsynth_init();
+	int i;
+	int16_t sineShape[600];
+	
+	dacspi_setMasterPeriod(SYNTH_OSC_COUNT*CPU_FREQ/WTOSC_MASTER_CLOCK);
+	
+	for(i=0;i<600;++i)
+		sineShape[i]=sin((i/300.0)*M_PI)/2.0*65535.0;
+
+	for(i=0;i<SYNTH_OSC_COUNT;++i)
+	{
+		wtosc_init(&synth.osc[i],i,0x7000);
+		wtosc_setSampleData(&synth.osc[i],sineShape,600);
+	}
+	
+	T0TC=0;	
+	T0MR0=CPU_FREQ/WTOSC_MASTER_CLOCK-1;
+	T0MCR=3; // int & reset for MR0
+
+	T0PR=0;
+	T0PC=0;
+	T0TCR=1;
+	
+	// setup TIMER0 vector as FIQ
+	VICIntSelect|=1<<4;
+	VICIntEnable|=1<<4; // enable interrupt
+
 	dacspi_init();
 
     if(fat16_get_dir_entry_of_path(fs, "/WAVEDATA/" BANK, &synth.dir_entry))
@@ -108,7 +84,8 @@ void synth_update(void)
 	
 	static int m=1;
 	static int note=69;
-	static int incr=0;
+	static int ali=0;
+	static uint8_t toto=0;
 	
 	key=getkey_serial0();
 	
@@ -122,15 +99,17 @@ void synth_update(void)
 		m=1;
 		break;
 	case '-':
-		--note;
+		if(note>12)
+			--note;
 		m=1;
 		break;
 	case '*':
-		++incr;
+		++ali;
 		m=1;
 		break;
 	case '/':
-		--incr;
+		if(ali>0)
+			--ali;
 		m=1;
 		break;
 	case 'n':
@@ -145,18 +124,19 @@ void synth_update(void)
 
 	if(m)
 	{
-		rprintf("note %d %d\n",incr,note);
+		rprintf("note %d %d %d\n",ali,note,toto);
 		
 		for(int i=0;i<SYNTH_VOICE_COUNT/2;++i)
 		{
-			wtsynth_setParameters(i*4+0,((note+0)<<8),incr);
-			/*wtsynth_setParameters(i*4+1,((note+12)<<8)+7,incr);
-			wtsynth_setParameters(i*4+2,((note+24)<<8)+17,incr);
-			wtsynth_setParameters(i*4+3,((note+36)<<8)+39,incr);*/
+			wtosc_setParameters(&synth.osc[i*4+0],((note+0)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+1],((note+0)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+2],((note+0)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+3],((note+0)<<8)+toto,ali);
 		}
 		
 		m=0;
+		++toto;
 	}
-	rprintf("%u ",dacspi_states[6]);
+//	rprintf("% 7u ",dacspi_states[7]);
 }
 

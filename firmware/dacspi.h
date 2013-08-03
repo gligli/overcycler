@@ -9,8 +9,7 @@
 #define DSIDX_PERIOD 3
 #define DSIDX_PHASE 4
 #define DSIDX_INCREMENT 5
-#define DSIDX_LAST_SAMPLE 6
-#define DSIDX_INTERP_RATIO 7
+#define DSIDX_DEBUG 7
 
 void dacspi_init(void);
 void dacspi_setState(int channel, int dsidx, uint32_t value);

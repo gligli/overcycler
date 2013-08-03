@@ -50,7 +50,7 @@ FIQ_Init:
 FIQ_Handler:
 	
 	// save regs
-	stmfd sp!,{r0-r5}
+	stmfd sp!,{r0-r4}
 
 	// ack int
 	mov r2,#1
@@ -75,7 +75,6 @@ dovoice:
 
 	// load osc state
 	ldr r1,[r12,#4]
-	ldr r5,[r12,#8]
 	ldr r4,[r12,#16]
 
 	// update osc counter
@@ -92,7 +91,8 @@ dovoice:
 	bge dosample
 
 	// reload phase
-	add r4,r5
+	ldr r3,[r12,#8]
+	add r4,r3
 
 	// get master period
 	ldr r8,[r9]
@@ -103,27 +103,18 @@ dosample:
 	str r1,[r12,#4]
 	str r4,[r12,#16]
 
-	// get sample offset
-	ldr r2,[r12,#28]
-	umull r1,r3,r2,r1
-
-	// get full sample index
-	add r4,r4,r3
-	cmp r4,r5
-	subhs r4,r4,r5
-
-	// get sample
+	// get sample command
 	mov r4,r4,lsl#1
-	ldrh r2,[r0,r4]
+	ldrh r4,[r0,r4]
 
 	// send it
-	strh r2,[r10]
+	strh r4,[r10]
 
 	// to next osc
 	add r12,#32
 
 	// restore regs
-	ldmfd sp!, {r0-r5}
+	ldmfd sp!, {r0-r4}
 
 	// return
 	subs pc, lr, #4

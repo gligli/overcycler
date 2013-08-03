@@ -10,19 +10,24 @@
 
 struct wtosc_s
 {
-	uint16_t data[WTOSC_MAX_SAMPLES];	
+	int16_t rawData[WTOSC_MAX_SAMPLES];
+	uint16_t resmpData[WTOSC_MAX_SAMPLES];
 	
-	uint32_t samplePeriod;
+	int16_t rawSampleCount;
+	uint16_t increment;
+
+	uint32_t resmpSamplePeriod;
+	int16_t resmpSampleCount;
+
 	uint16_t controlData;
 	uint16_t cv;
-	uint16_t increment;
-	int16_t sampleCount;
+	
 	int channel;
 };
 
 void wtosc_init(struct wtosc_s * o, int channel, uint16_t controlData);
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount);
-void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t increment);
+void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing);
 void wtosc_update(struct wtosc_s * o, uint32_t ticks);
 
 #endif

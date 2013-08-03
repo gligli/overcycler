@@ -36,6 +36,11 @@ SRC = $(TARGET).c
 #Functions unique to the bootloader build
 SRC += system.c
 
+#
+SRC += dacspi.c
+SRC += wtosc.c
+SRC += synth.c
+
 #Needed most of the time for basic functions
 SRC += $(SYSPATH)syscalls.c 
 SRC += $(SYSPATH)rprintf.c 
@@ -56,11 +61,6 @@ SRC += $(USBPATH)usbinit.c
 SRC += $(USBPATH)usbhw_lpc.c 
 SRC += $(USBPATH)usbcontrol.c 
 SRC += $(USBPATH)usbstdreq.c
-
-#
-SRC += dacspi.c
-SRC += wtosc.c
-SRC += synth.c
 
 
 # List C source files here which must be compiled in ARM-Mode.
@@ -148,8 +148,8 @@ CDEFS += -D$(VECTOR_LOCATION)
 ADEFS += -D$(VECTOR_LOCATION)
 endif
 
-CDEFS += -D__WinARM__
-ADEFS += -D__WinARM__
+#CDEFS += -D__WinARM__
+#ADEFS += -D__WinARM__
 
 # Compiler flags.
 #  -g*:          generate debugging information

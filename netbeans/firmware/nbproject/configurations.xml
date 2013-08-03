@@ -3,11 +3,15 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="../../firmware" name="firmware">
       <df name="LPCUSB">
+        <in>blockdev.h</in>
         <in>blockdev_sd.c</in>
         <in>lpc2000_spi.c</in>
         <in>main_msc.c</in>
         <in>msc_bot.c</in>
+        <in>msc_bot.h</in>
         <in>msc_scsi.c</in>
+        <in>msc_scsi.h</in>
+        <in>spi.h</in>
         <in>type.h</in>
         <in>usbapi.h</in>
         <in>usbcontrol.c</in>
@@ -22,16 +26,21 @@
         <in>partition.c</in>
         <in>partition.h</in>
         <in>rprintf.c</in>
+        <in>rprintf.h</in>
         <in>sd_raw.c</in>
         <in>sd_raw.h</in>
         <in>serial.c</in>
+        <in>serial.h</in>
         <in>syscalls.c</in>
       </df>
       <in>dacspi.c</in>
+      <in>dacspi.h</in>
       <in>main.c</in>
       <in>main.h</in>
       <in>synth.c</in>
+      <in>synth.h</in>
       <in>system.c</in>
+      <in>system.h</in>
       <in>wtosc.c</in>
       <in>wtosc.h</in>
     </df>
@@ -65,6 +74,8 @@
           <executablePath>../../firmware/FW.SFE</executablePath>
         </makeTool>
       </makefileType>
+      <item path="../../firmware/LPCUSB/blockdev.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../firmware/LPCUSB/blockdev_sd.c"
             ex="false"
             tool="0"
@@ -87,9 +98,15 @@
         <cTool>
         </cTool>
       </item>
+      <item path="../../firmware/LPCUSB/msc_bot.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../firmware/LPCUSB/msc_scsi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
+      </item>
+      <item path="../../firmware/LPCUSB/msc_scsi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../firmware/LPCUSB/spi.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../firmware/LPCUSB/type.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -129,6 +146,8 @@
         <cTool>
         </cTool>
       </item>
+      <item path="../../firmware/System/rprintf.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../firmware/System/sd_raw.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
@@ -139,6 +158,8 @@
         <cTool>
         </cTool>
       </item>
+      <item path="../../firmware/System/serial.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../firmware/System/syscalls.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
@@ -146,6 +167,8 @@
       <item path="../../firmware/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
+      </item>
+      <item path="../../firmware/dacspi.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../firmware/main.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -157,9 +180,13 @@
         <cTool>
         </cTool>
       </item>
+      <item path="../../firmware/synth.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../../firmware/system.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
+      </item>
+      <item path="../../firmware/system.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../firmware/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -171,6 +198,7 @@
         <cTool>
           <incDir>
             <pElem>../../firmware</pElem>
+            <pElem>../../../SysGCC/arm-eabi/arm-eabi/sys-include</pElem>
             <pElem>../../firmware/System</pElem>
           </incDir>
           <inheritIncValues>false</inheritIncValues>
@@ -182,6 +210,7 @@
           <incDir>
             <pElem>../../firmware</pElem>
             <pElem>../../firmware/LPCUSB</pElem>
+            <pElem>../../firmware/System</pElem>
           </incDir>
           <inheritIncValues>false</inheritIncValues>
           <inheritPreValues>false</inheritPreValues>
@@ -191,6 +220,9 @@
         <cTool>
           <incDir>
             <pElem>../../firmware</pElem>
+            <pElem>../../../SysGCC/arm-eabi/lib/gcc/arm-eabi/4.8.0/include</pElem>
+            <pElem>../../../SysGCC/arm-eabi/arm-eabi/sys-include/sys</pElem>
+            <pElem>../../../SysGCC/arm-eabi/arm-eabi/sys-include</pElem>
             <pElem>../../firmware/System</pElem>
           </incDir>
           <inheritIncValues>false</inheritIncValues>
