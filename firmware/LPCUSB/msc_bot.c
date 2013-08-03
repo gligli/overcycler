@@ -268,7 +268,7 @@ static void HandleDataOut(void)
 **************************************************************************/
 void MSCBotBulkOut(U8 bEP, U8 bEPStatus)
 {
-    int     iLen, iChunk;
+    int     iLen;
     BOOL    fHostIn, fDevIn;
 
     // ignore events on stalled EP
@@ -350,7 +350,7 @@ void MSCBotBulkOut(U8 bEP, U8 bEPStatus)
 
         case eDataIn:
         case eCSW:
-            iChunk = USBHwEPRead(bEP, NULL, 0);
+            USBHwEPRead(bEP, NULL, 0);
             DBG("Phase error in state %d, %d bytes\n", eState, iChunk);
             eState = eCBW;
             break;

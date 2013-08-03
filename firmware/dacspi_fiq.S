@@ -1,5 +1,5 @@
 #define T0IR 0xE0004000
-#define PWMTC 0xE0014008
+#define T0MR0 0xE0004018
 #define SSPDR 0xE0068008
 
 .data 
@@ -7,7 +7,7 @@
 .align 5
 .global dacspi_states
 dacspi_states:
-	// sample count / waveform data address / counter / period / phase / increment / unused / unused
+	// see dacspi.h for meaning
 	// max 16 voices
 	.word 0,0,0,0,0,0,0,0
 	.word 0,0,0,0,0,0,0,0
@@ -30,6 +30,10 @@ dacspi_states:
 	// termination
 	.word 0,0,0,0,0,0,0,0
 
+.global dacspi_master_period
+dacspi_master_period:
+	.word 0
+
 .text
 .arm
 
@@ -38,65 +42,88 @@ FIQ_Init:
 	ldr r12,=dacspi_states
 	ldr r11,=T0IR
 	ldr r10,=SSPDR
-	ldr r9,=PWMTC
+	ldr r9,=dacspi_master_period
+	mov r8,#500
 	bx lr
 
 .global FIQ_Handler
 FIQ_Handler:
 	
-	// ack int
-	mov r8,#1
-	strb r8,[r11]
-
 	// save regs
-	stmfd sp!,{r0-r7}
+	stmfd sp!,{r0-r5}
+
+	// ack int
+	mov r2,#1
+	strb r2,[r11]
 
 	// load osc state
-	ldmia r12,{r0-r7}
+	ldr r0,[r12]
 	
 	// past last osc?
 	cmp r0,#0
 	bne dovoice
 
+	str r8,[r12,#24]
+
 	// restart from first osc 
 	ldr r12,=dacspi_states
-	// load osc state
-	ldmia r12,{r0-r7}
+
+	// load next state
+	ldr r0,[r12]
 
 dovoice:
-	// get elapsed ticks
-	mov r8,r6
-	ldr r6,[r9]
-	sub r8,r6,r8
+
+	// load osc state
+	ldr r1,[r12,#4]
+	ldr r5,[r12,#8]
+	ldr r4,[r12,#16]
 
 	// update osc counter
-	subs r2,r8
-	bge dosample
+	subs r1,r8
+	bgt dosample
 
 	// reload counter
-	add r2,r3
+	ldr r3,[r12,#12]
+	add r1,r3
 
 	// update phase
-	subs r4,r5
+	ldr r3,[r12,#20]
+	subs r4,r3
 	bge dosample
 
 	// reload phase
-	add r4,r0
+	add r4,r5
 
+	// get master period
+	ldr r8,[r9]
+	
 dosample:
 	
 	// update osc state
-	stmia r12!,{r0-r7}
+	str r1,[r12,#4]
+	str r4,[r12,#16]
+
+	// get sample offset
+	ldr r2,[r12,#28]
+	umull r1,r3,r2,r1
+
+	// get full sample index
+	add r4,r4,r3
+	cmp r4,r5
+	subhs r4,r4,r5
 
 	// get sample
-	mov r8,r4,lsl#1
-	ldrh r8,[r1,r8]
+	mov r4,r4,lsl#1
+	ldrh r2,[r0,r4]
 
 	// send it
-	strh r8,[r10]
+	strh r2,[r10]
+
+	// to next osc
+	add r12,#32
 
 	// restore regs
-	ldmfd sp!, {r0-r7}
+	ldmfd sp!, {r0-r5}
 
 	// return
 	subs pc, lr, #4

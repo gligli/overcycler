@@ -19,7 +19,9 @@ void wtsynth_init(void)
 {
 	int i;
 	int16_t sineShape[600];
-		
+	
+	dacspi_setMasterPeriod(SYNTH_OSC_COUNT*CPU_FREQ/WTOSC_MASTER_CLOCK);
+	
 	for(i=0;i<600;++i)
 	{
 		sineShape[i]=sin((i/300.0)*M_PI)/2.0*65535.0;
@@ -37,7 +39,7 @@ void wtsynth_init(void)
 	PWMTCR=1;
 	
 	T0TC=0;	
-	T0MR0=CPU_FREQ/WTOSC_MASTER_CLOCK;
+	T0MR0=CPU_FREQ/WTOSC_MASTER_CLOCK-1;
 	T0MCR=3; // int & reset for MR0
 
 	T0PR=0;
@@ -80,31 +82,32 @@ static void loadWaveTable(void)
 		fat16_close_file(f);
 
 		for(i=0;i<SYNTH_OSC_COUNT;++i)
-		{
-			wtosc_init(&wtsynth.osc[i],i,0x7000);
 			wtosc_setSampleData(&wtsynth.osc[i],data,600);
-		}
 	}
 }
+
+#define BANK "AKWF_bw_perfectwaves"
+#define BANK "AKWF_bw_hvoice"
+#define BANK "AKWF_bw_squ"
 
 void synth_init(void)
 {
 	wtsynth_init();
 	dacspi_init();
 
-//    if(fat16_get_dir_entry_of_path(fs, "/WAVEDATA/AKWF_bw_perfectwaves", &synth.dir_entry))
-    if(fat16_get_dir_entry_of_path(fs, "/WAVEDATA/AKWF_hvoice", &synth.dir_entry))
+    if(fat16_get_dir_entry_of_path(fs, "/WAVEDATA/" BANK, &synth.dir_entry))
 	{
 		synth.dd = fat16_open_dir(fs, &synth.dir_entry);
 	}
 }
 
+extern volatile uint32_t dacspi_states[];
 void synth_update(void)
 {
 	int key;
 	
 	static int m=1;
-	static int note=33;
+	static int note=69;
 	static int incr=0;
 	
 	key=getkey_serial0();
@@ -147,12 +150,13 @@ void synth_update(void)
 		for(int i=0;i<SYNTH_VOICE_COUNT/2;++i)
 		{
 			wtsynth_setParameters(i*4+0,((note+0)<<8),incr);
-			wtsynth_setParameters(i*4+1,((note+0)<<8)+6,incr);
-			wtsynth_setParameters(i*4+2,((note+0)<<8)+12,incr);
-			wtsynth_setParameters(i*4+3,((note+0)<<8)+18,incr);
+			/*wtsynth_setParameters(i*4+1,((note+12)<<8)+7,incr);
+			wtsynth_setParameters(i*4+2,((note+24)<<8)+17,incr);
+			wtsynth_setParameters(i*4+3,((note+36)<<8)+39,incr);*/
 		}
 		
 		m=0;
 	}
+	rprintf("%u ",dacspi_states[6]);
 }
 

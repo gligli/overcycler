@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "rprintf.h"
-//#include "system.h" //Needed for delay_ms
+#include "system.h" //Needed for delay_ms
 
 #define SCRATCH 12  //32Bits go up to 4GB + 1 Byte for \0
 

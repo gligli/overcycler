@@ -12,9 +12,11 @@ void wtosc_init(struct wtosc_s * o, int channel, uint16_t controlData)
 	o->controlData=controlData;
 	o->channel=channel;
 
-	dacspi_setState(o->channel,DSIDX_SAMPLE_COUNT,0);
+	dacspi_setState(o->channel,DSIDX_PERIOD,1000);
+	dacspi_setState(o->channel,DSIDX_INCREMENT,1);
+	dacspi_setState(o->channel,DSIDX_SAMPLE_COUNT,WTOSC_MAX_SAMPLES);
+
 	dacspi_setState(o->channel,DSIDX_WAVEFORM_ADDR,(uint32_t)o->data);
-	dacspi_setState(o->channel,DSIDX_COUNTER,0);
 }
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
@@ -44,9 +46,9 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t increment)
 	freq=pow(2.0,(note-69.0)/12.0)*440.0; // note frequency
 	rate=freq*o->sampleCount; // sample rate
 
-	while((rate/underSample)>(double)WTOSC_MAX_SAMPLE_RATE)
+	while((rate/underSample)>(double)WTOSC_MASTER_SAMPLE_RATE)
 		++underSample;
-	
+		
 	increment+=underSample;
 	
 	BLOCK_INT
@@ -57,7 +59,8 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t increment)
 		
 		dacspi_setState(o->channel,DSIDX_PERIOD,o->samplePeriod);
 		dacspi_setState(o->channel,DSIDX_INCREMENT,o->increment);
+		dacspi_setState(o->channel,DSIDX_INTERP_RATIO,(o->increment*((uint64_t)1<<32))/o->samplePeriod);
 	}
 
-	rprintf("inc %d cv %x per %d\n",o->increment,o->cv,o->samplePeriod);
+	rprintf("inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->samplePeriod,(int)rate/underSample);
 }

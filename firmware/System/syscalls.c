@@ -127,7 +127,7 @@ static char *heap_ptr;		/* Points to current end of the heap.	*/
 /*  Since _s_r is not used in the current implementation, the following	*/
 /* messages must be suppressed.						*/
 
-void * _sbrk_r(
+__attribute__((used)) void * _sbrk_r(
     struct _reent *_s_r, 
     ptrdiff_t nbytes)
 {

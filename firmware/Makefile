@@ -11,7 +11,7 @@ SUBMDL   = LPC2138
 #THUMB    = -mthumb
 
 #This is needed to run IAP function call stuff
-THUMB_IW = -mthumb-interwork
+#THUMB_IW = -mthumb-interwork
 
 ## Create ROM-Image (final)
 RUN_MODE=ROM_RUN
@@ -100,7 +100,7 @@ FORMAT = ihex
 # Optimization level, can be [0, 1, 2, 3, s]. 
 # 0 = turn off optimization. s = optimize for size.
 # (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
-OPT = s
+OPT = fast
 #OPT = 0
 
 ## Using the Atmel AT91_lib produces warning with
@@ -159,15 +159,17 @@ ADEFS += -D__WinARM__
 #  -Wa,...:      tell GCC to pass this to the assembler.
 #    -adhlns...: create assembler listing
 #
-# Flags for C and C++ (arm-elf-gcc/arm-elf-g++)
+# Flags for C and C++ (arm-eabi-gcc/arm-eabi-g++)
 CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
-CFLAGS += -O$(OPT)
 CFLAGS += -Wall -Wcast-align -Wimplicit 
 CFLAGS += -Wpointer-arith -Wswitch
 CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 CFLAGS += -Wa,-adhlns=$(subst $(suffix $<),.lst,$<) 
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
+
+CFLAGS += -flto -fuse-linker-plugin
+CFLAGS += -O$(OPT)
 
 # flags only for C
 CONLYFLAGS += -Wnested-externs 
@@ -181,7 +183,7 @@ CONLYFLAGS += -Wstrict-prototypes
 CONLYFLAGS += -Wmissing-declarations
 endif
 
-# flags only for C++ (arm-elf-g++)
+# flags only for C++ (arm-eabi-g++)
 # CPPFLAGS = -fno-rtti -fno-exceptions
 CPPFLAGS = 
 
@@ -255,12 +257,12 @@ LPC21ISP_CONTROL = -control
 
 # Define programs and commands.
 SHELL = sh
-CC = arm-elf-gcc
-CPP = arm-elf-g++
-OBJCOPY = arm-elf-objcopy
-OBJDUMP = arm-elf-objdump
-SIZE = arm-elf-size
-NM = arm-elf-nm
+CC = arm-eabi-gcc
+CPP = arm-eabi-g++
+OBJCOPY = arm-eabi-objcopy
+OBJDUMP = arm-eabi-objdump
+SIZE = arm-eabi-size
+NM = arm-eabi-nm
 REMOVE = rm -f
 COPY = cp
 
@@ -333,7 +335,6 @@ sym: $(TARGET).sym
 
 # Eye candy.
 begin:
-	@echo
 	@echo $(MSG_BEGIN)
 
 finished:
@@ -341,17 +342,16 @@ finished:
 
 end:
 	@echo $(MSG_END)
-	@echo
 
 
 # Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
 ELFSIZE = $(SIZE) -A $(TARGET).elf
 sizebefore:
-	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_BEFORE); $(ELFSIZE); echo; fi
 
 sizeafter:
-	@if [ -f $(TARGET).elf ]; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE); echo; fi
+	@echo $(MSG_SIZE_AFTER)
+	@$(ELFSIZE)
 
 
 # Display compiler version information.
@@ -363,7 +363,6 @@ gccversion :
 ifeq ($(FLASH_TOOL),UVISION)
 # Program the device with Keil's uVision (needs configured uVision-Workspace). 
 program: $(TARGET).$(IMGEXT)
-	@echo
 	@echo "Programming with uVision"
 #	C:\Keil\uv3\Uv3.exe -f uvisionflash.Uv2 -ouvisionflash.txt
 	$(REMOVE) ../Common_WinARM/$(TARGET).hex
@@ -373,13 +372,11 @@ else
 ifeq ($(FLASH_TOOL),OPENOCD)
 # Program the device with Dominic Rath's OPENOCD in "batch-mode", needs cfg and "reset-script".
 program: $(TARGET).$(IMGEXT)
-	@echo
 	@echo "Programming with OPENOCD"
 	C:\WinARM\utils\openocd\openocd_svn59\openocd.exe -f oocd_flash2138_wig.cfg
 else
 # Program the device.  - lpc21isp will not work for SAM7
 program: $(TARGET).$(IMGEXT)
-	@echo
 	@echo $(MSG_LPC21_RESETREMINDER)
 	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 endif
@@ -388,19 +385,16 @@ endif
 
 # Create final output file (.hex) from ELF output file.
 %.hex: %.elf
-	@echo
 	@echo $(MSG_FLASH) $@
 	$(OBJCOPY) -O ihex $< $@
 	
 # Create final output file (.bin) from ELF output file.
 #%.bin: %.elf
-#	@echo
 #	@echo $(MSG_FLASH) $@
 #	$(OBJCOPY) -O binary $< $@
 
 # Create final output file (.bin) from ELF output file.
 FW.SFE: main.elf
-	@echo
 	@echo $(MSG_FLASH) $@
 	$(OBJCOPY) -O binary $< $@
 
@@ -408,14 +402,12 @@ FW.SFE: main.elf
 # Create extended listing file from ELF output file.
 # testing: option -C
 %.lss: %.elf
-	@echo
 	@echo $(MSG_EXTENDED_LISTING) $@
 	$(OBJDUMP) -h -S -C $< > $@
 
 
 # Create a symbol table from ELF output file.
 %.sym: %.elf
-	@echo
 	@echo $(MSG_SYMBOL_TABLE) $@
 	$(NM) -n $< > $@
 
@@ -424,34 +416,29 @@ FW.SFE: main.elf
 .SECONDARY : $(TARGET).elf
 .PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
 %.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
-	@echo
 	@echo $(MSG_LINKING) $@
-	@$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
+	$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
 #	$(CPP) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
 
 # Compile: create object files from C source files. ARM/Thumb
 $(COBJ) : %.o : %.c
-	@echo
 	@echo $(MSG_COMPILING) $<
-	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+	$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C source files. ARM-only
 $(COBJARM) : %.o : %.c
-	@echo
 	@echo $(MSG_COMPILING_ARM) $<
-	@$(CC) -c $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+	$(CC) -c $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM/Thumb
 $(CPPOBJ) : %.o : %.cpp
-	@echo
 	@echo $(MSG_COMPILINGCPP) $<
-	@$(CPP) -c $(THUMB) $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
+	$(CPP) -c $(THUMB) $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM-only
 $(CPPOBJARM) : %.o : %.cpp
-	@echo
 	@echo $(MSG_COMPILINGCPP_ARM) $<
-	@$(CPP) -c $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
+	$(CPP) -c $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
 
 
 # Compile: create assembler files from C source files. ARM/Thumb
@@ -462,16 +449,14 @@ $(CPPOBJARM) : %.o : %.cpp
 
 # Assemble: create object files from assembler source files. ARM/Thumb
 $(AOBJ) : %.o : %.S
-	@echo
 	@echo $(MSG_ASSEMBLING) $<
-	@$(CC) -c $(THUMB) $(ALL_ASFLAGS) $< -o $@
+	$(CC) -c $(THUMB) $(ALL_ASFLAGS) $< -o $@
 
 
 # Assemble: create object files from assembler source files. ARM-only
 $(AOBJARM) : %.o : %.S
-	@echo
 	@echo $(MSG_ASSEMBLING_ARM) $<
-	@$(CC) -c $(ALL_ASFLAGS) $< -o $@
+	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
 # Target: clean project.
@@ -479,7 +464,6 @@ clean: begin clean_list finished end
 
 
 clean_list :
-	@echo
 	@echo $(MSG_CLEANING)
 	$(REMOVE) ../Common_WinARM/$(TARGET).hex
 	$(REMOVE) $(TARGET).hex
