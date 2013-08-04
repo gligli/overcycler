@@ -10,7 +10,6 @@
 #include "sd_raw.h"
 #include "LPCUSB/main_msc.h"
 #include "LPCUSB/type.h"
-#include "LPCUSB/usbhw_lpc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // OverCycler main code

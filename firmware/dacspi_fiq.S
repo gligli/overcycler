@@ -1,5 +1,6 @@
-#define T0IR 0xE0004000
-#define T0MR0 0xE0004018
+#include "dacspi_fiq.h"
+
+#define T0 0xE0004000
 #define SSPDR 0xE0068008
 #define FIO0 0x3FFFC000
 #define EXTINT 0xE01FC140
@@ -8,7 +9,7 @@
 .align 5
 .global dacspi_states
 dacspi_states:
-	// see dacspi.h for meaning
+	// see dacspi_fiq.h for meaning
 	// max 16 voices
 	.word 0,0,0,0,0,0,0,0
 	.word 0,0,0,0,0,0,0,0
@@ -52,26 +53,27 @@ dacspi_states:
 	addlt r5,r6
 
 	// save state
-	str r5,[r3,#4]
+	str r5,[r3,#(DSIDX_PHASE*4)]
+	
+	// advance timer match
+	ldr r7,[r12,#(0x18+\osc*4)]
+	ldr r9,[r3,#(DSIDX_PERIOD*4)]
+	add r9,r7
+	str r9,[r12,#(0x18+\osc*4)]
 
 	// get sample
-	ldr r7,[r4,r5,lsl#1]
+	mov r9,r5,lsl#1
+	ldrh r6,[r4,r9]
 
-	// advance timer match
-	ldr r6,[r9,#(\osc*4)]
-	ldr r4,[r3,#20]
-	add r6,r4
-	str r6,[r9,#(\osc*4)]
-
-
-	// wait until SSP ready
+/*
+	// wait until SSP has sent the command (useless with current timings)
 1:
-	ldrb r4,[r10,#4]
-	tst r4,#16
+	ldrb r9,[r10,#4]
+	tst r9,#16
 	bne 1b
+*/
 
-
-	// send /LDAC pulse (load last sample into its voice)
+	// send /LDAC pulse (load prev sample into its voice)
 	strb r8,[r11,#(0x1c+1)]
 	nop
 	nop
@@ -82,9 +84,9 @@ dacspi_states:
 	strb r8,[r11,#(0x18+1)]
 
 	// send new sample
-	strh r7,[r10]
+	strh r6,[r10]
 
-	// save voice mask for future sample load
+	// store voice mask for sample load 
 	mov r8,#(0x10<<\osc)
 
 9:
@@ -94,10 +96,9 @@ dacspi_states:
 
 .global FIQ_Init
 FIQ_Init:
-	ldr r12,=T0IR
+	ldr r12,=T0
 	ldr r11,=FIO0
 	ldr r10,=SSPDR
-	ldr r9,=T0MR0
 	mov r8,#0
 	bx lr
 
@@ -107,6 +108,7 @@ FIQ_Handler:
 	// save regs
 	stmfd sp!,{r2-r7}
 
+	// ack ints
 	ldrb r2,[r12]
 	strb r2,[r12]
 

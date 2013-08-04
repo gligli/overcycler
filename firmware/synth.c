@@ -37,8 +37,9 @@ static void loadWaveTable(void)
 	}
 }
 
-//#define BANK "AKWF_bw_hvoice"
+//#define BANK "AKWF_bw_saw"
 //#define BANK "AKWF_bw_squ"
+//#define BANK "AKWF_hvoice"
 #define BANK "AKWF_bw_perfectwaves"
 
 void synth_init(void)
@@ -84,9 +85,8 @@ void synth_update(void)
 	int key;
 	
 	static int m=1;
-	static int note=69;
+	static int note=33;
 	static int ali=0;
-	static uint8_t toto=0;
 	
 	key=getkey_serial0();
 	
@@ -125,20 +125,22 @@ void synth_update(void)
 
 	if(m)
 	{
-		rprintf("note %d %d %d\n",ali,note,toto);
+		rprintf("note %d %d\n",ali,note);
 		
 		for(int i=0;i<SYNTH_VOICE_COUNT/2;++i)
 		{
-			wtosc_setParameters(&synth.osc[i*4+0],((note+0)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+1],((note+12)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+2],((note+16)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+3],((note+19)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+0],((note+0)<<8)+32,ali);
+			wtosc_setParameters(&synth.osc[i*4+1],((note+0)<<8)+7,ali);
+			wtosc_setParameters(&synth.osc[i*4+2],((note+0)<<8)-27,ali);
+			wtosc_setParameters(&synth.osc[i*4+3],((note+0)<<8)-8,ali);
 		}
 		
 		m=0;
-	//	++toto;
 	}
-	/*rprintf("% 7u ",dacspi_states[4]);
-	rprintf("% 7u ",dacspi_states[8+4]);*/
+/*	rprintf("% 7u ",dacspi_states[7]);
+	rprintf("% 7u ",dacspi_states[8+7]);
+	rprintf("% 7u ",dacspi_states[16+7]);
+	rprintf("% 7u ",dacspi_states[24+7]);
+	rprintf("\n");*/
 }
 

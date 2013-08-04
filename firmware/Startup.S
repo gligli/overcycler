@@ -109,9 +109,9 @@
         .set UND_Stack_Size, 0x00000080
         .set SVC_Stack_Size, 0x00000080
         .set ABT_Stack_Size, 0x00000080
-        .set FIQ_Stack_Size, 0x00000200
+        .set FIQ_Stack_Size, 0x00000080
         .set IRQ_Stack_Size, 0x00000200
-        .set USR_Stack_Size, 0x00000800
+        .set USR_Stack_Size, 0x00000c00
 
 #if 0
 AREA   STACK, DATA, READWRITE, ALIGN=2 

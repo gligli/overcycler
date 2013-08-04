@@ -35,6 +35,7 @@
       </df>
       <in>dacspi.c</in>
       <in>dacspi.h</in>
+      <in>dacspi_fiq.h</in>
       <in>main.c</in>
       <in>main.h</in>
       <in>synth.c</in>
@@ -169,6 +170,8 @@
         </cTool>
       </item>
       <item path="../../firmware/dacspi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../firmware/dacspi_fiq.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../firmware/main.c" ex="false" tool="0" flavor2="2">
         <cTool>
