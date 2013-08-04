@@ -1,7 +1,8 @@
 #define T0IR 0xE0004000
 #define T0MR0 0xE0004018
 #define SSPDR 0xE0068008
-
+#define FIO0 0x3FFFC000
+#define EXTINT 0xE01FC140
 .data 
 
 .align 5
@@ -30,91 +31,93 @@ dacspi_states:
 	// termination
 	.word 0,0,0,0,0,0,0,0
 
-.global dacspi_master_period
-dacspi_master_period:
-	.word 0
-
 .text
 .arm
 
+.macro doOsc osc
+
+	// test osc int flag
+	tst r2,#(1<<\osc)
+	beq 9f
+
+	// get osc state address
+	ldr r3,=dacspi_states
+	add r3,r3,#(32*\osc)
+
+	// load state
+	ldmia r3,{r4-r7}
+
+	// update state
+	subs r5,r7
+	addlt r5,r6
+
+	// save state
+	str r5,[r3,#4]
+
+	// get sample
+	ldr r7,[r4,r5,lsl#1]
+
+	// advance timer match
+	ldr r6,[r9,#(\osc*4)]
+	ldr r4,[r3,#20]
+	add r6,r4
+	str r6,[r9,#(\osc*4)]
+
+
+	// wait until SSP ready
+1:
+	ldrb r4,[r10,#4]
+	tst r4,#16
+	bne 1b
+
+
+	// send /LDAC pulse (load last sample into its voice)
+	strb r8,[r11,#(0x1c+1)]
+	nop
+	nop
+	nop
+	nop
+	nop
+	nop
+	strb r8,[r11,#(0x18+1)]
+
+	// send new sample
+	strh r7,[r10]
+
+	// save voice mask for future sample load
+	mov r8,#(0x10<<\osc)
+
+9:
+
+.endm
+
+
 .global FIQ_Init
 FIQ_Init:
-	ldr r12,=dacspi_states
-	ldr r11,=T0IR
+	ldr r12,=T0IR
+	ldr r11,=FIO0
 	ldr r10,=SSPDR
-	ldr r9,=dacspi_master_period
-	mov r8,#500
+	ldr r9,=T0MR0
+	mov r8,#0
 	bx lr
 
 .global FIQ_Handler
 FIQ_Handler:
-	
+
 	// save regs
-	stmfd sp!,{r0-r4}
+	stmfd sp!,{r2-r7}
 
-	// ack int
-	mov r2,#1
-	strb r2,[r11]
+	ldrb r2,[r12]
+	strb r2,[r12]
 
-	// load osc state
-	ldr r0,[r12]
-	
-	// past last osc?
-	cmp r0,#0
-	bne dovoice
-
-	str r8,[r12,#24]
-
-	// restart from first osc 
-	ldr r12,=dacspi_states
-
-	// load next state
-	ldr r0,[r12]
-
-dovoice:
-
-	// load osc state
-	ldr r1,[r12,#4]
-	ldr r4,[r12,#16]
-
-	// update osc counter
-	subs r1,r8
-	bgt dosample
-
-	// reload counter
-	ldr r3,[r12,#12]
-	add r1,r3
-
-	// update phase
-	ldr r3,[r12,#20]
-	subs r4,r3
-	bge dosample
-
-	// reload phase
-	ldr r3,[r12,#8]
-	add r4,r3
-
-	// get master period
-	ldr r8,[r9]
-	
-dosample:
-	
-	// update osc state
-	str r1,[r12,#4]
-	str r4,[r12,#16]
-
-	// get sample command
-	mov r4,r4,lsl#1
-	ldrh r4,[r0,r4]
-
-	// send it
-	strh r4,[r10]
-
-	// to next osc
-	add r12,#32
+	// handle oscs
+	doOsc 0
+	doOsc 1
+	doOsc 2
+	doOsc 3
 
 	// restore regs
-	ldmfd sp!, {r0-r4}
+	ldmfd sp!, {r2-r7}
 
 	// return
 	subs pc, lr, #4

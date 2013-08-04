@@ -46,8 +46,6 @@ void synth_init(void)
 	int i;
 	int16_t sineShape[600];
 	
-	dacspi_setMasterPeriod(SYNTH_OSC_COUNT*CPU_FREQ/WTOSC_MASTER_CLOCK);
-	
 	for(i=0;i<600;++i)
 		sineShape[i]=sin((i/300.0)*M_PI)/2.0*65535.0;
 
@@ -58,10 +56,13 @@ void synth_init(void)
 	}
 	
 	T0TC=0;	
-	T0MR0=CPU_FREQ/WTOSC_MASTER_CLOCK-1;
-	T0MCR=3; // int & reset for MR0
+	T0MR0=SYNTH_MASTER_CLOCK;
+	T0MR1=SYNTH_MASTER_CLOCK;
+	T0MR2=SYNTH_MASTER_CLOCK;
+	T0MR3=SYNTH_MASTER_CLOCK;
+	T0MCR=0x249; // int for all MR*
 
-	T0PR=0;
+	T0PR=(CPU_CLOCK/SYNTH_MASTER_CLOCK)-1;
 	T0PC=0;
 	T0TCR=1;
 	
@@ -129,14 +130,15 @@ void synth_update(void)
 		for(int i=0;i<SYNTH_VOICE_COUNT/2;++i)
 		{
 			wtosc_setParameters(&synth.osc[i*4+0],((note+0)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+1],((note+0)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+2],((note+0)<<8)+toto,ali);
-			wtosc_setParameters(&synth.osc[i*4+3],((note+0)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+1],((note+12)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+2],((note+16)<<8)+toto,ali);
+			wtosc_setParameters(&synth.osc[i*4+3],((note+19)<<8)+toto,ali);
 		}
 		
 		m=0;
-		++toto;
+	//	++toto;
 	}
-//	rprintf("% 7u ",dacspi_states[7]);
+	/*rprintf("% 7u ",dacspi_states[4]);
+	rprintf("% 7u ",dacspi_states[8+4]);*/
 }
 

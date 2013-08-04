@@ -10,6 +10,7 @@
 #include "sd_raw.h"
 #include "LPCUSB/main_msc.h"
 #include "LPCUSB/type.h"
+#include "LPCUSB/usbhw_lpc.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // OverCycler main code
@@ -63,7 +64,7 @@ int main(void)
 	disableInts();
 	
 	// init Portios
-	SCS=0x02; // select the "fast" version of the I/O ports
+	SCS=0x03; // select the "fast" version of the I/O ports
 
 	if(sd_raw_init()) //Initialize the SD card
 	{

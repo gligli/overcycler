@@ -195,7 +195,7 @@ int main_msc(void)
     USBHwConnect(TRUE);
 
     // call USB interrupt handler continuously
-    while (IOPIN0 & (1<<23))
+    while (FIO0PIN & (1<<23))
 	{
 		USBHwISR();
     }

@@ -14,18 +14,18 @@ void	SPIRecvN(U8 *pbBuf, int iLen);
 
 //SPI Chip Select Defines for SD Access
 #ifdef SS_PORT_1
-	#define	SPI_SS_IODIR	IODIR1
-	#define	SPI_SS_IOCLR	IOCLR1
-	#define	SPI_SS_IOSET	IOSET1   
+	#define	SPI_SS_IODIR	FIO1DIR
+	#define	SPI_SS_IOCLR	FIO1CLR
+	#define	SPI_SS_IOSET	FIO1SET   
 #endif
 #ifdef	SS_PORT_0
-	#define	SPI_SS_IODIR	IODIR0
-	#define	SPI_SS_IOCLR	IOCLR0
-	#define	SPI_SS_IOSET	IOSET0
+	#define	SPI_SS_IODIR	FIO0DIR
+	#define	SPI_SS_IOCLR	FIO0CLR
+	#define	SPI_SS_IOSET	FIO0SET
 #endif  
 
 //SPI Pin Location Definitions
-#define SPI_IODIR      	IODIR0
+#define SPI_IODIR      	FIO0DIR
 #define SPI_SCK_PIN    	4       
 #define SPI_MISO_PIN   	5         
 #define SPI_MOSI_PIN   	6        

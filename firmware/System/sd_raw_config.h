@@ -12,16 +12,16 @@
 
 //SPI Chip Select Defines for SD Access
 #ifdef SS_PORT_1
-	#define	SPI_SS_IODIR	IODIR1
-	#define	SPI_SS_IOCLR	IOCLR1
-	#define	SPI_SS_IOSET	IOSET1  
-	#define SPI_SS_IOPIN	IOPIN1
+	#define	SPI_SS_IODIR	FIO1DIR
+	#define	SPI_SS_IOCLR	FIO1CLR
+	#define	SPI_SS_IOSET	FIO1SET
+	#define	SPI_SS_IOPIN	FIO1PIN
 #endif
 #ifdef	SS_PORT_0
-	#define	SPI_SS_IODIR	IODIR0
-	#define	SPI_SS_IOCLR	IOCLR0
-	#define	SPI_SS_IOSET	IOSET0
-	#define	SPI_SS_IOPIN	IOPIN0
+	#define	SPI_SS_IODIR	FIO0DIR
+	#define	SPI_SS_IOCLR	FIO0CLR
+	#define	SPI_SS_IOSET	FIO0SET
+	#define	SPI_SS_IOPIN	FIO0PIN
 #endif  
 
 /* defines for customisation of sd/mmc port access */
@@ -76,7 +76,7 @@
  * \note When SD_RAW_WRITE_SUPPORT is 1, SD_RAW_SAVE_RAM will
  *       be reset to 0.
  */
-#define SD_RAW_SAVE_RAM 1
+#define SD_RAW_SAVE_RAM 0
 
 /**
  * @}

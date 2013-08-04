@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define CPU_FREQ 60000000 // hz
+#define CPU_CLOCK 60000000 // hz
 
 #include <string.h>
 #include <math.h>

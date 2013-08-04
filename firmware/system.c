@@ -65,8 +65,8 @@ void system_init(void)
     PLLCON=0x3;
     feed();
 
-    // Enabling MAM and setting number of clocks used for Flash memory fetch (4 cclks in this case)
-    MAMTIM=0x3;
+    // Enabling MAM and setting number of clocks used for Flash memory fetch
+    MAMTIM=0x2;
     MAMCR=0x2;
 
     // Setting peripheral Clock (pclk) to System Clock (cclk)
