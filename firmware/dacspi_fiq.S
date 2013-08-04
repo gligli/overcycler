@@ -65,15 +65,17 @@ dacspi_states:
 	mov r9,r5,lsl#1
 	ldrh r6,[r4,r9]
 
-/*
-	// wait until SSP has sent the command (useless with current timings)
+	// send sample
+	strh r6,[r10]
+
+	// wait until SSP has sent the command
 1:
 	ldrb r9,[r10,#4]
 	tst r9,#16
 	bne 1b
-*/
 
-	// send /LDAC pulse (load prev sample into its voice)
+	// send /LDAC pulse (load sample into its voice)
+	mov r8,#(0x10<<\osc)
 	strb r8,[r11,#(0x1c+1)]
 	nop
 	nop
@@ -82,12 +84,6 @@ dacspi_states:
 	nop
 	nop
 	strb r8,[r11,#(0x18+1)]
-
-	// send new sample
-	strh r6,[r10]
-
-	// store voice mask for sample load 
-	mov r8,#(0x10<<\osc)
 
 9:
 
