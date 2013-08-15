@@ -18,6 +18,7 @@ void feed(void);
 
 // general purpose
 void delay_ms(int);
+void delay_us(int);
 
 // calls system_init() to set clock, sets up interrupts, sets up timer, checks voltage and 
 // powers down if below threshold, then enables regulator for LCD and GPS

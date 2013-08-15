@@ -25,6 +25,27 @@ void delay_ms(int count)
     }
 }
 
+inline void delay_us(int count)
+{
+    int i;
+	
+    for (i = 0; i < count; i++)
+	{
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+		asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\n");
+	}
+}
+
+
+
 void boot_up(void)
 {
     //Initialize the MCU clock PLL

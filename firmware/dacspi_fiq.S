@@ -2,7 +2,7 @@
 
 #define T0 0xE0004000
 #define SSPDR 0xE0068008
-#define FIO0 0x3FFFC000
+#define FIO 0x3FFFC000
 #define EXTINT 0xE01FC140
 .data 
 
@@ -32,13 +32,59 @@ dacspi_states:
 	// termination
 	.word 0,0,0,0,0,0,0,0
 
+.global dacspi_ref
+dacspi_ref:
+	.word 0
+
 .text
 .arm
+
+#define SCK_BIT 5
+#define SDI_BIT 6
+
+.macro bbOne bit
+
+	and r4,r9,r5,lsr#(15-\bit)
+	strb r4,[r11,#(0x34+3)]
+	strb r8,[r11,#(0x38+3)]
+	
+.endm
+
+.macro bbSPI valr sselv
+
+	mov r9,#\sselv
+	strb r9,[r11,#(0x1c+1)]
+
+	mov r5,\valr,lsl#SDI_BIT
+	mov r9,#(1<<SDI_BIT)
+	mov r8,#(1<<SCK_BIT)
+
+	bbOne 0
+	bbOne 1
+	bbOne 2
+	bbOne 3
+	bbOne 4
+	bbOne 5
+	bbOne 6
+	bbOne 7
+	bbOne 8
+	bbOne 9
+	bbOne 10
+	bbOne 11
+	bbOne 12
+	bbOne 13
+	bbOne 14
+	bbOne 15
+	
+	mov r9,#\sselv
+	strb r9,[r11,#(0x18+1)]
+
+.endm
 
 .macro doOsc osc
 
 	// test osc int flag
-	tst r2,#(1<<\osc)
+	tst r2,#(1<<(\osc&3))
 	beq 9f
 
 	// get osc state address
@@ -56,34 +102,16 @@ dacspi_states:
 	str r5,[r3,#(DSIDX_PHASE*4)]
 	
 	// advance timer match
-	ldr r7,[r12,#(0x18+\osc*4)]
+	ldr r7,[r12,#(0x18+(\osc&3)*4)]
 	ldr r9,[r3,#(DSIDX_PERIOD*4)]
 	add r9,r7
-	str r9,[r12,#(0x18+\osc*4)]
+	str r9,[r12,#(0x18+(\osc&3)*4)]
 
 	// get sample
 	mov r9,r5,lsl#1
 	ldrh r6,[r4,r9]
 
-	// send sample
-	strh r6,[r10]
-
-	// wait until SSP has sent the command
-1:
-	ldrb r9,[r10,#4]
-	tst r9,#16
-	bne 1b
-
-	// send /LDAC pulse (load sample into its voice)
-	mov r8,#(0x10<<\osc)
-	strb r8,[r11,#(0x1c+1)]
-	nop
-	nop
-	nop
-	nop
-	nop
-	nop
-	strb r8,[r11,#(0x18+1)]
+	bbSPI r6,(0x80>>(\osc>>1))
 
 9:
 
@@ -93,7 +121,7 @@ dacspi_states:
 .global FIQ_Init
 FIQ_Init:
 	ldr r12,=T0
-	ldr r11,=FIO0
+	ldr r11,=FIO
 	ldr r10,=SSPDR
 	mov r8,#0
 	bx lr
@@ -113,6 +141,27 @@ FIQ_Handler:
 	doOsc 1
 	doOsc 2
 	doOsc 3
+
+	// go to timer1
+	add r12,#0x4000
+
+	// ack ints
+	ldrb r2,[r12]
+	strb r2,[r12]
+
+	// handle oscs
+	doOsc 4
+	doOsc 5
+	doOsc 6
+	doOsc 7
+
+	// back to timer0
+	sub r12,#0x4000
+
+	// send reference
+	ldr r4,=dacspi_ref
+	ldrh r4,[r4]
+	bbSPI r4,0x04
 
 	// restore regs
 	ldmfd sp!, {r2-r7}
