@@ -53,11 +53,8 @@ volatile uint16_t cvReference = 0;
 
 static void setCVReference(uint16_t value)
 {
-	BLOCK_INT
-	{
-		cvReference=DACSPI_CMD_SET_REF|(value>>4);
-		cvReferenceSent=0;
-	}
+	cvReference=DACSPI_CMD_SET_REF|(value>>4);
+	cvReferenceSent=0;
 
 	while(!cvReferenceSent)
 		__NOP();
@@ -210,8 +207,6 @@ __attribute__ ((used)) void TIMER1_IRQHandler(void)
 
 	if(ir&(1<<TIM_MR3_INT))
 		LPC_TIM1->MR3+=wtosc_update(&synth.osc[7]);
-
-	sendCVReference();
 }
 
 
@@ -231,8 +226,6 @@ __attribute__ ((used)) void TIMER2_IRQHandler(void)
 
 	if(ir&(1<<TIM_MR3_INT))
 		LPC_TIM2->MR3+=wtosc_update(&synth.osc[11]);
-
-	sendCVReference();
 }
 
 void synth_init(void)
@@ -267,13 +260,17 @@ void synth_init(void)
 		tm.ResetOnMatch=DISABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=SYNTH_MASTER_CLOCK;
+		tm.MatchValue=(i*4+4)*SYNTH_MASTER_CLOCK/8;
 		
 		TIM_ConfigMatch(LPC_TIM0,&tm);
 		TIM_ConfigMatch(LPC_TIM1,&tm);
 		TIM_ConfigMatch(LPC_TIM2,&tm);
 	}
 	
+	NVIC_SetPriority(TIMER0_IRQn,1);
+	NVIC_SetPriority(TIMER1_IRQn,1);
+	NVIC_SetPriority(TIMER2_IRQn,1);
+
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
 	NVIC_EnableIRQ(TIMER2_IRQn);
@@ -338,7 +335,7 @@ void synth_update(void)
 	int key,v,cv;
 	
 	static int m=1;
-	static int note=33;
+	static int note=104;
 	static int ali=0;
 	static int inc=1024;
 	
@@ -430,6 +427,6 @@ void synth_update(void)
 			updateCV(v,cv);
 		}
 	
-//	delay_us(500);
+	delay_us(1000);
 }
 

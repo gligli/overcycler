@@ -70,11 +70,7 @@ int main (void)
 
 	rprintf("synth init...\n");
 
-	__disable_irq();
-	
 	synth_init();
-	
-	__enable_irq();
 
 	rprintf("done\n");
 	

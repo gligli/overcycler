@@ -3,7 +3,7 @@
 
 #include "synth.h"
 
-#define WTOSC_MAX_SAMPLE_RATE 90000
+#define WTOSC_MAX_SAMPLE_RATE 80000
 #define WTOSC_CV_OCTAVE (256*12)
 #define WTOSC_MAX_SAMPLES 600 // samples
 

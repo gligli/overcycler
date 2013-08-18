@@ -17,19 +17,16 @@ void wtosc_init(struct wtosc_s * o, int8_t channel, uint16_t controlData)
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
 {
-	BLOCK_INT
-	{
-		memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
+	memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
 
-		if(sampleCount>WTOSC_MAX_SAMPLES)
-			return;
+	if(sampleCount>WTOSC_MAX_SAMPLES)
+		return;
 
-		int i;
-		for(i=0;i<sampleCount;++i)
-			o->data[i]=(((int32_t)data[i]-INT16_MIN)>>4)|o->controlData;
+	int i;
+	for(i=0;i<sampleCount;++i)
+		o->data[i]=(((int32_t)data[i]-INT16_MIN)>>4)|o->controlData;
 
-		o->sampleCount=sampleCount;
-	}
+	o->sampleCount=sampleCount;
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
@@ -51,12 +48,9 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 		while(fabs(f)>0.0001);
 	}
 		
-	BLOCK_INT
-	{
-		o->increment=underSample+aliasing;
-		o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
-		o->cv=cv;
-	}
+	o->increment=underSample+aliasing;
+	o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
+	o->cv=cv;
 		
 	rprintf("inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
 }

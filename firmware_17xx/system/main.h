@@ -29,18 +29,19 @@
 void delay_us(uint32_t);
 void delay_ms(uint32_t);
 
-static inline int __disable_irq_stub(void)
+static inline uint32_t __disable_irq_stub(void)
 {
-	__disable_irq();
-	return 1;
+	uint32_t pm=__get_PRIMASK();
+	__set_PRIMASK(1);
+	return pm;
 }
 
-static inline int __enable_irq_stub(void)
+static inline int __restore_irq_stub(uint32_t pm)
 {
-	__enable_irq();
-	return 0;
+	__set_PRIMASK(pm);
+	return 2;
 }
 
-#define BLOCK_INT for(int __int_block=__disable_irq_stub();__int_block;__int_block=__enable_irq_stub())
+#define BLOCK_INT for(uint32_t __int_block=__disable_irq_stub();__int_block<2;__int_block=__restore_irq_stub(__int_block))
 
 #endif
