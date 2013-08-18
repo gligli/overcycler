@@ -77,7 +77,7 @@
 /** Timer Match control bit mask */
 #define TIM_MCR_MASKBIT			   ((uint32_t)(0x0FFF))
 /** Timer Match control bit mask for specific channel*/
-#define	TIM_MCR_CHANNEL_MASKBIT(n)		((uint32_t)(7<<n))
+#define	TIM_MCR_CHANNEL_MASKBIT(n)		((uint32_t)(7<<(n * 3)))
 /**********************************************************************
 * Timer capture control register definitions
 **********************************************************************/
@@ -92,7 +92,7 @@
 /** Timer capture control bit mask */
 #define TIM_CCR_MASKBIT			((uint32_t)(0x3F))
 /** Timer Capture control bit mask for specific channel*/
-#define	TIM_CCR_CHANNEL_MASKBIT(n)		((uint32_t)(7<<n))
+#define	TIM_CCR_CHANNEL_MASKBIT(n)		((uint32_t)(7<<(n * 3)))
 
 /**********************************************************************
 * Timer external match register definitions

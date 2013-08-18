@@ -400,6 +400,12 @@ void TIM_ConfigMatch(LPC_TIM_TypeDef *TIMx, TIM_MATCHCFG_Type *TIM_MatchConfigSt
 	case 1:
 		TIMx->MR1 = TIM_MatchConfigStruct->MatchValue;
 		break;
+	case 2:
+		TIMx->MR2 = TIM_MatchConfigStruct->MatchValue;
+		break;
+	case 3:
+		TIMx->MR3 = TIM_MatchConfigStruct->MatchValue;
+		break;
 	}
 	//interrupt on MRn
 	TIMx->MCR &=~TIM_MCR_CHANNEL_MASKBIT(TIM_MatchConfigStruct->MatchChannel);
@@ -414,7 +420,6 @@ void TIM_ConfigMatch(LPC_TIM_TypeDef *TIMx, TIM_MATCHCFG_Type *TIM_MatchConfigSt
 	//stop on MRn
 	if (TIM_MatchConfigStruct->StopOnMatch)
 		TIMx->MCR |= TIM_STOP_ON_MATCH(TIM_MatchConfigStruct->MatchChannel);
-//	TIMx->MCR = 0x02;
 
 	// match output type
 

@@ -1,54 +1,66 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 12bit DACs communication through SPI
+// 12bit voice DACs communication through SPI
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "dacspi.h"
 
-extern volatile uint32_t dacspi_states[];
-extern volatile uint32_t dacspi_ref;
-
 struct
 {
 	int8_t currentChannel;
+	uint16_t prevCommands[DACSPI_CHANNEL_COUNT][2];
 } dacspi;
 
 
 void dacspi_init(void)
 {
 	memset(&dacspi,0,sizeof(dacspi));
-/*
+	
 	// SSP
-	SSPCPSR=2; // 1/2 APB clock
-	SSPCR0=0x0f | (0<<8); // 16bit; spi; mode 0,0; 1x multiplier
-	SSPCR1=0x02; // normal; enable; master
+
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
+	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
+
+	LPC_SSP0->CPSR=2;
+	LPC_SSP0->CR0=0x020f;
+	LPC_SSP0->CR1=2;
 	
 	// SSP pins
-	PINSEL1&=~0x03cc;
-	PINSEL1|=0x0288;
+
+	PINSEL_SetPinFunc(1,20,3);
+	PINSEL_SetPinFunc(1,21,3);
+	PINSEL_SetPinFunc(1,24,3);
 	
-	// /LDAC pins
-	PINSEL0&=~0xff300000;
-	FIO0DIR|=0xf400;
- */
-/*	
-	// SSEL pins
-	PINSEL0&=~0xff300000;
-	FIO0DIR|=0xf400;
-	FIO0SET=0xf400;
+	// /LDAC pins (6 voices + CV dac)
+	for(int i=0;i<7;++i)
+	{
+		PINSEL_SetPinFunc(2,i,0);
+		GPIO_SetDir(2,1<<i,1);
+		GPIO_SetValue(2,1<<i);
+	}
 	
-	// SDI / SCK
-	
-	PINSEL2=0;
-	FIO1DIR|=0x60000000;
-	FIO1CLR=0x60000000;*/
+	SSP_Cmd(LPC_SSP0,ENABLE);
 }
 
-void dacspi_setState(int channel, int dsidx, uint32_t value)
+inline void dacspi_sendCommand(uint8_t channel, uint16_t command)
 {
-//	dacspi_states[channel*8+dsidx]=value;
-}
-
-void dacspi_setReference(uint16_t value)
-{
-//	dacspi_ref=0x7000|(value>>4);
+	uint8_t mask;
+	
+	if(channel!=DACSPI_CV_CHANNEL)
+	{
+		dacspi.prevCommands[channel][command>>15]=command;
+		LPC_SSP0->DR=dacspi.prevCommands[channel][0];
+		LPC_SSP0->DR=dacspi.prevCommands[channel][1];
+	}
+	else
+	{
+		LPC_SSP0->DR=command;
+	}
+	
+	while(LPC_SSP0->SR&SSP_SR_BSY)
+		__NOP();
+	
+	mask=1<<channel;
+	LPC_GPIO2->FIOCLR0=mask;
+	DELAY_100NS();
+	LPC_GPIO2->FIOSET0=mask;
 }

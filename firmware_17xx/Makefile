@@ -23,7 +23,12 @@ VECTOR_LOCATION=VECTORS_IN_ROM
 TARGET = overcycler
 
 # List C source files here.
-SRC=core_cm3.c system_LPC17xx.c rprintf.c serial.c main.c
+SRC=system/core_cm3.c
+SRC+=system/system_LPC17xx.c
+SRC+=system/rprintf.c
+SRC+=system/serial.c
+SRC+=system/syscalls.c
+SRC+=system/main.c
 
 SRC+=drivers/lpc17xx_adc.c
 SRC+=drivers/lpc17xx_can.c
@@ -54,7 +59,10 @@ SRC+=fat_sd/ff.c
 SRC+=fat_sd/spi_sd_lpc17xx.c
 SRC+=fat_sd/ccsbcs.c
 
-SRC+=synth/dacspi.c synth/synth.c synth/wtosc.c
+SRC+=synth/dacspi.c
+SRC+=synth/synth.c
+SRC+=synth/wtosc.c
+SRC+=synth/utils.c
 
 
 # List C++ source files here.
@@ -73,7 +81,7 @@ CPPSRCARM =
 # Even though the DOS/Win* filesystem matches both .s and .S the same,
 # it will preserve the spelling of the filenames, and gcc itself does
 # care about how the name is spelled on its command-line.
-ASRC = startup_LPC17xx.S
+ASRC = system/startup_LPC17xx.S
 
 # List Assembler source files here which must be assembled in ARM-Mode..
 ASRCARM = 
@@ -92,17 +100,15 @@ OPT = fast
 ## the default warning-levels. 
 ## yes - disable these warnings; no - keep default settings
 AT91LIBNOWARN = yes
-#AT91LIBNOWARN = no
 
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
-#DEBUG = stabs
 DEBUG = dwarf-2
 
 # List any extra directories to look for include files here.
 #     Each directory must be seperated by a space.
-EXTRAINCDIRS = drivers fat_sd
+EXTRAINCDIRS = system drivers fat_sd
 
 # List any extra directories to look for library files here.
 #     Each directory must be seperated by a space.
@@ -142,7 +148,7 @@ endif
 #  -Wa,...:      tell GCC to pass this to the assembler.
 #    -adhlns...: create assembler listing
 #
-# Flags for C and C++ (arm-eabi-gcc/arm-eabi-g++)
+# Flags for C and C++ (arm-none-eabi-gcc/arm-none-eabi-g++)
 CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
 CFLAGS += -Wall -Wcast-align -Wimplicit 
@@ -166,7 +172,7 @@ CONLYFLAGS += -Wstrict-prototypes
 CONLYFLAGS += -Wmissing-declarations
 endif
 
-# flags only for C++ (arm-eabi-g++)
+# flags only for C++ (arm-none-eabi-g++)
 # CPPFLAGS = -fno-rtti -fno-exceptions
 CPPFLAGS = 
 
@@ -210,7 +216,6 @@ LDFLAGS += $(patsubst %,-l%,$(EXTRA_LIBS))
 
 
 #This line is used if you want to load main.hex into 0x00
-#LDFLAGS +=-Tlpc2138.cm
 LDFLAGS += -Tldscript_rom_gnu.ld
 
 
@@ -219,40 +224,31 @@ LDFLAGS += -Tldscript_rom_gnu.ld
 # only for Philips LPC and Analog ADuC ARMs
 #
 # Settings and variables:
-#LPC21ISP = lpc21isp
-LPC21ISP = lpc21isp
+LPC21ISP = ./lpc21isp
+LPC21ISP_KILL = taskkill -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
 LPC21ISP_BAUD = 230400
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
-# verbose output:
-#LPC21ISP_DEBUG = -debug
-# enter bootloader via RS232 DTR/RTS (only if hardware supports this
-# feature - see Philips AppNote):
-LPC21ISP_CONTROL = -term -control -donotstart
+LPC21ISP_OPTIONS = -term -control -donotstart
 # ---------------------------------------------------------------------------
 
 
-# Define directories, if needed.
-##DIRARM = c:/WinARM/
-## DIRARMBIN = $(DIRAVR)/bin/
-## DIRAVRUTILS = $(DIRAVR)/utils/bin/
-
 # Define programs and commands.
 SHELL = sh
-CC = arm-eabi-gcc
-CPP = arm-eabi-g++
-OBJCOPY = arm-eabi-objcopy
-OBJDUMP = arm-eabi-objdump
-SIZE = arm-eabi-size
-NM = arm-eabi-nm
+CC = arm-none-eabi-gcc
+CPP = arm-none-eabi-g++
+OBJCOPY = arm-none-eabi-objcopy
+OBJDUMP = arm-none-eabi-objdump
+SIZE = arm-none-eabi-size
+NM = arm-none-eabi-nm
 REMOVE = rm -f
 COPY = cp
 
 # Define Messages
 # English
 MSG_ERRORS_NONE = Errors: none
-MSG_BEGIN = "-------- begin (mode: $(RUN_MODE)) --------"
+MSG_BEGIN = -------- begin mode: $(RUN_MODE) --------
 MSG_END = --------  end  --------
 MSG_SIZE_BEFORE = Size before: 
 MSG_SIZE_AFTER = Size after:
@@ -261,11 +257,11 @@ MSG_EXTENDED_LISTING = Creating Extended Listing:
 MSG_SYMBOL_TABLE = Creating Symbol Table:
 MSG_LINKING = Linking:
 MSG_COMPILING = Compiling C:
-MSG_COMPILING_ARM = "Compiling C (ARM-only):"
+MSG_COMPILING_ARM = Compiling C (ARM-only):
 MSG_COMPILINGCPP = Compiling C++:
-MSG_COMPILINGCPP_ARM = "Compiling C++ (ARM-only):"
+MSG_COMPILINGCPP_ARM = Compiling C++ (ARM-only):
 MSG_ASSEMBLING = Assembling:
-MSG_ASSEMBLING_ARM = "Assembling (ARM-only):"
+MSG_ASSEMBLING_ARM = Assembling (ARM-only):
 MSG_CLEANING = Cleaning project:
 MSG_FORMATERROR = Can not handle output-format
 MSG_LPC21_RESETREMINDER = You may have to bring the target in bootloader-mode now.
@@ -291,27 +287,13 @@ GENDEPFLAGS = -MD -MP -MF .dep/$(@F).d
 ALL_CFLAGS  = -mcpu=$(MCU) $(THUMB_IW) -I. $(CFLAGS) $(GENDEPFLAGS)
 ALL_ASFLAGS = -mcpu=$(MCU) $(THUMB_IW) -I. -x assembler-with-cpp $(ASFLAGS)
 
-
 # Default target.
-all: begin gccversion sizebefore build sizeafter finished end
+all: sizebefore build sizeafter
 
-#ifeq ($(FORMAT),ihex)
-#build: elf hex lss sym
-#hex: $(TARGET).hex
-#IMGEXT=hex
-#else 
-#ifeq ($(FORMAT),binary)
-#build: elf bin lss sym hex FW.SFE
-build: elf lss sym hex
+build: elf hex
 
-#bin: $(TARGET).bin
+bin: $(TARGET).bin
 hex: $(TARGET).hex
-#IMGEXT=bin
-#else 
-#$(error "$(MSG_FORMATERROR) $(FORMAT)")
-#endif
-#endif
-
 elf: $(TARGET).elf
 lss: $(TARGET).lss 
 sym: $(TARGET).sym
@@ -329,8 +311,10 @@ end:
 
 # Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
-ELFSIZE = $(SIZE) -A $(TARGET).elf
+ELFSIZE = $(SIZE) -B $(TARGET).elf
 sizebefore:
+	@echo $(MSG_SIZE_BEFORE)
+	-@$(ELFSIZE)
 
 sizeafter:
 	@echo $(MSG_SIZE_AFTER)
@@ -342,19 +326,23 @@ gccversion :
 	@$(CC) --version
 
 # Program the device.  - lpc21isp will not work for SAM7
-program: $(TARGET).$(IMGEXT)
-	@echo $(MSG_LPC21_RESETREMINDER)
-	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
+program: $(LPC21ISP_FLASHFILE)
+	-$(LPC21ISP_KILL)
+	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
+
+term:
+	-$(LPC21ISP_KILL)
+	$(LPC21ISP) -termonly -control $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 
 # Create final output file (.hex) from ELF output file.
 %.hex: %.elf
 	@echo $(MSG_FLASH) $@
-	$(OBJCOPY) -O ihex $< $@
+	@$(OBJCOPY) -O ihex $< $@
 	
 # Create final output file (.bin) from ELF output file.
-#%.bin: %.elf
-#	@echo $(MSG_FLASH) $@
-#	$(OBJCOPY) -O binary $< $@
+%.bin: %.elf
+	@echo $(MSG_FLASH) $@
+	$(OBJCOPY) -O binary $< $@
 
 # Create final output file (.bin) from ELF output file.
 FW.SFE: main.elf
@@ -366,13 +354,13 @@ FW.SFE: main.elf
 # testing: option -C
 %.lss: %.elf
 	@echo $(MSG_EXTENDED_LISTING) $@
-	$(OBJDUMP) -h -S -C $< > $@
+	@$(OBJDUMP) -h -S -C $< > $@
 
 
 # Create a symbol table from ELF output file.
 %.sym: %.elf
 	@echo $(MSG_SYMBOL_TABLE) $@
-	$(NM) -n $< > $@
+	@$(NM) -n $< > $@
 
 
 # Link: create ELF output file from object files.
@@ -380,46 +368,38 @@ FW.SFE: main.elf
 .PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
 %.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
 	@echo $(MSG_LINKING) $@
-	$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
-#	$(CPP) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
+	@$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
 
 # Compile: create object files from C source files. ARM/Thumb
 $(COBJ) : %.o : %.c
 	@echo $(MSG_COMPILING) $<
-	$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C source files. ARM-only
 $(COBJARM) : %.o : %.c
 	@echo $(MSG_COMPILING_ARM) $<
-	$(CC) -c $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+	@$(CC) -c $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM/Thumb
 $(CPPOBJ) : %.o : %.cpp
 	@echo $(MSG_COMPILINGCPP) $<
-	$(CPP) -c $(THUMB) $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
+	@$(CPP) -c $(THUMB) $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
 
 # Compile: create object files from C++ source files. ARM-only
 $(CPPOBJARM) : %.o : %.cpp
 	@echo $(MSG_COMPILINGCPP_ARM) $<
-	$(CPP) -c $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
-
-
-# Compile: create assembler files from C source files. ARM/Thumb
-## does not work - TODO - hints welcome
-##$(COBJ) : %.s : %.c
-##	$(CC) $(THUMB) -S $(ALL_CFLAGS) $< -o $@
-
+	@$(CPP) -c $(ALL_CFLAGS) $(CPPFLAGS) $< -o $@ 
 
 # Assemble: create object files from assembler source files. ARM/Thumb
 $(AOBJ) : %.o : %.S
 	@echo $(MSG_ASSEMBLING) $<
-	$(CC) -c $(THUMB) $(ALL_ASFLAGS) $< -o $@
+	@$(CC) -c $(THUMB) $(ALL_ASFLAGS) $< -o $@
 
 
 # Assemble: create object files from assembler source files. ARM-only
 $(AOBJARM) : %.o : %.S
 	@echo $(MSG_ASSEMBLING_ARM) $<
-	$(CC) -c $(ALL_ASFLAGS) $< -o $@
+	@$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
 # Target: clean project.
@@ -462,6 +442,5 @@ clean_list :
 
 
 # Listing of phony targets.
-.PHONY : all begin finish end sizebefore sizeafter gccversion \
-#build elf hex lss sym clean clean_list program
+.PHONY : all begin finish end sizebefore sizeafter gccversion build elf hex lss sym clean clean_list program
 

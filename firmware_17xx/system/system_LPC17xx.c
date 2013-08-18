@@ -282,13 +282,13 @@
 #define SCS_Val               0x00000020
 #define CLKSRCSEL_Val         0x00000001
 #define PLL0_SETUP            1
-#define PLL0CFG_Val           0x0000000B
+#define PLL0CFG_Val           0x00010018
 #define PLL1_SETUP            1
 #define PLL1CFG_Val           0x00000000
-#define CCLKCFG_Val           0x00000003
+#define CCLKCFG_Val           0x00000002
 #define USBCLKCFG_Val         0x00000000
-#define PCLKSEL0_Val          0x00000040
-#define PCLKSEL1_Val          0x00000000
+#define PCLKSEL0_Val          0x00000054
+#define PCLKSEL1_Val          0x00001000
 #define PCONP_Val             0x042887DE
 #define CLKOUTCFG_Val         0x00000000
 
@@ -319,7 +319,7 @@
 // </e>
 */
 #define FLASH_SETUP           1
-#define FLASHCFG_Val          0x0000303A
+#define FLASHCFG_Val          0x0000403A
 
 /*
 //-------- <<< end of configuration section >>> ------------------------------
@@ -347,11 +347,11 @@
 #if (CHECK_RSVD((PLL1CFG_Val),   ~0x0000007F))
    #error "PLL1CFG: Invalid values of reserved bits!"
 #endif
-
+/*
 #if ((CCLKCFG_Val != 0) && (((CCLKCFG_Val - 1) % 2)))
    #error "CCLKCFG: CCLKSEL field does not contain only odd values or 0!"
 #endif
-
+*/
 #if (CHECK_RSVD((USBCLKCFG_Val), ~0x0000000F))
    #error "USBCLKCFG: Invalid values of reserved bits!"
 #endif
@@ -419,53 +419,6 @@
 /**
  * @}
  */
-
-
-/*------------------------------------------------------------------------------
- ints
- *------------------------------------------------------------------------------*/
-#define IRQ_MASK 0x00000080
-#define FIQ_MASK 0x00000040
-#define INT_MASK (IRQ_MASK | FIQ_MASK)
-
-static inline unsigned long __get_cpsr(void)
-{
-	unsigned long retval;
-//	__asm volatile (" mrs %0, cpsr" : "=r" (retval) : /* no inputs */ );
-	return retval;
-}
-
-static inline void __set_cpsr(unsigned long val)
-{
-//	__asm volatile (" msr cpsr, %0" : /* no outputs */ : "r" (val) );
-}
-
-unsigned long disableInts(void)
-{
-	unsigned long _cpsr;
-
-	_cpsr = __get_cpsr();
-	__set_cpsr(_cpsr | INT_MASK);
-	return _cpsr;
-}
-
-unsigned long enableInts(void)
-{
-	unsigned _cpsr;
-
-	_cpsr = __get_cpsr();
-	__set_cpsr(_cpsr & ~INT_MASK);
-	return _cpsr;
-}
-
-unsigned long restoreInts(unsigned long oldCPSR)
-{
-	unsigned long _cpsr;
-
-	_cpsr = __get_cpsr();
-	__set_cpsr((_cpsr & ~INT_MASK) | (oldCPSR & INT_MASK));
-	return _cpsr;
-}
 
 /** @addtogroup LPC17xx_System_Public_Variables  LPC17xx System Public Variables
   @{

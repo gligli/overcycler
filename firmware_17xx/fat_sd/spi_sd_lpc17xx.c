@@ -64,14 +64,6 @@
 /* used mode : */
 #define SPI_SD_ACCESS_MODE  SPI_SD_USE_FIFO
 
-// For Olimex LPC1766-STK
-// MMC_PWR (P-Channel FET): P0.21
-// SSEL1: P0.6, SCK1: P0.7, MISO1: P0.8, MOSI1: P0.9
-#define SOCKET_POWER_PORT        0
-#define SOCKET_POWER_PIN        21
-#define SOCKET_POWER_MASK       (1 << SOCKET_POWER_PIN)
-#define SOCKET_POWER_OPENDRAIN  PINSEL_PINMODE_OPENDRAIN /* 33k pull-up mounted */
-
 /* used SSP-port: */
 #define CARD_SSP                 1
 
@@ -183,13 +175,11 @@ static inline uint32_t socket_is_write_protected(void)
 
 static void socket_power_on()
 {
-	GPIO_ClearValue(SOCKET_POWER_PORT, SOCKET_POWER_MASK);
 	socket_powered = 1;
 }
 
 static void socket_power_off()
 {
-	GPIO_SetValue(SOCKET_POWER_PORT, SOCKET_POWER_MASK);
 	socket_powered = 0;
 }
 
@@ -201,19 +191,6 @@ static BYTE socket_is_powered()
 
 static void socket_init()
 {
-	PINSEL_CFG_Type PinCfg;
-
-	// Power P-Channel FET
-	PinCfg.Funcnum   = 0;
-	PinCfg.OpenDrain = SOCKET_POWER_OPENDRAIN;
-	PinCfg.Pinmode   = 0;
-	PinCfg.Pinnum    = SOCKET_POWER_PIN;
-	PinCfg.Portnum   = SOCKET_POWER_PORT;
-	PINSEL_ConfigPin(&PinCfg);
-	socket_power_off();
-	socket_powered = 0;
-	GPIO_SetDir(SOCKET_POWER_PORT, SOCKET_POWER_MASK, 1);
-
 	// card-present switch
 	// n/a
 

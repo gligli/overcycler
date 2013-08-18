@@ -7,7 +7,8 @@
 #include "dacspi.h"
 #include "ff.h"
 
-#define SYNTH_CV_COUNT 5
+#define SYNTH_VOICE_CV_COUNT 5
+#define SYNTH_MASTER_CV_COUNT 2
 
 //#define BANK "AKWF_bw_saw"
 //#define BANK "AKWF_bw_squ"
@@ -16,43 +17,131 @@
 
 #define BANK_DIR "/WAVEDATA/" BANK
 
-typedef enum {cvVrefA,cvBVrefB,cvCutoff,cvResonance,cvVCA} cv_t; 
+
+#define CVMUX_PORT_ABC 0
+#define CVMUX_PIN_A 19
+#define CVMUX_PIN_B 20
+#define CVMUX_PIN_C 21
+
+#define CVMUX_PORT_CARD0 0
+#define CVMUX_PIN_CARD0 22
+
+#define CVMUX_PORT_CARD1 0
+#define CVMUX_PIN_CARD1 10
+
+#define CVMUX_PORT_CARD2 4
+#define CVMUX_PIN_CARD2 29
+
+#define CVMUX_PORT_VCA 4
+#define CVMUX_PIN_VCA 28
+
+typedef enum {cvVrefA=0,cvBVrefB=1,cvCutoff=2,cvResonance=3,cvVCA=4,cvMasterLeft=5,cvMasterRight=6} cv_t; 
 
 struct
 {
 	struct wtosc_s osc[SYNTH_OSC_COUNT];
-	DIR dir;
+	DIR curDir;
 	FILINFO curFile;
 	char lfname[_MAX_LFN + 1];
-	uint16_t cv[SYNTH_VOICE_COUNT][SYNTH_CV_COUNT];
+	uint16_t cv[SYNTH_VOICE_COUNT][SYNTH_VOICE_CV_COUNT];
+	uint16_t masterCv[SYNTH_MASTER_CV_COUNT];
 } synth;
+
+
+volatile int8_t cvReferenceSent = 1;
+volatile uint16_t cvReference = 0;
+
+static void setCVReference(uint16_t value)
+{
+	BLOCK_INT
+	{
+		cvReference=DACSPI_CMD_SET_REF|(value>>4);
+		cvReferenceSent=0;
+	}
+
+	while(!cvReferenceSent)
+		__NOP();
+}
+static void sendCVReference(void)
+{
+	if(!cvReferenceSent)
+	{
+		dacspi_sendCommand(DACSPI_CV_CHANNEL,cvReference);
+		cvReferenceSent=1;
+	}
+}
 
 static void updateCV(int8_t voice, cv_t cv)
 {
-/*	int cvv;
-	uint32_t addr;
+	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
 	
-	FIO0SET=0x400000;
-	delay_us(2);
-	FIO0CLR=0x4000c;
+	if(cv<cvVCA)
+	{
+		setCVReference(synth.cv[voice][cv]);
+	
+		if(cv&1)
+			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_A);
+		if(cv&2)
+			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_B);
+		if(voice&1)
+			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_C);
+		
+		delay_us(5);
+	
+		switch(voice>>1)
+		{
+		case 0:
+			GPIO_ClearValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
+			break;			
+		case 1:
+			GPIO_ClearValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
+			break;			
+		case 2:
+			GPIO_ClearValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
+			break;			
+		}
+	}
+	else
+	{
+		if(cv==cvVCA)
+		{
+			GPIO_SetValue(CVMUX_PORT_ABC,voice<<CVMUX_PIN_A);
 
-	cvv=voice*4+cv;
-	addr=((cvv&3)<<2)|((cvv&4)<<16);
+			setCVReference(synth.cv[voice][cvVCA]);
+		}
+		else
+		{
+			cv-=cvMasterLeft;
+			GPIO_SetValue(CVMUX_PORT_ABC,(cv+SYNTH_VOICE_COUNT)<<CVMUX_PIN_A);
+
+			setCVReference(synth.masterCv[cv]);
+		}
+		
+		delay_us(5);
 	
-	dacspi_setReference(synth.cv[0][cv]);
-	FIO0SET=addr;
+		GPIO_ClearValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
+	}
 
 	delay_us(20);
+	
+	GPIO_SetValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
+	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
+	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
+	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
+}
 
-	FIO0CLR=0x400000;
-
-	delay_us(10);*/
+static void timersEnable(int8_t enable)
+{
+	TIM_Cmd(LPC_TIM0,enable);
+	TIM_Cmd(LPC_TIM1,enable);
+	TIM_Cmd(LPC_TIM2,enable);
 }
 
 static void loadWaveTable(void)
 {
 	int i;
 	FIL f;
+	FRESULT res;
 	char fn[_MAX_LFN];
 	
 	strcpy(fn,BANK_DIR "/");
@@ -61,88 +150,189 @@ static void loadWaveTable(void)
 	rprintf("loading %s %d... ",fn,synth.curFile.fsize);
 	
 			
-	if(!f_open(&f,fn,FA_OPEN_EXISTING))
+	if(!f_open(&f,fn,FA_READ))
 	{
 
-		f_lseek(&f,0x2c);
-
+		if((res=f_lseek(&f,0x2c)))
+			rprintf("f_lseek res=%d\n",res);
+			
 		int16_t data[WTOSC_MAX_SAMPLES];
 
-		f_read(&f,(uint8_t*)data,sizeof(data),&i);
+		if((res=f_read(&f,data,sizeof(data),&i)))
+			rprintf("f_lseek res=%d\n",res);
+
 		f_close(&f);
+		
+		timersEnable(0);
 
 		for(i=0;i<SYNTH_OSC_COUNT;++i)
-			wtosc_setSampleData(&synth.osc[i],data,600);
+			wtosc_setSampleData(&synth.osc[i],data,WTOSC_MAX_SAMPLES);
+		
+		timersEnable(1);
 		
 		rprintf("loaded\n");
 	}
+}
+
+__attribute__ ((used)) void TIMER0_IRQHandler(void)
+{
+	uint32_t ir=LPC_TIM0->IR;
+	LPC_TIM0->IR=ir;
+
+	if(ir&(1<<TIM_MR0_INT))
+		LPC_TIM0->MR0+=wtosc_update(&synth.osc[0]);
+
+	if(ir&(1<<TIM_MR1_INT))
+		LPC_TIM0->MR1+=wtosc_update(&synth.osc[1]);
+
+	if(ir&(1<<TIM_MR2_INT))
+		LPC_TIM0->MR2+=wtosc_update(&synth.osc[2]);
+
+	if(ir&(1<<TIM_MR3_INT))
+		LPC_TIM0->MR3+=wtosc_update(&synth.osc[3]);
+
+	sendCVReference();
+}
+
+__attribute__ ((used)) void TIMER1_IRQHandler(void)
+{
+	uint32_t ir=LPC_TIM1->IR;
+	LPC_TIM1->IR=ir;
+
+	if(ir&(1<<TIM_MR0_INT))
+		LPC_TIM1->MR0+=wtosc_update(&synth.osc[4]);
+
+	if(ir&(1<<TIM_MR1_INT))
+		LPC_TIM1->MR1+=wtosc_update(&synth.osc[5]);
+
+	if(ir&(1<<TIM_MR2_INT))
+		LPC_TIM1->MR2+=wtosc_update(&synth.osc[6]);
+
+	if(ir&(1<<TIM_MR3_INT))
+		LPC_TIM1->MR3+=wtosc_update(&synth.osc[7]);
+
+	sendCVReference();
+}
+
+
+__attribute__ ((used)) void TIMER2_IRQHandler(void)
+{
+	uint32_t ir=LPC_TIM2->IR;
+	LPC_TIM2->IR=ir;
+
+	if(ir&(1<<TIM_MR0_INT))
+		LPC_TIM2->MR0+=wtosc_update(&synth.osc[8]);
+
+	if(ir&(1<<TIM_MR1_INT))
+		LPC_TIM2->MR1+=wtosc_update(&synth.osc[9]);
+
+	if(ir&(1<<TIM_MR2_INT))
+		LPC_TIM2->MR2+=wtosc_update(&synth.osc[10]);
+
+	if(ir&(1<<TIM_MR3_INT))
+		LPC_TIM2->MR3+=wtosc_update(&synth.osc[11]);
+
+	sendCVReference();
 }
 
 void synth_init(void)
 {
 	int i;
 	FRESULT res;
-	int16_t sineShape[600];
+	int16_t sineShape[WTOSC_MAX_SAMPLES];
 	
 	memset(&synth,0,sizeof(synth));
 	
-	for(i=0;i<600;++i)
-		sineShape[i]=sin((i/300.0)*M_PI)/2.0*65535.0;
-
-	for(i=0;i<SYNTH_OSC_COUNT;++i)
+	// init ocs timers (hardcoded for 6 voices)
+	
+	TIM_TIMERCFG_Type tim;
+	
+	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
+	tim.PrescaleValue=1;
+	
+	TIM_Init(LPC_TIM0,TIM_TIMER_MODE,&tim);
+	TIM_Init(LPC_TIM1,TIM_TIMER_MODE,&tim);
+	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
+	
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER0,CLKPWR_PCLKSEL_CCLK_DIV_1);
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER1,CLKPWR_PCLKSEL_CCLK_DIV_1);
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER2,CLKPWR_PCLKSEL_CCLK_DIV_1);
+	
+	TIM_MATCHCFG_Type tm;
+	
+	for(i=0;i<4;++i)
 	{
-		wtosc_init(&synth.osc[i],i,0x7000|((i&1)?0x8000:0));
-		wtosc_setSampleData(&synth.osc[i],sineShape,600);
+		tm.MatchChannel=i;
+		tm.IntOnMatch=ENABLE;
+		tm.ResetOnMatch=DISABLE;
+		tm.StopOnMatch=DISABLE;
+		tm.ExtMatchOutputType=0;
+		tm.MatchValue=SYNTH_MASTER_CLOCK;
+		
+		TIM_ConfigMatch(LPC_TIM0,&tm);
+		TIM_ConfigMatch(LPC_TIM1,&tm);
+		TIM_ConfigMatch(LPC_TIM2,&tm);
 	}
 	
-/*	T0TC=0;	
-	T0MR0=SYNTH_MASTER_CLOCK;
-	T0MR1=SYNTH_MASTER_CLOCK;
-	T0MR2=SYNTH_MASTER_CLOCK;
-	T0MR3=SYNTH_MASTER_CLOCK;
-	T0MCR=0x249; // int for all MR*
-
-	T0PR=(CPU_CLOCK/SYNTH_MASTER_CLOCK)-1;
-	T0PC=0;
-	T0TCR=1;
+	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(TIMER1_IRQn);
+	NVIC_EnableIRQ(TIMER2_IRQn);
 	
-	T1TC=0;	
-	T1MR0=SYNTH_MASTER_CLOCK;
-	T1MR1=SYNTH_MASTER_CLOCK;
-	T1MR2=SYNTH_MASTER_CLOCK;
-	T1MR3=SYNTH_MASTER_CLOCK;
-	T1MCR=0x249; // int for all MR*
+	// init spi dac
 
-	T1PR=(CPU_CLOCK/SYNTH_MASTER_CLOCK)-1;
-	T1PC=0;
-	T1TCR=1;
-	
-	// setup TIMER0/TIMER1 vector as FIQ
-	VICIntSelect|=3<<4;
-	VICIntEnable|=3<<4; // enable interrupt
-*/
 	dacspi_init();
+	
+	// init cv mux
+
+	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_A,1); // A
+	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_B,1); // B
+	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_C,1); // C
+	
+	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD0,CVMUX_PIN_CARD0,PINSEL_PINMODE_NORMAL);
+	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD1,CVMUX_PIN_CARD1,PINSEL_PINMODE_NORMAL);
+	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD2,CVMUX_PIN_CARD2,PINSEL_PINMODE_NORMAL);
+	PINSEL_SetOpenDrainMode(CVMUX_PORT_VCA,CVMUX_PIN_VCA,PINSEL_PINMODE_NORMAL);
+	
+	PINSEL_SetResistorMode(CVMUX_PORT_CARD0,CVMUX_PIN_CARD0,PINSEL_PINMODE_TRISTATE);
+	PINSEL_SetResistorMode(CVMUX_PORT_CARD1,CVMUX_PIN_CARD1,PINSEL_PINMODE_TRISTATE);
+	PINSEL_SetResistorMode(CVMUX_PORT_CARD2,CVMUX_PIN_CARD2,PINSEL_PINMODE_TRISTATE);
+	PINSEL_SetResistorMode(CVMUX_PORT_VCA,CVMUX_PIN_VCA,PINSEL_PINMODE_TRISTATE);
+	
+	GPIO_SetDir(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0,1); // voice card 0
+	GPIO_SetDir(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1,1); // voice card 1
+	GPIO_SetDir(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2,1); // voice card 2
+	GPIO_SetDir(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA,1); // VCAs
+	
+	// default waveform
+	
+	for(i=0;i<WTOSC_MAX_SAMPLES;++i)
+		sineShape[i]=sin(M_TWOPI*i/WTOSC_MAX_SAMPLES)/2.0*65535.0;
+
+	// init wavetable oscs
+	
+	for(i=0;i<SYNTH_OSC_COUNT;++i)
+	{
+		uint16_t ctl=(i&1)?DACSPI_CMD_SET_B:DACSPI_CMD_SET_A;
+		wtosc_init(&synth.osc[i],i>>1,ctl);
+		wtosc_setSampleData(&synth.osc[i],sineShape,WTOSC_MAX_SAMPLES);
+	}
 
 	synth.curFile.lfname=synth.lfname;
 	synth.curFile.lfsize=sizeof(synth.lfname);
 	
-    if((res=f_opendir(&synth.dir,BANK_DIR)))
-	{
+    if((res=f_opendir(&synth.curDir,BANK_DIR)))
 		rprintf("f_opendir res=%d\n",res);
-	}
 
-	if((res=f_readdir(&synth.dir,&synth.curFile)))
-	{
+	if((res=f_readdir(&synth.curDir,&synth.curFile)))
 		rprintf("f_readdir res=%d\n",res);
-	}
 
 	loadWaveTable();
-	
-	// cv
-//	FIO0DIR|=0x44000c;
+
+	// time to start the oscs
+
+	timersEnable(1);
 }
 
-extern volatile uint32_t dacspi_states[];
 void synth_update(void)
 {
 	int key,v,cv;
@@ -180,8 +370,8 @@ void synth_update(void)
 	case 'n':
 		do
 		{
-			if(f_readdir(&synth.dir,&synth.curFile) || (synth.curFile.fname[0]==0))
-				f_opendir(&synth.dir,BANK_DIR);
+			if(f_readdir(&synth.curDir,&synth.curFile) || (synth.curFile.fname[0]==0))
+				f_opendir(&synth.curDir,BANK_DIR);
 		}
 		while(!strstr(synth.curFile.fname,".WAV"));
 
@@ -225,26 +415,21 @@ void synth_update(void)
 	{
 		rprintf("note %d %d\n",ali,note);
 		
-		for(int i=0;i<SYNTH_VOICE_COUNT/2;++i)
-		{
-			wtosc_setParameters(&synth.osc[i*4+0],((note+0)<<8)+32,ali);
-			wtosc_setParameters(&synth.osc[i*4+1],((note+0)<<8)+7,ali);
-			wtosc_setParameters(&synth.osc[i*4+2],((note+0)<<8)-27,ali);
-			wtosc_setParameters(&synth.osc[i*4+3],((note+0)<<8)-8,ali);
-		}
-		
-		rprintf("% 4u % 4u % 4u % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
+		for(int i=0;i<SYNTH_OSC_COUNT;++i)
+			wtosc_setParameters(&synth.osc[i],(note<<8)+i*13,ali);
+
+		rprintf("refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
 		
 		m=0;
 	}
-/*	rprintf("% 7u ",dacspi_states[7]);
-	rprintf("% 7u ",dacspi_states[8+7]);
-	rprintf("% 7u ",dacspi_states[16+7]);
-	rprintf("% 7u ",dacspi_states[24+7]);
-	rprintf("\n");*/
-	
+
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 		for(cv=0;cv<4;++cv)
+		{
+			synth.cv[v][cv]=synth.cv[0][cv];
 			updateCV(v,cv);
+		}
+	
+//	delay_us(500);
 }
 

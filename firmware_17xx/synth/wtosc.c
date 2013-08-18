@@ -5,17 +5,14 @@
 #include "wtosc.h"
 #include "dacspi.h"
 
-void wtosc_init(struct wtosc_s * o, int channel, uint16_t controlData)
+void wtosc_init(struct wtosc_s * o, int8_t channel, uint16_t controlData)
 {
 	memset(o,0,sizeof(struct wtosc_s));
-	o->samplePeriod=WTOSC_MAX_SAMPLES;
+	o->period=WTOSC_MAX_SAMPLES;
 	o->controlData=controlData;
 	o->channel=channel;
-
-	dacspi_setState(o->channel,DSIDX_INCREMENT,1);
-	dacspi_setState(o->channel,DSIDX_SAMPLE_COUNT,WTOSC_MAX_SAMPLES);
-
-	dacspi_setState(o->channel,DSIDX_WAVEFORM_ADDR,(uint32_t)o->data);
+	o->increment=1;
+	o->sampleCount=WTOSC_MAX_SAMPLES;
 }
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
@@ -32,13 +29,12 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 			o->data[i]=(((int32_t)data[i]-INT16_MIN)>>4)|o->controlData;
 
 		o->sampleCount=sampleCount;
-		dacspi_setState(o->channel,DSIDX_SAMPLE_COUNT,o->sampleCount);
 	}
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 {
-	double freq,note,rate,f;
+	double freq,note,rate,f,dummy;
 	int underSample=0;
 	
 	note=cv/256.0; // midi note
@@ -50,20 +46,28 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 		do
 		{
 			++underSample;
-			f=modf((double)o->sampleCount/underSample,NULL);
+			f=modf((double)o->sampleCount/underSample,&dummy);
 		}
 		while(fabs(f)>0.0001);
 	}
 		
-	o->increment=underSample+aliasing;
-	o->samplePeriod=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
-	o->cv=cv;
-		
 	BLOCK_INT
 	{
-		dacspi_setState(o->channel,DSIDX_PERIOD,o->samplePeriod);
-		dacspi_setState(o->channel,DSIDX_INCREMENT,o->increment);
+		o->increment=underSample+aliasing;
+		o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
+		o->cv=cv;
 	}
+		
+	rprintf("inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
+}
 
-	rprintf("inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->samplePeriod,(int)rate/underSample);
+inline uint32_t wtosc_update(struct wtosc_s * o)
+{
+	o->phase-=o->increment;
+	if(o->phase<0)
+		o->phase+=o->sampleCount;
+	
+	dacspi_sendCommand(o->channel,o->data[o->phase]);
+
+	return o->period;
 }
