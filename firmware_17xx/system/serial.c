@@ -27,6 +27,19 @@ void init_serial0 ( unsigned long baudrate )
     LPC_UART0->LCR = 0x03;                           /* DLAB = 0                         */
 }
 
+/* Initialize Serial Interface UART0 */
+void init_serial1 ( unsigned long baudrate )
+{
+    unsigned long Fdiv;
+
+//    LPC_PINCON->PINSEL0 |= (1<<16) | (1<<18);         /* Enable RxD1 and TxD1              */
+    LPC_UART1->LCR = 0x83;                          /* 8 bits, no Parity, 1 Stop bit     */
+    Fdiv = ( SystemCoreClock / 16 ) / baudrate ;     /* baud rate                        */
+    LPC_UART1->DLM = Fdiv / 256;
+    LPC_UART1->DLL = Fdiv % 256;
+    LPC_UART1->LCR = 0x03;                           /* DLAB = 0                         */
+}
+
 /* Write character to Serial Port 0 with \n -> \r\n  */
 int putchar_serial0 (int ch)
 {
@@ -44,6 +57,13 @@ int putc_serial0 (int ch)
 {
     while (!(LPC_UART0->LSR & 0x20));
     return (LPC_UART0->THR = ch);
+}
+
+/* Write character to Serial Port 1 without \n -> \r\n  */
+int putc_serial1 (int ch)
+{
+    while (!(LPC_UART1->LSR & 0x20));
+    return (LPC_UART1->THR = ch);
 }
 
 void putstring_serial0 (const char *string)

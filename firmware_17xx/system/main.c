@@ -54,25 +54,25 @@ int main (void)
 	SystemCoreClockUpdate();
 
 	init_serial0(230400);
-    rprintf_devopen(putc_serial0); 
+    rprintf_devopen(0,putc_serial0); 
 	
-	rprintf("\nOverCycler\n");
+	rprintf(0,"\nOverCycler\n");
 	
-	rprintf("storage init...\n");
+	rprintf(0,"storage init...\n");
 
 	SysTick_Config(SystemCoreClock / 100); // 10ms ticks for disk access
 	
 	if((res=disk_initialize(0)))
-		rprintf("disk_initialize res=%d\n",res);
+		rprintf(0,"disk_initialize res=%d\n",res);
 	
 	if((res=f_mount(0,&fatFS)))
-		rprintf("f_mount res=%d\n",res);
+		rprintf(0,"f_mount res=%d\n",res);
 
-	rprintf("synth init...\n");
+	rprintf(0,"synth init...\n");
 
 	synth_init();
 
-	rprintf("done\n");
+	rprintf(0,"done\n");
 	
 	for(;;)
 	{

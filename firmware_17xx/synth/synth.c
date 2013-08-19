@@ -6,6 +6,8 @@
 #include "wtosc.h"
 #include "dacspi.h"
 #include "ff.h"
+#include "ui.h"
+#include "uart_midi.h"
 
 #define SYNTH_VOICE_CV_COUNT 5
 #define SYNTH_MASTER_CV_COUNT 2
@@ -144,19 +146,19 @@ static void loadWaveTable(void)
 	strcpy(fn,BANK_DIR "/");
 	strcat(fn,synth.curFile.lfname);
 
-	rprintf("loading %s %d... ",fn,synth.curFile.fsize);
+	rprintf(0,"loading %s %d... ",fn,synth.curFile.fsize);
 	
 			
 	if(!f_open(&f,fn,FA_READ))
 	{
 
 		if((res=f_lseek(&f,0x2c)))
-			rprintf("f_lseek res=%d\n",res);
+			rprintf(0,"f_lseek res=%d\n",res);
 			
 		int16_t data[WTOSC_MAX_SAMPLES];
 
 		if((res=f_read(&f,data,sizeof(data),&i)))
-			rprintf("f_lseek res=%d\n",res);
+			rprintf(0,"f_lseek res=%d\n",res);
 
 		f_close(&f);
 		
@@ -167,7 +169,7 @@ static void loadWaveTable(void)
 		
 		timersEnable(1);
 		
-		rprintf("loaded\n");
+		rprintf(0,"loaded\n");
 	}
 }
 
@@ -318,16 +320,25 @@ void synth_init(void)
 	synth.curFile.lfsize=sizeof(synth.lfname);
 	
     if((res=f_opendir(&synth.curDir,BANK_DIR)))
-		rprintf("f_opendir res=%d\n",res);
+		rprintf(0,"f_opendir res=%d\n",res);
 
 	if((res=f_readdir(&synth.curDir,&synth.curFile)))
-		rprintf("f_readdir res=%d\n",res);
+		rprintf(0,"f_readdir res=%d\n",res);
 
 	loadWaveTable();
 
+	// init UI
+	
+	ui_init();
+	
+	// init MIDI uart
+	
+	uartMidi_init();
+	
 	// time to start the oscs
 
 	timersEnable(1);
+	
 }
 
 void synth_update(void)
@@ -410,14 +421,16 @@ void synth_update(void)
 	
 	if(m)
 	{
-		rprintf("note %d %d\n",ali,note);
+		rprintf(0,"note %d %d\n",ali,note);
 		
 		for(int i=0;i<SYNTH_OSC_COUNT;++i)
 			wtosc_setParameters(&synth.osc[i],(note<<8)+i*13,ali);
 
-		rprintf("refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
+		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
 		
 		m=0;
+	
+		ui_update();
 	}
 
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
@@ -427,6 +440,6 @@ void synth_update(void)
 			updateCV(v,cv);
 		}
 	
-	delay_us(1000);
+	//delay_us(1000);
 }
 

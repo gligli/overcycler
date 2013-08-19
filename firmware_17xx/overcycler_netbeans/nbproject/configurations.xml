@@ -64,6 +64,10 @@
         <in>dacspi.h</in>
         <in>synth.c</in>
         <in>synth.h</in>
+        <in>uart_midi.c</in>
+        <in>uart_midi.h</in>
+        <in>ui.c</in>
+        <in>ui.h</in>
         <in>utils.c</in>
         <in>wtosc.c</in>
         <in>wtosc.h</in>
@@ -300,6 +304,14 @@
         </cTool>
       </item>
       <item path="../synth/synth.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../synth/uart_midi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/ui.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../synth/ui.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
         <cTool>

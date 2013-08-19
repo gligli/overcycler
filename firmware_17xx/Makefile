@@ -63,6 +63,8 @@ SRC+=synth/dacspi.c
 SRC+=synth/synth.c
 SRC+=synth/wtosc.c
 SRC+=synth/utils.c
+SRC+=synth/ui.c
+SRC+=synth/uart_midi.c
 
 
 # List C++ source files here.

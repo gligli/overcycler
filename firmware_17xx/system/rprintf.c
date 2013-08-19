@@ -46,20 +46,20 @@
 #define PADDING         //SPACE and ZERO padding
 
 
-static int (*putcharfunc)(int c);
+static int (*putcharfunc[4])(int c)={NULL};
 
-void rprintf_devopen( int(*put)(int) )
+void rprintf_devopen(int channel, int(*put)(int))
 {
-    putcharfunc = put;
+    putcharfunc[channel]=put;
 }
 
-static void myputchar(unsigned char c)
+static void myputchar(int channel,unsigned char c)
 {
-    if(c == '\n') putcharfunc('\r');
-    putcharfunc(c);
+    if(c == '\n') putcharfunc[channel]('\r');
+    putcharfunc[channel](c);
 }
 
-void rprintf(char const *format, ...)
+void rprintf(int channel, char const *format, ...)
 {
     unsigned char scratch[SCRATCH];
     unsigned char format_flag;
@@ -89,7 +89,7 @@ void rprintf(char const *format, ...)
         while ((format_flag = *(format++)) != '%')
         {      // Until '%' or '\0'
             if (!format_flag){va_end (ap); return;}
-                myputchar(format_flag);
+                myputchar(channel,format_flag);
         }
 
         issigned=0; //default unsigned
@@ -137,7 +137,7 @@ void rprintf(char const *format, ...)
             #endif
 
             default:
-                myputchar(format_flag);
+                myputchar(channel,format_flag);
                 continue;
 
                 #ifdef USE_STRING
@@ -146,7 +146,7 @@ void rprintf(char const *format, ...)
                 #endif
                 case 's':
                 ptr = (unsigned char*)va_arg(ap,char *);
-                while(*ptr) { myputchar(*ptr); ptr++; }
+                while(*ptr) { myputchar(channel,*ptr); ptr++; }
                     continue;
                 #endif
 
@@ -202,7 +202,7 @@ void rprintf(char const *format, ...)
                     if(s_val < 0) //Value negativ ?
                     {
                         s_val = - s_val; //Make it positiv
-                        myputchar('-');    //Output sign
+                        myputchar(channel,'-');    //Output sign
                     }
 
                     u_val = (unsigned long)s_val;
@@ -244,7 +244,7 @@ void rprintf(char const *format, ...)
                     while(width--) *--ptr = fill; //insert padding chars
                 #endif
 
-                while(*ptr) { myputchar(*ptr); ptr++; }
+                while(*ptr) { myputchar(channel,*ptr); ptr++; }
                     }
         }
     }
