@@ -346,9 +346,8 @@ void synth_update(void)
 	int key,v,cv;
 	
 	static int m=1;
-	static int note=104;
+	static int note=33;
 	static int ali=0;
-	static int inc=1024;
 	
 	key=getkey_serial0();
 	
@@ -385,38 +384,6 @@ void synth_update(void)
 
 		loadWaveTable();
 		break;
-	case 'q':
-		synth.cv[0][0]+=inc;
-		m=1;
-		break;
-	case 'w':
-		synth.cv[0][0]-=inc;
-		m=1;
-		break;
-	case 's':
-		synth.cv[0][1]+=inc;
-		m=1;
-		break;
-	case 'x':
-		synth.cv[0][1]-=inc;
-		m=1;
-		break;
-	case 'd':
-		synth.cv[0][2]+=inc;
-		m=1;
-		break;
-	case 'c':
-		synth.cv[0][2]-=inc;
-		m=1;
-		break;
-	case 'f':
-		synth.cv[0][3]+=inc;
-		m=1;
-		break;
-	case 'v':
-		synth.cv[0][3]-=inc;
-		m=1;
-		break;
 	}
 	
 	if(m)
@@ -429,8 +396,6 @@ void synth_update(void)
 		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
 		
 		m=0;
-	
-		ui_update();
 	}
 
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
@@ -440,6 +405,16 @@ void synth_update(void)
 			updateCV(v,cv);
 		}
 	
-	//delay_us(1000);
+	ui_update();
+	
+	synth.cv[0][0]=ui_getPotValue(0);
+	synth.cv[0][1]=ui_getPotValue(5);
+	synth.cv[0][2]=ui_getPotValue(1);
+	synth.cv[0][3]=ui_getPotValue(6);
+	if(ali!=ui_getPotValue(4)>>8)
+	{
+		ali=ui_getPotValue(4)>>8;
+		m=1;
+	}
 }
 

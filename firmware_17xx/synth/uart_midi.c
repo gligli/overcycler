@@ -6,7 +6,7 @@
 
 __attribute__ ((used)) void UART2_IRQHandler(void)
 {
-	rprintf(1,"%02x",UART_ReceiveData(LPC_UART2));
+	rprintf(0,"%02x",UART_ReceiveData(LPC_UART2));
 }
 
 void uartMidi_init(void)

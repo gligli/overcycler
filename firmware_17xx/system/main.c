@@ -39,6 +39,8 @@ void delay_us(uint32_t count)
 		DELAY_100NS();
 		DELAY_100NS();
 		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
 	}
 }
 
@@ -56,7 +58,7 @@ int main (void)
 	init_serial0(230400);
     rprintf_devopen(0,putc_serial0); 
 	
-	rprintf(0,"\nOverCycler\n");
+	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
 	
 	rprintf(0,"storage init...\n");
 
