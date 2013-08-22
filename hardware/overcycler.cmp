@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 21/08/2013 23:51:39
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 22/08/2013 19:42:13
 
 BeginCmp
 TimeStamp = /5215EBBD;
@@ -151,7 +151,7 @@ BeginCmp
 TimeStamp = /521411A0;
 Reference = P9;
 ValeurCmp = TEN_POTS;
-IdModule  = SIL-12;
+IdModule  = pin_array_6x2;
 EndCmp
 
 BeginCmp

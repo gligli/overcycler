@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler main board schematics"
-Date "21 aug 2013"
+Date "22 aug 2013"
 Rev "1"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -421,17 +421,6 @@ F 3 "" H 3650 3650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L CONN_12 P9
-U 1 1 521411A0
-P 5550 2600
-F 0 "P9" V 5500 2600 60  0000 C CNN
-F 1 "TEN_POTS" V 5600 2600 60  0000 C CNN
-F 2 "" H 5550 2600 60  0000 C CNN
-F 3 "" H 5550 2600 60  0000 C CNN
-	1    5550 2600
-	1    0    0    -1  
-$EndComp
-$Comp
 L +3.3V #PWR014
 U 1 1 52142117
 P 5050 1750
@@ -544,12 +533,12 @@ $EndComp
 $Comp
 L GND #PWR016
 U 1 1 52153743
-P 6750 6900
-F 0 "#PWR016" H 6750 6900 30  0001 C CNN
-F 1 "GND" H 6750 6830 30  0001 C CNN
-F 2 "" H 6750 6900 60  0000 C CNN
-F 3 "" H 6750 6900 60  0000 C CNN
-	1    6750 6900
+P 7100 7000
+F 0 "#PWR016" H 7100 7000 30  0001 C CNN
+F 1 "GND" H 7100 6930 30  0001 C CNN
+F 2 "" H 7100 7000 60  0000 C CNN
+F 3 "" H 7100 7000 60  0000 C CNN
+	1    7100 7000
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -566,12 +555,12 @@ $EndComp
 $Comp
 L -5V #PWR018
 U 1 1 52153759
-P 6950 6900
-F 0 "#PWR018" H 6950 7040 20  0001 C CNN
-F 1 "-5V" H 6950 7010 30  0000 C CNN
-F 2 "" H 6950 6900 60  0000 C CNN
-F 3 "" H 6950 6900 60  0000 C CNN
-	1    6950 6900
+P 6750 6900
+F 0 "#PWR018" H 6750 7040 20  0001 C CNN
+F 1 "-5V" H 6750 7010 30  0000 C CNN
+F 2 "" H 6750 6900 60  0000 C CNN
+F 3 "" H 6750 6900 60  0000 C CNN
+	1    6750 6900
 	1    0    0    -1  
 $EndComp
 Text Label 8350 6450 2    60   ~ 0
@@ -844,14 +833,14 @@ Wire Wire Line
 Wire Wire Line
 	2900 3150 2900 3350
 Wire Wire Line
-	4400 3350 2900 3350
+	2900 3350 4400 3350
 Connection ~ 3650 3350
 Wire Wire Line
 	3650 5050 3650 5150
 Wire Wire Line
 	4400 5100 2900 5100
 Wire Wire Line
-	2900 4400 2900 5100
+	2900 5100 2900 4400
 Wire Wire Line
 	2900 4900 2950 4900
 Connection ~ 3650 5100
@@ -889,7 +878,7 @@ Wire Wire Line
 Wire Wire Line
 	4400 4700 4350 4700
 Wire Wire Line
-	4400 1850 4400 3350
+	4400 3350 4400 1950
 Wire Wire Line
 	4400 2950 4350 2950
 Wire Wire Line
@@ -952,38 +941,32 @@ Wire Wire Line
 Wire Wire Line
 	4350 2650 5200 2650
 Wire Wire Line
-	4350 2750 5200 2750
+	4350 2750 6050 2750
 Wire Wire Line
 	4350 3800 4650 3800
 Wire Wire Line
 	4650 3800 4650 2850
 Wire Wire Line
-	4650 2850 5200 2850
+	4650 2850 6150 2850
 Wire Wire Line
 	4350 3900 4750 3900
 Wire Wire Line
 	4750 3900 4750 2950
 Wire Wire Line
-	4750 2950 5200 2950
+	4750 2950 6250 2950
 Wire Wire Line
 	4350 4100 4850 4100
 Wire Wire Line
 	4850 4100 4850 3050
 Wire Wire Line
-	4850 3050 5200 3050
+	4850 3050 6350 3050
 Wire Wire Line
 	4350 4200 4950 4200
 Wire Wire Line
 	4950 4200 4950 3150
 Wire Wire Line
-	4950 3150 5200 3150
-Wire Wire Line
-	4400 1850 5150 1850
-Wire Wire Line
-	5150 2050 5200 2050
+	4950 3150 6450 3150
 Connection ~ 4400 2950
-Wire Wire Line
-	5150 1850 5150 2050
 Wire Wire Line
 	5200 2150 5050 2150
 Wire Wire Line
@@ -1001,7 +984,7 @@ Connection ~ 4400 4500
 Wire Wire Line
 	2950 7250 2950 7150
 Wire Wire Line
-	2950 7150 6950 7150
+	2950 7150 6750 7150
 Wire Wire Line
 	2850 7250 2850 7100
 Wire Wire Line
@@ -1036,10 +1019,6 @@ Wire Wire Line
 	6150 6800 6150 7250
 Wire Wire Line
 	1650 6250 1650 7250
-Wire Wire Line
-	6950 6900 6950 7250
-Wire Wire Line
-	6850 6850 6850 7250
 Wire Wire Line
 	4850 6900 4850 7250
 Wire Wire Line
@@ -1114,18 +1093,11 @@ Wire Wire Line
 Wire Wire Line
 	6650 6900 6650 7250
 Wire Wire Line
-	6750 7100 6750 7250
-Wire Wire Line
 	8350 6450 8450 6450
 Connection ~ 9000 6450
 Connection ~ 9000 6850
 Wire Wire Line
 	8450 6850 8450 6550
-Wire Wire Line
-	6850 6850 6750 6850
-Wire Wire Line
-	6750 6850 6750 6900
-Connection ~ 6950 7150
 Wire Wire Line
 	1500 7250 1500 6650
 Wire Wire Line
@@ -1133,10 +1105,9 @@ Wire Wire Line
 Wire Wire Line
 	1400 7050 1400 6500
 Wire Wire Line
-	2850 7100 6850 7100
+	1600 7100 6950 7100
 Connection ~ 4350 7100
 Connection ~ 5850 7100
-Connection ~ 6750 7100
 Connection ~ 6850 7100
 Wire Wire Line
 	2750 7050 6650 7050
@@ -1463,4 +1434,58 @@ Text Label 8000 650  0    60   ~ 0
 UNR+
 Text Label 8000 2150 3    60   ~ 0
 UNR-
+$Comp
+L CONN_6X2 P9
+U 1 1 52164F61
+P 5600 2400
+F 0 "P9" H 5600 2750 60  0000 C CNN
+F 1 "TEN_POTS" V 5600 2400 60  0000 C CNN
+F 2 "" H 5600 2400 60  0000 C CNN
+F 3 "" H 5600 2400 60  0000 C CNN
+	1    5600 2400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4400 1950 6050 1950
+Wire Wire Line
+	6050 1950 6050 2150
+Wire Wire Line
+	6050 2150 6000 2150
+Wire Wire Line
+	6050 2750 6050 2650
+Wire Wire Line
+	6050 2650 6000 2650
+Wire Wire Line
+	6150 2850 6150 2550
+Wire Wire Line
+	6150 2550 6000 2550
+Wire Wire Line
+	6250 2950 6250 2450
+Wire Wire Line
+	6250 2450 6000 2450
+Wire Wire Line
+	6350 3050 6350 2350
+Wire Wire Line
+	6350 2350 6000 2350
+Wire Wire Line
+	6450 3150 6450 2250
+Wire Wire Line
+	6450 2250 6000 2250
+Wire Wire Line
+	6750 6900 6750 7250
+Connection ~ 6750 7150
+Wire Wire Line
+	6850 7100 6850 7250
+Wire Wire Line
+	6950 6900 6950 7250
+Wire Wire Line
+	6950 6900 7100 6900
+Wire Wire Line
+	7100 6900 7100 7000
+Connection ~ 6950 7100
+Wire Wire Line
+	1050 6850 1600 6850
+Wire Wire Line
+	1600 6850 1600 7100
+Connection ~ 2850 7100
 $EndSCHEMATC
