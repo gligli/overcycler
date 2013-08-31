@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 13/08/2013 19:00:55
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 23/08/2013 19:51:52
 
 BeginCmp
 TimeStamp = /5208A12D;
@@ -228,28 +228,28 @@ BeginCmp
 TimeStamp = /5208A0E7;
 Reference = R1;
 ValeurCmp = 15k;
-IdModule  = R1;
+IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A0DD;
 Reference = R2;
 ValeurCmp = 15k;
-IdModule  = R1;
+IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A10F;
 Reference = R3;
 ValeurCmp = 15k;
-IdModule  = R1;
+IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A105;
 Reference = R4;
 ValeurCmp = 15k;
-IdModule  = R1;
+IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
@@ -283,14 +283,14 @@ EndCmp
 BeginCmp
 TimeStamp = /5208A2A2;
 Reference = R9;
-ValeurCmp = 68k;
+ValeurCmp = 6k8;
 IdModule  = R1;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A2A8;
 Reference = R10;
-ValeurCmp = 68k;
+ValeurCmp = 6k8;
 IdModule  = R1;
 EndCmp
 
@@ -325,28 +325,28 @@ EndCmp
 BeginCmp
 TimeStamp = /5208A2D0;
 Reference = R15;
-ValeurCmp = 2k2;
+ValeurCmp = 3k3;
 IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A30A;
 Reference = R16;
-ValeurCmp = 2k2;
+ValeurCmp = 3k3;
 IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A2BA;
 Reference = R17;
-ValeurCmp = 18k;
+ValeurCmp = 47k;
 IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
 TimeStamp = /5208A2F5;
 Reference = R18;
-ValeurCmp = 18k;
+ValeurCmp = 47k;
 IdModule  = R3-LARGE_PADS;
 EndCmp
 

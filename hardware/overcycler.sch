@@ -41,9 +41,9 @@ Title "Overcycler main board schematics"
 Date "22 aug 2013"
 Rev "1"
 Comp "GliGli's DIY"
-Comment1 ""
-Comment2 ""
-Comment3 ""
+Comment1 "inverser sck/ssel"
+Comment2 "largeur lpc"
+Comment3 "espacement ports cards"
 Comment4 ""
 $EndDescr
 $Comp

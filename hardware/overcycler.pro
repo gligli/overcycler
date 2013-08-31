@@ -1,4 +1,4 @@
-update=21/08/2013 23:17:49
+update=24/08/2013 08:47:00
 last_client=pcbnew
 [eeschema]
 version=1
@@ -50,10 +50,10 @@ EquName1=devcms
 version=1
 LastNetListRead=overcycler.net
 UseCmpFile=1
-PadDrill=0.600000000000
-PadDrillOvalY=0.600000000000
-PadSizeH=1.500000000000
-PadSizeV=1.500000000000
+PadDrill=1.016000000000
+PadDrillOvalY=1.016000000000
+PadSizeH=1.778000000000
+PadSizeV=1.778000000000
 PcbTextSizeV=1.500000000000
 PcbTextSizeH=1.500000000000
 PcbTextThickness=0.300000000000
@@ -85,3 +85,4 @@ LibName15=pga_sockets
 LibName16=valves
 LibName17=SIL-33
 LibName18=optocoupler
+LibName19=TO220-fixed
