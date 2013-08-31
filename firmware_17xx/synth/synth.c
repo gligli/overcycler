@@ -66,7 +66,7 @@ static void sendCVReference(void)
 {
 	if(!cvReferenceSent)
 	{
-		dacspi_sendCommand(DACSPI_CV_CHANNEL,cvReference);
+		dacspi_sendCommand(DACSPI_CV_CHANNEL,cvReference,cvReference);
 		cvReferenceSent=1;
 	}
 }
@@ -181,8 +181,9 @@ static void loadWaveTable(void)
  	oa=channel<<1; \
 	ob=(channel<<1)+1; \
  \
-	if((mask)&1){ dacspi_sendCommand(channel,wtosc_update(&synth.osc[oa])); MRA+=synth.osc[oa].period; } \
-	if((mask)&2){ dacspi_sendCommand(channel,wtosc_update(&synth.osc[ob])); MRB+=synth.osc[ob].period; } \
+	if((mask)&1) MRA+=wtosc_update(&synth.osc[oa]); \
+	if((mask)&2) MRB+=wtosc_update(&synth.osc[ob]); \
+	if((mask)&3) dacspi_sendCommand(channel,synth.osc[oa].output,synth.osc[ob].output); \
 }
 
 __attribute__ ((used)) void TIMER0_IRQHandler(void)
@@ -254,9 +255,9 @@ void synth_init(void)
 		TIM_ConfigMatch(LPC_TIM2,&tm);
 	}
 	
-	NVIC_SetPriority(TIMER0_IRQn,1);
-	NVIC_SetPriority(TIMER1_IRQn,1);
-	NVIC_SetPriority(TIMER2_IRQn,1);
+	NVIC_SetPriority(TIMER0_IRQn,2);
+	NVIC_SetPriority(TIMER1_IRQn,2);
+	NVIC_SetPriority(TIMER2_IRQn,2);
 
 	NVIC_EnableIRQ(TIMER0_IRQn);
 	NVIC_EnableIRQ(TIMER1_IRQn);
@@ -297,7 +298,7 @@ void synth_init(void)
 	for(i=0;i<SYNTH_OSC_COUNT;++i)
 	{
 		uint16_t ctl=(i&1)?DACSPI_CMD_SET_B:DACSPI_CMD_SET_A;
-		wtosc_init(&synth.osc[i],i>>1,ctl);
+		wtosc_init(&synth.osc[i],ctl);
 		wtosc_setSampleData(&synth.osc[i],sineShape,WTOSC_MAX_SAMPLES);
 	}
 
@@ -357,9 +358,9 @@ void synth_update(void)
 		ali=ui_getPotValue(4)>>8;
 		m=1;
 	}
-	if(det!=ui_getPotValue(2)>>9)
+	if(det!=ui_getPotValue(2)>>6)
 	{
-		det=ui_getPotValue(2)>>9;
+		det=ui_getPotValue(2)>>6;
 		m=1;
 	}
 	if(note!=ui_getPotValue(7)>>1)

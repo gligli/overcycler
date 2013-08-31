@@ -5,12 +5,11 @@
 #include "wtosc.h"
 #include "dacspi.h"
 
-void wtosc_init(struct wtosc_s * o, int8_t channel, uint16_t controlData)
+void wtosc_init(struct wtosc_s * o, uint16_t controlData)
 {
 	memset(o,0,sizeof(struct wtosc_s));
 	o->period=WTOSC_MAX_SAMPLES;
 	o->controlData=controlData;
-	o->channel=channel;
 	o->increment=1;
 	o->sampleCount=WTOSC_MAX_SAMPLES;
 }
@@ -64,5 +63,6 @@ FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
 	if(o->phase<0)
 		o->phase+=o->sampleCount;
 
-	return o->data[o->phase];
+	o->output=o->data[o->phase];
+	return o->period;
 }
