@@ -11,6 +11,6 @@
 #define DACSPI_CMD_SET_REF 0x3000
 
 void dacspi_init(void);
-void dacspi_sendCommand(uint8_t channel, uint16_t commandA, uint16_t commandB);
+void dacspi_setCommand(uint8_t channel, int8_t ab, uint16_t command);
 
 #endif

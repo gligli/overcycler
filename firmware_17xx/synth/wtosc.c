@@ -30,27 +30,27 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 {
-	double freq,note,rate,f,dummy;
-	int underSample=0;
+	double freq,f,dummy;
+	int underSample=0,rate;
 	
-	note=cv/256.0; // midi note
-	freq=pow(2.0,(note-69.0)/12.0)*440.0; // note frequency
+	freq=pow(2.0,(((double)cv/WTOSC_CV_SEMITONE)-69.0)/12.0)*440.0; // note frequency
 	rate=freq*o->sampleCount; // sample rate
 
-	while((rate/underSample)>(double)WTOSC_MAX_SAMPLE_RATE)
+	do
 	{
 		do
 		{
 			++underSample;
-			f=modf((double)o->sampleCount/underSample,&dummy);
+			f=modf(((double)o->sampleCount)/underSample,&dummy);
 		}
 		while(fabs(f)>0.0001);
 	}
+	while((double)60000.0<(((double)rate)/underSample));
 
 	BLOCK_INT
 	{
 		o->increment=underSample+aliasing;
-		o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
+		o->period=(uint64_t)SYNTH_MASTER_CLOCK*o->increment/rate;	
 		o->cv=cv;
 	}
 		
@@ -63,6 +63,5 @@ FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
 	if(o->phase<0)
 		o->phase+=o->sampleCount;
 
-	o->output=o->data[o->phase];
-	return o->period;
+	return o->data[o->phase];
 }

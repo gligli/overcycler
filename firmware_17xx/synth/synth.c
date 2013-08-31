@@ -41,7 +41,7 @@ typedef enum {cvVrefA=0,cvBVrefB=1,cvCutoff=2,cvResonance=3,cvVCA=4,cvMasterLeft
 
 struct
 {
-	struct wtosc_s osc[SYNTH_OSC_COUNT];
+	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	DIR curDir;
 	FILINFO curFile;
 	char lfname[_MAX_LFN + 1];
@@ -66,7 +66,8 @@ static void sendCVReference(void)
 {
 	if(!cvReferenceSent)
 	{
-		dacspi_sendCommand(DACSPI_CV_CHANNEL,cvReference,cvReference);
+		dacspi_setCommand(DACSPI_CV_CHANNEL,0,cvReference);
+		dacspi_setCommand(DACSPI_CV_CHANNEL,1,cvReference);
 		cvReferenceSent=1;
 	}
 }
@@ -165,8 +166,11 @@ static void loadWaveTable(void)
 		
 		timersEnable(0);
 
-		for(i=0;i<SYNTH_OSC_COUNT;++i)
-			wtosc_setSampleData(&synth.osc[i],data,WTOSC_MAX_SAMPLES);
+		for(i=0;i<SYNTH_VOICE_COUNT;++i)
+		{
+			wtosc_setSampleData(&synth.osc[i][0],data,WTOSC_MAX_SAMPLES);
+			wtosc_setSampleData(&synth.osc[i][1],data,WTOSC_MAX_SAMPLES);
+		}
 		
 		timersEnable(1);
 		
@@ -177,13 +181,8 @@ static void loadWaveTable(void)
 
 #define DO_VOICE_COMMANDS(channel,MRA,MRB,mask) \
 { \
-	uint8_t oa,ob; \
- 	oa=channel<<1; \
-	ob=(channel<<1)+1; \
- \
-	if((mask)&1) MRA+=wtosc_update(&synth.osc[oa]); \
-	if((mask)&2) MRB+=wtosc_update(&synth.osc[ob]); \
-	if((mask)&3) dacspi_sendCommand(channel,synth.osc[oa].output,synth.osc[ob].output); \
+	if((mask)&1) { dacspi_setCommand(channel,0,wtosc_update(&synth.osc[channel][0])); MRA+=synth.osc[channel][0].period; } \
+	if((mask)&2) { dacspi_setCommand(channel,1,wtosc_update(&synth.osc[channel][1])); MRB+=synth.osc[channel][1].period; } \
 }
 
 __attribute__ ((used)) void TIMER0_IRQHandler(void)
@@ -248,10 +247,14 @@ void synth_init(void)
 		tm.ResetOnMatch=DISABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=(4+i*4)*SYNTH_MASTER_CLOCK/8;
 		
+		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+0)*SYNTH_MASTER_CLOCK/3;
 		TIM_ConfigMatch(LPC_TIM0,&tm);
+
+		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+1)*SYNTH_MASTER_CLOCK/3;
 		TIM_ConfigMatch(LPC_TIM1,&tm);
+
+		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+2)*SYNTH_MASTER_CLOCK/3;
 		TIM_ConfigMatch(LPC_TIM2,&tm);
 	}
 	
@@ -295,11 +298,12 @@ void synth_init(void)
 
 	// init wavetable oscs
 	
-	for(i=0;i<SYNTH_OSC_COUNT;++i)
+	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		uint16_t ctl=(i&1)?DACSPI_CMD_SET_B:DACSPI_CMD_SET_A;
-		wtosc_init(&synth.osc[i],ctl);
-		wtosc_setSampleData(&synth.osc[i],sineShape,WTOSC_MAX_SAMPLES);
+		wtosc_init(&synth.osc[i][0],DACSPI_CMD_SET_A);
+		wtosc_init(&synth.osc[i][1],DACSPI_CMD_SET_B);
+		wtosc_setSampleData(&synth.osc[i][0],sineShape,WTOSC_MAX_SAMPLES);
+		wtosc_setSampleData(&synth.osc[i][1],sineShape,WTOSC_MAX_SAMPLES);
 	}
 
 	synth.curFile.lfname=synth.lfname;
@@ -335,11 +339,10 @@ void synth_update(void)
 
 	static int note=33;
 	static int ali=0;
+	static int uni=0;
 	static int det=0;
 	static int shp=0;
 
-	delay_us(10000);
-	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 		for(cv=0;cv<4;++cv)
 		{
@@ -358,21 +361,26 @@ void synth_update(void)
 		ali=ui_getPotValue(4)>>8;
 		m=1;
 	}
-	if(det!=ui_getPotValue(2)>>6)
+	if(det!=ui_getPotValue(2)>>8)
 	{
-		det=ui_getPotValue(2)>>6;
+		det=ui_getPotValue(2)>>8;
 		m=1;
 	}
-	if(note!=ui_getPotValue(7)>>1)
+	if(uni!=ui_getPotValue(8)>>10)
 	{
-		note=ui_getPotValue(7)>>1;
+		uni=ui_getPotValue(8)>>10;
 		m=1;
 	}
-	if(shp!=ui_getPotValue(3)>>9)
+	if(note!=(ui_getPotValue(7)>>9)<<9)
+	{
+		note=(ui_getPotValue(7)>>9)<<9;
+		m=1;
+	}
+	if(shp!=ui_getPotValue(3)>>10)
 	{
 		int p=0;		
 
-		shp=ui_getPotValue(3)>>9;
+		shp=ui_getPotValue(3)>>10;
 				
 		f_opendir(&synth.curDir,BANK_DIR);
 		do
@@ -390,8 +398,16 @@ void synth_update(void)
 	{
 //		rprintf(0,"note %d %d\n",ali,note);
 		
-		for(int i=0;i<SYNTH_OSC_COUNT;++i)
-			wtosc_setParameters(&synth.osc[i],(note)+i*det,ali);
+		for(v=0;v<SYNTH_VOICE_COUNT;++v)
+		{
+			if(v&1)
+				cv=note+v*uni;
+			else
+				cv=note-(v+1)*uni;
+				
+			wtosc_setParameters(&synth.osc[v][0],cv-det,ali);
+			wtosc_setParameters(&synth.osc[v][1],512*24+cv+det,ali);
+		}
 
 //		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
 		

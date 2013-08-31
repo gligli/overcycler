@@ -3,22 +3,21 @@
 
 #include "synth.h"
 
-#define WTOSC_MAX_SAMPLE_RATE 60000
-#define WTOSC_CV_OCTAVE (256*12)
+#define WTOSC_MAX_SAMPLE_RATE 80000
+#define WTOSC_CV_SEMITONE 512
 #define WTOSC_MAX_SAMPLES 600 // samples
 
 struct wtosc_s
 {
+	volatile int16_t phase;
+	volatile uint16_t increment;
+	volatile uint32_t period;
+	volatile int16_t sampleCount;
+
 	uint16_t data[WTOSC_MAX_SAMPLES];	
 	
 	uint16_t cv;
-	uint16_t output;
 	uint16_t controlData;
-
-	uint32_t period;
-	uint16_t increment;
-	int16_t phase;
-	int16_t sampleCount;
 };
 
 void wtosc_init(struct wtosc_s * o, uint16_t controlData);

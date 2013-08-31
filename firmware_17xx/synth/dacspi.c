@@ -4,14 +4,12 @@
 
 #include "dacspi.h"
 
-#define FIFO_COUNT 2
 #define STEP_COUNT 8
 
 #define DACSPI_DMACONFIG \
 			GPDMA_DMACCxConfig_E | \
 			GPDMA_DMACCxConfig_DestPeripheral(14) | \
-			GPDMA_DMACCxConfig_TransferType(1) | \
-			GPDMA_DMACCxConfig_ITC
+			GPDMA_DMACCxConfig_TransferType(1)
 
 static const uint8_t channel2mask[DACSPI_CHANNEL_COUNT]=
 {
@@ -20,61 +18,15 @@ static const uint8_t channel2mask[DACSPI_CHANNEL_COUNT]=
 
 static struct
 {
-	volatile int8_t curff,nextff;
-	uint32_t commands[FIFO_COUNT][2];
-	uint8_t steps[FIFO_COUNT][STEP_COUNT];
-	GPDMA_LLI_Type lli[FIFO_COUNT][2];
+	volatile uint32_t commands[DACSPI_CHANNEL_COUNT][2];
+	uint8_t steps[DACSPI_CHANNEL_COUNT][STEP_COUNT];
+	GPDMA_LLI_Type lli[DACSPI_CHANNEL_COUNT][2];
 } dacspi;
 
-static FORCEINLINE void startDMA(int8_t ff)
+
+FORCEINLINE void dacspi_setCommand(uint8_t channel, int8_t ab, uint16_t command)
 {
-	dacspi.curff=ff;
-
-	LPC_GPDMACH0->DMACCSrcAddr=dacspi.lli[ff][0].SrcAddr;
-	LPC_GPDMACH0->DMACCDestAddr=dacspi.lli[ff][0].DstAddr;
-	LPC_GPDMACH0->DMACCLLI=dacspi.lli[ff][0].NextLLI;
-	LPC_GPDMACH0->DMACCControl=dacspi.lli[ff][0].Control;
-	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
-}
-
-__attribute__ ((used)) void DMA_IRQHandler(void)
-{
-	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
-	
-	if(dacspi.nextff>=0)
-	{
-		startDMA(dacspi.nextff);
-		dacspi.nextff=-1;
-	}
-	else
-	{
-		dacspi.curff=-1;
-	}
-}
-
-void dacspi_sendCommand(uint8_t channel, uint16_t commandA, uint16_t commandB)
-{
-	int8_t pff,ff;
-	
-	pff=dacspi.nextff;
-	if(pff<0)
-		pff=dacspi.curff;
-
-	ff=(pff==0)?1:0;
-	
-	dacspi.commands[ff][0]=commandA;
-	dacspi.commands[ff][1]=commandB;
-
-	dacspi.steps[ff][STEP_COUNT-2]=~channel2mask[channel];
-
-	if(dacspi.curff<0)
-	{
-		startDMA(ff);
-	}
-	else
-	{
-		dacspi.nextff=ff;
-	}
+	dacspi.commands[channel][ab]=command;
 }
 
 void dacspi_init(void)
@@ -110,9 +62,10 @@ void dacspi_init(void)
 
 	//
 	
-	for(i=0;i<FIFO_COUNT;++i)
+	for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
 	{
 		memset(&dacspi.steps[i][0],0xff,STEP_COUNT);
+		dacspi.steps[i][STEP_COUNT-2]=~channel2mask[i];
 
 		dacspi.lli[i][0].SrcAddr=(uint32_t)&dacspi.commands[i][0];
 		dacspi.lli[i][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
@@ -125,17 +78,13 @@ void dacspi_init(void)
 
 		dacspi.lli[i][1].SrcAddr=(uint32_t)&dacspi.steps[i][0];
 		dacspi.lli[i][1].DstAddr=(uint32_t)&LPC_GPIO2->FIOPIN0;
-		dacspi.lli[i][1].NextLLI=0;
+		dacspi.lli[i][1].NextLLI=(uint32_t)&dacspi.lli[(i+1)%DACSPI_CHANNEL_COUNT][0];
 		dacspi.lli[i][1].Control=
 			GPDMA_DMACCxControl_TransferSize(STEP_COUNT) |
 			GPDMA_DMACCxControl_SWidth(0) |
 			GPDMA_DMACCxControl_DWidth(0) |
-			GPDMA_DMACCxControl_SI |
-			GPDMA_DMACCxControl_I;
+			GPDMA_DMACCxControl_SI;
 	}
-	
-	dacspi.curff=-1;
-	dacspi.nextff=-1;
 	
 	//
 	
@@ -160,14 +109,18 @@ void dacspi_init(void)
 	tm.ResetOnMatch=ENABLE;
 	tm.StopOnMatch=DISABLE;
 	tm.ExtMatchOutputType=0;
-	tm.MatchValue=SYNTH_MASTER_CLOCK/(12*1000*1000);
+	tm.MatchValue=20;
 
 	TIM_ConfigMatch(LPC_TIM3,&tm);
 
 	// start
 	
-	NVIC_SetPriority(DMA_IRQn,1);
-	NVIC_EnableIRQ(DMA_IRQn);
-	
 	TIM_Cmd(LPC_TIM3,ENABLE);
+	
+	LPC_GPDMACH0->DMACCSrcAddr=dacspi.lli[0][0].SrcAddr;
+	LPC_GPDMACH0->DMACCDestAddr=dacspi.lli[0][0].DstAddr;
+	LPC_GPDMACH0->DMACCLLI=dacspi.lli[0][0].NextLLI;
+	LPC_GPDMACH0->DMACCControl=dacspi.lli[0][0].Control;
+
+	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
 }
