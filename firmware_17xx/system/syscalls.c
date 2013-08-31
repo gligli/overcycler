@@ -106,11 +106,11 @@ label:
 	goto label; /* endless loop */
 }
 
-int _kill(int pid, int sig) {
+__attribute__ ((used)) int _kill(int pid, int sig) {
 	return -1;
 }
 
-int _getpid() {
+__attribute__ ((used)) int _getpid() {
 	return -1;
 }
 

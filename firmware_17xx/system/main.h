@@ -23,6 +23,8 @@
 #include <lpc17xx_ssp.h>
 #include <lpc17xx_adc.h>
 #include <lpc17xx_uart.h>
+#include <lpc17xx_gpdma.h>
+#include <lpc17xx_spi.h>
 
 // assumes 100Mhz clock
 #define DELAY_100NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop")

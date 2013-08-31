@@ -47,21 +47,22 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 		}
 		while(fabs(f)>0.0001);
 	}
+
+	BLOCK_INT
+	{
+		o->increment=underSample+aliasing;
+		o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
+		o->cv=cv;
+	}
 		
-	o->increment=underSample+aliasing;
-	o->period=(double)SYNTH_MASTER_CLOCK*o->increment/rate;	
-	o->cv=cv;
-		
-	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
+//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
 }
 
-inline uint32_t wtosc_update(struct wtosc_s * o)
+FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
 {
 	o->phase-=o->increment;
 	if(o->phase<0)
 		o->phase+=o->sampleCount;
-	
-	dacspi_sendCommand(o->channel,o->data[o->phase]);
 
-	return o->period;
+	return o->data[o->phase];
 }

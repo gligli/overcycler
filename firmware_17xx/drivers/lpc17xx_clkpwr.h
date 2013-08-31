@@ -277,15 +277,17 @@ extern "C"
 #define	CLKPWR_PCLKSEL_MC		  	((uint32_t)(62))
 
 /** Macro for Peripheral Clock Selection register bit values
- * Note: When CCLK_DIV_8, Peripheral’s clock is selected to
+ * Note: When CCLK_DIV_8, Peripheralï¿½s clock is selected to
  * PCLK_xyz = CCLK/8 except for CAN1, CAN2, and CAN filtering
- * when ’11’selects PCLK_xyz = CCLK/6 */
+ * when ï¿½11ï¿½selects PCLK_xyz = CCLK/6 */
 /* Peripheral clock divider is set to 4 from CCLK */
 #define	CLKPWR_PCLKSEL_CCLK_DIV_4  ((uint32_t)(0))
 /** Peripheral clock divider is the same with CCLK */
 #define	CLKPWR_PCLKSEL_CCLK_DIV_1  ((uint32_t)(1))
 /** Peripheral clock divider is set to 2 from CCLK */
 #define	CLKPWR_PCLKSEL_CCLK_DIV_2  ((uint32_t)(2))
+/* Peripheral clock divider is set to 8 from CCLK */
+#define	CLKPWR_PCLKSEL_CCLK_DIV_8  ((uint32_t)(3))
 
 
 /********************************************************************

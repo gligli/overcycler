@@ -61,6 +61,7 @@ static void setCVReference(uint16_t value)
 	while(!cvReferenceSent)
 		__NOP();
 }
+
 static void sendCVReference(void)
 {
 	if(!cvReferenceSent)
@@ -173,24 +174,26 @@ static void loadWaveTable(void)
 	}
 }
 
+
+#define DO_VOICE_COMMANDS(channel,MRA,MRB,mask) \
+{ \
+	uint8_t oa,ob; \
+ 	oa=channel<<1; \
+	ob=(channel<<1)+1; \
+ \
+	if((mask)&1){ dacspi_sendCommand(channel,wtosc_update(&synth.osc[oa])); MRA+=synth.osc[oa].period; } \
+	if((mask)&2){ dacspi_sendCommand(channel,wtosc_update(&synth.osc[ob])); MRB+=synth.osc[ob].period; } \
+}
+
 __attribute__ ((used)) void TIMER0_IRQHandler(void)
 {
 	uint32_t ir=LPC_TIM0->IR;
 	LPC_TIM0->IR=ir;
 
-	if(ir&(1<<TIM_MR0_INT))
-		LPC_TIM0->MR0+=wtosc_update(&synth.osc[0]);
-
-	if(ir&(1<<TIM_MR1_INT))
-		LPC_TIM0->MR1+=wtosc_update(&synth.osc[1]);
-
-	if(ir&(1<<TIM_MR2_INT))
-		LPC_TIM0->MR2+=wtosc_update(&synth.osc[2]);
-
-	if(ir&(1<<TIM_MR3_INT))
-		LPC_TIM0->MR3+=wtosc_update(&synth.osc[3]);
-
 	sendCVReference();
+
+	DO_VOICE_COMMANDS(0,LPC_TIM0->MR0,LPC_TIM0->MR1,ir);
+	DO_VOICE_COMMANDS(1,LPC_TIM0->MR2,LPC_TIM0->MR3,ir>>2);
 }
 
 __attribute__ ((used)) void TIMER1_IRQHandler(void)
@@ -198,17 +201,8 @@ __attribute__ ((used)) void TIMER1_IRQHandler(void)
 	uint32_t ir=LPC_TIM1->IR;
 	LPC_TIM1->IR=ir;
 
-	if(ir&(1<<TIM_MR0_INT))
-		LPC_TIM1->MR0+=wtosc_update(&synth.osc[4]);
-
-	if(ir&(1<<TIM_MR1_INT))
-		LPC_TIM1->MR1+=wtosc_update(&synth.osc[5]);
-
-	if(ir&(1<<TIM_MR2_INT))
-		LPC_TIM1->MR2+=wtosc_update(&synth.osc[6]);
-
-	if(ir&(1<<TIM_MR3_INT))
-		LPC_TIM1->MR3+=wtosc_update(&synth.osc[7]);
+	DO_VOICE_COMMANDS(2,LPC_TIM1->MR0,LPC_TIM1->MR1,ir);
+	DO_VOICE_COMMANDS(3,LPC_TIM1->MR2,LPC_TIM1->MR3,ir>>2);
 }
 
 
@@ -217,17 +211,8 @@ __attribute__ ((used)) void TIMER2_IRQHandler(void)
 	uint32_t ir=LPC_TIM2->IR;
 	LPC_TIM2->IR=ir;
 
-	if(ir&(1<<TIM_MR0_INT))
-		LPC_TIM2->MR0+=wtosc_update(&synth.osc[8]);
-
-	if(ir&(1<<TIM_MR1_INT))
-		LPC_TIM2->MR1+=wtosc_update(&synth.osc[9]);
-
-	if(ir&(1<<TIM_MR2_INT))
-		LPC_TIM2->MR2+=wtosc_update(&synth.osc[10]);
-
-	if(ir&(1<<TIM_MR3_INT))
-		LPC_TIM2->MR3+=wtosc_update(&synth.osc[11]);
+	DO_VOICE_COMMANDS(4,LPC_TIM2->MR0,LPC_TIM2->MR1,ir);
+	DO_VOICE_COMMANDS(5,LPC_TIM2->MR2,LPC_TIM2->MR3,ir>>2);
 }
 
 void synth_init(void)
@@ -262,7 +247,7 @@ void synth_init(void)
 		tm.ResetOnMatch=DISABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=(i*4+4)*SYNTH_MASTER_CLOCK/8;
+		tm.MatchValue=(4+i*4)*SYNTH_MASTER_CLOCK/8;
 		
 		TIM_ConfigMatch(LPC_TIM0,&tm);
 		TIM_ConfigMatch(LPC_TIM1,&tm);
@@ -338,66 +323,22 @@ void synth_init(void)
 	// time to start the oscs
 
 	timersEnable(1);
-	
+
 }
 
 void synth_update(void)
 {
-	int key,v,cv;
+	int v,cv;
 	
 	static int m=1;
+
 	static int note=33;
 	static int ali=0;
-	
-	key=getkey_serial0();
-	
-	switch(key)
-	{
-	case 'r':
-		NVIC_SystemReset();
-		break;
-	case '+':
-		++note;
-		m=1;
-		break;
-	case '-':
-		if(note>12)
-			--note;
-		m=1;
-		break;
-	case '*':
-		++ali;
-		m=1;
-		break;
-	case '/':
-		if(ali>0)
-			--ali;
-		m=1;
-		break;
-	case 'n':
-		do
-		{
-			if(f_readdir(&synth.curDir,&synth.curFile) || (synth.curFile.fname[0]==0))
-				f_opendir(&synth.curDir,BANK_DIR);
-		}
-		while(!strstr(synth.curFile.fname,".WAV"));
+	static int det=0;
+	static int shp=0;
 
-		loadWaveTable();
-		break;
-	}
+	delay_us(10000);
 	
-	if(m)
-	{
-		rprintf(0,"note %d %d\n",ali,note);
-		
-		for(int i=0;i<SYNTH_OSC_COUNT;++i)
-			wtosc_setParameters(&synth.osc[i],(note<<8)+i*13,ali);
-
-		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
-		
-		m=0;
-	}
-
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 		for(cv=0;cv<4;++cv)
 		{
@@ -409,12 +350,52 @@ void synth_update(void)
 	
 	synth.cv[0][0]=ui_getPotValue(0);
 	synth.cv[0][1]=ui_getPotValue(5);
-	synth.cv[0][2]=ui_getPotValue(1);
+	synth.cv[0][2]=UINT16_MAX-ui_getPotValue(1);
 	synth.cv[0][3]=ui_getPotValue(6);
 	if(ali!=ui_getPotValue(4)>>8)
 	{
 		ali=ui_getPotValue(4)>>8;
 		m=1;
 	}
+	if(det!=ui_getPotValue(2)>>9)
+	{
+		det=ui_getPotValue(2)>>9;
+		m=1;
+	}
+	if(note!=ui_getPotValue(7)>>1)
+	{
+		note=ui_getPotValue(7)>>1;
+		m=1;
+	}
+	if(shp!=ui_getPotValue(3)>>9)
+	{
+		int p=0;		
+
+		shp=ui_getPotValue(3)>>9;
+				
+		f_opendir(&synth.curDir,BANK_DIR);
+		do
+		{
+			f_readdir(&synth.curDir,&synth.curFile);
+			++p;
+		}
+		while(p<=shp && synth.curFile.fname[0]!=0);
+
+		loadWaveTable();
+	}
+
+
+	if(m)
+	{
+//		rprintf(0,"note %d %d\n",ali,note);
+		
+		for(int i=0;i<SYNTH_OSC_COUNT;++i)
+			wtosc_setParameters(&synth.osc[i],(note)+i*det,ali);
+
+//		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
+		
+		m=0;
+	}
+
 }
 
