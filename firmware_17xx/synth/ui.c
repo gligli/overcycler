@@ -82,7 +82,7 @@ uint16_t ui_getPotValue(int8_t pot)
 	memcpy(&tmp[0],&ui.pots[pot][0],UI_POT_SAMPLES*sizeof(uint16_t));
 	bubble(tmp,UI_POT_SAMPLES);
 	
-	return (tmp[UI_POT_SAMPLES/2]>>7)<<7; // get median
+	return (tmp[UI_POT_SAMPLES/2]>>6)<<6; // get median
 }
 
 void ui_init(void)
@@ -148,7 +148,7 @@ void ui_update(void)
 {
 	rprintf(1,"                    ");
 	for(int i=0;i<UI_POT_COUNT;++i)
-		rprintf(1,"% 4d",(ui_getPotValue(i))>>7);
+		rprintf(1,"% 4d",((ui_getPotValue(i))>>6)%1000);
 	rprintf(1,"                    ");
 //	delay_ms(40);
 }

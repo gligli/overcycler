@@ -50,26 +50,15 @@ struct
 } synth;
 
 
-volatile int8_t cvReferenceSent = 1;
-volatile uint16_t cvReference = 0;
-
 static void setCVReference(uint16_t value)
 {
-	cvReference=DACSPI_CMD_SET_REF|(value>>4);
-	cvReferenceSent=0;
-
-	while(!cvReferenceSent)
-		__NOP();
-}
-
-static void sendCVReference(void)
-{
-	if(!cvReferenceSent)
-	{
-		dacspi_setCommand(DACSPI_CV_CHANNEL,0,cvReference);
-		dacspi_setCommand(DACSPI_CV_CHANNEL,1,cvReference);
-		cvReferenceSent=1;
-	}
+	uint16_t cmd;
+	
+	cmd=(value>>4)|DACSPI_CMD_SET_REF;
+	
+	dacspi_setCommand(DACSPI_CV_CHANNEL,0,cmd);
+	dacspi_setCommand(DACSPI_CV_CHANNEL,1,cmd);
+	delay_us(10);
 }
 
 static void updateCV(int8_t voice, cv_t cv)
@@ -189,8 +178,6 @@ __attribute__ ((used)) void TIMER0_IRQHandler(void)
 {
 	uint32_t ir=LPC_TIM0->IR;
 	LPC_TIM0->IR=ir;
-
-	sendCVReference();
 
 	DO_VOICE_COMMANDS(0,LPC_TIM0->MR0,LPC_TIM0->MR1,ir);
 	DO_VOICE_COMMANDS(1,LPC_TIM0->MR2,LPC_TIM0->MR3,ir>>2);
@@ -343,8 +330,11 @@ void synth_update(void)
 	static int det=0;
 	static int shp=0;
 
+	updateCV(6,cvMasterLeft);
+	updateCV(6,cvMasterRight);
+	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
-		for(cv=0;cv<4;++cv)
+		for(cv=0;cv<SYNTH_VOICE_CV_COUNT;++cv)
 		{
 			synth.cv[v][cv]=synth.cv[0][cv];
 			updateCV(v,cv);
@@ -352,15 +342,19 @@ void synth_update(void)
 	
 	ui_update();
 	
+	synth.masterCv[0]=ui_getPotValue(4);
+	synth.masterCv[1]=ui_getPotValue(4);
+	
 	synth.cv[0][0]=ui_getPotValue(0);
 	synth.cv[0][1]=ui_getPotValue(5);
 	synth.cv[0][2]=UINT16_MAX-ui_getPotValue(1);
 	synth.cv[0][3]=ui_getPotValue(6);
-	if(ali!=ui_getPotValue(4)>>8)
+	synth.cv[0][4]=satAddU16S16(ui_getPotValue(9),-(int32_t)ui_getPotValue(6)/6);
+/*	if(ali!=ui_getPotValue(4)>>8)
 	{
 		ali=ui_getPotValue(4)>>8;
 		m=1;
-	}
+	}*/
 	if(det!=ui_getPotValue(2)>>8)
 	{
 		det=ui_getPotValue(2)>>8;
@@ -376,11 +370,11 @@ void synth_update(void)
 		note=(ui_getPotValue(7)>>9)<<9;
 		m=1;
 	}
-	if(shp!=ui_getPotValue(3)>>10)
+	if(shp!=ui_getPotValue(3)>>9)
 	{
 		int p=0;		
 
-		shp=ui_getPotValue(3)>>10;
+		shp=ui_getPotValue(3)>>9;
 				
 		f_opendir(&synth.curDir,BANK_DIR);
 		do

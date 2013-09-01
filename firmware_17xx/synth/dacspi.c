@@ -5,6 +5,7 @@
 #include "dacspi.h"
 
 #define STEP_COUNT 8
+#define TIMER_MATCH 20
 
 #define DACSPI_DMACONFIG \
 			GPDMA_DMACCxConfig_E | \
@@ -40,7 +41,7 @@ void dacspi_init(void)
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
 
-	LPC_SSP0->CPSR=4; // 30Mhz
+	LPC_SSP0->CPSR=6; // 20Mhz
 	LPC_SSP0->CR0=0x0f; // 16Bit SPI(0,0)
 	LPC_SSP0->CR1=2; // Enable
 	LPC_SSP0->DMACR=3; // DMA
@@ -109,7 +110,7 @@ void dacspi_init(void)
 	tm.ResetOnMatch=ENABLE;
 	tm.StopOnMatch=DISABLE;
 	tm.ExtMatchOutputType=0;
-	tm.MatchValue=20;
+	tm.MatchValue=TIMER_MATCH;
 
 	TIM_ConfigMatch(LPC_TIM3,&tm);
 

@@ -43,9 +43,9 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 			++underSample;
 			f=modf(((double)o->sampleCount)/underSample,&dummy);
 		}
-		while(fabs(f)>0.0001);
+		while(fabs(f));
 	}
-	while((double)60000.0<(((double)rate)/underSample));
+	while((double)WTOSC_MAX_SAMPLE_RATE<(((double)rate)/underSample));
 
 	BLOCK_INT
 	{

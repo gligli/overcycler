@@ -4,7 +4,7 @@
 #include "synth.h"
 
 #define DACSPI_CHANNEL_COUNT 7
-#define DACSPI_CV_CHANNEL (DACSPI_CHANNEL_COUNT-1)
+#define DACSPI_CV_CHANNEL 6
 
 #define DACSPI_CMD_SET_A 0x7000
 #define DACSPI_CMD_SET_B 0xf000
