@@ -10,5 +10,6 @@
 
 void synth_init(void);
 void synth_update(void);
+void synth_updateDACs(void);
 
 #endif

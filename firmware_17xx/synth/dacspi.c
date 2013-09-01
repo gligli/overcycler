@@ -4,26 +4,31 @@
 
 #include "dacspi.h"
 
-#define STEP_COUNT 8
-#define TIMER_MATCH 20
-
 #define DACSPI_DMACONFIG \
 			GPDMA_DMACCxConfig_E | \
 			GPDMA_DMACCxConfig_DestPeripheral(14) | \
-			GPDMA_DMACCxConfig_TransferType(1)
+			GPDMA_DMACCxConfig_TransferType(1) | \
+			GPDMA_DMACCxConfig_ITC
 
 static const uint8_t channel2mask[DACSPI_CHANNEL_COUNT]=
 {
 	0x02,0x01,0x04,0x08,0x010,0x80,0x40
 };
 
-static struct
+__attribute__ ((section(".eth_ram"))) static struct
 {
-	volatile uint32_t commands[DACSPI_CHANNEL_COUNT][2];
-	uint8_t steps[DACSPI_CHANNEL_COUNT][STEP_COUNT];
+	uint32_t commands[DACSPI_CHANNEL_COUNT][2];
+	uint8_t steps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
 	GPDMA_LLI_Type lli[DACSPI_CHANNEL_COUNT][2];
 } dacspi;
 
+
+__attribute__ ((used)) void DMA_IRQHandler(void)
+{
+	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
+	
+	synth_updateDACs();
+}
 
 FORCEINLINE void dacspi_setCommand(uint8_t channel, int8_t ab, uint16_t command)
 {
@@ -65,8 +70,8 @@ void dacspi_init(void)
 	
 	for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
 	{
-		memset(&dacspi.steps[i][0],0xff,STEP_COUNT);
-		dacspi.steps[i][STEP_COUNT-2]=~channel2mask[i];
+		memset(&dacspi.steps[i][0],0xff,DACSPI_STEP_COUNT);
+		dacspi.steps[i][DACSPI_STEP_COUNT-2]=~channel2mask[i];
 
 		dacspi.lli[i][0].SrcAddr=(uint32_t)&dacspi.commands[i][0];
 		dacspi.lli[i][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
@@ -81,11 +86,13 @@ void dacspi_init(void)
 		dacspi.lli[i][1].DstAddr=(uint32_t)&LPC_GPIO2->FIOPIN0;
 		dacspi.lli[i][1].NextLLI=(uint32_t)&dacspi.lli[(i+1)%DACSPI_CHANNEL_COUNT][0];
 		dacspi.lli[i][1].Control=
-			GPDMA_DMACCxControl_TransferSize(STEP_COUNT) |
+			GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
 			GPDMA_DMACCxControl_SWidth(0) |
 			GPDMA_DMACCxControl_DWidth(0) |
 			GPDMA_DMACCxControl_SI;
 	}
+	
+	dacspi.lli[0][1].Control|=GPDMA_DMACCxControl_I;
 	
 	//
 	
@@ -110,9 +117,12 @@ void dacspi_init(void)
 	tm.ResetOnMatch=ENABLE;
 	tm.StopOnMatch=DISABLE;
 	tm.ExtMatchOutputType=0;
-	tm.MatchValue=TIMER_MATCH;
+	tm.MatchValue=DACSPI_TIMER_MATCH;
 
 	TIM_ConfigMatch(LPC_TIM3,&tm);
+	
+	NVIC_SetPriority(DMA_IRQn,0);
+	NVIC_EnableIRQ(DMA_IRQn);
 
 	// start
 	

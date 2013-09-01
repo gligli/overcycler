@@ -164,6 +164,12 @@ SECTIONS
 	{
 		*.o (USB_RAM)
 	} > ram2
+
+	.eth_ram (NOLOAD):
+	{
+		*.o (ETH_RAM)
+	} > ram1
+
   .heap (NOLOAD) :
   {
     *(.heap)

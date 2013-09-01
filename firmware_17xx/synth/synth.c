@@ -120,13 +120,6 @@ static void updateCV(int8_t voice, cv_t cv)
 	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
 }
 
-static void timersEnable(int8_t enable)
-{
-	TIM_Cmd(LPC_TIM0,enable);
-	TIM_Cmd(LPC_TIM1,enable);
-	TIM_Cmd(LPC_TIM2,enable);
-}
-
 static void loadWaveTable(void)
 {
 	int i;
@@ -153,53 +146,32 @@ static void loadWaveTable(void)
 
 		f_close(&f);
 		
-		timersEnable(0);
-
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		{
 			wtosc_setSampleData(&synth.osc[i][0],data,WTOSC_MAX_SAMPLES);
 			wtosc_setSampleData(&synth.osc[i][1],data,WTOSC_MAX_SAMPLES);
 		}
 		
-		timersEnable(1);
-		
 		rprintf(0,"loaded\n");
 	}
 }
 
+#define DO_OSC(v,o) dacspi_setCommand(v,o,wtosc_update(&synth.osc[v][o],DACSPI_TICK_RATE))
 
-#define DO_VOICE_COMMANDS(channel,MRA,MRB,mask) \
-{ \
-	if((mask)&1) { dacspi_setCommand(channel,0,wtosc_update(&synth.osc[channel][0])); MRA+=synth.osc[channel][0].period; } \
-	if((mask)&2) { dacspi_setCommand(channel,1,wtosc_update(&synth.osc[channel][1])); MRB+=synth.osc[channel][1].period; } \
-}
-
-__attribute__ ((used)) void TIMER0_IRQHandler(void)
+void synth_updateDACs(void)
 {
-	uint32_t ir=LPC_TIM0->IR;
-	LPC_TIM0->IR=ir;
-
-	DO_VOICE_COMMANDS(0,LPC_TIM0->MR0,LPC_TIM0->MR1,ir);
-	DO_VOICE_COMMANDS(1,LPC_TIM0->MR2,LPC_TIM0->MR3,ir>>2);
-}
-
-__attribute__ ((used)) void TIMER1_IRQHandler(void)
-{
-	uint32_t ir=LPC_TIM1->IR;
-	LPC_TIM1->IR=ir;
-
-	DO_VOICE_COMMANDS(2,LPC_TIM1->MR0,LPC_TIM1->MR1,ir);
-	DO_VOICE_COMMANDS(3,LPC_TIM1->MR2,LPC_TIM1->MR3,ir>>2);
-}
-
-
-__attribute__ ((used)) void TIMER2_IRQHandler(void)
-{
-	uint32_t ir=LPC_TIM2->IR;
-	LPC_TIM2->IR=ir;
-
-	DO_VOICE_COMMANDS(4,LPC_TIM2->MR0,LPC_TIM2->MR1,ir);
-	DO_VOICE_COMMANDS(5,LPC_TIM2->MR2,LPC_TIM2->MR3,ir>>2);
+	DO_OSC(0,0);
+	DO_OSC(0,1);
+	DO_OSC(1,0);
+	DO_OSC(1,1);
+	DO_OSC(2,0);
+	DO_OSC(2,1);
+	DO_OSC(3,0);
+	DO_OSC(3,1);
+	DO_OSC(4,0);
+	DO_OSC(4,1);
+	DO_OSC(5,0);
+	DO_OSC(5,1);
 }
 
 void synth_init(void)
@@ -209,53 +181,6 @@ void synth_init(void)
 	int16_t sineShape[WTOSC_MAX_SAMPLES];
 	
 	memset(&synth,0,sizeof(synth));
-	
-	// init ocs timers (hardcoded for 6 voices)
-	
-	TIM_TIMERCFG_Type tim;
-	
-	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
-	tim.PrescaleValue=1;
-	
-	TIM_Init(LPC_TIM0,TIM_TIMER_MODE,&tim);
-	TIM_Init(LPC_TIM1,TIM_TIMER_MODE,&tim);
-	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
-	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER0,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER1,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER2,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	
-	TIM_MATCHCFG_Type tm;
-	
-	for(i=0;i<4;++i)
-	{
-		tm.MatchChannel=i;
-		tm.IntOnMatch=ENABLE;
-		tm.ResetOnMatch=DISABLE;
-		tm.StopOnMatch=DISABLE;
-		tm.ExtMatchOutputType=0;
-		
-		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+0)*SYNTH_MASTER_CLOCK/3;
-		TIM_ConfigMatch(LPC_TIM0,&tm);
-
-		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+1)*SYNTH_MASTER_CLOCK/3;
-		TIM_ConfigMatch(LPC_TIM1,&tm);
-
-		tm.MatchValue=SYNTH_MASTER_CLOCK+(i+2)*SYNTH_MASTER_CLOCK/3;
-		TIM_ConfigMatch(LPC_TIM2,&tm);
-	}
-	
-	NVIC_SetPriority(TIMER0_IRQn,2);
-	NVIC_SetPriority(TIMER1_IRQn,2);
-	NVIC_SetPriority(TIMER2_IRQn,2);
-
-	NVIC_EnableIRQ(TIMER0_IRQn);
-	NVIC_EnableIRQ(TIMER1_IRQn);
-	NVIC_EnableIRQ(TIMER2_IRQn);
-	
-	// init spi dac
-
-	dacspi_init();
 	
 	// init cv mux
 
@@ -312,10 +237,10 @@ void synth_init(void)
 	
 	uartMidi_init();
 	
-	// time to start the oscs
+	// init spi dac
 
-	timersEnable(1);
-
+	dacspi_init();
+	
 }
 
 void synth_update(void)
@@ -400,7 +325,7 @@ void synth_update(void)
 				cv=note-(v+1)*uni;
 				
 			wtosc_setParameters(&synth.osc[v][0],cv-det,ali);
-			wtosc_setParameters(&synth.osc[v][1],512*24+cv+det,ali);
+			wtosc_setParameters(&synth.osc[v][1],/*512*12+*/cv+det,ali);
 		}
 
 //		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
