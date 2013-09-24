@@ -38,12 +38,12 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler main board schematics"
-Date "22 aug 2013"
-Rev "1"
+Date "24 sep 2013"
+Rev "2"
 Comp "GliGli's DIY"
-Comment1 "inverser sck/ssel"
-Comment2 "largeur lpc"
-Comment3 "espacement ports cards"
+Comment1 ""
+Comment2 ""
+Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
@@ -1047,9 +1047,7 @@ Wire Wire Line
 Wire Wire Line
 	1550 7450 1550 6700
 Wire Wire Line
-	1050 7250 1500 7250
-Wire Wire Line
-	1050 7150 1450 7150
+	1050 7250 1450 7250
 Wire Wire Line
 	1050 7050 1400 7050
 Wire Wire Line
@@ -1094,9 +1092,9 @@ Connection ~ 9000 6850
 Wire Wire Line
 	8450 6850 8450 6550
 Wire Wire Line
-	1500 7250 1500 6650
+	1500 7150 1500 6650
 Wire Wire Line
-	1450 7150 1450 6600
+	1450 7250 1450 6600
 Wire Wire Line
 	1400 7050 1400 6500
 Wire Wire Line
@@ -1485,4 +1483,6 @@ Wire Wire Line
 Connection ~ 2850 7100
 Connection ~ 4400 1100
 Connection ~ 3200 1100
+Wire Wire Line
+	1050 7150 1500 7150
 $EndSCHEMATC
