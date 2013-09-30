@@ -20,7 +20,7 @@ struct wtosc_s
 
 	uint16_t cv;
 	uint16_t controlData;
-
+	
 	uint16_t data[WTOSC_MAX_SAMPLES];	
 };
 

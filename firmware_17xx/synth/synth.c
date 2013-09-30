@@ -16,6 +16,8 @@
 //#define BANK "AKWF_bw_squ"
 //#define BANK "AKWF_hvoice"
 #define BANK "test"
+//#define BANK "AKWF_0002"
+//#define BANK "AKWF_granular"
 
 #define BANK_DIR "/WAVEDATA/" BANK
 
@@ -58,13 +60,11 @@ static void setCVReference(uint16_t value)
 	
 	dacspi_setCommand(DACSPI_CV_CHANNEL,0,cmd);
 	dacspi_setCommand(DACSPI_CV_CHANNEL,1,cmd);
-	delay_us(10);
+	delay_us(5);
 }
 
 static void updateCV(int8_t voice, cv_t cv)
 {
-	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
-	
 	if(cv<cvVCA)
 	{
 		setCVReference(synth.cv[voice][cv]);
@@ -95,16 +95,16 @@ static void updateCV(int8_t voice, cv_t cv)
 	{
 		if(cv==cvVCA)
 		{
-			GPIO_SetValue(CVMUX_PORT_ABC,voice<<CVMUX_PIN_A);
-
 			setCVReference(synth.cv[voice][cvVCA]);
+
+			GPIO_SetValue(CVMUX_PORT_ABC,voice<<CVMUX_PIN_A);
 		}
 		else
 		{
 			cv-=cvMasterLeft;
-			GPIO_SetValue(CVMUX_PORT_ABC,(cv+SYNTH_VOICE_COUNT)<<CVMUX_PIN_A);
-
 			setCVReference(synth.masterCv[cv]);
+
+			GPIO_SetValue(CVMUX_PORT_ABC,(cv+SYNTH_VOICE_COUNT)<<CVMUX_PIN_A);
 		}
 		
 		delay_us(5);
@@ -118,6 +118,7 @@ static void updateCV(int8_t voice, cv_t cv)
 	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
 	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
 	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
+	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
 }
 
 static void loadWaveTable(void)
@@ -250,7 +251,6 @@ void synth_update(void)
 	static int m=1;
 
 	static int note=33;
-	static int ali=0;
 	static int uni=0;
 	static int det=0;
 	static int shp=0;
@@ -264,7 +264,7 @@ void synth_update(void)
 			synth.cv[v][cv]=synth.cv[0][cv];
 			updateCV(v,cv);
 		}
-	
+
 	ui_update();
 	
 	synth.masterCv[0]=ui_getPotValue(4);
@@ -315,7 +315,7 @@ void synth_update(void)
 
 	if(m)
 	{
-//		rprintf(0,"note %d %d\n",ali,note);
+		rprintf(0,"note %d\n",note>>9);
 		
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
 		{
@@ -324,8 +324,8 @@ void synth_update(void)
 			else
 				cv=note-(v+1)*uni;
 				
-			wtosc_setParameters(&synth.osc[v][0],cv-det,ali);
-			wtosc_setParameters(&synth.osc[v][1],/*512*12+*/cv+det,ali);
+			wtosc_setParameters(&synth.osc[v][0],cv-det,0);
+			wtosc_setParameters(&synth.osc[v][1],512*12*0+cv+det,0);
 		}
 
 //		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);
