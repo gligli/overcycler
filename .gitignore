@@ -1,0 +1,6 @@
+*.o
+*.lst
+*.d
+*.bak
+*.ppu
+/firmware/FW.SFE
