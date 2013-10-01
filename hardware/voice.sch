@@ -36,7 +36,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler voice board schematics"
-Date "24 aug 2013"
+Date "1 oct 2013"
 Rev "1"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -287,12 +287,12 @@ $Comp
 L R R5
 U 1 1 5208A0F1
 P 4800 3000
-F 0 "R5" V 4850 3050 60  0000 C CNN
-F 1 "220" H 4800 3000 60  0001 C CNN
+F 0 "R5" V 4900 3000 60  0000 C CNN
+F 1 "220" V 4800 3000 60  0000 C CNN
 F 2 "" H 4800 3000 60  0001 C CNN
 F 3 "" H 4800 3000 60  0001 C CNN
-F 4 "R" V 4880 3000 40  0000 C CNN "Reference"
-F 5 "220" V 4807 3001 40  0000 C CNN "Value"
+F 4 "~" V 4880 3000 40  0000 C CNN "Reference"
+F 5 "~" V 4807 3001 40  0000 C CNN "Value"
 F 6 "~" V 4730 3000 30  0000 C CNN "Footprint"
 F 7 "~" H 4800 3000 30  0000 C CNN "Datasheet"
 	1    4800 3000
@@ -302,12 +302,12 @@ $Comp
 L R R6
 U 1 1 5208A0FB
 P 4800 4300
-F 0 "R6" V 4850 4350 60  0000 C CNN
-F 1 "220" H 4800 4300 60  0001 C CNN
+F 0 "R6" V 4700 4300 60  0000 C CNN
+F 1 "220" V 4800 4300 60  0000 C CNN
 F 2 "" H 4800 4300 60  0001 C CNN
 F 3 "" H 4800 4300 60  0001 C CNN
-F 4 "R" V 4880 4300 40  0000 C CNN "Reference"
-F 5 "220" V 4807 4301 40  0000 C CNN "Value"
+F 4 "~" V 4900 4300 40  0000 C CNN "Reference"
+F 5 "~" V 4807 4301 40  0000 C CNN "Value"
 F 6 "~" V 4730 4300 30  0000 C CNN "Footprint"
 F 7 "~" H 4800 4300 30  0000 C CNN "Datasheet"
 	1    4800 4300
