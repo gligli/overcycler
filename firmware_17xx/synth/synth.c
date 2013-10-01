@@ -244,9 +244,12 @@ void synth_init(void)
 	
 }
 
+
+int dbg1=1,dbg2=10;
+
 void synth_update(void)
 {
-	int v,cv;
+	int v,cv,key;
 	
 	static int m=1;
 
@@ -255,6 +258,28 @@ void synth_update(void)
 	static int det=0;
 	static int shp=0;
 
+	key=getkey_serial0();
+	
+	switch(key)
+	{
+	case 'a':
+		++dbg1;
+		rprintf(0,"dbg1 %d dbg2 %d\n",dbg1,dbg2);
+		break;
+	case 'q':
+		--dbg1;
+		rprintf(0,"dbg1 %d dbg2 %d\n",dbg1,dbg2);
+		break;
+	case 'z':
+		++dbg2;
+		rprintf(0,"dbg1 %d dbg2 %d\n",dbg1,dbg2);
+		break;
+	case 's':
+		--dbg2;
+		rprintf(0,"dbg1 %d dbg2 %d\n",dbg1,dbg2);
+		break;
+	}
+	
 	updateCV(6,cvMasterLeft);
 	updateCV(6,cvMasterRight);
 	

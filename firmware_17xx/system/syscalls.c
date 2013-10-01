@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 //#include "uart.h"
 
-_ssize_t _read_r(
+__attribute__ ((used)) _ssize_t _read_r(
     struct _reent *r, 
     int file, 
     void *ptr, 
@@ -42,7 +42,7 @@ _ssize_t _read_r(
 	return 0;
 }
 
-_ssize_t _write_r (
+__attribute__ ((used)) _ssize_t _write_r (
     struct _reent *r, 
     int file, 
     const void *ptr, 
@@ -62,14 +62,14 @@ _ssize_t _write_r (
 	return len;
 }
 
-int _close_r(
+__attribute__ ((used)) int _close_r(
     struct _reent *r, 
     int file)
 {
 	return 0;
 }
 
-_off_t _lseek_r(
+__attribute__ ((used)) _off_t _lseek_r(
     struct _reent *r, 
     int file, 
     _off_t ptr, 
@@ -79,7 +79,7 @@ _off_t _lseek_r(
 }
 
 
-int _fstat_r(
+__attribute__ ((used)) int _fstat_r(
     struct _reent *r, 
     int file, 
     struct stat *st)
@@ -93,14 +93,12 @@ int _fstat_r(
 	return 0;
 }
 
-int isatty(int file); /* avoid warning */
-
-int isatty(int file)
+__attribute__ ((used)) int _isatty(int file)
 {
 	return 1;
 }
 
-void _exit (int n)
+__attribute__ ((used)) void _exit (int n)
 {
 label:
 	goto label; /* endless loop */

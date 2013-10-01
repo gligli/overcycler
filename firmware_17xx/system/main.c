@@ -49,12 +49,14 @@ void delay_ms(uint32_t count)
 	delay_us(1000*count);
 }
 
-int main (void)
+int main(void)
 {
 	FRESULT res;
 	
-	SystemCoreClockUpdate();
+	delay_ms(500);
 
+	SystemCoreClockUpdate();
+	
 	init_serial0(230400);
     rprintf_devopen(0,putc_serial0); 
 	

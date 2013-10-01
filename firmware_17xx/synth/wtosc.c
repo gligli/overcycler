@@ -64,7 +64,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 		o->cv=cv;
 	}
 		
-	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
+//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)rate/underSample);
 }
 
 FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o, int32_t elapsedTicks)
