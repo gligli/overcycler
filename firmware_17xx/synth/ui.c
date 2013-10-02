@@ -4,6 +4,8 @@
 
 #include "ui.h"
 
+#define DISPLAY_ACK 6
+
 #define ADC_QUANTUM (1<<(16-12)) // 12bit resolution
 
 #define ADCROW_PORT 3
@@ -12,9 +14,9 @@
 #define UI_POT_COUNT 10
 #define UI_POT_SAMPLES 128
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*25)
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*24)
 #define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*12)
-#define POT_TIMEOUT_RATIO 7500
+#define POT_TIMEOUT 20
 
 static const uint8_t potToCh[UI_POT_COUNT]=
 {
@@ -68,7 +70,46 @@ __attribute__ ((used)) void ADC_IRQHandler(void)
 	
 }
 
-void bubble(uint16_t a[], int n)
+static void sendCommand(const char * command, int8_t waitAck)
+{
+	uint8_t c;
+
+	putc_serial1(0x1b);
+	rprintf(1,command);
+
+	if(waitAck)
+	{
+		do
+			c=getkey_serial1();
+		while(waitAck && c!=DISPLAY_ACK);
+	}
+}
+
+static void readKeypad(void)
+{
+	int key;
+	uint8_t c;
+	
+	for(;;)
+	{
+		sendCommand("[k",0);
+
+		key=0;		
+		c=getc_serial1();
+		
+		while(c && c!=DISPLAY_ACK)
+		{
+			key=key*10+c-'0';
+			c=getc_serial1();
+		}
+		
+		if(!key) break;
+		
+		rprintf(0,"keypad %x\n",key);
+	}
+}
+
+static void bubble(uint16_t a[], int n)
 {
 	int i, j;
 	uint16_t t;
@@ -101,7 +142,7 @@ static void updatePotValue(int8_t pot)
 	
 	acc=0;
 	cnt=0;
-	for(i=0.3*UI_POT_SAMPLES;i<0.5*UI_POT_SAMPLES;++i)
+	for(i=0.4*UI_POT_SAMPLES;i<0.6*UI_POT_SAMPLES;++i)
 	{
 		acc+=tmp[i];
 		++cnt;
@@ -118,9 +159,8 @@ static void updatePotValue(int8_t pot)
 		if (ui.lockTimeout[pot])
 			--ui.lockTimeout[pot];
 		
-		// timeout depends on delta, so small changes lead to a longer timeout than bigger changes
 		if(delta>POT_TIMEOUT_THRESHOLD)
-			ui.lockTimeout[pot]=POT_TIMEOUT_RATIO/delta; 
+			ui.lockTimeout[pot]=POT_TIMEOUT;
 		
 		ui.value[pot]=new;
 
@@ -131,7 +171,7 @@ static void updatePotValue(int8_t pot)
 
 uint16_t ui_getPotValue(int8_t pot)
 {
-	return ui.value[pot];
+	return ui.value[pot]&0xffc0;
 }
 
 void ui_init(void)
@@ -141,6 +181,7 @@ void ui_init(void)
 	// init screen serial
 	
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_UART1,CLKPWR_PCLKSEL_CCLK_DIV_1);	
+	PINSEL_SetResistorMode(0,16,PINSEL_PINMODE_PULLUP);
 	init_serial1(115200);
 	
 	PINSEL_SetPinFunc(0,15,1);
@@ -148,22 +189,26 @@ void ui_init(void)
 	
 	rprintf_devopen(1,putc_serial1);
 	
-	// init screen
-	
-	rprintf(1,"\r\x1b[c"); // reset
-	delay_ms(500); // init time
-	rprintf(1,"\x1b[20c"); // screen size (20 cols)
-	rprintf(1,"\x1b[4L"); // screen size (4 rows)
-	rprintf(1,"\x1b[?25I"); // hide cursor
-	rprintf(1,"\x1b[1x"); // disable scrolling
-	rprintf(1,"\x1b[2J"); // clear screen
+	// init screen (autobaud)
+	rprintf(1,"\r");
+	delay_ms(500);
 
 	// welcome message
-	
-	rprintf(1,"    GliGli's DIY    ");
-	rprintf(1,"                    ");
-	rprintf(1,"-={[ OverCycler ]}=-");
-	rprintf(1,"                    ");
+	rprintf(1,"Gli's OverCycler");
+	rprintf(1,"    " __DATE__);
+	sendCommand("[1b",0); // at 115200bps
+	delay_ms(500);
+	sendCommand("[?27S",0); // save it as start screen
+	delay_ms(500);
+
+	// configure screen
+	sendCommand("[6k",0); // ack (keep synced with DISPLAY_ACK)
+	sendCommand("[20c",1); // screen size (20 cols)
+	sendCommand("[4L",1); // screen size (4 rows)
+	sendCommand("[?25I",1); // hide cursor
+	sendCommand("[1x",1); // disable scrolling
+	sendCommand("[2J",1); // clear screen
+	sendCommand("[1r",1); // keypad debounce
 	
 	// init row select
 	
@@ -199,8 +244,10 @@ void ui_update(void)
 	for(int i=0;i<UI_POT_COUNT;++i)
 	{
 		updatePotValue(i);
-		rprintf(1,"% 4d",ui_getPotValue(i)>>4);
+		rprintf(1,"% 4d",ui_getPotValue(i)>>6);
 	}
 	rprintf(1,"                    ");
+	
+	readKeypad();
 }
 

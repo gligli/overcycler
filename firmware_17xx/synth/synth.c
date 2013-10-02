@@ -59,7 +59,7 @@ static void setCVReference(uint16_t value)
 	cmd=(value>>4)|DACSPI_CMD_SET_REF;
 	
 	dacspi_setCommand(DACSPI_CV_CHANNEL,0,cmd);
-	dacspi_setCommand(DACSPI_CV_CHANNEL,1,cmd);
+	dacspi_setCommand(DACSPI_CV_CHANNEL,1,DACSPI_CMD_SET_B); // dummy command
 	delay_us(5);
 }
 
@@ -350,7 +350,7 @@ void synth_update(void)
 				cv=note-(v+1)*uni;
 				
 			wtosc_setParameters(&synth.osc[v][0],cv-det,0);
-			wtosc_setParameters(&synth.osc[v][1],512*12*0+cv+det,0);
+			wtosc_setParameters(&synth.osc[v][1],512*12*1+cv+det,0);
 		}
 
 //		rprintf(0,"refA % 4u refB % 4u Fc % 4u Q % 4u\n",synth.cv[0][0],synth.cv[0][1],synth.cv[0][2],synth.cv[0][3]);

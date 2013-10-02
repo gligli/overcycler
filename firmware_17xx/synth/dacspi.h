@@ -6,8 +6,6 @@
 #define DACSPI_CHANNEL_COUNT 7
 #define DACSPI_CV_CHANNEL 6
 
-// 8 / 19 / 30Mhz -> less potmux noise
-
 #define DACSPI_STEP_COUNT 7
 #define DACSPI_TIMER_MATCH 10
 

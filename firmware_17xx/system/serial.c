@@ -32,7 +32,8 @@ void init_serial1 ( unsigned long baudrate )
 {
     unsigned long Fdiv;
 
-//    LPC_PINCON->PINSEL0 |= (1<<16) | (1<<18);         /* Enable RxD1 and TxD1              */
+    LPC_PINCON->PINSEL0 |= (1<<30);         /* Enable TxD1              */
+    LPC_PINCON->PINSEL1 |= (1<<0);         /* Enable RxD1              */
     LPC_UART1->LCR = 0x83;                          /* 8 bits, no Parity, 1 Stop bit     */
     Fdiv = ( SystemCoreClock / 16 ) / baudrate ;     /* baud rate                        */
     LPC_UART1->DLM = Fdiv / 256;
@@ -92,8 +93,28 @@ int getkey_serial0 (void)
 }
 
 /* Read character from Serial Port   */
-int getc3 (void)
+int getc_serial0 (void)
 {
 	while ( (LPC_UART0->LSR & 0x01) == 0 ); //Wait for character
 	return LPC_UART0->RBR;
+}
+
+/* Read character from Serial Port   */
+int getkey_serial1 (void)
+{
+	if (LPC_UART1->LSR & 0x01)
+    {
+        return (LPC_UART1->RBR);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+/* Read character from Serial Port   */
+int getc_serial1 (void)
+{
+	while ( (LPC_UART1->LSR & 0x01) == 0 ); //Wait for character
+	return LPC_UART1->RBR;
 }
