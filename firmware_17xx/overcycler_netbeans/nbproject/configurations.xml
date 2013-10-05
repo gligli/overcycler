@@ -60,15 +60,31 @@
         <in>spi_sd_lpc17xx.h</in>
       </df>
       <df name="synth">
+        <in>adsr.c</in>
+        <in>adsr.h</in>
+        <in>adsr_lookups.h</in>
+        <in>arp.c</in>
+        <in>arp.h</in>
+        <in>assigner.c</in>
+        <in>assigner.h</in>
         <in>dacspi.c</in>
         <in>dacspi.h</in>
+        <in>lfo.c</in>
+        <in>lfo.h</in>
+        <in>midi.c</in>
+        <in>midi.h</in>
+        <in>storage.c</in>
+        <in>storage.h</in>
         <in>synth.c</in>
         <in>synth.h</in>
+        <in>tuner.c</in>
+        <in>tuner.h</in>
         <in>uart_midi.c</in>
         <in>uart_midi.h</in>
         <in>ui.c</in>
         <in>ui.h</in>
         <in>utils.c</in>
+        <in>utils.h</in>
         <in>wtosc.c</in>
         <in>wtosc.h</in>
       </df>
@@ -86,6 +102,20 @@
         <in>syscalls.c</in>
         <in>system_LPC17xx.c</in>
         <in>system_LPC17xx.h</in>
+      </df>
+      <df name="xnormidi">
+        <df name="bytequeue">
+          <in>bytequeue.c</in>
+          <in>bytequeue.h</in>
+          <in>interrupt_setting.c</in>
+          <in>interrupt_setting.h</in>
+        </df>
+        <in>midi.c</in>
+        <in>midi.h</in>
+        <in>midi_device.c</in>
+        <in>midi_device.h</in>
+        <in>midi_function_types.h</in>
+        <in>sysex_tools.c</in>
       </df>
     </df>
     <df root="../overcycler" name="overcycler">
@@ -121,6 +151,8 @@
           <cTool>
             <standard>3</standard>
             <incDir>
+              <pElem>../xnormidi/bytequeue</pElem>
+              <pElem>../xnormidi</pElem>
               <pElem>../synth</pElem>
               <pElem>../fat_sd</pElem>
               <pElem>..</pElem>
@@ -293,11 +325,49 @@
       </item>
       <item path="../fat_sd/spi_sd_lpc17xx.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/adsr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/adsr_lookups.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/arp.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/assigner.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/assigner.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
       <item path="../synth/dacspi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/lfo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/midi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/storage.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -305,17 +375,29 @@
       </item>
       <item path="../synth/synth.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="0">
+      <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../synth/tuner.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
       <item path="../synth/uart_midi.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../synth/ui.c" ex="false" tool="0" flavor2="0">
+      <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
       <item path="../synth/ui.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
+      </item>
+      <item path="../synth/utils.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -360,6 +442,42 @@
         </cTool>
       </item>
       <item path="../system/system_LPC17xx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../xnormidi/bytequeue/bytequeue.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../xnormidi/bytequeue/bytequeue.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../xnormidi/bytequeue/interrupt_setting.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../xnormidi/bytequeue/interrupt_setting.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../xnormidi/midi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
+      </item>
+      <item path="../xnormidi/midi_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../xnormidi/midi_function_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
     </conf>
   </confs>

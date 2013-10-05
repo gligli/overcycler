@@ -26,8 +26,17 @@
 #include <lpc17xx_gpdma.h>
 #include <lpc17xx_spi.h>
 
-// assumes 100Mhz clock
-#define DELAY_100NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop")
+//AVR compatibility
+#define PROGMEM
+#define pgm_read_byte(addr) (*(uint8_t*)(addr))
+#define random rand
+#define srandom srand
+#define print(s) rprintf(0,s)
+#define phex(x) rprintf(0,"%x",x)
+#define phex16(x) phex(x)
+
+// assumes 120Mhz clock
+#define DELAY_100NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop")
 
 void delay_us(uint32_t);
 void delay_ms(uint32_t);
@@ -45,6 +54,13 @@ static inline int __restore_irq_stub(uint32_t pm)
 	return 2;
 }
 
-#define BLOCK_INT for(uint32_t __int_block=__disable_irq_stub();__int_block<2;__int_block=__restore_irq_stub(__int_block))
+#define BLOCK_INT for(uint32_t __ctr=1,__int_block=__disable_irq_stub();__ctr;__int_block=__restore_irq_stub(__int_block),__ctr=0)
+
+
+#define STORAGE_PAGE_SIZE 256
+#define STORAGE_SIZE (256*256)
+
+extern void storage_write(uint32_t pageIdx, uint8_t *buf);
+extern void storage_read(uint32_t pageIdx, uint8_t *buf);
 
 #endif

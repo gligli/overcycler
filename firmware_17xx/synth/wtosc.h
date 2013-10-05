@@ -3,25 +3,27 @@
 
 #include "synth.h"
 
-#define WTOSC_CV_SEMITONE 512
+#define WTOSC_CV_SEMITONE 256
 #define WTOSC_MAX_SAMPLES 600 // samples
 
 struct wtosc_s
 {
-	uint32_t curSample;
-	uint32_t prevSample;
+	uint16_t data[WTOSC_MAX_SAMPLES];	
 
-	int32_t counter;
 	int32_t period;
-
 	int32_t phase;
 	int32_t increment;
 	int32_t sampleCount;
 
+	int32_t counter;
+
+	uint16_t curSample;
+	uint16_t prevSample;
+
 	uint16_t cv;
+	uint16_t aliasing;
 	uint16_t controlData;
-	
-	uint16_t data[WTOSC_MAX_SAMPLES];	
+
 };
 
 void wtosc_init(struct wtosc_s * o, uint16_t controlData);

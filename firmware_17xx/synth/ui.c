@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "ui.h"
+#include "storage.h"
 
 #define DISPLAY_ACK 6
 
@@ -31,6 +32,8 @@ static struct
 	int8_t row;
 	uint16_t value[UI_POT_COUNT];
 	uint16_t lockTimeout[UI_POT_COUNT];
+	
+	int8_t presetModified;
 } ui;
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
@@ -70,42 +73,68 @@ __attribute__ ((used)) void ADC_IRQHandler(void)
 	
 }
 
-static void sendCommand(const char * command, int8_t waitAck)
+int sendChar(int ch)
+{
+	while(UART_CheckBusy((LPC_UART_TypeDef*)LPC_UART1)==SET);
+	UART_SendData((LPC_UART_TypeDef*)LPC_UART1,ch);
+	return -1;
+}
+
+uint8_t receiveChar(void)
+{
+	return UART_ReceiveData((LPC_UART_TypeDef*)LPC_UART1);
+}
+
+static void sendCommand(const char * command, int8_t waitAck, char * response)
 {
 	uint8_t c;
 
-	putc_serial1(0x1b);
-	rprintf(1,command);
+	// empty receive fifo
+	while(receiveChar());
+		
+	// send command
+	sendChar(0x1b);
+	while(*command)
+		sendChar(*command++);
 
 	if(waitAck)
 	{
 		do
-			c=getkey_serial1();
-		while(waitAck && c!=DISPLAY_ACK);
+		{
+			c=receiveChar();
+			if(response && c && c!=DISPLAY_ACK)
+				*response++=c;
+		}
+		while(c!=DISPLAY_ACK);
 	}
+
+	if(response)
+		*response=0;
 }
 
 static void readKeypad(void)
 {
 	int key;
-	uint8_t c;
+	char response[10],*rb;
+
+	// get all awaiting keys
 	
 	for(;;)
 	{
-		sendCommand("[k",0);
+		sendCommand("[k",1,response);
 
-		key=0;		
-		c=getc_serial1();
-		
-		while(c && c!=DISPLAY_ACK)
+		key=0;
+		rb=response;
+		while(*rb)
 		{
-			key=key*10+c-'0';
-			c=getc_serial1();
+			if(*rb>='0' && *rb<='9')
+				key=key*10+(*rb-'0');
+			++rb;
 		}
 		
 		if(!key) break;
 		
-		rprintf(0,"keypad %x\n",key);
+		rprintf(0,"keypad %x %s\n",key,response);
 	}
 }
 
@@ -142,18 +171,19 @@ static void updatePotValue(int8_t pot)
 	
 	acc=0;
 	cnt=0;
+
 	for(i=0.4*UI_POT_SAMPLES;i<0.6*UI_POT_SAMPLES;++i)
 	{
 		acc+=tmp[i];
 		++cnt;
 	}
+
+	new=acc/cnt;
 	
 	// ignore small changes
 	
-	new=acc/cnt;
 	delta=abs(new-ui.value[pot]);
-	
-	
+
 	if(delta>POT_CHANGE_DETECT_THRESHOLD || ui.lockTimeout[pot])
 	{
 		if (ui.lockTimeout[pot])
@@ -174,6 +204,17 @@ uint16_t ui_getPotValue(int8_t pot)
 	return ui.value[pot]&0xffc0;
 }
 
+void ui_setPresetModified(int8_t modified)
+{
+	ui.presetModified=modified;
+}
+
+int8_t ui_isPresetModified(void)
+{
+	return ui.presetModified;
+}
+
+
 void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
@@ -181,34 +222,41 @@ void ui_init(void)
 	// init screen serial
 	
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_UART1,CLKPWR_PCLKSEL_CCLK_DIV_1);	
-	PINSEL_SetResistorMode(0,16,PINSEL_PINMODE_PULLUP);
-	init_serial1(115200);
-	
 	PINSEL_SetPinFunc(0,15,1);
 	PINSEL_SetPinFunc(0,16,1);
+
+	UART_CFG_Type uart;
+	UART_ConfigStructInit(&uart);
+	uart.Baud_rate=115200;
+	UART_Init((LPC_UART_TypeDef*)LPC_UART1,&uart);
 	
-	rprintf_devopen(1,putc_serial1);
+	UART_FIFO_CFG_Type fifo;
+	UART_FIFOConfigStructInit(&fifo);
+	UART_FIFOConfig((LPC_UART_TypeDef*)LPC_UART1,&fifo);
+	
+	UART_TxCmd((LPC_UART_TypeDef*)LPC_UART1,ENABLE);
+
+	rprintf_devopen(1,sendChar);
 	
 	// init screen (autobaud)
-	rprintf(1,"\r");
+	sendChar(0x0d);
 	delay_ms(500);
 
 	// welcome message
 	rprintf(1,"Gli's OverCycler");
 	rprintf(1,"    " __DATE__);
-	sendCommand("[1b",0); // at 115200bps
+	sendCommand("[1b",0,NULL); // default at 115200bps
 	delay_ms(500);
-	sendCommand("[?27S",0); // save it as start screen
+	sendCommand("[?27S",0,NULL); // save it as start screen
 	delay_ms(500);
 
 	// configure screen
-	sendCommand("[6k",0); // ack (keep synced with DISPLAY_ACK)
-	sendCommand("[20c",1); // screen size (20 cols)
-	sendCommand("[4L",1); // screen size (4 rows)
-	sendCommand("[?25I",1); // hide cursor
-	sendCommand("[1x",1); // disable scrolling
-	sendCommand("[2J",1); // clear screen
-	sendCommand("[1r",1); // keypad debounce
+	sendCommand("[6k",0,NULL); // ack = DISPLAY_ACK
+	sendCommand("[20c",1,NULL); // screen size (20 cols)
+	sendCommand("[4L",1,NULL); // screen size (4 rows)
+	sendCommand("[?25I",1,NULL); // hide cursor
+	sendCommand("[1x",1,NULL); // disable scrolling
+	sendCommand("[2J",1,NULL); // clear screen
 	
 	// init row select
 	
@@ -231,6 +279,7 @@ void ui_init(void)
 	LPC_ADC->ADCR=0x2f | ADC_CR_CLKDIV(15);
 	LPC_ADC->ADINTEN=0x01;
 	
+	NVIC_SetPriority(ADC_IRQn,31);
 	NVIC_EnableIRQ(ADC_IRQn);
 
 	// start
@@ -247,7 +296,6 @@ void ui_update(void)
 		rprintf(1,"% 4d",ui_getPotValue(i)>>6);
 	}
 	rprintf(1,"                    ");
-	
+
 	readKeypad();
 }
-

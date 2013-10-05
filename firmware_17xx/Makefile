@@ -23,7 +23,16 @@ VECTOR_LOCATION=VECTORS_IN_ROM
 TARGET = overcycler
 
 # List C source files here.
-SRC=system/core_cm3.c
+
+XNORMIDISRC=xnormidi/midi.c
+XNORMIDISRC+=xnormidi/midi_device.c
+XNORMIDISRC+=xnormidi/sysex_tools.c
+XNORMIDISRC+=xnormidi/bytequeue/bytequeue.c
+XNORMIDISRC+=xnormidi/bytequeue/interrupt_setting.c
+
+SRC=$(XNORMIDISRC)
+
+SRC+=system/core_cm3.c
 SRC+=system/system_LPC17xx.c
 SRC+=system/rprintf.c
 SRC+=system/serial.c
@@ -59,13 +68,19 @@ SRC+=fat_sd/ff.c
 SRC+=fat_sd/spi_sd_lpc17xx.c
 SRC+=fat_sd/ccsbcs.c
 
+SRC+=synth/adsr.c
+SRC+=synth/arp.c
+SRC+=synth/assigner.c
 SRC+=synth/dacspi.c
+SRC+=synth/lfo.c
+SRC+=synth/midi.c
+SRC+=synth/storage.c
 SRC+=synth/synth.c
-SRC+=synth/wtosc.c
-SRC+=synth/utils.c
-SRC+=synth/ui.c
+SRC+=synth/tuner.c
 SRC+=synth/uart_midi.c
-
+SRC+=synth/ui.c
+SRC+=synth/utils.c
+SRC+=synth/wtosc.c
 
 # List C++ source files here.
 # use file-extension cpp for C++-files (use extension .cpp)

@@ -8,10 +8,35 @@
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 120000000
 
+#define TICKER_1S 500
+
+typedef enum {cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvAmp=6,cvMasterLeft=7,cvMasterRight=8} cv_t; 
+
+typedef enum
+{
+	modOff=0,modPitch=1,modFil=2,modAmp=3
+} modulationTarget_t;
+
+typedef enum
+{
+	wmOff=0,wmAliasing=1,wmWidth=2
+} wmodTarget_t;
+
+typedef enum
+{
+	otNone=0,otA=1,otB=2,otBoth=3
+} oscTarget_t;
+
+void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato); // voice -1 is unison
+void synth_uartEvent(uint8_t data);
+void synth_updateDACsEvent(void);
+
+void synth_timerInterrupt(void);
+
 void synth_init(void);
 void synth_update(void);
-void synth_updateDACs(void);
 
-extern int dbg1,dbg2;
+extern volatile uint32_t currentTick; // 500hz
+extern const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT];
 
 #endif

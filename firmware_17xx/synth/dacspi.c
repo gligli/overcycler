@@ -10,10 +10,12 @@
 			GPDMA_DMACCxConfig_TransferType(1) | \
 			GPDMA_DMACCxConfig_ITC
 
-static const uint8_t channel2mask[DACSPI_CHANNEL_COUNT]=
+static const uint8_t hard_channel_ldac_mask[DACSPI_CHANNEL_COUNT]=
 {
-	0x02,0x01,0x04,0x08,0x010,0x80,0x40
+	0x02,0x01,0x04,0x08,0x10,0x80,0x40
 };
+
+#define SOFT_CHANNEL_LDAC_MASK(c) (~hard_channel_ldac_mask[(c<DACSPI_CV_CHANNEL)?synth_voiceLayout[0][c]:c])
 
 __attribute__ ((section(".eth_ram"))) static struct
 {
@@ -27,7 +29,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 {
 	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
 	
-	synth_updateDACs();
+	synth_updateDACsEvent();
 }
 
 FORCEINLINE void dacspi_setCommand(uint8_t channel, int8_t ab, uint16_t command)
@@ -71,7 +73,7 @@ void dacspi_init(void)
 	for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
 	{
 		memset(&dacspi.steps[i][0],0xff,DACSPI_STEP_COUNT);
-		dacspi.steps[i][DACSPI_STEP_COUNT-2]=~channel2mask[i];
+		dacspi.steps[i][2]=SOFT_CHANNEL_LDAC_MASK(i);
 
 		dacspi.lli[i][0].SrcAddr=(uint32_t)&dacspi.commands[i][0];
 		dacspi.lli[i][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
@@ -92,7 +94,9 @@ void dacspi_init(void)
 			GPDMA_DMACCxControl_SI;
 	}
 	
-	dacspi.lli[0][1].Control|=GPDMA_DMACCxControl_I;
+	// trigger interrupt on voice 0
+	
+	dacspi.lli[1][1].Control|=GPDMA_DMACCxControl_I;
 	
 	//
 	
@@ -134,4 +138,6 @@ void dacspi_init(void)
 	LPC_GPDMACH0->DMACCControl=dacspi.lli[0][0].Control;
 
 	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
+	
+	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 }
