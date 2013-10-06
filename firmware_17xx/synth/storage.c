@@ -341,13 +341,14 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 		currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
 		currentPreset.continuousParameters[cpUnisonDetune]=256;
-		currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX*7/8;
-		currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX*7/8;
+		currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
+		currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
 
 		currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
 		currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 		currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
 		currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
+		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX/2;
 
 		currentPreset.steppedParameters[spBenderSemitones]=5;
 		currentPreset.steppedParameters[spBenderTarget]=modPitch;
@@ -359,6 +360,12 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		
 		if(makeSound)
 			currentPreset.continuousParameters[cpAVol]=UINT16_MAX/2;
+
+		// temp
+		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX*2/3;
+		currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX*2/3;
+		currentPreset.continuousParameters[cpAmpDec]=UINT16_MAX*2/3;
+		currentPreset.continuousParameters[cpAmpRel]=UINT16_MAX*2/3;
 	}
 }
 

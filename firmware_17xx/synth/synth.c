@@ -15,6 +15,7 @@
 #include "assigner.h"
 #include "arp.h"
 #include "storage.h"
+#include "vca_curves.h"
 
 #define BANK "test"
 #define BANK_DIR "/WAVEDATA/" BANK
@@ -347,10 +348,28 @@ static void setCVReference(uint16_t value)
 	delay_us(6);
 }
 
+static uint16_t adjustCV(cv_t cv, uint16_t value)
+{
+	switch(cv)
+	{
+	case cvCutoff:
+		value=UINT16_MAX-value;
+		break;
+	case cvAmp:
+	case cvMasterLeft:
+	case cvMasterRight:
+		value=computeShape((uint32_t)value<<8,vcaLinearizationCurve);		
+		break;
+	default:
+		;
+	}
+	
+	return value;
+}
+
 static void refreshCV(int8_t voice, cv_t cv, uint16_t value)
 {
-	if(cv==cvCutoff ||cv==cvAmp || cv==cvMasterLeft || cv==cvMasterRight)
-		value=UINT16_MAX-value;
+	value=adjustCV(cv,value);
 
 	GPIO_SetValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
 	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
