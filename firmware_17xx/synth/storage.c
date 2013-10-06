@@ -340,8 +340,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		memset(&currentPreset,0,sizeof(currentPreset));
 
 		currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX*3/4;
-		currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX*3/4;
+		currentPreset.continuousParameters[cpUnisonDetune]=256;
+		currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX*7/8;
+		currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX*7/8;
 
 		currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
 		currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
@@ -357,7 +358,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 			currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 		
 		if(makeSound)
-			currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
+			currentPreset.continuousParameters[cpAVol]=UINT16_MAX/2;
 	}
 }
 

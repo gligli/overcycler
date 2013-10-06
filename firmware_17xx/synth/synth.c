@@ -175,13 +175,9 @@ static void computeTunedCVs(void)
 		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.benderCVs[cvAPitch]+mTune);
 		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.benderCVs[cvBPitch]+mTune+fineBFreq);
 		
-		if(currentPreset.steppedParameters[spUnison])
-		{
-			detune=(1+(v>>1))*(v&1?-1:1)*(detuneRaw>>8);
-
-			cva=satAddU16S16(cva,detune);
-			cvb=satAddU16S16(cvb,detune);
-		}
+		detune=(1+(v>>1))*(v&1?-1:1)*(detuneRaw>>8);
+		cva=satAddU16S16(cva,detune);
+		cvb=satAddU16S16(cvb,detune);
 		
 		// filter
 		
@@ -717,14 +713,11 @@ void synth_timerInterrupt(void)
 
 		// CV update
 		if(v<SYNTH_VOICE_COUNT)
-			refreshCV(v,cvResonance,currentPreset.continuousParameters[cpResonance]);
+			refreshCV(v,cvAVol,currentPreset.continuousParameters[cpAVol]);
+		else
+			refreshCV(SYNTH_VOICE_COUNT,cvMasterLeft,currentPreset.continuousParameters[cpMasterLeft]);
 		break;
 	case 1:
-		if(arp_getMode()!=amOff)
-		{
-			arp_update();
-		}
-
 		if(synth.gliding)
 		{
 			for(v=0;v<SYNTH_VOICE_COUNT;++v)
@@ -737,18 +730,21 @@ void synth_timerInterrupt(void)
 
 		// CV update
 		if(v<SYNTH_VOICE_COUNT)
-			refreshCV(v,cvAVol,currentPreset.continuousParameters[cpAVol]);
-		else
-			refreshCV(SYNTH_VOICE_COUNT,cvMasterLeft,currentPreset.continuousParameters[cpMasterLeft]);
-		break;
-	case 2:
-		handleFinishedVoices();
-
-		// CV update
-		if(v<SYNTH_VOICE_COUNT)
 			refreshCV(v,cvBVol,currentPreset.continuousParameters[cpBVol]);
 		else
 			refreshCV(SYNTH_VOICE_COUNT,cvMasterRight,currentPreset.continuousParameters[cpMasterRight]);
+		break;
+	case 2:
+		if(arp_getMode()!=amOff)
+		{
+			arp_update();
+		}
+
+		// CV update
+		if(v<SYNTH_VOICE_COUNT)
+			refreshCV(v,cvResonance,currentPreset.continuousParameters[cpResonance]);
+		else
+			handleFinishedVoices(); // 1/7th of 500hz, good enough
 		break;
 	case 3:
 		lfo_update(&synth.vibrato);
