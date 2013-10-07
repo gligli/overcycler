@@ -289,13 +289,13 @@ void ui_init(void)
 
 void ui_update(void)
 {
-	rprintf(1,"                    ");
+	sendChar(0x0d);
 	for(int i=0;i<UI_POT_COUNT;++i)
 	{
 		updatePotValue(i);
 		rprintf(1,"% 4d",ui_getPotValue(i)>>6);
 	}
-	rprintf(1,"                    ");
+	sendChar(0x0d);
 
 	readKeypad();
 }

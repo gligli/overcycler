@@ -20,6 +20,15 @@ static MidiDevice midi;
 extern void refreshFullState(void);
 extern void refreshPresetMode(void);
 
+uint16_t midiCombineBytes(uint8_t first, uint8_t second)
+{
+   uint16_t _14bit;
+   _14bit = (uint16_t)second;
+   _14bit <<= 7;
+   _14bit |= (uint16_t)first;
+   return _14bit;
+}
+
 static int8_t midiFilterChannel(uint8_t channel)
 {
 	return settings.midiReceiveChannel<0 || (channel&MIDI_CHANMASK)==settings.midiReceiveChannel;
@@ -84,6 +93,9 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 		settings_save();
 		refreshPresetMode();
 		refreshFullState();
+	}else if (control==1) // modwheel
+	{
+		synth_wheelEvent(0,value<<9,2);
 	}
 	
 	if(!settings.presetMode) // in manual mode CC changes would only conflict with pot scans...
@@ -134,6 +146,19 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 	}
 }
 
+static void midi_pitchBendEvent(MidiDevice * device, uint8_t channel, uint8_t v1, uint8_t v2)
+{
+	if(!midiFilterChannel(channel))
+		return;
+
+	int16_t value;
+	
+	value=midiCombineBytes(v1,v2);
+	value-=0x2000;
+	value<<=2;
+	
+	synth_wheelEvent(value,0,1);
+}
 void midi_init(void)
 {
 	midi_device_init(&midi);
@@ -141,6 +166,7 @@ void midi_init(void)
 	midi_register_noteoff_callback(&midi,midi_noteOffEvent);
 	midi_register_cc_callback(&midi,midi_ccEvent);
 	midi_register_progchange_callback(&midi,midi_progChangeEvent);
+	midi_register_pitchbend_callback(&midi,midi_pitchBendEvent);
 }
 
 void midi_update(void)

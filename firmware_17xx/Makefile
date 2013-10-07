@@ -81,6 +81,7 @@ SRC+=synth/uart_midi.c
 SRC+=synth/ui.c
 SRC+=synth/utils.c
 SRC+=synth/wtosc.c
+SRC+=synth/PowFast.c
 
 # List C++ source files here.
 # use file-extension cpp for C++-files (use extension .cpp)
@@ -174,6 +175,7 @@ CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 CFLAGS += -Wa,-adhlns=$(subst $(suffix $<),.lst,$<) 
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
+CFLAGS += -fno-unroll-loops -fno-inline-functions # done by hand
 CFLAGS += -flto -fuse-linker-plugin
 CFLAGS += -O$(OPT)
 

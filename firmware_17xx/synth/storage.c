@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "storage.h"
+#include "lfo.h"
 
 // increment this each time the binary format is changed
 #define STORAGE_VERSION 0
@@ -347,19 +348,27 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
 		currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 		currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX/2;
-
+		currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/8;
+		currentPreset.continuousParameters[cpLFOFreq]=UINT16_MAX/2;
+				
 		currentPreset.steppedParameters[spBenderSemitones]=5;
 		currentPreset.steppedParameters[spBenderTarget]=modPitch;
 		currentPreset.steppedParameters[spModwheelShift]=1;
 		currentPreset.steppedParameters[spChromaticPitch]=2; // octave
 		currentPreset.steppedParameters[spAssignerPriority]=apLast;
+		currentPreset.steppedParameters[spLFOShape]=lsTri;
+		currentPreset.steppedParameters[spLFOTargets]=otBoth;
+		currentPreset.steppedParameters[spLFOShift]=1;
+		
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
 			currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 		
 		if(makeSound)
+		{
 			currentPreset.continuousParameters[cpAVol]=UINT16_MAX/2;
+			currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
+		}
 
 		// temp
 		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX*2/3;

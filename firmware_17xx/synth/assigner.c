@@ -181,7 +181,7 @@ void assigner_setVoiceMask(uint8_t mask)
 	assigner.voiceMask=mask;
 }
 
-int8_t assigner_getAssignment(int8_t voice, uint8_t * note)
+FORCEINLINE int8_t assigner_getAssignment(int8_t voice, uint8_t * note)
 {
 	int8_t a;
 	

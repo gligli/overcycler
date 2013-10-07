@@ -3,12 +3,15 @@
 
 #include "synth.h"
 
-#define WTOSC_CV_SEMITONE 256
 #define WTOSC_MAX_SAMPLES 600 // samples
+#define WTOSC_CV_SEMITONE 256
+#define WTOSC_LOWEST_NOTE 12
+#define WTOSC_HIGHEST_NOTE 120
 
 struct wtosc_s
 {
 	uint16_t data[WTOSC_MAX_SAMPLES];	
+	uint8_t undersample[WTOSC_HIGHEST_NOTE-WTOSC_LOWEST_NOTE+1];
 
 	int32_t period;
 	int32_t phase;
