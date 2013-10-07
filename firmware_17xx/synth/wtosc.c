@@ -7,17 +7,18 @@
 #include "PowFast.h"
 
 #define OVERSAMPLING_RATIO 2 // higher -> less aliasing but lower effective sample rate
-#define MAX_SAMPLERATE ((float)SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE/OVERSAMPLING_RATIO)
+#define MAX_SAMPLERATE ((double)SYNTH_MASTER_CLOCK/(DACSPI_TICK_RATE*OVERSAMPLING_RATIO))
 
 #define COSINESHAPE_LENGTH 256
 
 static uint16_t cosineShape[COSINESHAPE_LENGTH];
-static const float c2fMul=1.0f/(12.0f*WTOSC_CV_SEMITONE);
+static const double c2fMul=1.0/(12.0*WTOSC_CV_SEMITONE);
+static const double c2fAdd=-69.0/12.0;
 static int powFastTable[256];
 
-static FORCEINLINE float cvToFrequency(int32_t cv)
+static FORCEINLINE float cvToFrequency(uint16_t cv)
 {
-	return powFast2_simple(powFastTable,8,c2fMul*(cv-(69<<8)))*440.0f;
+	return powFast2_simple(powFastTable,8,c2fMul*cv+c2fAdd)*440.0f;
 }
 
 static void globalPreinit(void)
@@ -29,7 +30,7 @@ static void globalPreinit(void)
 	// for cosine interpolation
 	
 	for(int i=0;i<COSINESHAPE_LENGTH;++i)
-		cosineShape[i]=(1.0f-cos(M_PI*i/(float)COSINESHAPE_LENGTH))*(65535.0/2.0);
+		cosineShape[i]=(1.0f-cos(M_PI*i/(double)COSINESHAPE_LENGTH))*(65535.0/2.0);
 	
 	powFastSetTable(powFastTable,8);
 
@@ -50,7 +51,7 @@ void wtosc_init(struct wtosc_s * o, uint16_t controlData)
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
 {
-	float f,dummy;
+	double f,dummy;
 	int i,underSample,sampleRate;
 
 	memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
@@ -76,11 +77,11 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 			do
 			{
 				++underSample;
-				f=modff(((float)o->sampleCount)/underSample,&dummy);
+				f=modf(((double)o->sampleCount)/underSample,&dummy);
 			}
-			while(fabsf(f));
+			while(fabs(f)>0.0001);
 		}
-		while(MAX_SAMPLERATE<(((float)sampleRate)/underSample));
+		while(MAX_SAMPLERATE<(((double)sampleRate)/underSample));
 		
 		o->undersample[i-WTOSC_LOWEST_NOTE]=underSample;
 	}

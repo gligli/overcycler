@@ -48,11 +48,13 @@ const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 
 volatile uint32_t currentTick=0; // 500hz
 
+static volatile uint32_t dacUpdateCount=0;
+
 struct
 {
+	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	struct adsr_s filEnvs[SYNTH_VOICE_COUNT];
 	struct adsr_s ampEnvs[SYNTH_VOICE_COUNT];
-
 	struct lfo_s lfo,vibrato;
 	
 	uint16_t oscANoteCV[SYNTH_VOICE_COUNT];
@@ -73,7 +75,6 @@ struct
 	uint32_t modulationDelayStart;
 	uint16_t modulationDelayTickCount;
 
-	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	DIR curDir;
 	FILINFO curFile;
 	char lfname[_MAX_LFN + 1];
@@ -170,6 +171,8 @@ static void computeTunedCVs(void)
 		baseBPitch&=0xff;
 	}
 
+	rprintf(0,"pi %d %d\n",synth.benderCVs[cvAPitch],mTune);
+	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		if (!assigner_getAssignment(v,&note))
@@ -403,19 +406,23 @@ void refreshFullState(void)
 // Speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
 
-static void setCVReference(uint16_t value)
+static FORCEINLINE void setCVReference(uint16_t value)
 {
 	uint16_t cmd;
+	uint32_t prev;
 	
 	cmd=(value>>4)|DACSPI_CMD_SET_REF;
 	
 	dacspi_setCommand(DACSPI_CV_CHANNEL,0,cmd);
 	dacspi_setCommand(DACSPI_CV_CHANNEL,1,cmd);
 
-	delay_us(6);
+	// wait for a DAC full update
+	prev=dacUpdateCount;
+	while(dacUpdateCount<prev+2)
+		DELAY_100NS();
 }
 
-static uint16_t adjustCV(cv_t cv, uint16_t value)
+static FORCEINLINE uint16_t adjustCV(cv_t cv, uint16_t value)
 {
 	switch(cv)
 	{
@@ -438,12 +445,6 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint16_t value)
 {
 	value=adjustCV(cv,value);
 
-	GPIO_SetValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
-	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
-	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
-	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
-	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
-
 	setCVReference(value);
 
 	if(cv<=cvResonance)
@@ -456,8 +457,6 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint16_t value)
 			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_B);
 		if(voice&1)
 			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_C);
-
-		delay_us(1);
 
 		switch(voice>>1)
 		{
@@ -486,69 +485,61 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint16_t value)
 			GPIO_SetValue(CVMUX_PORT_ABC,(cv+SYNTH_VOICE_COUNT)<<CVMUX_PIN_A);
 		}
 
-		delay_us(1);
-
 		GPIO_ClearValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
 	}
 
-	delay_us(3);
+	delay_us(4);
+
+	GPIO_SetValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
+	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
+	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
+	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
+	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int16_t wmodEnvAmt,int16_t filEnvAmt,int16_t pitchAVal,int16_t pitchBVal,int16_t wmodAVal,int16_t wmodBVal,int16_t filterVal, uint8_t wmodMask)
 {
-	int32_t vpa,vpb,vma,vmb,vf;
-	uint16_t envVal;
-	int8_t assigned;
+	int32_t vpa,vpb,vma,vmb,vf,envVal;
 
-	assigned=assigner_getAssignment(v,NULL);
+	// envs
 
-	if(assigned)
-	{
-		// update envs, compute CVs & apply them
+	adsr_update(&synth.ampEnvs[v]);
+	adsr_update(&synth.filEnvs[v]);
+	envVal=synth.filEnvs[v].output;
 
-		adsr_update(&synth.filEnvs[v]);
-		envVal=synth.filEnvs[v].output;
+	// filter
 
-		// filter
+	vf=filterVal;
+	vf+=scaleU16S16(envVal,filEnvAmt);
+	vf+=synth.filterNoteCV[v];
+	refreshCV(v,cvCutoff,vf);
 
-		vf=filterVal;
-		vf+=scaleU16S16(envVal,filEnvAmt);
-		vf+=synth.filterNoteCV[v];
-		refreshCV(v,cvCutoff,vf);
+	// oscs
 
-		// oscs
+	vpa=pitchAVal;
+	vpb=pitchBVal;
 
-		vpa=pitchAVal;
-		vpb=pitchBVal;
+	vma=wmodAVal;
+	if(wmodMask&8)
+		vma+=scaleU16S16(envVal,wmodEnvAmt);
 
-		vma=wmodAVal;
-		if(wmodMask&8)
-			vma+=scaleU16S16(envVal,wmodEnvAmt);
+	vmb=wmodBVal;
+	if(wmodMask&128)
+		vmb+=scaleU16S16(envVal,wmodEnvAmt);
 
-		vmb=wmodBVal;
-		if(wmodMask&128)
-			vmb+=scaleU16S16(envVal,wmodEnvAmt);
+	// osc A
 
-		// osc A
+	vpa+=synth.oscANoteCV[v];
+	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0);
 
-		vpa+=synth.oscANoteCV[v];
-		wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0);
+	// osc B
 
-		// amplifier
+	vpb+=synth.oscBNoteCV[v];
+	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0);
 
-		adsr_update(&synth.ampEnvs[v]);
-		refreshCV(v,cvAmp,synth.ampEnvs[v].output);
+	// amplifier
 
-		// osc B
-
-		vpb+=synth.oscBNoteCV[v];
-		wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0);
-	}
-	else
-	{
-		refreshCV(v,cvAmp,0);
-		delay_us(4); // lets some time for CV to stabilize
-	}
+	refreshCV(v,cvAmp,synth.ampEnvs[v].output);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -590,6 +581,7 @@ void synth_init(void)
 		wtosc_init(&synth.osc[i][1],DACSPI_CMD_SET_B);
 	}
 
+	// give it some memory
 	synth.curFile.lfname=synth.lfname;
 	synth.curFile.lfsize=sizeof(synth.lfname);
 	
@@ -602,6 +594,14 @@ void synth_init(void)
 
 		if((res=f_readdir(&synth.curDir,&synth.curFile)))
 			rprintf(0,"f_readdir res=%d\n",res);
+		
+		//temp
+		i=0;
+		while(i)
+		{
+			f_readdir(&synth.curDir,&synth.curFile);
+			if(synth.curFile.fname[0]!=0) --i;
+		}
 
 		loadWaveTable();
 	}
@@ -654,7 +654,10 @@ void synth_init(void)
 
 void synth_update(void)
 {
-	print("u");	
+#ifdef DEBUG	
+	putc_serial0('.');	
+#endif
+	
 	ui_update();
 }
 
@@ -791,18 +794,22 @@ void synth_timerInterrupt(void)
 
 #define DO_OSC(v,o) dacspi_setCommand(v,o,wtosc_update(&synth.osc[v][o],DACSPI_TICK_RATE))
 
-void synth_updateDACsEvent(void)
+void synth_updateDACsEvent()
 {
+	++dacUpdateCount;
+
+	// hardware order (less noisy)
+	
 	DO_OSC(0,0);
 	DO_OSC(0,1);
 	DO_OSC(1,0);
 	DO_OSC(1,1);
-	DO_OSC(2,0);
-	DO_OSC(2,1);
 	DO_OSC(3,0);
 	DO_OSC(3,1);
 	DO_OSC(4,0);
 	DO_OSC(4,1);
+	DO_OSC(2,0);
+	DO_OSC(2,1);
 	DO_OSC(5,0);
 	DO_OSC(5,1);
 }
