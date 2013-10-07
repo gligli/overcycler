@@ -19,7 +19,7 @@ static const uint8_t hard_channel_ldac_mask[DACSPI_CHANNEL_COUNT]=
 
 __attribute__ ((section(".eth_ram"))) static struct
 {
-	uint32_t commands[DACSPI_CHANNEL_COUNT][2];
+	uint16_t commands[DACSPI_CHANNEL_COUNT][2];
 	uint8_t steps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
 	GPDMA_LLI_Type lli[DACSPI_CHANNEL_COUNT][2];
 } dacspi;
@@ -28,7 +28,6 @@ __attribute__ ((section(".eth_ram"))) static struct
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
 	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
-	
 	synth_updateDACsEvent();
 }
 
@@ -48,7 +47,7 @@ void dacspi_init(void)
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
 
-	LPC_SSP0->CPSR=4; // 30Mhz
+	LPC_SSP0->CPSR=6; // 20Mhz
 	LPC_SSP0->CR0=0x0f; // 16Bit SPI(0,0)
 	LPC_SSP0->CR1=2; // Enable
 	LPC_SSP0->DMACR=3; // DMA
@@ -73,15 +72,16 @@ void dacspi_init(void)
 	for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
 	{
 		memset(&dacspi.steps[i][0],0xff,DACSPI_STEP_COUNT);
-		dacspi.steps[i][2]=SOFT_CHANNEL_LDAC_MASK(i);
-
+		
+		dacspi.steps[i][DACSPI_STEP_COUNT-1]=SOFT_CHANNEL_LDAC_MASK(i);
+		
 		dacspi.lli[i][0].SrcAddr=(uint32_t)&dacspi.commands[i][0];
 		dacspi.lli[i][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
 		dacspi.lli[i][0].NextLLI=(uint32_t)&dacspi.lli[i][1];
 		dacspi.lli[i][0].Control=
 			GPDMA_DMACCxControl_TransferSize(2) |
-			GPDMA_DMACCxControl_SWidth(2) |
-			GPDMA_DMACCxControl_DWidth(2) |
+			GPDMA_DMACCxControl_SWidth(1) |
+			GPDMA_DMACCxControl_DWidth(1) |
 			GPDMA_DMACCxControl_SI;
 
 		dacspi.lli[i][1].SrcAddr=(uint32_t)&dacspi.steps[i][0];
@@ -94,9 +94,9 @@ void dacspi_init(void)
 			GPDMA_DMACCxControl_SI;
 	}
 	
-	// trigger interrupt on voice 0
+	// interrupt trigger
 	
-	dacspi.lli[1][1].Control|=GPDMA_DMACCxControl_I;
+	dacspi.lli[0][1].Control|=GPDMA_DMACCxControl_I;
 	
 	//
 	
@@ -112,7 +112,7 @@ void dacspi_init(void)
 	
 	TIM_Init(LPC_TIM3,TIM_TIMER_MODE,&tim);
 	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_1);
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_2);
 	
 	TIM_MATCHCFG_Type tm;
 	
