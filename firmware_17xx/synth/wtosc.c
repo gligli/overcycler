@@ -4,7 +4,7 @@
 
 #include "wtosc.h"
 #include "dacspi.h"
-#include "PowFast.h"
+#include "osc_curves.h"
 
 #define OVERSAMPLING_RATIO 2 // higher -> less aliasing but lower effective sample rate
 #define MAX_SAMPLERATE ((double)SYNTH_MASTER_CLOCK/(DACSPI_TICK_RATE*OVERSAMPLING_RATIO))
@@ -12,13 +12,16 @@
 #define COSINESHAPE_LENGTH 256
 
 static uint16_t cosineShape[COSINESHAPE_LENGTH];
-static const double c2fMul=1.0/(12.0*WTOSC_CV_SEMITONE);
-static const double c2fAdd=-69.0/12.0;
-static int powFastTable[256];
 
-static FORCEINLINE float cvToFrequency(uint16_t cv)
+static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency shifted by 10
 {
-	return powFast2_simple(powFastTable,8,c2fMul*cv+c2fAdd)*440.0f;
+	uint32_t v;
+	
+	v=((uint32_t)cv*20)%(20*12*WTOSC_CV_SEMITONE); // phase for computeShape
+	v=(uint32_t)computeShape(v<<8,oscOctaveCurve)+32768; // octave frequency in the 12th octave
+	v=(v<<10)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 10
+	
+	return v;
 }
 
 static void globalPreinit(void)
@@ -32,8 +35,6 @@ static void globalPreinit(void)
 	for(int i=0;i<COSINESHAPE_LENGTH;++i)
 		cosineShape[i]=(1.0f-cos(M_PI*i/(double)COSINESHAPE_LENGTH))*(65535.0/2.0);
 	
-	powFastSetTable(powFastTable,8);
-
 	done=1;	
 }
 
@@ -51,8 +52,8 @@ void wtosc_init(struct wtosc_s * o, uint16_t controlData)
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
 {
-	double f,dummy;
-	int i,underSample,sampleRate;
+	double f,dummy,sampleRate;
+	int i,underSample;
 
 	memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
 
@@ -67,9 +68,9 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 	
 	// recompute undersamples
 	
-	for(i=WTOSC_LOWEST_NOTE;i<=WTOSC_HIGHEST_NOTE;++i)
+	for(i=0;i<=WTOSC_HIGHEST_NOTE;++i)
 	{
-		sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)*o->sampleCount;
+		sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/1024.0*o->sampleCount;
 		underSample=0;
 
 		do
@@ -83,30 +84,30 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 		}
 		while(MAX_SAMPLERATE<(((double)sampleRate)/underSample));
 		
-		o->undersample[i-WTOSC_LOWEST_NOTE]=underSample;
+		o->undersample[i]=underSample;
 	}
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 {
-	uint32_t underSample,sampleRate;
+	uint64_t sampleRate;
+	uint8_t underSample;
 	
 	aliasing>>=7;
-	cv=MAX(WTOSC_LOWEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	
 	if(cv==o->cv && aliasing==o->aliasing)
 		return;	
 	
 	sampleRate=cvToFrequency(cv)*o->sampleCount;
-	underSample=o->undersample[(cv/WTOSC_CV_SEMITONE)-WTOSC_LOWEST_NOTE];
+	underSample=o->undersample[cv/WTOSC_CV_SEMITONE];
 
 	o->increment=underSample+aliasing;
-	o->period=(uint64_t)SYNTH_MASTER_CLOCK*o->increment/sampleRate;	
+	o->period=(((uint64_t)SYNTH_MASTER_CLOCK*o->increment)<<10)/sampleRate;	
 	o->cv=cv;
 	o->aliasing=aliasing;
 		
-//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/underSample);
+//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/(underSample<<10));
 }
 
 FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o, int32_t elapsedTicks)

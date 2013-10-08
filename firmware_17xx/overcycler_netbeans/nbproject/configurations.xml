@@ -73,6 +73,7 @@
         <in>lfo.h</in>
         <in>midi.c</in>
         <in>midi.h</in>
+        <in>osc_curves.h</in>
         <in>storage.c</in>
         <in>storage.h</in>
         <in>synth.c</in>
@@ -363,6 +364,8 @@
         </cTool>
       </item>
       <item path="../synth/midi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../synth/osc_curves.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
         <cTool>

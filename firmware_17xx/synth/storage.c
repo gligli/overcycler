@@ -372,16 +372,19 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		}
 
 		// temp
+		currentPreset.continuousParameters[cpMasterLeft]=15000;
+		currentPreset.continuousParameters[cpMasterRight]=15000;
+		currentPreset.continuousParameters[cpUnisonDetune]=0;
 //		currentPreset.continuousParameters[cpLFOPitchAmt]=0;
 //		currentPreset.continuousParameters[cpLFOFilAmt]=35000;
 //		currentPreset.continuousParameters[cpLFOFreq]=2000;
 //		currentPreset.continuousParameters[cpCutoff]=30000;
 //		currentPreset.continuousParameters[cpFilKbdAmt]=20000;
-		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX*1/3;
-		currentPreset.continuousParameters[cpAmpAtt]=55000;
+		currentPreset.continuousParameters[cpAmpVelocity]=UINT16_MAX*1/2;
+//		currentPreset.continuousParameters[cpAmpAtt]=55000;
 //		currentPreset.continuousParameters[cpAmpSus]=40000;
 //		currentPreset.continuousParameters[cpAmpDec]=35000;
-		currentPreset.continuousParameters[cpAmpRel]=55000;
+//		currentPreset.continuousParameters[cpAmpRel]=55000;
 //		currentPreset.continuousParameters[cpAFreq]=96*WTOSC_CV_SEMITONE;
 //		currentPreset.continuousParameters[cpAVol]=UINT16_MAX*2/4;
 //		currentPreset.continuousParameters[cpBVol]=UINT16_MAX*4/4;

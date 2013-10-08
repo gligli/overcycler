@@ -171,8 +171,6 @@ static void computeTunedCVs(void)
 		baseBPitch&=0xff;
 	}
 
-	rprintf(0,"pi %d %d\n",synth.benderCVs[cvAPitch],mTune);
-	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		if (!assigner_getAssignment(v,&note))
@@ -238,22 +236,6 @@ void computeBenderCVs(void)
 		bend/=UINT16_MAX;
 		synth.benderCVs[cvAmp]=bend;
 		break;
-	}
-}
-
-static inline void computeGlide(uint16_t * out, const uint16_t target, const uint16_t amount)
-{
-	uint16_t diff;
-	
-	if(*out<target)
-	{
-		diff=target-*out;
-		*out+=MIN(amount,diff);
-	}
-	else if(*out>target)
-	{
-		diff=*out-target;
-		*out-=MIN(amount,diff);
 	}
 }
 
@@ -405,6 +387,22 @@ void refreshFullState(void)
 ////////////////////////////////////////////////////////////////////////////////
 // Speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
+
+static inline void computeGlide(uint16_t * out, const uint16_t target, const uint16_t amount)
+{
+	uint16_t diff;
+	
+	if(*out<target)
+	{
+		diff=target-*out;
+		*out+=MIN(amount,diff);
+	}
+	else if(*out>target)
+	{
+		diff=*out-target;
+		*out-=MIN(amount,diff);
+	}
+}
 
 static FORCEINLINE void setCVReference(uint16_t value)
 {
@@ -596,7 +594,7 @@ void synth_init(void)
 			rprintf(0,"f_readdir res=%d\n",res);
 		
 		//temp
-		i=0;
+		i=1;
 		while(i)
 		{
 			f_readdir(&synth.curDir,&synth.curFile);

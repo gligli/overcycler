@@ -81,7 +81,7 @@ SRC+=synth/uart_midi.c
 SRC+=synth/ui.c
 SRC+=synth/utils.c
 SRC+=synth/wtosc.c
-SRC+=synth/PowFast.c
+#SRC+=synth/PowFast.c
 
 # List C++ source files here.
 # use file-extension cpp for C++-files (use extension .cpp)
