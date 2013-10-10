@@ -13,10 +13,10 @@
 #define ADCROW_PIN 25
 
 #define UI_POT_COUNT 10
-#define UI_POT_SAMPLES 128
+#define UI_POT_SAMPLES 64
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*24)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*12)
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*8)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*4)
 #define POT_TIMEOUT 20
 
 static const uint8_t potToCh[UI_POT_COUNT]=
@@ -138,24 +138,6 @@ static void readKeypad(void)
 	}
 }
 
-static void bubble(uint16_t a[], int n)
-{
-	int i, j;
-	uint16_t t;
-	for (i = n - 2; i >= 0; i--)
-	{
-		for (j = 0; j <= i; j++)
-		{
-			if (a[j] > a[j + 1])
-			{
-				t = a[j];
-				a[j] = a[j + 1];
-				a[j + 1] = t;
-			}
-		}
-	}
-}
-
 static void updatePotValue(int8_t pot)
 {
 	uint16_t tmp[UI_POT_SAMPLES];
@@ -165,14 +147,14 @@ static void updatePotValue(int8_t pot)
 	// sort values
 	
 	memcpy(&tmp[0],&ui.pots[pot][0],UI_POT_SAMPLES*sizeof(uint16_t));
-	bubble(tmp,UI_POT_SAMPLES);
+	qsort(tmp,UI_POT_SAMPLES,sizeof(uint16_t),uint16Compare);
 	
 	// average of non-extreme values
 	
 	acc=0;
 	cnt=0;
 
-	for(i=0.4*UI_POT_SAMPLES;i<0.6*UI_POT_SAMPLES;++i)
+	for(i=UI_POT_SAMPLES*7/16;i<UI_POT_SAMPLES*9/16;++i)
 	{
 		acc+=tmp[i];
 		++cnt;
@@ -276,10 +258,10 @@ void ui_init(void)
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_8);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,ENABLE);
 
-	LPC_ADC->ADCR=0x2f | ADC_CR_CLKDIV(15);
+	LPC_ADC->ADCR=0x2f | ADC_CR_CLKDIV(31);
 	LPC_ADC->ADINTEN=0x01;
 	
-	NVIC_SetPriority(ADC_IRQn,31);
+	NVIC_SetPriority(ADC_IRQn,15);
 	NVIC_EnableIRQ(ADC_IRQn);
 
 	// start

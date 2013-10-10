@@ -97,3 +97,13 @@ uint16_t exponentialCourse(uint16_t v, float ratio, float range)
 {
 	return expf(-(float)v/ratio)*range;
 }
+
+int uint16Compare(const void * a,const void * b)
+{
+	if (*(uint16_t*)a==*(uint16_t*)b)
+		return 0;
+	else if (*(uint16_t*)a < *(uint16_t*)b)
+		return -1;
+	else
+		return 1;
+}
