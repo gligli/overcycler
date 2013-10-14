@@ -11,14 +11,15 @@
 
 #define COSINESHAPE_LENGTH 256
 
-static uint16_t cosineShape[COSINESHAPE_LENGTH];
+static uint8_t cosineShape[COSINESHAPE_LENGTH];
 
 static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency shifted by 10
 {
 	uint32_t v;
 	
-	v=((uint32_t)cv*20)%(20*12*WTOSC_CV_SEMITONE); // phase for computeShape
-	v=(uint32_t)computeShape(v<<8,oscOctaveCurve)+32768; // octave frequency in the 12th octave
+	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
+	v=(v*20)<<8; // phase for computeShape
+	v=(uint32_t) computeShape(v,oscOctaveCurve)+32768; // octave frequency in the 12th octave
 	v=(v<<10)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 10
 	
 	return v;
@@ -33,7 +34,7 @@ static void globalPreinit(void)
 	// for cosine interpolation
 	
 	for(int i=0;i<COSINESHAPE_LENGTH;++i)
-		cosineShape[i]=(1.0f-cos(M_PI*i/(double)COSINESHAPE_LENGTH))*(65535.0/2.0);
+		cosineShape[i]=(1.0f-cos(M_PI*i/(double)COSINESHAPE_LENGTH))*(255.0/2.0);
 	
 	done=1;	
 }
@@ -80,7 +81,7 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 				++underSample;
 				f=modf(((double)o->sampleCount)/underSample,&dummy);
 			}
-			while(fabs(f)>0.0001);
+			while(fabs(f));
 		}
 		while(MAX_SAMPLERATE<(((double)sampleRate)/underSample));
 		
@@ -90,7 +91,7 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 {
-	uint64_t sampleRate;
+	uint32_t sampleRate;
 	uint8_t underSample;
 	
 	aliasing>>=7;
@@ -103,20 +104,19 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 	underSample=o->undersample[cv/WTOSC_CV_SEMITONE];
 
 	o->increment=underSample+aliasing;
-	o->period=(((uint64_t)SYNTH_MASTER_CLOCK*o->increment)<<10)/sampleRate;	
+	o->period=((SYNTH_MASTER_CLOCK<<5)/((sampleRate/o->increment)>>5));	
 	o->cv=cv;
 	o->aliasing=aliasing;
 		
-//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/(underSample<<10));
+//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/(o->increment<<10));
 }
 
-FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o, int32_t elapsedTicks)
+FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
 {
 	uint32_t r;
-	uint32_t alpha;
+	uint8_t alpha;
 	
-
-	o->counter-=elapsedTicks;
+	o->counter-=DACSPI_TICK_RATE;
 	if(o->counter<0)
 	{
 		o->counter+=o->period;
@@ -129,14 +129,23 @@ FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o, int32_t elapsedTicks)
 		o->curSample=o->data[o->phase];
 	}
 
-	// prepare cosine interpolation
+	if(o->aliasing)
+	{
+		// we want aliasing, don't interpolate !
+		
+		r=o->curSample;
+	}
+	else
+	{
+		// prepare cosine interpolation
 
-	alpha=(o->counter<<8)/o->period;
-	alpha=cosineShape[(uint8_t)alpha];
+		alpha=(o->counter<<8)/o->period;
+		alpha=cosineShape[alpha];
+
+		// apply it
+
+		r=(alpha*o->prevSample+(UINT8_MAX-alpha)*o->curSample)>>8;
+	}
 	
-	// apply it
-	
-	r=(alpha*o->prevSample+(UINT16_MAX-alpha)*o->curSample)>>20;
-	
-	return r|o->controlData;
+	return (r>>4)|o->controlData;
 }

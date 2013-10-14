@@ -19,7 +19,7 @@ static const uint8_t hard_channel_ldac_mask[DACSPI_CHANNEL_COUNT]=
 
 __attribute__ ((section(".eth_ram"))) static struct
 {
-	uint16_t commands[DACSPI_CHANNEL_COUNT][2];
+	uint32_t commands[DACSPI_CHANNEL_COUNT][2];
 	uint8_t steps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
 	GPDMA_LLI_Type lli[DACSPI_CHANNEL_COUNT][2];
 } dacspi;
@@ -80,8 +80,8 @@ void dacspi_init(void)
 		dacspi.lli[i][0].NextLLI=(uint32_t)&dacspi.lli[i][1];
 		dacspi.lli[i][0].Control=
 			GPDMA_DMACCxControl_TransferSize(2) |
-			GPDMA_DMACCxControl_SWidth(1) |
-			GPDMA_DMACCxControl_DWidth(1) |
+			GPDMA_DMACCxControl_SWidth(2) |
+			GPDMA_DMACCxControl_DWidth(2) |
 			GPDMA_DMACCxControl_SI;
 
 		dacspi.lli[i][1].SrcAddr=(uint32_t)&dacspi.steps[i][0];

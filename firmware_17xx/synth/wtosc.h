@@ -31,6 +31,6 @@ struct wtosc_s
 void wtosc_init(struct wtosc_s * o, uint16_t controlData);
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount);
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing);
-uint16_t wtosc_update(struct wtosc_s * o, int32_t elapsedTicks);
+uint16_t wtosc_update(struct wtosc_s * o);
 
 #endif

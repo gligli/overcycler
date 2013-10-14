@@ -29,15 +29,15 @@ typedef enum
 
 typedef enum
 {
-	spABank=0,spAWave=1,spABaseWMod=2,spAFilWMod=3,
-	spBBank=4,spBWave=5,spBBaseWMod=6,spBFilWMod=7,
+	spABank=0,spAWave=1,spAWModType=2,spAWModEnvEn=3,
+	spBBank=4,spBWave=5,spBWModType=6,spBWModEnvEn=7,
 			
 	spLFOShape=8,spLFOShift=9,spLFOTargets=10,
 
 	spFilEnvSlow=11,spAmpEnvSlow=12,
 			
-	spBenderSemitones=13,spBenderTarget=14,
-	spModwheelShift=15,spModwheelTarget=16,
+	spBenderRange=13,spBenderTarget=14,
+	spModwheelRange=15,spModwheelTarget=16,
 			
 	spUnison=17,spAssignerPriority=18,spChromaticPitch=19,
 			

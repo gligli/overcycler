@@ -13,7 +13,7 @@
 #define MIDI_BASE_STEPPED_CC 56
 #define MIDI_BASE_COARSE_CC 16
 #define MIDI_BASE_FINE_CC 80
-#define MIDI_BASE_NOTE 24
+#define MIDI_BASE_NOTE 0
 
 static MidiDevice midi;
 

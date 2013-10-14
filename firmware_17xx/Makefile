@@ -330,7 +330,7 @@ end:
 
 # Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
-ELFSIZE = $(SIZE) -B $(TARGET).elf
+ELFSIZE = $(SIZE) -A $(TARGET).elf
 sizebefore:
 	@echo $(MSG_SIZE_BEFORE)
 	-@$(ELFSIZE)
