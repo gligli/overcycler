@@ -6,21 +6,24 @@
 #include "dacspi.h"
 #include "osc_curves.h"
 
+#define VIRTUAL_CLOCK 1800000000
+#define VIRTUAL_DAC_TICK_RATE (DACSPI_TICK_RATE*15)
+
 #define OVERSAMPLING_RATIO 2 // higher -> less aliasing but lower effective sample rate
-#define MAX_SAMPLERATE ((double)SYNTH_MASTER_CLOCK/(DACSPI_TICK_RATE*OVERSAMPLING_RATIO))
+#define MAX_SAMPLERATE (VIRTUAL_CLOCK/(VIRTUAL_DAC_TICK_RATE*OVERSAMPLING_RATIO))
 
 #define COSINESHAPE_LENGTH 256
 
 static uint8_t cosineShape[COSINESHAPE_LENGTH];
 
-static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency shifted by 10
+static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
 	
 	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
 	v=(v*20)<<8; // phase for computeShape
-	v=(uint32_t) computeShape(v,oscOctaveCurve)+32768; // octave frequency in the 12th octave
-	v=(v<<10)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 10
+	v=(uint32_t)computeShape(v,oscOctaveCurve)+32768; // octave frequency in the 12th octave
+	v=(v<<8)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 8
 	
 	return v;
 }
@@ -71,7 +74,7 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 	
 	for(i=0;i<=WTOSC_HIGHEST_NOTE;++i)
 	{
-		sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/1024.0*o->sampleCount;
+		sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/256.0*o->sampleCount;
 		underSample=0;
 
 		do
@@ -104,7 +107,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 	underSample=o->undersample[cv/WTOSC_CV_SEMITONE];
 
 	o->increment=underSample+aliasing;
-	o->period=((SYNTH_MASTER_CLOCK<<5)/((sampleRate/o->increment)>>5));	
+	o->period=(VIRTUAL_CLOCK/((sampleRate/o->increment)>>8));	
 	o->cv=cv;
 	o->aliasing=aliasing;
 		
@@ -116,7 +119,7 @@ FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
 	uint32_t r;
 	uint8_t alpha;
 	
-	o->counter-=DACSPI_TICK_RATE;
+	o->counter-=VIRTUAL_DAC_TICK_RATE;
 	if(o->counter<0)
 	{
 		o->counter+=o->period;

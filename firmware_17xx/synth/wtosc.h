@@ -5,7 +5,7 @@
 
 #define WTOSC_MAX_SAMPLES 600 // samples
 #define WTOSC_CV_SEMITONE 256
-#define WTOSC_HIGHEST_NOTE 120
+#define WTOSC_HIGHEST_NOTE 127
 
 struct wtosc_s
 {
@@ -13,11 +13,11 @@ struct wtosc_s
 	uint8_t undersample[WTOSC_HIGHEST_NOTE+1];
 
 	int32_t period;
+	int32_t counter;
+
 	int32_t phase;
 	int32_t increment;
 	int32_t sampleCount;
-
-	int32_t counter;
 
 	uint16_t curSample;
 	uint16_t prevSample;
