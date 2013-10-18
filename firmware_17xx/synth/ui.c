@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "storage.h"
 #include "integer.h"
+#include "arp.h"
 
 #define DISPLAY_ACK 6
 
@@ -27,12 +28,12 @@ enum uiDigitInput_e{
 
 enum uiParamType_e
 {
-	ptNone=0,ptCont,ptStep,ptActn
+	ptNone=0,ptCont,ptStep,ptCust
 };
 
 enum uiKeypadButton_e
 {
-	kb0=0,kb1,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,
+	kb1=0,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,kb0,
 	kbA,kbB,kbC,kbD,
 	kbAsterisk,kbSharp
 };
@@ -70,10 +71,16 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		},
 		{
-			/*0*/ {.type=ptNone},
-			/*1*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency mode",.values={"Free","Semi","Octv"}},
+			/*1*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency mode",.values={"Free","Semi","Oct "}},
 			/*2*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod type",.values={"Off ","Alia","Wdth"}},
 			/*3*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod type",.values={"Off ","Alia","Wdth"}},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
+			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 	/* Filter page (B) */
@@ -93,10 +100,16 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpFilVelocity,.shortName="FVel",.longName="Filter Velocity"},
 		},
 		{
-			/*0*/ {.type=ptNone},
 			/*1*/ {.type=ptStep,.number=spFilEnvSlow,.shortName="FEnT",.longName="Filter Envelope Type",.values={"Fast","Slow"}},
 			/*2*/ {.type=ptStep,.number=spAWModEnvEn,.shortName="AWmE",.longName="A WaveMod envelope",.values={"Off ","On  "}},
 			/*3*/ {.type=ptStep,.number=spBWModEnvEn,.shortName="BWmE",.longName="B WaveMod envelope",.values={"Off ","On  "}},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
+			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 	/* Amplifier page (C) */
@@ -116,10 +129,16 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpAmpVelocity,.shortName="AVel",.longName="Amplifier Velocity"},
 		},
 		{
-			/*0*/ {.type=ptNone},
 			/*1*/ {.type=ptStep,.number=spAmpEnvSlow,.shortName="AEnT",.longName="Amplifier Envelope Type",.values={"Fast","Slow"}},
 			/*2*/ {.type=ptStep,.number=spUnison,.shortName="Unis",.longName="Unison",.values={"Off ","On  "}},
 			/*3*/ {.type=ptStep,.number=spAssignerPriority,.shortName="Prio",.longName="Assigner Priority",.values={"Last","Low ","High"}},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
+			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 	/* Modulation page (D) */
@@ -139,20 +158,35 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpLFOAmpAmt,.shortName="LAmp",.longName="Amplifier LFO Amount"},
 		},
 		{
-			/*0*/ {.type=ptNone},
 			/*1*/ {.type=ptStep,.number=spLFOShift,.shortName="LRng",.longName="LFO Range",.values={"Slow","Fast"}},
-			/*2*/ {.type=ptStep,.number=spLFOTargets,.shortName="LTgt",.longName="LFO OSc target",.values={"Off ","OscA","OscB","Both"}},
-			/*3*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel range",.values={"Min ","Low ","High","Full"}},
-			/*4*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel target",.values={"LFO ","Vib "}},
+			/*2*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel range",.values={"Min ","Low ","High","Full"}},
+			/*3*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender range",.values={"3rd ","5th ","Oct "}},
+			/*4*/ {.type=ptStep,.number=spLFOTargets,.shortName="LTgt",.longName="LFO Osc target",.values={"Off ","OscA","OscB","Both"}},
+			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel target",.values={"LFO ","Vib "}},
+			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender target",.values={"Off ","Pit ","Fil ","Amp "}},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 	/* Sequencer/arpeggiator page (#) */
 	{
 		{
-		
+			/* 1st row of pots */
+			{.type=ptCont,.number=cpSeqArpClock,.shortName="Clk ",.longName="Seq/Arp clock"},
 		},
 		{
-
+			/*1*/ {.type=ptCust,.number=1,.shortName="ArSq",.longName="Seq/Arp choice",.values={"Arp ","Seq "}},
+			/*2*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp mode",.values={"Off ","UpDn","Rand","Asgn"}},
+			/*3*/ {.type=ptCust,.number=3,.shortName="AHld",.longName="Arp hold",.values={"Off ","On "}},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
+			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 	/* Miscellaneous page (*) */
@@ -174,9 +208,9 @@ static const uint8_t potToCh[UI_POT_COUNT]=
 
 static const uint8_t keypadButtonCode[16]=
 {
-	0xd7,0xee,0xde,0xbe,0xed,0xdd,0xbd,0xeb,0xdb,0xbb,
+	0xee,0xde,0xbe,0xed,0xdd,0xbd,0xeb,0xdb,0xbb,0xd7,
 	0x7e,0x7d,0x7b,0x77,
-	0xe7,0xb7
+	0xb7,0xe7
 };
 
 static struct
@@ -189,6 +223,7 @@ static struct
 	
 	int8_t presetModified;
 	enum uiPage_e activePage;
+	int8_t displayMode;
 	
 	int8_t activeSource;
 	uint32_t activeSourceTimeout;
@@ -323,11 +358,34 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		sprintf(dv,"%4d",v>>6);
 		break;
 	case ptStep:
+	case ptCust:
 		valCount=0;
 		while(valCount<8 && prm->values[valCount]!=NULL)
 			++valCount;
 
-		v=currentPreset.steppedParameters[prm->number];
+		
+		if(prm->type==ptStep)
+		{
+			v=currentPreset.steppedParameters[prm->number];
+		}
+		else
+		{
+			switch(prm->number)
+			{
+			case 0:
+				v=ui.displayMode;
+				break;
+			case 1:
+				v=0;
+				break;
+			case 2:
+				v=arp_getMode();
+				break;
+			case 3:
+				v=arp_getHold();
+				break;
+			}
+		}
 		
 		if(v<valCount)
 			strcpy(dv,prm->values[v]);
@@ -405,6 +463,20 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			ui.slowUpdateTimeoutNumber=prm->number;
 		}
 		
+		break;
+	case ptCust:
+		switch(prm->number)
+		{
+			case 0:
+				ui.displayMode=1-ui.displayMode;
+				break;
+			case 2:
+				arp_setMode((arp_getMode()+1)%4,arp_getHold());
+				break;
+			case 3:
+				arp_setMode(arp_getMode(),!arp_getHold());
+				break;
+		}
 		break;
 	default:
 		/*nothing*/;
@@ -570,6 +642,7 @@ void ui_init(void)
 	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_BURST;
 	
 	ui.activePage=upNone;
+	ui.activePage=upNone;
 }
 
 void ui_update(void)
@@ -598,7 +671,7 @@ void ui_update(void)
 		rprintf(1,"*: Misc   #: Seq/Arp");
 		
 	}
-	else if(ui.activeSourceTimeout>currentTick)
+	else if(ui.activeSourceTimeout>currentTick) // fullscreen display
 	{
 		rprintf(1,getName(ui.activeSource,1));
 		sendCommand("[H",1,NULL);
@@ -610,7 +683,35 @@ void ui_update(void)
 				sendChar(' ');
 
 	}
-	else
+	else if(ui.displayMode) // buttons
+	{
+		ui.activeSource=INT8_MAX;
+
+		for(i=0;i<3;++i)
+		{
+			rprintf(1,getName(i,0));
+			sendChar(' ');
+			sendChar(' ');
+		}
+		sendChar('\r');
+ 
+		for(i=0;i<6;++i)
+		{
+			if(i==3) sendChar('\r');
+			rprintf(1,getDisplayValue(i,NULL));
+			sendChar(' ');
+			sendChar(' ');
+		}
+		sendChar('\r');
+
+		for(i=3;i<6;++i)
+		{
+			rprintf(1,getName(i,0));
+			sendChar(' ');
+			sendChar(' ');
+		}
+	}
+	else // pots
 	{
 		ui.activeSource=INT8_MAX;
 

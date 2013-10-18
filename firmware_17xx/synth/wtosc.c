@@ -22,7 +22,7 @@ static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency 
 	
 	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
 	v=(v*20)<<8; // phase for computeShape
-	v=(uint32_t)computeShape(v,oscOctaveCurve)+32768; // octave frequency in the 12th octave
+	v=(uint32_t)computeShape(v,oscOctaveCurve,1)+32768; // octave frequency in the 12th octave
 	v=(v<<8)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 8
 	
 	return v;

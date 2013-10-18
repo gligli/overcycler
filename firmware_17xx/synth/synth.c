@@ -230,13 +230,12 @@ void computeBenderCVs(void)
 		synth.benderCVs[cvBPitch]=bend;
 		break;
 	case modFil:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*2,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
+		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*4,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
 		bend/=UINT16_MAX;
 		synth.benderCVs[cvCutoff]=bend;
 		break;
 	case modAmp:
 		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
-		bend/=UINT16_MAX;
 		synth.benderCVs[cvAmp]=bend;
 		break;
 	}
@@ -472,7 +471,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	case cvAmp:
 	case cvMasterLeft:
 	case cvMasterRight:
-		value=computeShape((uint32_t)value<<8,vcaLinearizationCurve);		
+		value=computeShape((uint32_t)value<<8,vcaLinearizationCurve,1);		
 		break;
 	default:
 		;
@@ -541,7 +540,7 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
 }
 
-static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal, uint8_t wmodMask, int32_t resoFactor)
+static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)
 {
 	int32_t vpa,vpb,vma,vmb,vf,vamp,envVal;
 
@@ -583,7 +582,10 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 
 	// amplifier
 	
-	vamp=(synth.ampEnvs[v].output*resoFactor)>>8;
+	if(synth.ampEnvs[v].stage==sWait)
+		ampVal=0;
+	vamp=satAddU16S32(synth.ampEnvs[v].output,ampVal);
+	vamp=(vamp*resoFactor)>>8;
 	refreshCV(v,cvAmp,vamp);
 }
 
@@ -708,7 +710,7 @@ void synth_update(void)
 // 2Khz
 void synth_timerInterrupt(void)
 {
-	int32_t v,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,wmodEnvAmt,filEnvAmt,resoFactor;
+	int32_t v,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt,resoFactor;
 
 	static int frc=0;
 	static int8_t curVoice=0;
@@ -732,6 +734,11 @@ void synth_timerInterrupt(void)
 		// filter
 
 	filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo.output);
+	
+		// amplifier
+	
+	ampVal=synth.benderCVs[cvAmp];
+	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
 	
 	// global computations
 	
@@ -759,12 +766,12 @@ void synth_timerInterrupt(void)
 	// per voice stuff
 	
 		// P600_VOICE_COUNT calls
-	refreshVoice(0,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
-	refreshVoice(1,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
-	refreshVoice(2,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
-	refreshVoice(3,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
-	refreshVoice(4,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
-	refreshVoice(5,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,synth.wmodMask,resoFactor);
+	refreshVoice(0,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+	refreshVoice(1,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+	refreshVoice(2,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+	refreshVoice(3,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+	refreshVoice(4,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+	refreshVoice(5,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
 
 	// slower updates
 	
@@ -858,7 +865,7 @@ void synth_updateDACsEvent()
 
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato)
 {
-#ifdef DEBUG
+#ifdef DEBUG_
 	rprintf(0,"assign note %d gate %d voice %d velocity %d legato %d\n",note,gate,voice,velocity,legato);
 #endif
 
@@ -902,7 +909,7 @@ void synth_uartEvent(uint8_t data)
 
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 {
-#ifdef DEBUG
+#ifdef DEBUG_
 	rprintf(0,"wheel bend %d mod %d mask %d\n",bend,modulation,mask);
 #endif
 

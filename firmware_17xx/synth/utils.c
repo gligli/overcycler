@@ -43,21 +43,28 @@ inline uint16_t lerp(uint16_t a,uint16_t b,uint8_t x)
 	return a+((x*(b-a))>>8);
 }
 
-inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[])
+inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t interpolate)
 {
 	uint8_t ai,bi,x;
 	uint16_t a,b;
+	
+	if(interpolate)
+	{
+		x=phase>>8;
+		bi=ai=phase>>16;
 
-	x=phase>>8;
-	bi=ai=phase>>16;
+		if(ai<UINT8_MAX)
+			bi=ai+1;
 
-	if(ai<UINT8_MAX)
-		bi=ai+1;
+		a=lookup[ai];
+		b=lookup[bi];
 
-	a=lookup[ai];
-	b=lookup[bi];
-
-	return lerp(a,b,x);
+		return lerp(a,b,x);
+	}
+	else
+	{
+		return lookup[phase>>16];
+	}
 }
 
 inline uint16_t scaleU16U16(uint16_t a, uint16_t b)
