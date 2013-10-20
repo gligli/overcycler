@@ -17,8 +17,8 @@
 #define UI_POT_COUNT 10
 #define UI_POT_SAMPLES 64
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*10)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*5)
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*24)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*12)
 #define POT_TIMEOUT (TICKER_1S/2)
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*2/3)
 
@@ -411,10 +411,18 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	{
 		ui.activePage=source-kbA;
 		rprintf(0,"page %d\n",ui.activePage);
+
+		// cancel ongoing changes
+		ui.activeSourceTimeout=0;
+		memset(&ui.lockTimeout[0],0,UI_POT_COUNT*sizeof(uint32_t));
+
 		return;
 	}
 	
-	if(ui.activePage==upNone)
+	potnum=-source-1;
+	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+
+	if(ui.activePage==upNone || prm->type==ptNone)
 		return;
 
 	// fullscreen display
@@ -423,9 +431,6 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	ui.activeSource=source;
 	ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
 	
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
-
 	switch(prm->type)
 	{
 	case ptCont:
@@ -649,12 +654,20 @@ void ui_update(void)
 {
 	int i;
 	uint16_t v;
+	static uint8_t frc=0;
+	
+	++frc;
 	
 	// update pot values
 
 	for(i=0;i<UI_POT_COUNT;++i)
 		updatePotValue(i);
 
+	// next updates done only 1 in 4 times
+	
+	if(!(frc&3)==0) 
+		return;
+	
 	// display
 
 	if(ui.pendingScreenClear)
