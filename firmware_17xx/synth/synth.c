@@ -48,8 +48,6 @@ const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 
 volatile uint32_t currentTick=0; // 500hz
 
-static volatile uint32_t dacUpdateCount=0;
-
 struct
 {
 	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
@@ -98,7 +96,7 @@ static void loadWaveTable(int8_t ab)
 
 	rprintf(0,"loading %s %d... ",fn,synth.curFile.fsize);
 	
-	rprintf(1,"\x1b[2JLoading...\r\r%s",fn,synth.curFile.fsize); //TEMP
+	rprintf(1,"\x1b[2J Loading...\r\r%s",synth.curFile.lfname); //TEMP
 	
 	if(!f_open(&f,fn,FA_READ))
 	{
@@ -448,17 +446,10 @@ static inline void computeGlide(uint16_t * out, const uint16_t target, const uin
 static FORCEINLINE void setCVReference(uint16_t value)
 {
 	uint16_t cmd;
-	uint32_t prev;
 	
 	cmd=(value>>4)|DACSPI_CMD_SET_REF;
 	
-	dacspi_setCommand(DACSPI_CV_CHANNEL,0,cmd);
-	dacspi_setCommand(DACSPI_CV_CHANNEL,1,cmd);
-
-	// wait for a DAC full update
-	prev=dacUpdateCount;
-	while(dacUpdateCount<prev+2)
-		DELAY_100NS();
+	dacspi_sendCVCommand(cmd);
 }
 
 static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
@@ -484,8 +475,6 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
 	uint16_t value;
 	
-	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
-
 	v=MIN(v,UINT16_MAX);
 	value=adjustCV(cv,v);
 
@@ -538,6 +527,7 @@ static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
 	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
 	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
+	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)
@@ -604,17 +594,6 @@ void synth_init(void)
 	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_A,1); // A
 	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_B,1); // B
 	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_C,1); // C
-	
-	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD0,CVMUX_PIN_CARD0,PINSEL_PINMODE_NORMAL);
-	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD1,CVMUX_PIN_CARD1,PINSEL_PINMODE_NORMAL);
-	PINSEL_SetOpenDrainMode(CVMUX_PORT_CARD2,CVMUX_PIN_CARD2,PINSEL_PINMODE_NORMAL);
-	PINSEL_SetOpenDrainMode(CVMUX_PORT_VCA,CVMUX_PIN_VCA,PINSEL_PINMODE_NORMAL);
-	
-	PINSEL_SetResistorMode(CVMUX_PORT_CARD0,CVMUX_PIN_CARD0,PINSEL_PINMODE_TRISTATE);
-	PINSEL_SetResistorMode(CVMUX_PORT_CARD1,CVMUX_PIN_CARD1,PINSEL_PINMODE_TRISTATE);
-	PINSEL_SetResistorMode(CVMUX_PORT_CARD2,CVMUX_PIN_CARD2,PINSEL_PINMODE_TRISTATE);
-	PINSEL_SetResistorMode(CVMUX_PORT_VCA,CVMUX_PIN_VCA,PINSEL_PINMODE_TRISTATE);
-	
 	GPIO_SetDir(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0,1); // voice card 0
 	GPIO_SetDir(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1,1); // voice card 1
 	GPIO_SetDir(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2,1); // voice card 2
@@ -623,8 +602,8 @@ void synth_init(void)
 	// init wavetable oscs
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		wtosc_init(&synth.osc[i][0],DACSPI_CMD_SET_A);
-		wtosc_init(&synth.osc[i][1],DACSPI_CMD_SET_B);
+		wtosc_init(&synth.osc[i][0],i,0);
+		wtosc_init(&synth.osc[i][1],i,1);
 	}
 
 	// give it some memory
@@ -841,26 +820,22 @@ void synth_timerInterrupt(void)
 // Synth internal events
 ////////////////////////////////////////////////////////////////////////////////
 
-#define DO_OSC(v,o) dacspi_setCommand(v,o,wtosc_update(&synth.osc[v][o]))
-
-void synth_updateDACsEvent()
+void synth_updateDACsEvent(int32_t start, int32_t count)
 {
-	++dacUpdateCount;
-
-	// hardware order (less noisy)
+	int32_t end=start+count-1;
 	
-	DO_OSC(0,0);
-	DO_OSC(0,1);
-	DO_OSC(1,0);
-	DO_OSC(1,1);
-	DO_OSC(3,0);
-	DO_OSC(3,1);
-	DO_OSC(4,0);
-	DO_OSC(4,1);
-	DO_OSC(2,0);
-	DO_OSC(2,1);
-	DO_OSC(5,0);
-	DO_OSC(5,1);
+	wtosc_update(&synth.osc[0][0],start,end);
+	wtosc_update(&synth.osc[0][1],start,end);
+	wtosc_update(&synth.osc[1][0],start,end);
+	wtosc_update(&synth.osc[1][1],start,end);
+	wtosc_update(&synth.osc[3][0],start,end);
+	wtosc_update(&synth.osc[3][1],start,end);
+	wtosc_update(&synth.osc[4][0],start,end);
+	wtosc_update(&synth.osc[4][1],start,end);
+	wtosc_update(&synth.osc[2][0],start,end);
+	wtosc_update(&synth.osc[2][1],start,end);
+	wtosc_update(&synth.osc[5][0],start,end);
+	wtosc_update(&synth.osc[5][1],start,end);
 }
 
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato)

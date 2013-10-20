@@ -13,10 +13,10 @@ struct wtosc_s
 	uint8_t undersample[WTOSC_HIGHEST_NOTE+1];
 
 	int32_t period;
-	int32_t counter;
-
-	int32_t phase;
 	int32_t increment;
+	
+	int32_t counter;
+	int32_t phase;
 	int32_t sampleCount;
 
 	uint16_t curSample;
@@ -24,13 +24,14 @@ struct wtosc_s
 
 	uint16_t cv;
 	uint16_t aliasing;
-	uint16_t controlData;
-
+	
+	int8_t voice;
+	int8_t ab;
 };
 
-void wtosc_init(struct wtosc_s * o, uint16_t controlData);
+void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab);
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount);
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing);
-uint16_t wtosc_update(struct wtosc_s * o);
+void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer);
 
 #endif

@@ -4,41 +4,89 @@
 
 #include "dacspi.h"
 
+static const uint8_t voice_ldac_mask[SYNTH_VOICE_COUNT]=
+{
+	0xfd,0xfe,0xfb,0xf7,0xef,0x7f,
+};
+
 #define DACSPI_DMACONFIG \
 			GPDMA_DMACCxConfig_E | \
 			GPDMA_DMACCxConfig_DestPeripheral(14) | \
 			GPDMA_DMACCxConfig_TransferType(1) | \
 			GPDMA_DMACCxConfig_ITC
 
-static const uint8_t hard_channel_ldac_mask[DACSPI_CHANNEL_COUNT]=
-{
-	0x02,0x01,0x04,0x08,0x10,0x80,0x40
-};
+#define DACSPI_BUFFER_COUNT 64
 
-#define SOFT_CHANNEL_LDAC_MASK(c) (~hard_channel_ldac_mask[(c<DACSPI_CV_CHANNEL)?synth_voiceLayout[0][c]:c])
+#define DACSPI_CV_CHANNEL 6
+#define DACSPI_CV_LDAC_MASK 0xbf
+
+#define DACSPI_MARKER_COUNT (DACSPI_STEP_COUNT+2)
+#define DACSPI_MARKER_PRE 0xC0
+#define DACSPI_MARKER_SSP 0x40
+#define DACSPI_MARKER_LDAC 0x80
+
+static volatile uint8_t marker;
 
 __attribute__ ((section(".eth_ram"))) static struct
 {
-	uint32_t commands[DACSPI_CHANNEL_COUNT][2];
-	uint8_t steps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
-	GPDMA_LLI_Type lli[DACSPI_CHANNEL_COUNT][2];
+	GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][2];
+	uint16_t voiceCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT][2];
+	uint8_t voiceSteps[SYNTH_VOICE_COUNT][DACSPI_STEP_COUNT];
+	uint8_t markers[DACSPI_BUFFER_COUNT][DACSPI_MARKER_COUNT];
 } dacspi;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
+	int8_t secondHalfPlaying,curBuffer=marker&0x3f;
+	
 	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
-	synth_updateDACsEvent();
+
+	// when second half is playing, update first and vice-versa
+	secondHalfPlaying=curBuffer>=(DACSPI_BUFFER_COUNT/2);
+	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 }
 
-FORCEINLINE void dacspi_setCommand(uint8_t channel, int8_t ab, uint16_t command)
+FORCEINLINE void dacspi_setVoiceCommand(uint8_t buffer, uint8_t voice, int8_t ab, uint16_t command)
 {
-	dacspi.commands[channel][ab]=command;
+	dacspi.voiceCommands[buffer][voice][ab]=command;
+}
+
+FORCEINLINE void dacspi_sendCVCommand(uint16_t command)
+{
+	// CV DAC update
+	
+	BLOCK_INT
+	{
+		while((marker&0xc0)!=DACSPI_MARKER_SSP); // wait for CV DAC slot
+		
+		LPC_GPIO2->FIOPIN0=0xff; // initial LDAC pulse state
+		LPC_SSP0->DR=command; // send SPI DAC command
+
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		DELAY_100NS();
+		
+		LPC_GPIO2->FIOPIN0=DACSPI_CV_LDAC_MASK; // LDAC pulse
+
+		DELAY_100NS();
+
+		LPC_GPIO2->FIOPIN0=0xff; //  LDAC pulse end
+	}
+
+	// wait DAC setting time (4.5us)
+	
+	delay_us(6);
 }
 
 void dacspi_init(void)
 {
-	int i;
+	int i,j,lliPos;
 	
 	memset(&dacspi,0,sizeof(dacspi));
 
@@ -47,7 +95,7 @@ void dacspi_init(void)
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
 
-	LPC_SSP0->CPSR=6; // 20Mhz
+	LPC_SSP0->CPSR=4; // 30Mhz
 	LPC_SSP0->CR0=0x0f; // 16Bit SPI(0,0)
 	LPC_SSP0->CR1=2; // Enable
 	LPC_SSP0->DMACR=3; // DMA
@@ -58,45 +106,73 @@ void dacspi_init(void)
 	PINSEL_SetPinFunc(1,21,3);
 	PINSEL_SetPinFunc(1,24,3);
 	
+	LPC_GPIO1->FIODIR2|=0x20;
+	LPC_GPIO1->FIOMASK2&=~0x20;
+	
 	// /LDAC pins
 	
 	for(i=0;i<8;++i)
 	{
 		PINSEL_SetPinFunc(2,i,0);
 		GPIO_SetDir(2,1<<i,1);
-		GPIO_SetValue(2,1<<i);
 	}
 
 	//
-	
-	for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
-	{
-		memset(&dacspi.steps[i][0],0xff,DACSPI_STEP_COUNT);
-		
-		dacspi.steps[i][DACSPI_STEP_COUNT-1]=SOFT_CHANNEL_LDAC_MASK(i);
-		
-		dacspi.lli[i][0].SrcAddr=(uint32_t)&dacspi.commands[i][0];
-		dacspi.lli[i][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
-		dacspi.lli[i][0].NextLLI=(uint32_t)&dacspi.lli[i][1];
-		dacspi.lli[i][0].Control=
-			GPDMA_DMACCxControl_TransferSize(2) |
-			GPDMA_DMACCxControl_SWidth(2) |
-			GPDMA_DMACCxControl_DWidth(2) |
-			GPDMA_DMACCxControl_SI;
 
-		dacspi.lli[i][1].SrcAddr=(uint32_t)&dacspi.steps[i][0];
-		dacspi.lli[i][1].DstAddr=(uint32_t)&LPC_GPIO2->FIOPIN0;
-		dacspi.lli[i][1].NextLLI=(uint32_t)&dacspi.lli[(i+1)%DACSPI_CHANNEL_COUNT][0];
-		dacspi.lli[i][1].Control=
-			GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
-			GPDMA_DMACCxControl_SWidth(0) |
-			GPDMA_DMACCxControl_DWidth(0) |
-			GPDMA_DMACCxControl_SI;
+	lliPos=0;
+	
+	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
+	{
+		for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
+		{
+			if(i==DACSPI_CV_CHANNEL)
+			{
+				memset(&dacspi.markers[j][0],DACSPI_MARKER_SSP|j,DACSPI_MARKER_COUNT);
+				/*dacspi.markers[j][0]=DACSPI_MARKER_PRE|j;
+				dacspi.markers[j][1]=DACSPI_MARKER_PRE|j;*/
+				dacspi.markers[j][DACSPI_MARKER_COUNT-1]=DACSPI_MARKER_LDAC|j;
+
+				dacspi.lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.markers[j][0];
+				dacspi.lli[lliPos][0].DstAddr=(uint32_t)&marker;
+				dacspi.lli[lliPos][0].NextLLI=(uint32_t)&dacspi.lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+				dacspi.lli[lliPos][0].Control=
+					GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT+2) |
+					GPDMA_DMACCxControl_SWidth(0) |
+					GPDMA_DMACCxControl_DWidth(0) |
+					GPDMA_DMACCxControl_SI;
+			}
+			else
+			{
+				memset(&dacspi.voiceSteps[i][0],0xff,DACSPI_STEP_COUNT);
+				dacspi.voiceSteps[i][DACSPI_STEP_COUNT-1]=voice_ldac_mask[synth_voiceLayout[0][i]];
+
+				dacspi.lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.voiceCommands[j][i][0];
+				dacspi.lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
+				dacspi.lli[lliPos][0].NextLLI=(uint32_t)&dacspi.lli[lliPos][1];
+				dacspi.lli[lliPos][0].Control=
+					GPDMA_DMACCxControl_TransferSize(2) |
+					GPDMA_DMACCxControl_SWidth(1) |
+					GPDMA_DMACCxControl_DWidth(1) |
+					GPDMA_DMACCxControl_SI;
+			}
+
+			dacspi.lli[lliPos][1].NextLLI=(uint32_t)&dacspi.lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+			dacspi.lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.voiceSteps[i][0];
+			dacspi.lli[lliPos][1].DstAddr=(uint32_t)&LPC_GPIO2->FIOPIN0;
+			dacspi.lli[lliPos][1].Control=
+				GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
+				GPDMA_DMACCxControl_SWidth(0) |
+				GPDMA_DMACCxControl_DWidth(0) |
+				GPDMA_DMACCxControl_SI;
+			
+			++lliPos;
+		}
 	}
 	
-	// interrupt trigger
+	// interrupt triggers
 	
-	dacspi.lli[0][1].Control|=GPDMA_DMACCxControl_I;
+	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*1/16][0].Control|=GPDMA_DMACCxControl_I;
+	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*9/16][0].Control|=GPDMA_DMACCxControl_I;
 	
 	//
 	
@@ -112,7 +188,7 @@ void dacspi_init(void)
 	
 	TIM_Init(LPC_TIM3,TIM_TIMER_MODE,&tim);
 	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_2);
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	
 	TIM_MATCHCFG_Type tm;
 	

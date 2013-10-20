@@ -36,7 +36,8 @@
 #define phex16(x) phex(x)
 
 // assumes 120Mhz clock
-#define DELAY_100NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop")
+#define DELAY_50NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop")
+#define DELAY_100NS() {DELAY_50NS();DELAY_50NS();}
 
 void delay_us(uint32_t);
 void delay_ms(uint32_t);

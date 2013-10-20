@@ -9,8 +9,7 @@
 #define VIRTUAL_CLOCK 1800000000
 #define VIRTUAL_DAC_TICK_RATE (DACSPI_TICK_RATE*15)
 
-#define OVERSAMPLING_RATIO 2 // higher -> less aliasing but lower effective sample rate
-#define MAX_SAMPLERATE (VIRTUAL_CLOCK/(VIRTUAL_DAC_TICK_RATE*OVERSAMPLING_RATIO))
+#define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/(VIRTUAL_DAC_TICK_RATE*(oversampling)))
 
 #define COSINESHAPE_LENGTH 256
 
@@ -42,13 +41,14 @@ static void globalPreinit(void)
 	done=1;	
 }
 
-void wtosc_init(struct wtosc_s * o, uint16_t controlData)
+void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab)
 {
 	globalPreinit();
 
 	memset(o,0,sizeof(struct wtosc_s));
 
-	o->controlData=controlData;
+	o->voice=voice;
+	o->ab=ab;
 	
 	wtosc_setSampleData(o,NULL,256);
 	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0);
@@ -86,7 +86,7 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 			}
 			while(fabs(f));
 		}
-		while(MAX_SAMPLERATE<(((double)sampleRate)/underSample));
+		while(MAX_SAMPLERATE(underSample>2?2:1)<(((double)sampleRate)/underSample));
 		
 		o->undersample[i]=underSample;
 	}
@@ -111,44 +111,67 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 	o->cv=cv;
 	o->aliasing=aliasing;
 		
-//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/(o->increment<<10));
+//	rprintf(0,"inc %d cv %x per %d rate %d\n",o->increment,o->cv,o->period,(int)sampleRate/(o->increment<<8));
 }
 
-FORCEINLINE uint16_t wtosc_update(struct wtosc_s * o)
+FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer)
 {
+	int32_t buf,counter,period,phase,increment,sampleCount;
 	uint32_t r;
-	uint8_t alpha;
+	uint16_t prevSample,curSample,aliasing,controlData;
+	uint8_t alpha,voice,ab;
 	
-	o->counter-=VIRTUAL_DAC_TICK_RATE;
-	if(o->counter<0)
+	counter=o->counter;
+	period=o->period;
+	phase=o->phase;
+	increment=o->increment;
+	sampleCount=o->sampleCount;
+	prevSample=o->prevSample;
+	curSample=o->curSample;
+
+	aliasing=o->aliasing;	
+	voice=o->voice;
+	ab=o->ab;
+	controlData=ab?DACSPI_CMD_SET_B:DACSPI_CMD_SET_A;
+	
+	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
-		o->counter+=o->period;
-		
-		o->phase-=o->increment;
-		if(o->phase<0)
-			o->phase+=o->sampleCount;
+		counter-=VIRTUAL_DAC_TICK_RATE;
+		if(counter<0)
+		{
+			counter+=period;
 
-		o->prevSample=o->curSample;
-		o->curSample=o->data[o->phase];
-	}
+			phase-=increment;
+			if(phase<0)
+				phase+=sampleCount;
 
-	if(o->aliasing)
-	{
-		// we want aliasing, don't interpolate !
-		
-		r=o->curSample;
-	}
-	else
-	{
-		// prepare cosine interpolation
+			prevSample=curSample;
+			curSample=o->data[phase];
+		}
 
-		alpha=(o->counter<<8)/o->period;
-		alpha=cosineShape[alpha];
+		if(aliasing)
+		{
+			// we want aliasing, don't interpolate !
 
-		// apply it
+			r=curSample;
+		}
+		else
+		{
+			// prepare cosine interpolation
 
-		r=(alpha*o->prevSample+(UINT8_MAX-alpha)*o->curSample)>>8;
+			alpha=(counter<<8)/period;
+			alpha=cosineShape[alpha];
+
+			// apply it
+
+			r=(alpha*prevSample+(UINT8_MAX-alpha)*curSample)>>8;
+		}
+
+		dacspi_setVoiceCommand(buf,voice,ab,(r>>4)|controlData);
 	}
 	
-	return (r>>4)|o->controlData;
+	o->counter=counter;
+	o->phase=phase;
+	o->prevSample=prevSample;
+	o->curSample=curSample;
 }
