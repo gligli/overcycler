@@ -15,12 +15,12 @@
 #define ADCROW_PIN 25
 
 #define UI_POT_COUNT 10
-#define UI_POT_SAMPLES 64
+#define UI_POT_SAMPLES 16
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*24)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*12)
-#define POT_TIMEOUT (TICKER_1S/2)
-#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*2/3)
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*32)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*24)
+#define POT_TIMEOUT (TICKER_1S*2/3)
+#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*3/4)
 
 enum uiDigitInput_e{
 	diSynth,diLoadDecadeDigit,diStoreDecadeDigit,diLoadUnitDigit,diStoreUnitDigit
@@ -202,8 +202,8 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 
 static const uint8_t potToCh[UI_POT_COUNT]=
 {
-	0,1,2,3,5,
-	0,1,2,3,5,
+	1<<0,1<<1,1<<2,1<<3,1<<5,
+	1<<0,1<<1,1<<2,1<<3,1<<5,
 };
 
 static const uint8_t keypadButtonCode[16]=
@@ -217,7 +217,7 @@ static struct
 {
 	uint16_t pots[UI_POT_COUNT][UI_POT_SAMPLES];
 	int16_t curSample;
-	int8_t row;
+	int8_t curPot;
 	uint16_t value[UI_POT_COUNT];
 	uint32_t lockTimeout[UI_POT_COUNT];
 	
@@ -239,29 +239,20 @@ extern void refreshWaves(int8_t ab);
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
 {
-	int pot,i;
 	
-	pot=ui.row?(UI_POT_COUNT/2):0;
+	if(LPC_ADC->ADGDR & ADC_DR_DONE_FLAG)
+		ui.pots[ui.curPot][ui.curSample]=(uint16_t)LPC_ADC->ADGDR;
 
-	for(i=0;i<UI_POT_COUNT/2;++i)
-	{
-		uint32_t adc_value;
- 
-		adc_value = *(uint32_t *) ((&LPC_ADC->ADDR0) + potToCh[pot]);
-		
-		if(adc_value&ADC_DR_DONE_FLAG)
-			ui.pots[pot][ui.curSample]=(uint16_t)adc_value;
-		
-		++pot;
-	}
-
-	if(ui.row)
-	{
-		GPIO_ClearValue(ADCROW_PORT,1<<ADCROW_PIN);
-	}
-	else
+	++ui.curPot;
+	
+	if(ui.curPot==UI_POT_COUNT/2)
 	{
 		GPIO_SetValue(ADCROW_PORT,1<<ADCROW_PIN);
+	}
+	else if(ui.curPot>=UI_POT_COUNT)
+	{
+		ui.curPot=0;
+		GPIO_ClearValue(ADCROW_PORT,1<<ADCROW_PIN);
 		
 		// scanned all the pots, move to next sample
 		
@@ -270,8 +261,8 @@ __attribute__ ((used)) void ADC_IRQHandler(void)
 			ui.curSample=0;
 	}
 	
-	ui.row=!ui.row;
 	
+	LPC_ADC->ADCR=(LPC_ADC->ADCR&~0xff) | potToCh[ui.curPot] | ADC_CR_START_NOW;
 }
 
 static uint16_t getPotValue(int8_t pot)
@@ -528,26 +519,16 @@ static void readKeypad(void)
 static void updatePotValue(int8_t pot)
 {
 	uint16_t tmp[UI_POT_SAMPLES];
-	int i,cnt;
-	uint32_t acc,new,delta;
+	uint32_t new,delta;
 	
 	// sort values
 	
 	memcpy(&tmp[0],&ui.pots[pot][0],UI_POT_SAMPLES*sizeof(uint16_t));
 	qsort(tmp,UI_POT_SAMPLES,sizeof(uint16_t),uint16Compare);
 	
-	// average of non-extreme values
+	// median
 	
-	acc=0;
-	cnt=0;
-
-	for(i=UI_POT_SAMPLES*7/16;i<UI_POT_SAMPLES*9/16;++i)
-	{
-		acc+=tmp[i];
-		++cnt;
-	}
-
-	new=acc/cnt;
+	new=tmp[UI_POT_SAMPLES/2];
 	
 	// ignore small changes
 	
@@ -633,21 +614,21 @@ void ui_init(void)
 	
 	// init adc
 	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_8);
+	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,ENABLE);
 
-	LPC_ADC->ADCR=0x2f | ADC_CR_CLKDIV(31);
-	LPC_ADC->ADINTEN=0x01;
+	LPC_ADC->ADCR=ADC_CR_CLKDIV(13);
+	LPC_ADC->ADINTEN=ADC_INTEN_GLOBAL;
 	
-	NVIC_SetPriority(ADC_IRQn,15);
+	NVIC_SetPriority(ADC_IRQn,7);
 	NVIC_EnableIRQ(ADC_IRQn);
 
 	// start
 	
-	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_BURST;
+	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_START_NOW;
 	
 	ui.activePage=upNone;
-	ui.activePage=upNone;
+	ui.activeSource=INT8_MAX;
 }
 
 void ui_update(void)

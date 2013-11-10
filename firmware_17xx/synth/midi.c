@@ -108,7 +108,8 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 		settings_save();
 		refreshPresetMode();
 		refreshFullState();
-	}else if (control==1) // modwheel
+	}
+	else if (control==1) // modwheel
 	{
 		synth_wheelEvent(0,value<<9,2);
 	}
