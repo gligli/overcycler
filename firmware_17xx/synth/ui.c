@@ -6,6 +6,7 @@
 #include "storage.h"
 #include "integer.h"
 #include "arp.h"
+#include "ffconf.h"
 
 #define DISPLAY_ACK 6
 
@@ -228,14 +229,8 @@ static struct
 	int8_t activeSource;
 	uint32_t activeSourceTimeout;
 	
-	uint32_t slowUpdateTimeout;
-	int8_t slowUpdateTimeoutNumber;
-	
 	int8_t pendingScreenClear;
 } ui;
-
-extern void refreshFullState(void);
-extern void refreshWaves(int8_t ab);
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
 {
@@ -325,6 +320,46 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 		return "    ";
 }
 
+static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+{
+	static char dv[_MAX_LFN];
+	const struct uiParam_s * prm;
+	int8_t potnum;
+	
+	dv[0]=0;	
+	potnum=-source-1;
+	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	
+	if(prm->type==ptStep)
+	{
+		switch(prm->number)
+		{
+			case spABank:
+				appendBankName(0,dv);
+				break;
+			case spBBank:
+				appendBankName(1,dv);
+				break;
+			case spAWave:
+				appendWaveName(0,dv);
+				break;
+			case spBWave:
+				appendWaveName(1,dv);
+				break;
+			default:
+				return NULL;
+		}
+
+		// always 20chars
+		for(int i=strlen(dv);i<20;++i) dv[i]=' ';
+		dv[20]=0;
+		
+		return dv;
+	}
+	
+	return NULL;
+}
+
 static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	static char dv[10]={0};
@@ -381,7 +416,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		if(v<valCount)
 			strcpy(dv,prm->values[v]);
 		else
-			sprintf(dv,"%4d",v);
+			sprintf(dv,"%4d",v+1);
 		break;
 	default:
 		;
@@ -433,7 +468,23 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			++valCount;
 		
 		if(!valCount)
-			valCount=1<<steppedParametersBits[prm->number];
+		{
+			switch(prm->number)
+			{
+				case spABank:
+				case spBBank:
+					valCount=getBankCount();
+					break;
+				case spAWave:
+					valCount=getWaveCount(0);
+					break;
+				case spBWave:
+					valCount=getWaveCount(1);
+					break;
+				default:
+					valCount=1<<steppedParametersBits[prm->number];
+			}
+		}
 
 		if(source<0)
 			data=(getPotValue(potnum)*valCount)>>16;
@@ -443,20 +494,27 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		currentPreset.steppedParameters[prm->number]=data;
 		
 		//	special cases
-		
-			// unison latch
-		if(prm->number==spUnison)
+		switch(prm->number)
 		{
-			if(data)
-				assigner_latchPattern();
-			else
-				assigner_setPoly();
-			assigner_getPattern(currentPreset.voicePattern,NULL);
-		}
-		else if(prm->number==spAWave || prm->number==spBWave)
-		{
-			ui.slowUpdateTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
-			ui.slowUpdateTimeoutNumber=prm->number;
+			case spUnison: // unison latch
+				if(data)
+					assigner_latchPattern();
+				else
+					assigner_setPoly();
+				assigner_getPattern(currentPreset.voicePattern,NULL);
+				break;					
+			case spABank:
+				refreshWaveNames(0);
+				break;
+			case spBBank:
+				refreshWaveNames(1);
+				break;
+			case spAWave:
+				refreshWaveforms(0);
+				break;
+			case spBWave:
+				refreshWaveforms(1);
+				break;
 		}
 		
 		break;
@@ -636,6 +694,7 @@ void ui_update(void)
 	int i;
 	uint16_t v;
 	static uint8_t frc=0;
+	char * s;
 	
 	++frc;
 	
@@ -668,14 +727,26 @@ void ui_update(void)
 	else if(ui.activeSourceTimeout>currentTick) // fullscreen display
 	{
 		rprintf(1,getName(ui.activeSource,1));
-		sendCommand("[H",1,NULL);
-		rprintf(1,"\r\r        %s\r",getDisplayValue(ui.activeSource,&v));
-		for(i=0;i<20;++i)
-			if(i<(((int32_t)v+UINT16_MAX/40)*20>>16))
-				sendChar(255);
-			else
-				sendChar(' ');
 
+		sendCommand("[H",1,NULL);
+		rprintf(1,"\r\r        %s        ",getDisplayValue(ui.activeSource,&v));
+		
+		sendCommand("[H",1,NULL);
+		rprintf(1,"\r\r\r",s);
+		s=getDisplayFulltext(ui.activeSource);
+		if(s)
+		{
+			rprintf(1,s);
+		}
+		else
+		{
+			// bargraph			
+			for(i=0;i<20;++i)
+				if(i<(((int32_t)v+UINT16_MAX/40)*20>>16))
+					sendChar(255);
+				else
+					sendChar(' ');
+		}
 	}
 	else if(ui.displayMode) // buttons
 	{
@@ -722,18 +793,4 @@ void ui_update(void)
 	// read keypad
 			
 	readKeypad();
-	
-	// slow updates
-	
-	if(currentTick>ui.slowUpdateTimeout)
-	{
-		// waveforms
-		if(ui.slowUpdateTimeoutNumber==spAWave)
-			refreshWaves(0);
-		
-		if(ui.slowUpdateTimeoutNumber==spBWave)
-			refreshWaves(1);
-		
-		ui.slowUpdateTimeout=UINT32_MAX;
-	}
 }

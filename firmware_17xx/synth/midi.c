@@ -18,9 +18,6 @@
 
 static MidiDevice midi;
 
-extern void refreshFullState(void);
-extern void refreshPresetMode(void);
-
 uint16_t midiCombineBytes(uint8_t first, uint8_t second)
 {
    uint16_t _14bit;

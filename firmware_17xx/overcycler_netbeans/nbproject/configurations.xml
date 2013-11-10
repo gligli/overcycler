@@ -3,120 +3,67 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root=".." name="0">
       <df name="drivers">
-        <in>LPC17xx.h</in>
         <in>lpc17xx_adc.c</in>
-        <in>lpc17xx_adc.h</in>
         <in>lpc17xx_can.c</in>
-        <in>lpc17xx_can.h</in>
         <in>lpc17xx_clkpwr.c</in>
-        <in>lpc17xx_clkpwr.h</in>
         <in>lpc17xx_dac.c</in>
-        <in>lpc17xx_dac.h</in>
         <in>lpc17xx_emac.c</in>
-        <in>lpc17xx_emac.h</in>
         <in>lpc17xx_gpdma.c</in>
-        <in>lpc17xx_gpdma.h</in>
         <in>lpc17xx_gpio.c</in>
-        <in>lpc17xx_gpio.h</in>
         <in>lpc17xx_i2c.c</in>
-        <in>lpc17xx_i2c.h</in>
         <in>lpc17xx_i2s.c</in>
-        <in>lpc17xx_i2s.h</in>
         <in>lpc17xx_libcfg_default.c</in>
         <in>lpc17xx_mcpwm.c</in>
-        <in>lpc17xx_mcpwm.h</in>
         <in>lpc17xx_nvic.c</in>
         <in>lpc17xx_pinsel.c</in>
-        <in>lpc17xx_pinsel.h</in>
         <in>lpc17xx_pwm.c</in>
-        <in>lpc17xx_pwm.h</in>
         <in>lpc17xx_qei.c</in>
-        <in>lpc17xx_qei.h</in>
         <in>lpc17xx_rit.c</in>
-        <in>lpc17xx_rit.h</in>
         <in>lpc17xx_rtc.c</in>
-        <in>lpc17xx_rtc.h</in>
         <in>lpc17xx_spi.c</in>
-        <in>lpc17xx_spi.h</in>
         <in>lpc17xx_ssp.c</in>
-        <in>lpc17xx_ssp.h</in>
         <in>lpc17xx_timer.c</in>
-        <in>lpc17xx_timer.h</in>
         <in>lpc17xx_uart.c</in>
-        <in>lpc17xx_uart.h</in>
         <in>lpc17xx_wdt.c</in>
-        <in>lpc17xx_wdt.h</in>
-        <in>lpc_types.h</in>
       </df>
       <df name="fat_sd">
         <in>ccsbcs.c</in>
         <in>diskio.c</in>
-        <in>diskio.h</in>
         <in>fattime.c</in>
         <in>ff.c</in>
-        <in>ff.h</in>
-        <in>integer.h</in>
         <in>spi_sd_lpc17xx.c</in>
-        <in>spi_sd_lpc17xx.h</in>
       </df>
       <df name="synth">
+        <in>PowFast.c</in>
         <in>adsr.c</in>
-        <in>adsr.h</in>
-        <in>adsr_lookups.h</in>
         <in>arp.c</in>
-        <in>arp.h</in>
         <in>assigner.c</in>
-        <in>assigner.h</in>
         <in>dacspi.c</in>
-        <in>dacspi.h</in>
         <in>lfo.c</in>
-        <in>lfo.h</in>
         <in>midi.c</in>
-        <in>midi.h</in>
-        <in>osc_curves.h</in>
         <in>storage.c</in>
-        <in>storage.h</in>
         <in>synth.c</in>
-        <in>synth.h</in>
         <in>tuner.c</in>
-        <in>tuner.h</in>
         <in>uart_midi.c</in>
-        <in>uart_midi.h</in>
         <in>ui.c</in>
-        <in>ui.h</in>
         <in>utils.c</in>
-        <in>utils.h</in>
-        <in>vca_curves.h</in>
         <in>wtosc.c</in>
-        <in>wtosc.h</in>
       </df>
       <df name="system">
         <in>core_cm3.c</in>
-        <in>core_cm3.h</in>
-        <in>core_cmFunc.h</in>
-        <in>core_cmInstr.h</in>
         <in>main.c</in>
-        <in>main.h</in>
         <in>rprintf.c</in>
-        <in>rprintf.h</in>
         <in>serial.c</in>
-        <in>serial.h</in>
         <in>syscalls.c</in>
         <in>system_LPC17xx.c</in>
-        <in>system_LPC17xx.h</in>
       </df>
       <df name="xnormidi">
         <df name="bytequeue">
           <in>bytequeue.c</in>
-          <in>bytequeue.h</in>
           <in>interrupt_setting.c</in>
-          <in>interrupt_setting.h</in>
         </df>
         <in>midi.c</in>
-        <in>midi.h</in>
         <in>midi_device.c</in>
-        <in>midi_device.h</in>
-        <in>midi_function_types.h</in>
         <in>sysex_tools.c</in>
       </df>
     </df>
@@ -157,67 +104,47 @@
               <pElem>../synth</pElem>
               <pElem>../fat_sd</pElem>
               <pElem>..</pElem>
-              <pElem>../system</pElem>
               <pElem>../drivers</pElem>
+              <pElem>../system</pElem>
             </incDir>
           </cTool>
         </makeTool>
       </makefileType>
-      <item path="../drivers/LPC17xx.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_adc.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_adc.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_can.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_can.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_clkpwr.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_clkpwr.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_dac.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_dac.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_emac.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_emac.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_gpdma.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_gpdma.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_gpio.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_gpio.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_i2c.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_i2c.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_i2s.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_i2s.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_libcfg_default.c"
             ex="false"
@@ -230,8 +157,6 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_mcpwm.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_nvic.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
@@ -240,63 +165,41 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_pinsel.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_pwm.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_pwm.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_qei.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_qei.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_rit.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_rit.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_rtc.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_rtc.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_spi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_spi.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_ssp.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_ssp.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_timer.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_timer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../drivers/lpc17xx_uart.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../drivers/lpc17xx_uart.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../drivers/lpc17xx_wdt.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_wdt.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../drivers/lpc_types.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../fat_sd/ccsbcs.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -306,8 +209,6 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../fat_sd/diskio.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../fat_sd/fattime.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
@@ -316,127 +217,81 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../fat_sd/ff.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../fat_sd/integer.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../fat_sd/spi_sd_lpc17xx.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../fat_sd/spi_sd_lpc17xx.h" ex="false" tool="3" flavor2="0">
+      <item path="../synth/PowFast.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+        </cTool>
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/adsr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../synth/adsr_lookups.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/arp.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/assigner.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/assigner.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/dacspi.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/lfo.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/midi.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../synth/osc_curves.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/storage.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/synth.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/tuner.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/uart_midi.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/ui.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../synth/utils.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../synth/vca_curves.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../synth/wtosc.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../system/core_cm3.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../system/core_cmFunc.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../system/core_cmInstr.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../system/main.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../system/main.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../system/rprintf.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../system/rprintf.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../system/serial.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../system/serial.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../system/syscalls.c" ex="false" tool="0" flavor2="2">
         <cTool>
@@ -446,13 +301,9 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../system/system_LPC17xx.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../xnormidi/bytequeue/bytequeue.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../xnormidi/bytequeue/bytequeue.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../xnormidi/bytequeue/interrupt_setting.c"
             ex="false"
@@ -461,24 +312,13 @@
         <cTool>
         </cTool>
       </item>
-      <item path="../xnormidi/bytequeue/interrupt_setting.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
       </item>
-      <item path="../xnormidi/midi.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="2">
         <cTool>
         </cTool>
-      </item>
-      <item path="../xnormidi/midi_device.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../xnormidi/midi_function_types.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="2">
         <cTool>

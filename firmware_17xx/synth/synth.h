@@ -37,6 +37,16 @@ void synth_timerInterrupt(void);
 void synth_init(void);
 void synth_update(void);
 
+// synth.c internal api
+void refreshFullState(void);
+void refreshPresetMode(void);
+void refreshWaveNames(int8_t ab);
+void refreshWaveforms(int8_t ab);
+int8_t appendBankName(int8_t ab, char * path);
+int8_t appendWaveName(int8_t ab, char * path);
+int getBankCount(void);
+int getWaveCount(int8_t ab);
+
 extern volatile uint32_t currentTick; // 500hz
 extern const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT];
 

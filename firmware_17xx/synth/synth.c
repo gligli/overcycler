@@ -17,8 +17,11 @@
 #include "storage.h"
 #include "vca_curves.h"
 
-#define BANK "test"
-#define BANK_DIR "/WAVEDATA/" BANK
+#define WAVEDATA_PATH "/WAVEDATA"
+
+#define MAX_BANKS 80
+#define MAX_BANK_WAVES 100
+#define MAX_FILENAME _MAX_LFN
 
 #define POT_DEAD_ZONE 512
 
@@ -39,7 +42,7 @@
 #define CVMUX_PORT_VCA 4
 #define CVMUX_PIN_VCA 28
 
-// soft voice to hard voice (mapped to that the upper the voice, the stronger the panning is)
+// soft voice to hard voice (mapped so that the upper the voice, the stronger panning it gets)
 const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 {
 	{0,1,3,4,2,5}, //  for DACs
@@ -48,7 +51,19 @@ const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 
 volatile uint32_t currentTick=0; // 500hz
 
-struct
+__attribute__ ((section(".usb_ram"))) static struct
+{
+	int bankCount;
+	int curWaveCount[2];
+	char bankNames[MAX_BANKS][MAX_FILENAME];
+	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
+
+	DIR curDir;
+	FILINFO curFile;
+	char lfname[_MAX_LFN + 1];
+} waveData;
+
+static struct
 {
 	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	struct adsr_s filEnvs[SYNTH_VOICE_COUNT];
@@ -74,49 +89,11 @@ struct
 	uint16_t modulationDelayTickCount;
 	
 	uint8_t wmodMask;
-
-	DIR curDir;
-	FILINFO curFile;
-	char lfname[_MAX_LFN + 1];
 } synth;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
-
-static void loadWaveTable(int8_t ab)
-{
-	int i;
-	FIL f;
-	FRESULT res;
-	char fn[_MAX_LFN];
-	
-	strcpy(fn,BANK_DIR "/");
-	strcat(fn,synth.curFile.lfname);
-
-	rprintf(0,"loading %s %d... ",fn,synth.curFile.fsize);
-	
-	rprintf(1,"\x1b[2J Loading...\r\r%s",synth.curFile.lfname); //TEMP
-	
-	if(!f_open(&f,fn,FA_READ))
-	{
-
-		if((res=f_lseek(&f,0x2c)))
-			rprintf(0,"f_lseek res=%d\n",res);
-
-		int16_t data[WTOSC_MAX_SAMPLES];
-
-		if((res=f_read(&f,data,sizeof(data),&i)))
-			rprintf(0,"f_lseek res=%d\n",res);
-
-		f_close(&f);
-
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			wtosc_setSampleData(&synth.osc[i][ab],data,WTOSC_MAX_SAMPLES);
-
-		rprintf(0,"loaded\n");
-	}
-}
 
 static void computeTunedCVs(void)
 {
@@ -402,25 +379,142 @@ void refreshFullState(void)
 	computeTunedCVs();
 }
 
-void refreshWaves(int8_t ab)
+int8_t appendBankName(int8_t ab, char * path)
 {
-	int i;
+	uint8_t bankNum;
+
+	bankNum=currentPreset.steppedParameters[ab?spBBank:spABank];
+
+	if(bankNum>=waveData.bankCount)
+		return 0;
+
+	strcat(path,waveData.bankNames[bankNum]);
+	
+	return 1;
+}
+
+int8_t appendWaveName(int8_t ab, char * path)
+{
+	uint8_t waveNum;
+
+	waveNum=currentPreset.steppedParameters[ab?spBWave:spAWave];
+
+	if(waveNum>=waveData.curWaveCount[ab])
+		return 0;
+
+	strcat(path,waveData.waveNames[ab][waveNum]);
+	
+	return 1;
+}
+
+int getBankCount(void)
+{
+	return waveData.bankCount;
+}
+
+int getWaveCount(int8_t ab)
+{
+	return waveData.curWaveCount[ab];
+}
+
+static void refreshBankNames(void)
+{
 	FRESULT res;
 	
-	if((res=f_opendir(&synth.curDir,BANK_DIR)))
-		rprintf(0,"f_opendir res=%d\n",res);
+	waveData.bankCount=0;
 
-	if((res=f_readdir(&synth.curDir,&synth.curFile)))
-		rprintf(0,"f_readdir res=%d\n",res);
-
-	i=ab?currentPreset.steppedParameters[spBWave]:currentPreset.steppedParameters[spAWave];
-	while(i)
+	if((res=f_opendir(&waveData.curDir,WAVEDATA_PATH)))
 	{
-		f_readdir(&synth.curDir,&synth.curFile);
-		if(synth.curFile.fname[0]!=0) --i;
+		rprintf(0,"f_opendir res=%d\n",res);
+		return;
 	}
 
-	loadWaveTable(ab);
+	if((res=f_readdir(&waveData.curDir,&waveData.curFile)))
+		rprintf(0,"f_readdir res=%d\n",res);
+
+	while(!res)
+	{
+		if(strcmp(waveData.curFile.fname,".") && strcmp(waveData.curFile.fname,".."))
+		{
+			strncpy(waveData.bankNames[waveData.bankCount],waveData.curFile.lfname,waveData.curFile.lfsize);
+			++waveData.bankCount;
+		}
+		
+		res=f_readdir(&waveData.curDir,&waveData.curFile);
+		if (!waveData.curFile.fname[0] || waveData.bankCount>=MAX_BANKS)
+			break;
+	}
+	
+	rprintf(0,"bankCount %d\n",waveData.bankCount);
+}
+
+void refreshWaveNames(int8_t ab)
+{
+	FRESULT res;
+	char fn[256];
+	
+	waveData.curWaveCount[ab]=0;
+
+	strcpy(fn,WAVEDATA_PATH "/");
+	if(!appendBankName(ab,fn)) return;
+
+	rprintf(0,"loading %s\n",fn);
+	
+	if((res=f_opendir(&waveData.curDir,fn)))
+	{
+		rprintf(0,"f_opendir res=%d\n",res);
+		return;
+	}
+
+	if((res=f_readdir(&waveData.curDir,&waveData.curFile)))
+		rprintf(0,"f_readdir res=%d\n",res);
+
+	while(!res)
+	{
+		if(strstr(waveData.curFile.fname,".WAV"))
+		{
+			strncpy(waveData.waveNames[ab][waveData.curWaveCount[ab]],waveData.curFile.lfname,waveData.curFile.lfsize);
+			++waveData.curWaveCount[ab];
+		}
+		
+		res=f_readdir(&waveData.curDir,&waveData.curFile);
+		if (!waveData.curFile.fname[0] || waveData.curWaveCount[ab]>=MAX_BANK_WAVES)
+			break;
+	}
+
+	rprintf(0,"curWaveCount %d %d\n",ab,waveData.curWaveCount[ab]);
+}
+
+void refreshWaveforms(int8_t ab)
+{
+	int i;
+	FIL f;
+	FRESULT res;
+	char fn[256];
+	
+	strcpy(fn,WAVEDATA_PATH "/");
+	if(!appendBankName(ab,fn)) return;
+	strcat(fn,"/");
+	if(!appendWaveName(ab,fn)) return;
+
+	rprintf(0,"loading %s\n",fn);
+	
+	if(!f_open(&f,fn,FA_READ))
+	{
+
+		if((res=f_lseek(&f,0x2c)))
+			rprintf(0,"f_lseek res=%d\n",res);
+
+		int16_t data[WTOSC_MAX_SAMPLES];
+
+		if((res=f_read(&f,data,sizeof(data),&i)))
+			rprintf(0,"f_lseek res=%d\n",res);
+
+		f_close(&f);
+
+		for(i=0;i<SYNTH_VOICE_COUNT;++i)
+			wtosc_setSampleData(&synth.osc[i][ab],data,WTOSC_MAX_SAMPLES);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -554,11 +648,11 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 
 	vma=wmodAVal;
 	if(wmodMask&8)
-		vma+=scaleU16U16(envVal,wmodEnvAmt);
+		vma+=scaleU16S16(envVal,wmodEnvAmt);
 
 	vmb=wmodBVal;
 	if(wmodMask&128)
-		vmb+=scaleU16U16(envVal,wmodEnvAmt);
+		vmb+=scaleU16S16(envVal,wmodEnvAmt);
 
 	// osc A
 
@@ -588,6 +682,7 @@ void synth_init(void)
 	int i;
 	
 	memset(&synth,0,sizeof(synth));
+	memset(&waveData,0,sizeof(waveData));
 	
 	// init cv mux
 
@@ -607,8 +702,8 @@ void synth_init(void)
 	}
 
 	// give it some memory
-	synth.curFile.lfname=synth.lfname;
-	synth.curFile.lfsize=sizeof(synth.lfname);
+	waveData.curFile.lfname=waveData.lfname;
+	waveData.curFile.lfsize=sizeof(waveData.lfname);
 	
 	// init subsystems
 	dacspi_init();
@@ -655,8 +750,11 @@ void synth_init(void)
 	refreshFullState();
 	
 	__enable_irq();
-	refreshWaves(0);
-	refreshWaves(1);
+	refreshBankNames();
+	refreshWaveNames(0);
+	refreshWaveNames(1);
+	refreshWaveforms(0);
+	refreshWaveforms(1);
 }
 
 
@@ -721,9 +819,8 @@ void synth_timerInterrupt(void)
 	
 	// global computations
 	
-	v=currentPreset.continuousParameters[cpFilEnvAmt];
-	v+=INT16_MIN;
-	filEnvAmt=v;
+	filEnvAmt=currentPreset.continuousParameters[cpFilEnvAmt];
+	filEnvAmt+=INT16_MIN;
 	
 	wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
 	if(currentPreset.steppedParameters[spLFOTargets]&otA)
@@ -734,6 +831,7 @@ void synth_timerInterrupt(void)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
 
 	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
+	wmodEnvAmt+=INT16_MIN;
 	
 	pitchAVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchAVal));
 	pitchBVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchBVal));

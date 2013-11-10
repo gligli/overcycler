@@ -68,28 +68,31 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 		for(i=0;i<sampleCount;++i)
 			o->data[i]=(int32_t)data[i]-INT16_MIN;
 
-	o->sampleCount=sampleCount;
-	
 	// recompute undersamples
-	
-	for(i=0;i<=WTOSC_HIGHEST_NOTE;++i)
-	{
-		sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/256.0*o->sampleCount;
-		underSample=0;
 
-		do
+	if(o->sampleCount!=sampleCount)
+	{
+		for(i=0;i<=WTOSC_HIGHEST_NOTE;++i)
 		{
+			sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/256.0*sampleCount;
+			underSample=0;
+
 			do
 			{
-				++underSample;
-				f=modf(((double)o->sampleCount)/underSample,&dummy);
+				do
+				{
+					++underSample;
+					f=modf(((double)sampleCount)/underSample,&dummy);
+				}
+				while(fabs(f));
 			}
-			while(fabs(f));
+			while(MAX_SAMPLERATE(underSample>2?2:1)<(((double)sampleRate)/underSample));
+
+			o->undersample[i]=underSample;
 		}
-		while(MAX_SAMPLERATE(underSample>2?2:1)<(((double)sampleRate)/underSample));
-		
-		o->undersample[i]=underSample;
 	}
+
+	o->sampleCount=sampleCount;
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
