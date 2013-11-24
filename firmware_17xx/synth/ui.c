@@ -586,6 +586,11 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				{
 					preset_loadDefault(1);
 				}
+
+				refreshWaveNames(0);
+				refreshWaveNames(1);
+				refreshWaveforms(0);
+				refreshWaveforms(1);
 				break;
 			case 7:
 				settings.midiReceiveChannel=((getPotValue(potnum)*17)>>16)-1;
