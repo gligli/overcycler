@@ -5,8 +5,6 @@
 #include "assigner.h"
 #include "tuner.h"
 
-#define MANUAL_PRESET_PAGE ((STORAGE_SIZE/STORAGE_PAGE_SIZE)-5)
-
 typedef enum
 {
 	cpAFreq=0,cpAVol=1,cpABaseWMod=2,
@@ -50,7 +48,6 @@ struct settings_s
 	uint16_t tunes[TUNER_OCTAVE_COUNT][TUNER_CV_COUNT];
 
 	uint16_t presetNumber;
-	int8_t presetMode;
 	
 	int8_t midiReceiveChannel; // -1: omni / 0-15: channel 1-16
 	int8_t midiSendChannel; // 0-15: channel 1-16

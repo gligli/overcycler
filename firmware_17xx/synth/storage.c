@@ -7,7 +7,7 @@
 #include "wtosc.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 0
+#define STORAGE_VERSION 1
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -178,40 +178,28 @@ LOWERCODESIZE int8_t settings_load(void)
 {
 	int8_t i,j;
 	
-	BLOCK_INT
-	{
-		if(!storageLoad(SETTINGS_PAGE,SETTINGS_PAGE_COUNT))
-			return 0;
+	if(!storageLoad(SETTINGS_PAGE,SETTINGS_PAGE_COUNT))
+		return 0;
 
-		if (storage.version<1)
-			return 0;
+	if (storage.version<1)
+		return 0;
 
-		// v1
-		for(j=0;j<TUNER_OCTAVE_COUNT;++j)
-			for(i=0;i<TUNER_CV_COUNT;++i)
-				settings.tunes[j][i]=storageRead16();
+	// v1
+	for(j=0;j<TUNER_OCTAVE_COUNT;++j)
+		for(i=0;i<TUNER_CV_COUNT;++i)
+			settings.tunes[j][i]=storageRead16();
 
-		settings.presetNumber=storageRead16();
-		settings.presetMode=storageRead8();
-		settings.midiReceiveChannel=storageReadS8();
-		
-		if (storage.version<2)
-			return 1;
+	settings.presetNumber=storageRead16();
+	settings.midiReceiveChannel=storageReadS8();
+	settings.voiceMask=storageRead8();
+	settings.midiSendChannel=storageReadS8();
 
-		// v2
+	if (storage.version<2)
+		return 1;
 
-		settings.voiceMask=storageRead8();
-		settings.midiSendChannel=storageReadS8();
-		
-		if (storage.version<3)
-			return 1;
+	// v2
 
-		// v3
-		
-		// ...
-	
-	
-	}
+	// ...
 	
 	return 1;
 }
@@ -220,59 +208,53 @@ LOWERCODESIZE void settings_save(void)
 {
 	int8_t i,j;
 	
-	BLOCK_INT
-	{
-		storagePrepareStore();
+	storagePrepareStore();
 
-		// v1
+	// v1
 
-		for(j=0;j<TUNER_OCTAVE_COUNT;++j)
-			for(i=0;i<TUNER_CV_COUNT;++i)
-				storageWrite16(settings.tunes[j][i]);
+	for(j=0;j<TUNER_OCTAVE_COUNT;++j)
+		for(i=0;i<TUNER_CV_COUNT;++i)
+			storageWrite16(settings.tunes[j][i]);
 
-		storageWrite16(settings.presetNumber);
-		storageWrite8(settings.presetMode);
-		storageWriteS8(settings.midiReceiveChannel);
-		
-		// v2
-		
-		storageWrite8(settings.voiceMask);
-		storageWriteS8(settings.midiSendChannel);
+	storageWrite16(settings.presetNumber);
+	storageWriteS8(settings.midiReceiveChannel);
+	storageWrite8(settings.voiceMask);
+	storageWriteS8(settings.midiSendChannel);
 
-		// v3
-		
-		// ...
+	// v2
 
-		// this must stay last
-		storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
-	}
+	// ...
+
+	// this must stay last
+	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
 }
 
 LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 {
 	int8_t i;
 	
-	BLOCK_INT
-	{
-		storageLoad(number,1);
+	storageLoad(number,1);
 
-		if (storage.version<1)
-			return 0;
+	if (storage.version<1)
+		return 0;
 
-		// v1
-		
-		continuousParameter_t cp;
-		for(cp=0;cp<=cpCount;++cp)
-			currentPreset.continuousParameters[cp]=storageRead16();
+	// v1
 
-		steppedParameter_t sp;
-		for(sp=0;sp<=spCount;++sp)
-			currentPreset.steppedParameters[sp]=storageRead8();
+	continuousParameter_t cp;
+	for(cp=0;cp<=cpCount;++cp)
+		currentPreset.continuousParameters[cp]=storageRead16();
 
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			currentPreset.voicePattern[i]=storageRead8();
-	}
+	steppedParameter_t sp;
+	for(sp=0;sp<=spCount;++sp)
+		currentPreset.steppedParameters[sp]=storageRead8();
+
+	for(i=0;i<SYNTH_VOICE_COUNT;++i)
+		currentPreset.voicePattern[i]=storageRead8();
 	
+	// v2
+
+	// ...
+
 	return 1;
 }
 
@@ -280,110 +262,95 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 {
 	int8_t i;
 	
-	BLOCK_INT
-	{
-		storagePrepareStore();
+	storagePrepareStore();
 
-		// v1
-		
-		continuousParameter_t cp;
-		for(cp=0;cp<=cpCount;++cp)
-			storageWrite16(currentPreset.continuousParameters[cp]);
+	// v1
 
-		steppedParameter_t sp;
-		for(sp=0;sp<=spCount;++sp)
-			storageWrite8(currentPreset.steppedParameters[sp]);
-		
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			storageWrite8(currentPreset.voicePattern[i]);
-		
-		// this must stay last
-		storageFinishStore(number,1);
-	}
+	continuousParameter_t cp;
+	for(cp=0;cp<=cpCount;++cp)
+		storageWrite16(currentPreset.continuousParameters[cp]);
+
+	steppedParameter_t sp;
+	for(sp=0;sp<=spCount;++sp)
+		storageWrite8(currentPreset.steppedParameters[sp]);
+
+	for(i=0;i<SYNTH_VOICE_COUNT;++i)
+		storageWrite8(currentPreset.voicePattern[i]);
+
+	// this must stay last
+	storageFinishStore(number,1);
 }
 
 LOWERCODESIZE void storage_export(uint16_t number, uint8_t * buf, int16_t * size)
 {
 	int16_t actualSize;
 
-	BLOCK_INT
-	{
-		storageLoad(number,1);
+	storageLoad(number,1);
 
-		// don't export trailing zeroes		
-		
-		actualSize=STORAGE_PAGE_SIZE;
-		while(storage.buffer[actualSize-1]==0)
-			--actualSize;
-		
-		buf[0]=number;		
-		memcpy(&buf[1],storage.buffer,actualSize);
-		*size=actualSize+1;
-	}
+	// don't export trailing zeroes		
+
+	actualSize=STORAGE_PAGE_SIZE;
+	while(storage.buffer[actualSize-1]==0)
+		--actualSize;
+
+	buf[0]=number;		
+	memcpy(&buf[1],storage.buffer,actualSize);
+	*size=actualSize+1;
 }
 
 LOWERCODESIZE void storage_import(uint16_t number, uint8_t * buf, int16_t size)
 {
-	BLOCK_INT
-	{
-		memset(storage.buffer,0,sizeof(storage.buffer));
-		memcpy(storage.buffer,buf,size);
-		storage.bufPtr=storage.buffer+size;
-		storageFinishStore(number,1);
-	}
+	memset(storage.buffer,0,sizeof(storage.buffer));
+	memcpy(storage.buffer,buf,size);
+	storage.bufPtr=storage.buffer+size;
+	storageFinishStore(number,1);
 }
 
 LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 {
 	int8_t i;
 
-	BLOCK_INT
+	memset(&currentPreset,0,sizeof(currentPreset));
+
+	currentPreset.continuousParameters[cpUnisonDetune]=512;
+	currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
+
+	currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
+	currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
+	currentPreset.continuousParameters[cpLFOFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
+
+	currentPreset.steppedParameters[spBenderRange]=1;
+	currentPreset.steppedParameters[spBenderTarget]=modPitch;
+	currentPreset.steppedParameters[spModwheelRange]=2;
+	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
+	currentPreset.steppedParameters[spAssignerPriority]=apLast;
+	currentPreset.steppedParameters[spLFOShape]=lsTri;
+	currentPreset.steppedParameters[spLFOTargets]=otBoth;
+	currentPreset.steppedParameters[spLFOShift]=1;
+
+	currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
+	currentPreset.steppedParameters[spBBank]=26;
+
+	for(i=0;i<SYNTH_VOICE_COUNT;++i)
+		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
+
+	if(makeSound)
 	{
-		memset(&currentPreset,0,sizeof(currentPreset));
-
-		currentPreset.continuousParameters[cpUnisonDetune]=512;
-		currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
-
-		currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
-		currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-		currentPreset.continuousParameters[cpLFOFreq]=UINT16_MAX/2;
-		currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
-				
-		currentPreset.steppedParameters[spBenderRange]=1;
-		currentPreset.steppedParameters[spBenderTarget]=modPitch;
-		currentPreset.steppedParameters[spModwheelRange]=2;
-		currentPreset.steppedParameters[spChromaticPitch]=2; // octave
-		currentPreset.steppedParameters[spAssignerPriority]=apLast;
-		currentPreset.steppedParameters[spLFOShape]=lsTri;
-		currentPreset.steppedParameters[spLFOTargets]=otBoth;
-		currentPreset.steppedParameters[spLFOShift]=1;
-
-		currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
-		currentPreset.steppedParameters[spBBank]=26;
-		
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
-		
-		if(makeSound)
-		{
-			currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
-		}
+		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
 	}
 }
 
 LOWERCODESIZE void settings_loadDefault(void)
 {
-	BLOCK_INT
-	{
-		memset(&settings,0,sizeof(settings));
-		
-		settings.midiReceiveChannel=-1;
-		settings.voiceMask=0x3f;
-		
-		tuner_init(); // use theoretical tuning
-	}
+	memset(&settings,0,sizeof(settings));
+
+	settings.midiReceiveChannel=-1;
+	settings.voiceMask=0x3f;
+
+	tuner_init(); // use theoretical tuning
 }

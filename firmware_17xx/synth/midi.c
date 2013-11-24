@@ -99,20 +99,10 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 	print("\n");
 #endif
 
-	if(control==0 && value<=1 && settings.presetMode!=value) // coarse bank #
-	{
-		settings.presetMode=value;
-		settings_save();
-		refreshPresetMode();
-		refreshFullState();
-	}
-	else if (control==1) // modwheel
+	if (control==1) // modwheel
 	{
 		synth_wheelEvent(0,value<<9,2);
 	}
-	
-	if(!settings.presetMode) // in manual mode CC changes would only conflict with pot scans...
-		return;
 	
 	if(control>=MIDI_BASE_COARSE_CC && control<MIDI_BASE_COARSE_CC+cpCount)
 	{
@@ -147,7 +137,7 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 	if(!midiFilterChannel(channel))
 		return;
 
-	if(settings.presetMode && program<100  && program!=settings.presetNumber)
+	if(program<100  && program!=settings.presetNumber)
 	{
 		if(preset_loadCurrent(program))
 		{

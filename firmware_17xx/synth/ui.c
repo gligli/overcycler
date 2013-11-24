@@ -194,10 +194,30 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 	/* Miscellaneous page (*) */
 	{
 		{
-
+			/* 1st row of pots */
+			{.type=ptCust,.number=4,.shortName="Slot",.longName="Preset slot"},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			/* 2nd row of pots */
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi channel"},
 		},
 		{
-
+			/*1*/ {.type=ptCust,.number=5,.shortName="Load",.longName="Load preset"},
+			/*2*/ {.type=ptNone},
+			/*3*/ {.type=ptCust,.number=6,.shortName="Save",.longName="Save preset"},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
+			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
 		},
 	},
 };
@@ -234,6 +254,8 @@ static struct
 	int8_t slowUpdateTimeoutNumber;
 	
 	int8_t pendingScreenClear;
+
+	int8_t presetAwaitingNumber;
 } ui;
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
@@ -420,6 +442,14 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 3:
 				v=arp_getHold();
 				break;
+			case 4:
+			case 5:
+			case 6:
+				v=ui.presetAwaitingNumber;
+				break;
+			case 7:
+				v=settings.midiReceiveChannel;
+				break;
 			}
 		}
 		
@@ -539,6 +569,27 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 3:
 				arp_setMode(arp_getMode(),!arp_getHold());
+				break;
+			case 4:
+				ui.presetAwaitingNumber=(getPotValue(potnum)*100)>>16;
+				break;
+			case 6:
+				preset_saveCurrent(ui.presetAwaitingNumber);
+				/* fall through */
+			case 5:
+				if(preset_loadCurrent(ui.presetAwaitingNumber))
+				{
+					settings.presetNumber=ui.presetAwaitingNumber;
+					settings_save();                
+				}
+				else
+				{
+					preset_loadDefault(1);
+				}
+				break;
+			case 7:
+				settings.midiReceiveChannel=((getPotValue(potnum)*17)>>16)-1;
+				settings_save();
 				break;
 		}
 		break;

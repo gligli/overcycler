@@ -71,33 +71,37 @@ void storage_write(uint32_t pageIdx, uint8_t *buf)
 	FIL f;
 	char fn[_MAX_LFN];
 	UINT bw;
-
+	
 	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
-	
+
 	rprintf(0,"storage_write %d %s\n",pageIdx,fn);
-	
-	if(f_open(&f,fn,FA_CREATE_NEW))
+
+	if(f_open(&f,fn,FA_WRITE|FA_CREATE_ALWAYS))
 		return;
 	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
 	f_close(&f);
+
+	rprintf(0,"%d bytes\n",bw);
 }
 
 void storage_read(uint32_t pageIdx, uint8_t *buf)
 {
 	FIL f;
 	char fn[_MAX_LFN];
-	UINT bw;
+	UINT br;
 
 	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
-	
+
 	rprintf(0,"storage_read %d %s\n",pageIdx,fn);
-	
+
 	memset(buf,0,STORAGE_PAGE_SIZE);
-	
-	if(f_open(&f,fn,FA_OPEN_EXISTING))
+
+	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
 		return;
-	f_read(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_read(&f,buf,STORAGE_PAGE_SIZE,&br);
 	f_close(&f);
+
+	rprintf(0,"%d bytes\n",br);
 }
 
 int main(void)

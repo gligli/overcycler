@@ -361,7 +361,7 @@ static void refreshMisc(void)
 
 void refreshPresetMode(void)
 {
-	if(!preset_loadCurrent(settings.presetMode?settings.presetNumber:MANUAL_PRESET_PAGE))
+	if(!preset_loadCurrent(settings.presetNumber))
 		preset_loadDefault(1);
 
 	ui_setPresetModified(0);
@@ -728,13 +728,9 @@ void synth_init(void)
 	lfo_setShape(&synth.vibrato,lsTri);
 	lfo_setSpeedShift(&synth.vibrato,4);
 
-	// manual preset
+	// default preset
 	
-	if(!preset_loadCurrent(MANUAL_PRESET_PAGE))
-	{
-		preset_loadDefault(1);
-		preset_saveCurrent(MANUAL_PRESET_PAGE);
-	}
+	preset_loadDefault(1);
 	
 	// load settings from storage; tune when they are bad
 	
