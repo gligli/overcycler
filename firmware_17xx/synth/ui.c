@@ -22,6 +22,7 @@
 #define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*24)
 #define POT_TIMEOUT (TICKER_1S*2/3)
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*3/4)
+#define SLOW_UPDATE_TIMEOUT (TICKER_1S/10)
 
 enum uiDigitInput_e{
 	diSynth,diLoadDecadeDigit,diStoreDecadeDigit,diLoadUnitDigit,diStoreUnitDigit
@@ -229,6 +230,9 @@ static struct
 	int8_t activeSource;
 	uint32_t activeSourceTimeout;
 	
+	uint32_t slowUpdateTimeout;
+	int8_t slowUpdateTimeoutNumber;
+	
 	int8_t pendingScreenClear;
 } ui;
 
@@ -270,6 +274,12 @@ int sendChar(int ch)
 	while(UART_CheckBusy((LPC_UART_TypeDef*)LPC_UART1)==SET);
 	UART_SendData((LPC_UART_TypeDef*)LPC_UART1,ch);
 	return -1;
+}
+
+void sendString(const char * s)
+{
+	while(*s)
+		sendChar(*s++);
 }
 
 uint8_t receiveChar(void)
@@ -428,7 +438,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
-	int8_t potnum;
+	int8_t potnum,change;
 	const struct uiParam_s * prm;
 
 //	rprintf(0,"handleUserInput %d\n",source);
@@ -442,6 +452,8 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		ui.activeSourceTimeout=0;
 		memset(&ui.lockTimeout[0],0,UI_POT_COUNT*sizeof(uint32_t));
 
+		ui.pendingScreenClear=1;
+		
 		return;
 	}
 	
@@ -460,6 +472,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	switch(prm->type)
 	{
 	case ptCont:
+		change=currentPreset.continuousParameters[prm->number]!=getPotValue(potnum);
 		currentPreset.continuousParameters[prm->number]=getPotValue(potnum);
 		break;
 	case ptStep:
@@ -491,34 +504,31 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		else
 			data=(currentPreset.steppedParameters[prm->number]+1)%valCount;
 
+		change=currentPreset.steppedParameters[prm->number]!=data;
 		currentPreset.steppedParameters[prm->number]=data;
 		
 		//	special cases
-		switch(prm->number)
+		if(change)
 		{
-			case spUnison: // unison latch
+			if(prm->number==spUnison)
+			{
+				// unison latch
 				if(data)
 					assigner_latchPattern();
 				else
 					assigner_setPoly();
 				assigner_getPattern(currentPreset.voicePattern,NULL);
-				break;					
-			case spABank:
-				refreshWaveNames(0);
-				break;
-			case spBBank:
-				refreshWaveNames(1);
-				break;
-			case spAWave:
-				refreshWaveforms(0);
-				break;
-			case spBWave:
-				refreshWaveforms(1);
-				break;
+			}
+			else if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
+			{
+				// waveform changes
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number;
+			}
 		}
-		
 		break;
 	case ptCust:
+		change=1;
 		switch(prm->number)
 		{
 			case 0:
@@ -535,10 +545,12 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	default:
 		/*nothing*/;
 	}
-	
-	ui.presetModified=1;
 
-	refreshFullState();
+	if(change)
+	{
+		ui.presetModified=1;
+		refreshFullState();
+	}
 }
 
 static void readKeypad(void)
@@ -695,6 +707,7 @@ void ui_update(void)
 	uint16_t v;
 	static uint8_t frc=0;
 	char * s;
+	int8_t fsDisp;
 	
 	++frc;
 	
@@ -703,40 +716,63 @@ void ui_update(void)
 	for(i=0;i<UI_POT_COUNT;++i)
 		updatePotValue(i);
 
-	// next updates done only 1 in 4 times
+	// slow updates (if needed)
 	
-	if(!(frc&3)==0) 
-		return;
-	
-	// display
+	if(currentTick>ui.slowUpdateTimeout)
+	{
+		switch(ui.slowUpdateTimeoutNumber)
+		{
+			case spABank:
+				refreshWaveNames(0);
+				break;
+			case spBBank:
+				refreshWaveNames(1);
+				break;
+			case spAWave:
+				refreshWaveforms(0);
+				break;
+			case spBWave:
+				refreshWaveforms(1);
+				break;
+		}
+		
+		ui.slowUpdateTimeout=UINT32_MAX;
+	}
 
+	// display
+	
+	fsDisp=ui.activeSourceTimeout>currentTick;
+	if(!fsDisp && ui.activeSourceTimeout)
+	{
+		ui.activeSourceTimeout=0;
+		ui.pendingScreenClear=1;
+	}
+	
 	if(ui.pendingScreenClear)
 		sendCommand("[2J",1,NULL); // clear screen
-	else
-		sendCommand("[H",1,NULL); // home pos
-	ui.pendingScreenClear=0;
+
+	sendCommand("[H",1,NULL); // home pos
 
 	if(ui.activePage==upNone)
 	{
-		rprintf(1,"GliGli's OverCycler ");
-		rprintf(1,"A: Oscs   B: Filter ");
-		rprintf(1,"C: Ampli  D: LFO/Mod");
-		rprintf(1,"*: Misc   #: Seq/Arp");
-		
+		sendString("GliGli's OverCycler ");
+		sendString("A: Oscs   B: Filter ");
+		sendString("C: Ampli  D: LFO/Mod");
+		sendString("*: Misc   #: Seq/Arp");
 	}
-	else if(ui.activeSourceTimeout>currentTick) // fullscreen display
+	else if(fsDisp) // fullscreen display
 	{
-		rprintf(1,getName(ui.activeSource,1));
+		if(ui.pendingScreenClear)
+			sendString(getName(ui.activeSource,1));
 
-		sendCommand("[H",1,NULL);
-		rprintf(1,"\r\r        %s        ",getDisplayValue(ui.activeSource,&v));
+		sendCommand("[3;9H",1,NULL);
+		sendString(getDisplayValue(ui.activeSource,&v));
 		
-		sendCommand("[H",1,NULL);
-		rprintf(1,"\r\r\r",s);
+		sendString("\r");
 		s=getDisplayFulltext(ui.activeSource);
 		if(s)
 		{
-			rprintf(1,s);
+			sendString(s);
 		}
 		else
 		{
@@ -752,43 +788,55 @@ void ui_update(void)
 	{
 		ui.activeSource=INT8_MAX;
 
-		for(i=0;i<3;++i)
-		{
-			rprintf(1,getName(i,0));
-			sendChar(' ');
-			sendChar(' ');
-		}
+		if(ui.pendingScreenClear)
+			for(i=0;i<3;++i)
+			{
+				sendString(getName(i,0));
+				sendChar(' ');
+				sendChar(' ');
+			}
+
 		sendChar('\r');
  
 		for(i=0;i<6;++i)
 		{
 			if(i==3) sendChar('\r');
-			rprintf(1,getDisplayValue(i,NULL));
+			sendString(getDisplayValue(i,NULL));
 			sendChar(' ');
 			sendChar(' ');
 		}
-		sendChar('\r');
-
-		for(i=3;i<6;++i)
+	
+		if(ui.pendingScreenClear)
 		{
-			rprintf(1,getName(i,0));
-			sendChar(' ');
-			sendChar(' ');
+			sendChar('\r');
+
+			for(i=3;i<6;++i)
+			{
+				sendString(getName(i,0));
+				sendChar(' ');
+				sendChar(' ');
+			}
 		}
 	}
 	else // pots
 	{
 		ui.activeSource=INT8_MAX;
 
-		for(i=0;i<UI_POT_COUNT/2;++i)
-			rprintf(1,getName(-i-1,0));
+		if(ui.pendingScreenClear)
+			for(i=0;i<UI_POT_COUNT/2;++i)
+				sendString(getName(-i-1,0));
 			
+		sendCommand("[H",1,NULL);
+		sendString("\r");
 		for(i=0;i<UI_POT_COUNT;++i)
-			rprintf(1,getDisplayValue(-i-1,NULL));
+			sendString(getDisplayValue(-i-1,NULL));
 
-		for(i=UI_POT_COUNT/2;i<UI_POT_COUNT;++i)
-			rprintf(1,getName(-i-1,0));
+		if(ui.pendingScreenClear)
+			for(i=UI_POT_COUNT/2;i<UI_POT_COUNT;++i)
+				sendString(getName(-i-1,0));
 	}
+
+	ui.pendingScreenClear=0;
 
 	// read keypad
 			

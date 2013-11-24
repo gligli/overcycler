@@ -76,7 +76,6 @@
       <itemPath>../Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
-  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
     <Elem>..</Elem>
   </sourceRootList>

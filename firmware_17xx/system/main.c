@@ -2,6 +2,8 @@
 // main code
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <sys/stat.h>
+
 #include "main.h"
 
 #include "LPC17xx.h"
@@ -18,6 +20,8 @@
 
 #define SYNTH_TIMER_HZ 2000
 #define DISK_TIMER_HZ 100
+
+#define STORAGE_PATH "/STORAGE"
 
 FATFS fatFS;
 static volatile int synthReady;
@@ -64,12 +68,36 @@ void delay_ms(uint32_t count)
 
 void storage_write(uint32_t pageIdx, uint8_t *buf)
 {
-	rprintf(0,"storage_write %d\n",pageIdx);
+	FIL f;
+	char fn[_MAX_LFN];
+	UINT bw;
+
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	
+	rprintf(0,"storage_write %d %s\n",pageIdx,fn);
+	
+	if(f_open(&f,fn,FA_CREATE_NEW))
+		return;
+	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
 }
 
 void storage_read(uint32_t pageIdx, uint8_t *buf)
 {
-	rprintf(0,"storage_read %d\n",pageIdx);
+	FIL f;
+	char fn[_MAX_LFN];
+	UINT bw;
+
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	
+	rprintf(0,"storage_read %d %s\n",pageIdx,fn);
+	
+	memset(buf,0,STORAGE_PAGE_SIZE);
+	
+	if(f_open(&f,fn,FA_OPEN_EXISTING))
+		return;
+	f_read(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
 }
 
 int main(void)
@@ -97,6 +125,8 @@ int main(void)
 	if((res=f_mount(0,&fatFS)))
 		rprintf(0,"f_mount res=%d\n",res);
 
+	f_mkdir(STORAGE_PATH);
+	
 	rprintf(0,"synth init...\n");
 
 	BLOCK_INT

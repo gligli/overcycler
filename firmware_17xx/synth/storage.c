@@ -361,6 +361,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		currentPreset.steppedParameters[spLFOShape]=lsTri;
 		currentPreset.steppedParameters[spLFOTargets]=otBoth;
 		currentPreset.steppedParameters[spLFOShift]=1;
+
+		currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
+		currentPreset.steppedParameters[spBBank]=26;
 		
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
 			currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
