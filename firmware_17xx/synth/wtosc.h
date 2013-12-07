@@ -10,14 +10,13 @@
 struct wtosc_s
 {
 	uint16_t data[WTOSC_MAX_SAMPLES];	
-	uint8_t undersample[WTOSC_HIGHEST_NOTE+1];
 
 	int32_t period;
 	int32_t increment;
+	int32_t sampleCount;
 	
 	int32_t counter;
 	int32_t phase;
-	int32_t sampleCount;
 
 	uint16_t curSample;
 	uint16_t prevSample;

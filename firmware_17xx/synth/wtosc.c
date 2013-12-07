@@ -15,13 +15,13 @@
 
 static uint8_t cosineShape[COSINESHAPE_LENGTH];
 
-static FORCEINLINE uint32_t cvToFrequency(uint16_t cv) // returns the frequency shifted by 8
+static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
 	
 	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
 	v=(v*20)<<8; // phase for computeShape
-	v=(uint32_t)computeShape(v,oscOctaveCurve,1)+32768; // octave frequency in the 12th octave
+	v=(uint32_t)computeShape(v,oscOctaveCurve,0)+32768; // octave frequency in the 12th octave
 	v=(v<<8)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 8
 	
 	return v;
@@ -56,8 +56,7 @@ void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab)
 
 void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
 {
-	double f,dummy,sampleRate;
-	int i,underSample;
+	int i;
 
 	memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
 
@@ -67,30 +66,6 @@ void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCoun
 	if(data)
 		for(i=0;i<sampleCount;++i)
 			o->data[i]=(int32_t)data[i]-INT16_MIN;
-
-	// recompute undersamples
-
-	if(o->sampleCount!=sampleCount)
-	{
-		for(i=0;i<=WTOSC_HIGHEST_NOTE;++i)
-		{
-			sampleRate=cvToFrequency(i*WTOSC_CV_SEMITONE)/256.0*sampleCount;
-			underSample=0;
-
-			do
-			{
-				do
-				{
-					++underSample;
-					f=modf(((double)sampleCount)/underSample,&dummy);
-				}
-				while(fabs(f));
-			}
-			while(MAX_SAMPLERATE(underSample>2?2:1)<(((double)sampleRate)/underSample));
-
-			o->undersample[i]=underSample;
-		}
-	}
 
 	o->sampleCount=sampleCount;
 }
@@ -107,7 +82,11 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing)
 		return;	
 	
 	sampleRate=cvToFrequency(cv)*o->sampleCount;
-	underSample=o->undersample[cv/WTOSC_CV_SEMITONE];
+	underSample=(sampleRate>>8)/MAX_SAMPLERATE(1.618);
+
+	do
+		++underSample;
+	while(o->sampleCount%underSample);
 
 	o->increment=underSample+aliasing;
 	o->period=(VIRTUAL_CLOCK/((sampleRate/o->increment)>>8));	
