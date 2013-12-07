@@ -42,7 +42,7 @@ enum uiKeypadButton_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upFil=1,upAmp=2,upMod=3,upSeqArp=4,upMisc=5
+	upNone=-1,upOscs=0,upFil=1,upAmp=2,upMod=3,upSeqArp=4,upMisc=5,upTuner=6
 };
 
 struct uiParam_s
@@ -54,7 +54,7 @@ struct uiParam_s
 	const char * values[8]; // 4 chars + zero termination
 };
 
-const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/key num]
 {
 	/* Oscillators page (A) */
 	{
@@ -212,8 +212,37 @@ const struct uiParam_s uiParameters[6][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptCust,.number=6,.shortName="Save",.longName="Save preset"},
 			/*4*/ {.type=ptNone},
-			/*5*/ {.type=ptNone},
+			/*5*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune hardware"},
 			/*6*/ {.type=ptNone},
+			/*7*/ {.type=ptNone},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+		},
+	},
+	/* Tuner page */
+	{
+		{
+			/* 1st row of pots */
+			{.type=ptCust,.number=9,.shortName="Oct1",.longName="Tuner octave 1"},
+			{.type=ptCust,.number=9,.shortName="Oct2",.longName="Tuner octave 2"},
+			{.type=ptCust,.number=9,.shortName="Oct3",.longName="Tuner octave 3"},
+			{.type=ptCust,.number=9,.shortName="Oct4",.longName="Tuner octave 4"},
+			{.type=ptCust,.number=9,.shortName="Oct5",.longName="Tuner octave 5"},
+			/* 2nd row of pots */
+			{.type=ptCust,.number=9,.shortName="Oct6",.longName="Tuner octave 6"},
+			{.type=ptCust,.number=9,.shortName="Oct7",.longName="Tuner octave 7"},
+			{.type=ptCust,.number=9,.shortName="Oct8",.longName="Tuner octave 8"},
+			{.type=ptNone},
+			{.type=ptNone},
+		},
+		{
+			/*1*/ {.type=ptCust,.number=10,.shortName="Vce1",.longName="Tuner voice 1"},
+			/*2*/ {.type=ptCust,.number=10,.shortName="Vce2",.longName="Tuner voice 2"},
+			/*3*/ {.type=ptCust,.number=10,.shortName="Vce3",.longName="Tuner voice 3"},
+			/*4*/ {.type=ptCust,.number=10,.shortName="Vce4",.longName="Tuner voice 4"},
+			/*5*/ {.type=ptCust,.number=10,.shortName="Vce5",.longName="Tuner voice 5"},
+			/*6*/ {.type=ptCust,.number=10,.shortName="Vce6",.longName="Tuner voice 6"},
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
@@ -256,6 +285,8 @@ static struct
 	int8_t pendingScreenClear;
 
 	int8_t presetAwaitingNumber;
+	
+	int8_t tunerActiveVoice;
 } ui;
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
@@ -450,6 +481,15 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 7:
 				v=settings.midiReceiveChannel;
 				break;
+			case 8:
+				v=0;
+				break;
+			case 9:
+				v=settings.tunes[potnum][ui.tunerActiveVoice]>>3;
+				break;
+			case 10:
+				v=ui.tunerActiveVoice;
+				break;
 			}
 		}
 		
@@ -595,6 +635,17 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			case 7:
 				settings.midiReceiveChannel=((getPotValue(potnum)*17)>>16)-1;
 				settings_save();
+				break;
+			case 8:
+				ui.activePage=upTuner;
+				ui.pendingScreenClear=1;
+				break;
+			case 9:
+				settings.tunes[potnum][ui.tunerActiveVoice]=TUNER_FIL_INIT_OFFSET+potnum*TUNER_FIL_INIT_SCALE-4096+(getPotValue(potnum)>>3);
+				settings_save();
+				break;
+			case 10:
+				ui.tunerActiveVoice=source-kb1;
 				break;
 		}
 		break;

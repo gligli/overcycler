@@ -10,9 +10,6 @@
 #define TUNER_MIDDLE_C_HERTZ 261.63
 #define TUNER_LOWEST_HERTZ (TUNER_MIDDLE_C_HERTZ/16)
 
-#define TUNER_FIL_INIT_OFFSET 8192
-#define TUNER_FIL_INIT_SCALE (65535/16)
-
 static struct
 {
 	cv_t currentCV;
