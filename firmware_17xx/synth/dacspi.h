@@ -14,7 +14,7 @@
 #define DACSPI_CMD_SET_REF 0x3000
 
 void dacspi_init(void);
-void dacspi_setVoiceCommand(uint8_t buffer, uint8_t voice, int8_t ab, uint16_t command);
+void dacspi_setVoiceCommand(int32_t buffer, int voice, int ab, uint16_t command);
 void dacspi_sendCVCommand(uint16_t command);
 
 #endif

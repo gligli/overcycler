@@ -47,7 +47,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 }
 
-FORCEINLINE void dacspi_setVoiceCommand(uint8_t buffer, uint8_t voice, int8_t ab, uint16_t command)
+FORCEINLINE void dacspi_setVoiceCommand(int32_t buffer, int voice, int ab, uint16_t command)
 {
 	dacspi.voiceCommands[buffer][voice][ab]=command;
 }

@@ -657,12 +657,12 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 	// osc A
 
 	vpa+=synth.oscANoteCV[v];
-	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0);
+	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0,(wmodMask&2)?vma:32768);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
-	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0);
+	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0,(wmodMask&32)?vmb:32768);
 
 	// amplifier
 	
