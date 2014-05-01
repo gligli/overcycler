@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler main board schematics"
-Date "24 sep 2013"
+Date "30 mar 2014"
 Rev "2"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -396,28 +396,6 @@ F 1 "GND" H 3650 3330 30  0001 C CNN
 F 2 "" H 3650 3400 60  0000 C CNN
 F 3 "" H 3650 3400 60  0000 C CNN
 	1    3650 3400
-	1    0    0    -1  
-$EndComp
-$Comp
-L +5V #PWR012
-U 1 1 521401B5
-P 3650 1900
-F 0 "#PWR012" H 3650 1990 20  0001 C CNN
-F 1 "+5V" H 3650 1990 30  0000 C CNN
-F 2 "" H 3650 1900 60  0000 C CNN
-F 3 "" H 3650 1900 60  0000 C CNN
-	1    3650 1900
-	1    0    0    -1  
-$EndComp
-$Comp
-L +5V #PWR013
-U 1 1 521401BB
-P 3650 3650
-F 0 "#PWR013" H 3650 3740 20  0001 C CNN
-F 1 "+5V" H 3650 3740 30  0000 C CNN
-F 2 "" H 3650 3650 60  0000 C CNN
-F 3 "" H 3650 3650 60  0000 C CNN
-	1    3650 3650
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -828,14 +806,14 @@ Wire Wire Line
 Wire Wire Line
 	2900 3150 2900 3350
 Wire Wire Line
-	4400 3350 2900 3350
+	2900 3350 4400 3350
 Connection ~ 3650 3350
 Wire Wire Line
 	3650 5050 3650 5150
 Wire Wire Line
 	4400 5100 2900 5100
 Wire Wire Line
-	2900 4400 2900 5100
+	2900 5100 2900 4400
 Wire Wire Line
 	2900 4900 2950 4900
 Connection ~ 3650 5100
@@ -873,13 +851,13 @@ Wire Wire Line
 Wire Wire Line
 	4400 4700 4350 4700
 Wire Wire Line
-	4400 1950 4400 3350
+	4400 3350 4400 1950
 Wire Wire Line
 	4400 2950 4350 2950
 Wire Wire Line
 	3650 3650 3650 3750
 Wire Wire Line
-	3650 1900 3650 2000
+	3650 1850 3650 2000
 Wire Wire Line
 	4500 5000 4350 5000
 Wire Wire Line
@@ -965,7 +943,7 @@ Connection ~ 4400 2950
 Wire Wire Line
 	5200 2150 5050 2150
 Wire Wire Line
-	5050 2150 5050 1750
+	5050 1750 5050 3650
 Wire Wire Line
 	2500 2650 1350 2650
 Wire Wire Line
@@ -1485,4 +1463,10 @@ Connection ~ 4400 1100
 Connection ~ 3200 1100
 Wire Wire Line
 	1050 7150 1500 7150
+Wire Wire Line
+	3650 1850 5050 1850
+Connection ~ 5050 1850
+Wire Wire Line
+	5050 3650 3650 3650
+Connection ~ 5050 2150
 $EndSCHEMATC
