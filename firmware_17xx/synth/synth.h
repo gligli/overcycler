@@ -27,10 +27,16 @@ typedef enum
 	otNone=0,otA=1,otB=2,otBoth=3
 } oscTarget_t;
 
+typedef enum
+{
+	smInternal=0,smMIDI=1,smTape=2
+} syncMode_t;
+
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato); // voice -1 is unison
 void synth_uartEvent(uint8_t data);
 void synth_updateDACsEvent(int32_t start, int32_t count);
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask);
+void synth_realtimeEvent(uint8_t midiEvent);
 
 void synth_timerInterrupt(void);
 

@@ -16,6 +16,11 @@
 #include "arp.h"
 #include "storage.h"
 #include "vca_curves.h"
+#include "../xnormidi/midi.h"
+#include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
+
+#define BIT_INTPUT_FOOTSWITCH (1<<26)
 
 #define WAVEDATA_PATH "/WAVEDATA"
 
@@ -89,7 +94,11 @@ static struct
 	uint16_t modulationDelayTickCount;
 	
 	uint8_t wmodMask;
+	
+	uint8_t pendingExtClock;
 } synth;
+
+extern const uint16_t attackCurveLookup[]; // for modulation delay
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
@@ -272,8 +281,8 @@ static void refreshLfoSettings(void)
 	static const int8_t mr[]={5,3,1,0};
 	lfoShape_t shape;
 	uint8_t shift;
-	int8_t dlyMod;
-	uint16_t mwAmt,lfoAmt,vibAmt;
+	uint16_t mwAmt,lfoAmt,vibAmt,dlyAmt;
+	uint32_t elapsed;
 
 	shape=currentPreset.steppedParameters[spLFOShape];
 	shift=1+currentPreset.steppedParameters[spLFOShift]*3;
@@ -281,9 +290,26 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo,shape);
 	lfo_setSpeedShift(&synth.lfo,shift);
 	
-	dlyMod=currentTick-synth.modulationDelayStart>synth.modulationDelayTickCount;
+	// wait modulationDelayTickCount then progressively increase over
+	// modulationDelayTickCount time, following an exponential curve
+	dlyAmt=0;
+	if(synth.modulationDelayStart!=UINT32_MAX)
+	{
+		if(currentPreset.continuousParameters[cpModDelay]==0)
+		{
+			dlyAmt=UINT16_MAX;
+		}
+		else if(currentTick>=synth.modulationDelayStart+synth.modulationDelayTickCount)
+		{
+			elapsed=currentTick-(synth.modulationDelayStart+synth.modulationDelayTickCount);
+			if(elapsed>=synth.modulationDelayTickCount)
+				dlyAmt=UINT16_MAX;
+			else
+				dlyAmt=attackCurveLookup[(elapsed<<8)/synth.modulationDelayTickCount];
+		}
+	}
+	
 	mwAmt=synth.modwheelAmount>>mr[currentPreset.steppedParameters[spModwheelRange]];
-
 	lfoAmt=currentPreset.continuousParameters[cpLFOAmt];
 	lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
 
@@ -297,20 +323,18 @@ static void refreshLfoSettings(void)
 				satAddU16U16(lfoAmt,mwAmt));
 		lfo_setCVs(&synth.vibrato,
 				 currentPreset.continuousParameters[cpVibFreq],
-				 dlyMod?vibAmt:0);
+				 scaleU16U16(vibAmt,dlyAmt));
 	}
 	else
 	{
 		lfo_setCVs(&synth.lfo,
 				currentPreset.continuousParameters[cpLFOFreq],
-				dlyMod?lfoAmt:0);
+				scaleU16U16(lfoAmt,dlyAmt));
 		lfo_setCVs(&synth.vibrato,
 				currentPreset.continuousParameters[cpVibFreq],
 				satAddU16U16(vibAmt,mwAmt));
 	}
-
 }
-
 static void refreshModulationDelay(int8_t refreshTickCount)
 {
 	int8_t anyPressed;
@@ -517,6 +541,30 @@ void refreshWaveforms(int8_t ab)
 	}
 }
 
+static void handleBitInputs(void)
+{
+	uint32_t cur;
+	static uint32_t last=0;
+	
+	cur=GPIO_ReadValue(3);
+	
+	// control footswitch 
+	 
+	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INTPUT_FOOTSWITCH) && last&BIT_INTPUT_FOOTSWITCH)
+	{
+		assigner_latchPattern();
+		assigner_getPattern(currentPreset.voicePattern,NULL);
+	}
+	else if(arp_getMode()!=amOff && (cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
+	{
+		arp_setMode(arp_getMode(),(cur&BIT_INTPUT_FOOTSWITCH)?0:2);
+	}
+
+	// this must stay last
+	
+	last=cur;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
@@ -683,6 +731,12 @@ void synth_init(void)
 	
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
+
+	// init footswitch in
+
+	GPIO_SetDir(3,1<<26,0);
+	PINSEL_SetResistorMode(3,26,PINSEL_PINMODE_TRISTATE);
+	PINSEL_SetOpenDrainMode(3,26,PINSEL_PINMODE_NORMAL);
 	
 	// init cv mux
 
@@ -880,10 +934,17 @@ void synth_timerInterrupt(void)
 		
 		lfo_update(&synth.vibrato);
 		
-		// arp
+		// bit inputs (footswitch / tape in)
+	
+		handleBitInputs();
+		
+		// arpeggiator
 
-		if(arp_getMode()!=amOff)
+		if(arp_getMode()!=amOff && (settings.syncMode==smInternal || synth.pendingExtClock))
 		{
+			if(synth.pendingExtClock)
+				--synth.pendingExtClock;
+			
 			arp_update();
 		}
 
@@ -994,5 +1055,22 @@ void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 	{
 		synth.modwheelAmount=modulation;
 		refreshLfoSettings();
+	}
+}
+
+void synth_realtimeEvent(uint8_t midiEvent)
+{
+	if(settings.syncMode!=smMIDI)
+		return;
+	
+	switch(midiEvent)
+	{
+		case MIDI_CLOCK:
+			++synth.pendingExtClock;
+			break;
+		case MIDI_START:
+			arp_resetCounter();
+			synth.pendingExtClock=0;
+			break;
 	}
 }

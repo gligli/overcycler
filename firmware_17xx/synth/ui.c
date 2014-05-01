@@ -202,7 +202,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"}},
 			/* 2nd row of pots */
 			{.type=ptCust,.number=11,.shortName="Bank",.longName="Preset bank"},
 			{.type=ptNone},
@@ -499,6 +499,9 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 11:
 				v=ui.presetBank;
 				break;
+			case 12:
+				v=settings.syncMode;
+				break;
 			}
 		}
 		
@@ -658,6 +661,10 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 11:
 				ui.presetBank=(getPotValue(potnum)*UI_PRESET_BANKS)>>16;
+				break;
+			case 12:
+				settings.syncMode=(getPotValue(potnum)*2)>>16;
+				settings_save();
 				break;
 		}
 		break;

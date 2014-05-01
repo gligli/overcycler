@@ -7,7 +7,7 @@
 #include "wtosc.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 1
+#define STORAGE_VERSION 2
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -199,6 +199,13 @@ LOWERCODESIZE int8_t settings_load(void)
 
 	// v2
 
+	settings.syncMode=storageRead8();
+
+	if (storage.version<3)
+		return 1;
+		
+	// v3
+	
 	// ...
 	
 	return 1;
@@ -223,6 +230,10 @@ LOWERCODESIZE void settings_save(void)
 
 	// v2
 
+	storageWrite8(settings.syncMode);
+	
+	// v3
+		
 	// ...
 
 	// this must stay last

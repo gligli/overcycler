@@ -50,7 +50,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1,0);
+		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1);
 	}
 	else
 	{
@@ -76,7 +76,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(intNote,0,0,0);
+		assigner_assignNote(intNote,0,0);
 	}
 	else
 	{
@@ -99,7 +99,7 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 	print("\n");
 #endif
 
-	if (control==1) // modwheel
+	if(control==1) // modwheel
 	{
 		synth_wheelEvent(0,value<<9,2);
 	}
@@ -162,6 +162,12 @@ static void midi_pitchBendEvent(MidiDevice * device, uint8_t channel, uint8_t v1
 	
 	synth_wheelEvent(value,0,1);
 }
+
+static void midi_realtimeEvent(MidiDevice * device, uint8_t event)
+{
+	synth_realtimeEvent(event);
+}
+
 void midi_init(void)
 {
 	midi_device_init(&midi);
@@ -170,6 +176,7 @@ void midi_init(void)
 	midi_register_cc_callback(&midi,midi_ccEvent);
 	midi_register_progchange_callback(&midi,midi_progChangeEvent);
 	midi_register_pitchbend_callback(&midi,midi_pitchBendEvent);
+	midi_register_realtime_callback(&midi,midi_realtimeEvent);
 }
 
 void midi_update(void)
