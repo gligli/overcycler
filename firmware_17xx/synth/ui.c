@@ -18,9 +18,12 @@
 #define UI_POT_COUNT 10
 #define UI_POT_SAMPLES 16
 
+#define UI_PRESET_SLOTS 20
+#define UI_PRESET_BANKS 10
+
 #define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*32)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*24)
-#define POT_TIMEOUT (TICKER_1S*2/3)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*16)
+#define POT_TIMEOUT (TICKER_1S*5/8)
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*3/4)
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/10)
 
@@ -201,7 +204,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptNone},
 			{.type=ptNone},
 			/* 2nd row of pots */
-			{.type=ptNone},
+			{.type=ptCust,.number=11,.shortName="Bank",.longName="Preset bank"},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
@@ -284,7 +287,8 @@ static struct
 	
 	int8_t pendingScreenClear;
 
-	int8_t presetAwaitingNumber;
+	int8_t presetBank;
+	int8_t presetSlot;
 	
 	int8_t tunerActiveVoice;
 } ui;
@@ -474,9 +478,11 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				v=arp_getHold();
 				break;
 			case 4:
+				v=ui.presetSlot;
+				break;
 			case 5:
 			case 6:
-				v=ui.presetAwaitingNumber;
+				v=ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS;
 				break;
 			case 7:
 				v=settings.midiReceiveChannel;
@@ -489,6 +495,9 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				break;
 			case 10:
 				v=ui.tunerActiveVoice;
+				break;
+			case 11:
+				v=ui.presetBank;
 				break;
 			}
 		}
@@ -611,15 +620,15 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				ui.presetAwaitingNumber=(getPotValue(potnum)*100)>>16;
+				ui.presetSlot=(getPotValue(potnum)*UI_PRESET_SLOTS)>>16;
 				break;
 			case 6:
-				preset_saveCurrent(ui.presetAwaitingNumber);
+				preset_saveCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS);
 				/* fall through */
 			case 5:
-				if(preset_loadCurrent(ui.presetAwaitingNumber))
+				if(preset_loadCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS))
 				{
-					settings.presetNumber=ui.presetAwaitingNumber;
+					settings.presetNumber=ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS;
 					settings_save();                
 				}
 				else
@@ -646,6 +655,9 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 10:
 				ui.tunerActiveVoice=source-kb1;
+				break;
+			case 11:
+				ui.presetBank=(getPotValue(potnum)*UI_PRESET_BANKS)>>16;
 				break;
 		}
 		break;
@@ -806,6 +818,8 @@ void ui_init(void)
 	
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
+	ui.presetSlot=-1;
+	ui.presetBank=-1;
 }
 
 void ui_update(void)
@@ -817,6 +831,14 @@ void ui_update(void)
 	int8_t fsDisp;
 	
 	++frc;
+	
+	// init preset #
+	
+	if(ui.presetSlot==-1)
+	{
+		ui.presetSlot=settings.presetNumber%UI_PRESET_SLOTS;
+		ui.presetBank=settings.presetNumber/UI_PRESET_SLOTS;
+	}
 	
 	// update pot values
 
