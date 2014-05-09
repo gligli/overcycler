@@ -10,6 +10,23 @@
 
 #define TICKER_1S 500
 
+#define CVMUX_PORT_ABC 0
+#define CVMUX_PIN_A 19
+#define CVMUX_PIN_B 20
+#define CVMUX_PIN_C 21
+
+#define CVMUX_PORT_CARD0 0
+#define CVMUX_PIN_CARD0 22
+
+#define CVMUX_PORT_CARD1 0
+#define CVMUX_PIN_CARD1 10
+
+#define CVMUX_PORT_CARD2 4
+#define CVMUX_PIN_CARD2 29
+
+#define CVMUX_PORT_VCA 4
+#define CVMUX_PIN_VCA 28
+
 typedef enum {cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvAmp=6,cvMasterLeft=7,cvMasterRight=8} cv_t; 
 
 typedef enum

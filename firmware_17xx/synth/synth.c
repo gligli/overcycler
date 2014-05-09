@@ -30,23 +30,6 @@
 
 #define POT_DEAD_ZONE 512
 
-#define CVMUX_PORT_ABC 0
-#define CVMUX_PIN_A 19
-#define CVMUX_PIN_B 20
-#define CVMUX_PIN_C 21
-
-#define CVMUX_PORT_CARD0 0
-#define CVMUX_PIN_CARD0 22
-
-#define CVMUX_PORT_CARD1 0
-#define CVMUX_PIN_CARD1 10
-
-#define CVMUX_PORT_CARD2 4
-#define CVMUX_PIN_CARD2 29
-
-#define CVMUX_PORT_VCA 4
-#define CVMUX_PIN_VCA 28
-
 // soft voice to hard voice (mapped so that the upper the voice, the stronger panning it gets)
 const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 {
@@ -585,15 +568,6 @@ static inline void computeGlide(uint16_t * out, const uint16_t target, const uin
 	}
 }
 
-static FORCEINLINE void setCVReference(uint16_t value)
-{
-	uint16_t cmd;
-	
-	cmd=(value>>4)|DACSPI_CMD_SET_REF;
-	
-	dacspi_sendCVCommand(cmd);
-}
-
 static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 {
 	switch(cv)
@@ -613,63 +587,32 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	return value;
 }
 
-static NOINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
+static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
-	uint16_t value;
+	uint16_t value,channel,cmd;
 	
 	v=MIN(v,UINT16_MAX);
 	value=adjustCV(cv,v);
 
-	setCVReference(value);
-
 	if(cv<=cvResonance)
 	{
-		voice=synth_voiceLayout[0][voice];
-		
-		if(cv&1)
-			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_A);
-		if(cv&2)
-			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_B);
-		if(voice&1)
-			GPIO_SetValue(CVMUX_PORT_ABC,1<<CVMUX_PIN_C);
-
-		switch(voice>>1)
-		{
-		case 0:
-			GPIO_ClearValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
-			break;			
-		case 1:
-			GPIO_ClearValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
-			break;			
-		case 2:
-			GPIO_ClearValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
-			break;			
-		}
+		channel=(synth_voiceLayout[0][voice]<<2)|cv;
 	}
 	else if(cv>=cvAmp)
 	{
 		if(cv==cvAmp)
 		{
-			voice=synth_voiceLayout[1][voice];
-
-			GPIO_SetValue(CVMUX_PORT_ABC,voice<<CVMUX_PIN_A);
+			channel=24|synth_voiceLayout[1][voice];
 		}
 		else
 		{
-			cv-=cvMasterLeft;
-			GPIO_SetValue(CVMUX_PORT_ABC,(cv+SYNTH_VOICE_COUNT)<<CVMUX_PIN_A);
+			channel=30+(cv-cvMasterLeft);
 		}
-
-		GPIO_ClearValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
 	}
-
-	delay_us(4);
-
-	GPIO_SetValue(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0);
-	GPIO_SetValue(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1);
-	GPIO_SetValue(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2);
-	GPIO_SetValue(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA);
-	GPIO_ClearValue(CVMUX_PORT_ABC,7<<CVMUX_PIN_A);
+	
+	cmd=(value>>4)|DACSPI_CMD_SET_REF;
+	
+	dacspi_setCVCommand(cmd,channel);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)
