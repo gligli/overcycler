@@ -29,6 +29,7 @@
 #define MAX_FILENAME _MAX_LFN
 
 #define POT_DEAD_ZONE 512
+#define VCA_RESO_COMPENSATION 10000
 
 // soft voice to hard voice (mapped so that the upper the voice, the stronger panning it gets)
 const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
@@ -576,6 +577,11 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
+		if (value)
+			value=INT16_MAX-(value>>1);
+		else
+			value=UINT16_MAX;
+		break;
 	case cvMasterLeft:
 	case cvMasterRight:
 		value=computeShape((uint32_t)value<<8,vcaLinearizationCurve,1);		
@@ -657,10 +663,9 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 
 	// amplifier
 	
-	if(synth.ampEnvs[v].stage==sWait)
-		ampVal=0;
-	vamp=satAddU16S32(synth.ampEnvs[v].output,ampVal);
-	vamp=(vamp*resoFactor)>>8;
+	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
+	vamp=scaleU16U16(vamp,UINT16_MAX-VCA_RESO_COMPENSATION);
+	if (vamp) vamp+=resoFactor;
 	refreshCV(v,cvAmp,vamp);
 }
 
@@ -716,7 +721,7 @@ void synth_init(void)
 		adsr_init(&synth.ampEnvs[i]);
 		adsr_init(&synth.filEnvs[i]);
 
-		adsr_setShape(&synth.ampEnvs[i],1);
+		adsr_setShape(&synth.ampEnvs[i],0);
 		adsr_setShape(&synth.filEnvs[i],1);
 	}
 
@@ -808,6 +813,7 @@ void synth_timerInterrupt(void)
 		// amplifier
 	
 	ampVal=synth.benderCVs[cvAmp];
+	ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV);
 	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
 	
 	// global computations
@@ -831,7 +837,8 @@ void synth_timerInterrupt(void)
 	wmodAVal=MAX(0,MIN(UINT16_MAX,wmodAVal));
 	wmodBVal=MAX(0,MIN(UINT16_MAX,wmodBVal));
 	filterVal=MAX(INT16_MIN,MIN(INT16_MAX,filterVal));
-	resoFactor=(UINT16_MAX+2*(int32_t)currentPreset.continuousParameters[cpResonance])/(3*256);
+	ampVal=MAX(0,MIN(UINT16_MAX,ampVal));
+	resoFactor=scaleU16U16(currentPreset.continuousParameters[cpResonance],VCA_RESO_COMPENSATION);
 	
 	// per voice stuff
 	
