@@ -66,7 +66,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptStep,.number=spABank,.shortName="ABnk",.longName="Osc A Bank"},
 			{.type=ptStep,.number=spAWave,.shortName="AWav",.longName="Osc A Waveform"},
 			{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
-			{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
+			{.type=ptCont,.number=cpBFreq,.shortName="Freq",.longName="Osc A/B Frequency"},
 			{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
 			/* 2nd row of pots */
 			{.type=ptStep,.number=spBBank,.shortName="BBnk",.longName="Osc B Bank"},

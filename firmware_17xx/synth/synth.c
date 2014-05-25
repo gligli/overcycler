@@ -96,13 +96,12 @@ static void computeTunedCVs(void)
 	uint16_t baseAPitch,baseBPitch,baseCutoff;
 	int16_t mTune,fineBFreq,detune;
 
-	uint16_t baseAPitchRaw,baseBPitchRaw,baseCutoffRaw,mTuneRaw,fineBFreqRaw,detuneRaw,trackRaw;
+	uint16_t baseBPitchRaw,baseCutoffRaw,mTuneRaw,fineBFreqRaw,detuneRaw,trackRaw;
 	uint8_t chrom;
 	
 	mTuneRaw=currentPreset.continuousParameters[cpMasterTune];
 	fineBFreqRaw=currentPreset.continuousParameters[cpBFineFreq];
 	baseCutoffRaw=currentPreset.continuousParameters[cpCutoff];
-	baseAPitchRaw=currentPreset.continuousParameters[cpAFreq];
 	baseBPitchRaw=currentPreset.continuousParameters[cpBFreq];
 	detuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
 	trackRaw=currentPreset.continuousParameters[cpFilKbdAmt];
@@ -113,8 +112,17 @@ static void computeTunedCVs(void)
 	mTune=(mTuneRaw>>7)+INT8_MIN*2;
 	fineBFreq=(fineBFreqRaw>>8)+INT8_MIN;
 	baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
-	baseAPitch=baseAPitchRaw>>2;
-	baseBPitch=baseBPitchRaw>>2;
+	
+	if(baseBPitchRaw>=UINT16_MAX/2)
+	{
+		baseAPitch=0;
+		baseBPitch=(baseBPitchRaw-(UINT16_MAX/2))>>1;
+	}
+	else
+	{
+		baseAPitch=((UINT16_MAX/2)-baseBPitchRaw)>>1;
+		baseBPitch=0;
+	}
 	
 	baseCutoffNote=baseCutoff>>8;
 	baseANote=baseAPitch>>8; // 64 semitones

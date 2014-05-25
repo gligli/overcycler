@@ -7,7 +7,7 @@
 #include "wtosc.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 2
+#define STORAGE_VERSION 3
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -264,8 +264,13 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	// v2
 
-	// ...
+	if(storage.version<3)
+		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+(UINT16_MAX/2);
 
+	// v3
+	
+	// ...
+	
 	return 1;
 }
 
@@ -328,6 +333,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
 
+	currentPreset.continuousParameters[cpBFreq]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 	currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
