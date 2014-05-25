@@ -369,6 +369,8 @@ static void refreshMisc(void)
 		synth.wmodMask|=1;
 	if(currentPreset.steppedParameters[spAWModType]==wmWidth)
 		synth.wmodMask|=2;
+	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
+		synth.wmodMask|=4;
 	if(currentPreset.steppedParameters[spAWModEnvEn])
 		synth.wmodMask|=8;
 
@@ -376,6 +378,8 @@ static void refreshMisc(void)
 		synth.wmodMask|=16;
 	if(currentPreset.steppedParameters[spBWModType]==wmWidth)
 		synth.wmodMask|=32;
+	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
+		synth.wmodMask|=64;
 	if(currentPreset.steppedParameters[spBWModEnvEn])
 		synth.wmodMask|=128;
 }
@@ -631,7 +635,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)
 {
-	int32_t vpa,vpb,vma,vmb,vf,vamp,envVal;
+	int32_t vpa,vpb,vma,vmb,vf,vamp,envVal,envValScale;
 
 	// envs
 
@@ -647,26 +651,41 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 	refreshCV(v,cvCutoff,vf);
 
 	// oscs
-
-	vpa=pitchAVal;
-	vpb=pitchBVal;
+	
+	envValScale=scaleU16S16(envVal,wmodEnvAmt);
 
 	vma=wmodAVal;
 	if(wmodMask&8)
-		vma+=scaleU16S16(envVal,wmodEnvAmt);
+	{
+		vma+=envValScale;
+		vma=MAX(0,MIN(UINT16_MAX,vma));
+	}
 
 	vmb=wmodBVal;
 	if(wmodMask&128)
-		vmb+=scaleU16S16(envVal,wmodEnvAmt);
+	{
+		vmb+=envValScale;
+		vmb=MAX(0,MIN(UINT16_MAX,vmb));
+	}
+
+	vpa=pitchAVal;
+	if(wmodMask&4)
+		vpa+=vma-(UINT16_MAX/2);
+
+	vpb=pitchBVal;
+	if(wmodMask&64)
+		vpb+=vmb-(UINT16_MAX/2);
 
 	// osc A
 
 	vpa+=synth.oscANoteCV[v];
+	vpa=MAX(0,MIN(UINT16_MAX,vpa));
 	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0,(wmodMask&2)?vma:32768);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
+	vpb=MAX(0,MIN(UINT16_MAX,vpb));
 	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0,(wmodMask&32)?vmb:32768);
 
 	// amplifier

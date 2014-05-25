@@ -335,6 +335,8 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	currentPreset.continuousParameters[cpBFreq]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpABaseWMod]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpBBaseWMod]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 	currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;

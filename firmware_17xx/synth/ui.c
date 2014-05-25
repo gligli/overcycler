@@ -77,8 +77,8 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 		},
 		{
 			/*1*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency mode",.values={"Free","Semi","Oct "}},
-			/*2*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod type",.values={"Off ","Alia","Wdth"}},
-			/*3*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod type",.values={"Off ","Alia","Wdth"}},
+			/*2*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod type",.values={"Off ","Alia","Wdth","Freq"}},
+			/*3*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
