@@ -36,7 +36,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler voice board schematics"
-Date "1 oct 2013"
+Date "29 may 2014"
 Rev "1"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -679,7 +679,7 @@ L R R15
 U 1 1 5208A2D0
 P 9350 2850
 F 0 "R15" V 9430 2850 40  0000 C CNN
-F 1 "3k3" V 9357 2851 40  0000 C CNN
+F 1 "8k2" V 9357 2851 40  0000 C CNN
 F 2 "~" V 9280 2850 30  0000 C CNN
 F 3 "~" H 9350 2850 30  0000 C CNN
 	1    9350 2850
@@ -756,7 +756,7 @@ L R R16
 U 1 1 5208A30A
 P 9350 4650
 F 0 "R16" V 9430 4650 40  0000 C CNN
-F 1 "3k3" V 9357 4651 40  0000 C CNN
+F 1 "8k2" V 9357 4651 40  0000 C CNN
 F 2 "~" V 9280 4650 30  0000 C CNN
 F 3 "~" H 9350 4650 30  0000 C CNN
 	1    9350 4650
