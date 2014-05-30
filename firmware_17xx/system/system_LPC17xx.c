@@ -282,7 +282,7 @@
 #define SCS_Val               0x00000020
 #define CLKSRCSEL_Val         0x00000001
 #define PLL0_SETUP            1
-#define PLL0CFG_Val           0x0000000e
+#define PLL0CFG_Val           0x00010018
 #define PLL1_SETUP            1
 #define PLL1CFG_Val           0x00000000
 #define CCLKCFG_Val           0x00000002
