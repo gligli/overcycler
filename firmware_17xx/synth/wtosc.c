@@ -7,7 +7,7 @@
 #include "osc_curves.h"
 
 #define VIRTUAL_CLOCK 3600000000UL
-#define VIRTUAL_DAC_TICK_RATE (DACSPI_TICK_RATE*30)
+#define VIRTUAL_DAC_TICK_RATE (DACSPI_TICK_RATE*36)
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
