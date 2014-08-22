@@ -794,6 +794,7 @@ void ui_init(void)
 	sendCommand("[?25I",1,NULL); // hide cursor
 	sendCommand("[1x",1,NULL); // disable scrolling
 	sendCommand("[2J",1,NULL); // clear screen
+	sendCommand("[50r",1,NULL); // keypad debounce
 	
 	// init row select
 	
