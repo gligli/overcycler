@@ -28,43 +28,11 @@ GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT] __attribute__
 static volatile uint8_t marker;
 uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-uint32_t deselectCommands[32][2] =
+uint32_t deselectCommands[4][2] =
 {
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
-
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
-
 	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
 	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
 };
 
@@ -208,8 +176,8 @@ void dacspi_init(void)
 						GPDMA_DMACCxControl_SWidth(1) |
 						GPDMA_DMACCxControl_DWidth(1);
 
-					additionalCvLli[j].SrcAddr=(uint32_t)&deselectCommands[cv][1];
-					additionalCvLli[j].DstAddr=deselectCommands[cv][0];
+					additionalCvLli[j].SrcAddr=(uint32_t)&deselectCommands[((cv-1)&0x1f)>>3][1];
+					additionalCvLli[j].DstAddr=deselectCommands[((cv-1)&0x1f)>>3][0];
 					additionalCvLli[j].NextLLI=(uint32_t)&dacspi.lli[lliPos][1];
 					additionalCvLli[j].Control=
 						GPDMA_DMACCxControl_TransferSize(1) |
@@ -257,8 +225,8 @@ void dacspi_init(void)
 	
 	// interrupt triggers
 	
-	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*1/16][0].Control|=GPDMA_DMACCxControl_I;
-	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*9/16][0].Control|=GPDMA_DMACCxControl_I;
+	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*0/2][0].Control|=GPDMA_DMACCxControl_I;
+	dacspi.lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT*1/2][0].Control|=GPDMA_DMACCxControl_I;
 	
 	//
 	
