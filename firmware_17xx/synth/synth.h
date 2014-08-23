@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #define SYNTH_VOICE_COUNT 6
+#define SYNTH_PART_COUNT 4
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 100000000
 
@@ -62,7 +63,6 @@ void synth_update(void);
 
 // synth.c internal api
 void refreshFullState(void);
-void refreshPresetMode(void);
 void refreshWaveNames(int8_t ab);
 void refreshWaveforms(int8_t ab);
 int8_t appendBankName(int8_t ab, char * path);

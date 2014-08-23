@@ -50,7 +50,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1);
+		assigner_assignNote(&assigner[currentPart],intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1);
 	}
 	else
 	{
@@ -76,7 +76,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(intNote,0,0);
+		assigner_assignNote(&assigner[currentPart],intNote,0,0);
 	}
 	else
 	{
@@ -108,23 +108,23 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 	{
 		param=control-MIDI_BASE_COARSE_CC;
 
-		currentPreset.continuousParameters[param]&=0x01fc;
-		currentPreset.continuousParameters[param]|=(uint16_t)value<<9;
+		currentPreset[currentPart].continuousParameters[param]&=0x01fc;
+		currentPreset[currentPart].continuousParameters[param]|=(uint16_t)value<<9;
 		ui_setPresetModified(1);	
 	}
 	else if(control>=MIDI_BASE_FINE_CC && control<MIDI_BASE_FINE_CC+cpCount)
 	{
 		param=control-MIDI_BASE_FINE_CC;
 
-		currentPreset.continuousParameters[param]&=0xfe00;
-		currentPreset.continuousParameters[param]|=(uint16_t)value<<2;
+		currentPreset[currentPart].continuousParameters[param]&=0xfe00;
+		currentPreset[currentPart].continuousParameters[param]|=(uint16_t)value<<2;
 		ui_setPresetModified(1);	
 	}
 	else if(control>=MIDI_BASE_STEPPED_CC && control<MIDI_BASE_STEPPED_CC+spCount)
 	{
 		param=control-MIDI_BASE_STEPPED_CC;
 		
-		currentPreset.steppedParameters[param]=value>>(7-steppedParametersBits[param]);
+		currentPreset[currentPart].steppedParameters[param]=value>>(7-steppedParametersBits[param]);
 		ui_setPresetModified(1);	
 	}
 
@@ -139,7 +139,7 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 
 	if(program<100  && program!=settings.presetNumber)
 	{
-		if(preset_loadCurrent(program))
+		if(preset_loadCurrent(currentPart,program))
 		{
 			settings.presetNumber=program;
 			ui_setPresetModified(0);	

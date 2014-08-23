@@ -56,7 +56,8 @@ static struct
 	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	struct adsr_s filEnvs[SYNTH_VOICE_COUNT];
 	struct adsr_s ampEnvs[SYNTH_VOICE_COUNT];
-	struct lfo_s lfo,vibrato;
+	struct lfo_s lfo[SYNTH_PART_COUNT];
+	struct lfo_s vibrato[SYNTH_PART_COUNT];
 	
 	uint16_t oscANoteCV[SYNTH_VOICE_COUNT];
 	uint16_t oscBNoteCV[SYNTH_VOICE_COUNT];
@@ -66,19 +67,24 @@ static struct
 	uint16_t oscBTargetCV[SYNTH_VOICE_COUNT];
 	uint16_t filterTargetCV[SYNTH_VOICE_COUNT];
 
-	int16_t benderCVs[cvAmp-cvAVol+1];
+	struct
+	{
+		int16_t benderCVs[cvAmp-cvAVol+1];
 
-	int16_t benderAmount;
-	uint16_t modwheelAmount;
-	int16_t glideAmount;
-	int8_t gliding;
-	
-	uint32_t modulationDelayStart;
-	uint16_t modulationDelayTickCount;
-	
-	uint8_t wmodMask;
+		int16_t benderAmount;
+		uint16_t modwheelAmount;
+		int16_t glideAmount;
+		int8_t gliding;
+
+		uint32_t modulationDelayStart;
+		uint16_t modulationDelayTickCount;
+
+		uint8_t wmodMask;
+	} partState[SYNTH_PART_COUNT];
 	
 	uint8_t pendingExtClock;
+	
+	int8_t voicePart[SYNTH_VOICE_COUNT];
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -99,63 +105,67 @@ static void computeTunedCVs(void)
 	uint16_t baseBPitchRaw,baseCutoffRaw,mTuneRaw,fineBFreqRaw,detuneRaw,trackRaw;
 	uint8_t chrom;
 	
-	mTuneRaw=currentPreset.continuousParameters[cpMasterTune];
-	fineBFreqRaw=currentPreset.continuousParameters[cpBFineFreq];
-	baseCutoffRaw=currentPreset.continuousParameters[cpCutoff];
-	baseBPitchRaw=currentPreset.continuousParameters[cpBFreq];
-	detuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
-	trackRaw=currentPreset.continuousParameters[cpFilKbdAmt];
-	chrom=currentPreset.steppedParameters[spChromaticPitch];
-	
-	// compute for oscs & filters
-	
-	mTune=(mTuneRaw>>7)+INT8_MIN*2;
-	fineBFreq=(fineBFreqRaw>>8)+INT8_MIN;
-	baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
-	
-	if(baseBPitchRaw>=UINT16_MAX/2)
-	{
-		baseAPitch=0;
-		baseBPitch=(baseBPitchRaw-(UINT16_MAX/2))>>1;
-	}
-	else
-	{
-		baseAPitch=((UINT16_MAX/2)-baseBPitchRaw)>>1;
-		baseBPitch=0;
-	}
-	
-	baseCutoffNote=baseCutoff>>8;
-	baseANote=baseAPitch>>8; // 64 semitones
-	baseBNote=baseBPitch>>8;
-	
-	baseCutoff&=0xff;
-	
-	if(chrom>0)
-	{
-		baseAPitch=0;
-		baseBPitch=0;
-		
-		if(chrom>1)
-		{
-			baseANote-=baseANote%12;
-			baseBNote-=baseBNote%12;
-		}
-	}
-	else
-	{
-		baseAPitch&=0xff;
-		baseBPitch&=0xff;
-	}
-
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		if (!assigner_getAssignment(v,&note))
+		int8_t part=synth.voicePart[v];
+		
+		if (!assigner_getAssignment(&assigner[part],v,&note))
 			continue;
 		
+		// get raw values
+
+		mTuneRaw=currentPreset[part].continuousParameters[cpMasterTune];
+		fineBFreqRaw=currentPreset[part].continuousParameters[cpBFineFreq];
+		baseCutoffRaw=currentPreset[part].continuousParameters[cpCutoff];
+		baseBPitchRaw=currentPreset[part].continuousParameters[cpBFreq];
+		detuneRaw=currentPreset[part].continuousParameters[cpUnisonDetune];
+		trackRaw=currentPreset[part].continuousParameters[cpFilKbdAmt];
+		chrom=currentPreset[part].steppedParameters[spChromaticPitch];
+
+		// compute for oscs & filters
+
+		mTune=(mTuneRaw>>7)+INT8_MIN*2;
+		fineBFreq=(fineBFreqRaw>>8)+INT8_MIN;
+		baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
+
+		if(baseBPitchRaw>=UINT16_MAX/2)
+		{
+			baseAPitch=0;
+			baseBPitch=(baseBPitchRaw-(UINT16_MAX/2))>>1;
+		}
+		else
+		{
+			baseAPitch=((UINT16_MAX/2)-baseBPitchRaw)>>1;
+			baseBPitch=0;
+		}
+
+		baseCutoffNote=baseCutoff>>8;
+		baseANote=baseAPitch>>8; // 64 semitones
+		baseBNote=baseBPitch>>8;
+
+		baseCutoff&=0xff;
+
+		if(chrom>0)
+		{
+			baseAPitch=0;
+			baseBPitch=0;
+
+			if(chrom>1)
+			{
+				baseANote-=baseANote%12;
+				baseBNote-=baseBNote%12;
+			}
+		}
+		else
+		{
+			baseAPitch&=0xff;
+			baseBPitch&=0xff;
+		}
+
 		// oscs
 		
-		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.benderCVs[cvAPitch]+mTune);
-		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.benderCVs[cvBPitch]+mTune+fineBFreq);
+		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.partState[part].benderCVs[cvAPitch]+mTune);
+		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.partState[part].benderCVs[cvBPitch]+mTune+fineBFreq);
 		
 		detune=(1+(v>>1))*(v&1?-1:1)*(detuneRaw>>9);
 		cva=satAddU16S16(cva,detune);
@@ -165,11 +175,11 @@ static void computeTunedCVs(void)
 		
 		trackingNote=baseCutoffNote+((note*(trackRaw>>8))>>8);
 			
-		cvf=satAddU16S16(tuner_computeCVFromNote(v,trackingNote,baseCutoff,cvCutoff),synth.benderCVs[cvCutoff]);
+		cvf=satAddU16S16(tuner_computeCVFromNote(v,trackingNote,baseCutoff,cvCutoff),synth.partState[part].benderCVs[cvCutoff]);
 		
 		// glide
 		
-		if(synth.gliding)
+		if(synth.partState[part].gliding)
 		{
 			synth.oscATargetCV[v]=cva;
 			synth.oscBTargetCV[v]=cvb;
@@ -194,26 +204,29 @@ void computeBenderCVs(void)
 	
 	int32_t bend;
 
-	bend=synth.benderAmount;
-
-	switch(currentPreset.steppedParameters[spBenderTarget])
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
 	{
-	case modPitch:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*2,0,cvAPitch)-tuner_computeCVFromNote(0,0,0,cvAPitch);
-		bend/=UINT16_MAX;
-		synth.benderCVs[cvAPitch]=bend;
-		synth.benderCVs[cvBPitch]=bend;
-		break;
-	case modFil:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*4,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
-		bend/=UINT16_MAX;
-		synth.benderCVs[cvCutoff]=bend;
-		break;
-	case modAmp:
-		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
-		synth.benderCVs[cvAmp]=bend;
-		break;
-	}
+		bend=synth.partState[part].benderAmount;
+
+		switch(currentPreset[part].steppedParameters[spBenderTarget])
+		{
+		case modPitch:
+			bend*=tuner_computeCVFromNote(0,br[currentPreset[part].steppedParameters[spBenderRange]]*2,0,cvAPitch)-tuner_computeCVFromNote(0,0,0,cvAPitch);
+			bend/=UINT16_MAX;
+			synth.partState[part].benderCVs[cvAPitch]=bend;
+			synth.partState[part].benderCVs[cvBPitch]=bend;
+			break;
+		case modFil:
+			bend*=tuner_computeCVFromNote(0,br[currentPreset[part].steppedParameters[spBenderRange]]*4,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
+			bend/=UINT16_MAX;
+			synth.partState[part].benderCVs[cvCutoff]=bend;
+			break;
+		case modAmp:
+			bend=(bend*br[currentPreset[part].steppedParameters[spBenderRange]])/12;
+			synth.partState[part].benderCVs[cvAmp]=bend;
+			break;
+		}
+		}
 }
 
 static void handleFinishedVoices(void)
@@ -223,15 +236,18 @@ static void handleFinishedVoices(void)
 	// when amp env finishes, voice is done
 	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
-		if(assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
-			assigner_voiceDone(v);
+		if(assigner_getAssignment(&assigner[synth.voicePart[v]],v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
+			assigner_voiceDone(&assigner[synth.voicePart[v]],v);
 }
 
 static void refreshAssignerSettings(void)
 {
-	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
-	assigner_setVoiceMask(settings.voiceMask);
-	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+	{
+		assigner_setPattern(&assigner[part],currentPreset[part].voicePattern,currentPreset[part].steppedParameters[spUnison]);
+		assigner_setVoiceMask(&assigner[part],settings.voiceMask);
+		assigner_setPriority(&assigner[part],currentPreset[part].steppedParameters[spAssignerPriority]);
+	}
 }
 
 static void refreshEnvSettings(int8_t type)
@@ -240,10 +256,12 @@ static void refreshEnvSettings(int8_t type)
 	int8_t i;
 	struct adsr_s * a;
 		
-	slow=currentPreset.steppedParameters[(type)?spFilEnvSlow:spAmpEnvSlow];
-
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
+		int8_t part=synth.voicePart[i];
+		
+		slow=currentPreset[part].steppedParameters[(type)?spFilEnvSlow:spAmpEnvSlow];
+
 		if(type)
 			a=&synth.filEnvs[i];
 		else
@@ -252,17 +270,17 @@ static void refreshEnvSettings(int8_t type)
 		adsr_setSpeedShift(a,(slow)?3:1);
 
 		adsr_setCVs(&synth.ampEnvs[i],
-				 currentPreset.continuousParameters[cpAmpAtt],
-				 currentPreset.continuousParameters[cpAmpDec],
-				 currentPreset.continuousParameters[cpAmpSus],
-				 currentPreset.continuousParameters[cpAmpRel],
+				 currentPreset[part].continuousParameters[cpAmpAtt],
+				 currentPreset[part].continuousParameters[cpAmpDec],
+				 currentPreset[part].continuousParameters[cpAmpSus],
+				 currentPreset[part].continuousParameters[cpAmpRel],
 				 0,0x0f);
 
 		adsr_setCVs(&synth.filEnvs[i],
-				 currentPreset.continuousParameters[cpFilAtt],
-				 currentPreset.continuousParameters[cpFilDec],
-				 currentPreset.continuousParameters[cpFilSus],
-				 currentPreset.continuousParameters[cpFilRel],
+				 currentPreset[part].continuousParameters[cpFilAtt],
+				 currentPreset[part].continuousParameters[cpFilDec],
+				 currentPreset[part].continuousParameters[cpFilSus],
+				 currentPreset[part].continuousParameters[cpFilRel],
 				 0,0x0f);
 	}
 }
@@ -275,121 +293,122 @@ static void refreshLfoSettings(void)
 	uint16_t mwAmt,lfoAmt,vibAmt,dlyAmt;
 	uint32_t elapsed;
 
-	shape=currentPreset.steppedParameters[spLFOShape];
-	shift=1+currentPreset.steppedParameters[spLFOShift]*3;
-
-	lfo_setShape(&synth.lfo,shape);
-	lfo_setSpeedShift(&synth.lfo,shift);
-	
-	// wait modulationDelayTickCount then progressively increase over
-	// modulationDelayTickCount time, following an exponential curve
-	dlyAmt=0;
-	if(synth.modulationDelayStart!=UINT32_MAX)
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
 	{
-		if(currentPreset.continuousParameters[cpModDelay]<POT_DEAD_ZONE)
+		shape=currentPreset[part].steppedParameters[spLFOShape];
+		shift=1+currentPreset[part].steppedParameters[spLFOShift]*3;
+
+		lfo_setShape(&synth.lfo[part],shape);
+		lfo_setSpeedShift(&synth.lfo[part],shift);
+
+		// wait modulationDelayTickCount then progressively increase over
+		// modulationDelayTickCount time, following an exponential curve
+		dlyAmt=0;
+		if(synth.partState[part].modulationDelayStart!=UINT32_MAX)
 		{
-			dlyAmt=UINT16_MAX;
-		}
-		else if(currentTick>=synth.modulationDelayStart+synth.modulationDelayTickCount)
-		{
-			elapsed=currentTick-(synth.modulationDelayStart+synth.modulationDelayTickCount);
-			if(elapsed>=synth.modulationDelayTickCount)
+			if(currentPreset[part].continuousParameters[cpModDelay]<POT_DEAD_ZONE)
+			{
 				dlyAmt=UINT16_MAX;
-			else
-				dlyAmt=attackCurveLookup[(elapsed<<8)/synth.modulationDelayTickCount];
+			}
+			else if(currentTick>=synth.partState[part].modulationDelayStart+synth.partState[part].modulationDelayTickCount)
+			{
+				elapsed=currentTick-(synth.partState[part].modulationDelayStart+synth.partState[part].modulationDelayTickCount);
+				if(elapsed>=synth.partState[part].modulationDelayTickCount)
+					dlyAmt=UINT16_MAX;
+				else
+					dlyAmt=attackCurveLookup[(elapsed<<8)/synth.partState[part].modulationDelayTickCount];
+			}
 		}
-	}
-	
-	mwAmt=synth.modwheelAmount>>mr[currentPreset.steppedParameters[spModwheelRange]];
-	lfoAmt=currentPreset.continuousParameters[cpLFOAmt];
-	lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
 
-	vibAmt=currentPreset.continuousParameters[cpVibAmt]>>2;
-	vibAmt=(vibAmt<POT_DEAD_ZONE)?0:(vibAmt-POT_DEAD_ZONE);
+		mwAmt=synth.partState[part].modwheelAmount>>mr[currentPreset[part].steppedParameters[spModwheelRange]];
+		lfoAmt=currentPreset[part].continuousParameters[cpLFOAmt];
+		lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
 
-	if(currentPreset.steppedParameters[spModwheelTarget]==0) // targeting lfo?
-	{
-		lfo_setCVs(&synth.lfo,
-				currentPreset.continuousParameters[cpLFOFreq],
-				satAddU16U16(lfoAmt,mwAmt));
-		lfo_setCVs(&synth.vibrato,
-				 currentPreset.continuousParameters[cpVibFreq],
-				 scaleU16U16(vibAmt,dlyAmt));
-	}
-	else
-	{
-		lfo_setCVs(&synth.lfo,
-				currentPreset.continuousParameters[cpLFOFreq],
-				scaleU16U16(lfoAmt,dlyAmt));
-		lfo_setCVs(&synth.vibrato,
-				currentPreset.continuousParameters[cpVibFreq],
-				satAddU16U16(vibAmt,mwAmt));
+		vibAmt=currentPreset[part].continuousParameters[cpVibAmt]>>2;
+		vibAmt=(vibAmt<POT_DEAD_ZONE)?0:(vibAmt-POT_DEAD_ZONE);
+
+		if(currentPreset[part].steppedParameters[spModwheelTarget]==0) // targeting lfo?
+		{
+			lfo_setCVs(&synth.lfo[part],
+					currentPreset[part].continuousParameters[cpLFOFreq],
+					satAddU16U16(lfoAmt,mwAmt));
+			lfo_setCVs(&synth.vibrato[part],
+					 currentPreset[part].continuousParameters[cpVibFreq],
+					 scaleU16U16(vibAmt,dlyAmt));
+		}
+		else
+		{
+			lfo_setCVs(&synth.lfo[part],
+					currentPreset[part].continuousParameters[cpLFOFreq],
+					scaleU16U16(lfoAmt,dlyAmt));
+			lfo_setCVs(&synth.vibrato[part],
+					currentPreset[part].continuousParameters[cpVibFreq],
+					satAddU16U16(vibAmt,mwAmt));
+		}
 	}
 }
 
 static void refreshModulationDelay(int8_t refreshTickCount)
 {
 	int8_t anyPressed, anyAssigned;
-	static int8_t prevAnyPressed=0;
+	static int8_t prevAnyPressed[SYNTH_PART_COUNT]={0};
 	
-	anyPressed=assigner_getAnyPressed();	
-	anyAssigned=assigner_getAnyAssigned();	
-	
-	if(!anyAssigned)
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
 	{
-		synth.modulationDelayStart=UINT32_MAX;
+		anyPressed=assigner_getAnyPressed(&assigner[part]);	
+		anyAssigned=assigner_getAnyAssigned(&assigner[part]);	
+
+		if(!anyAssigned)
+		{
+			synth.partState[part].modulationDelayStart=UINT32_MAX;
+		}
+
+		if(anyPressed && !prevAnyPressed[part])
+		{
+			synth.partState[part].modulationDelayStart=currentTick;
+		}
+
+		prevAnyPressed[part]=anyPressed;
+
+		if(refreshTickCount)
+			synth.partState[part].modulationDelayTickCount=exponentialCourse(UINT16_MAX-currentPreset[part].continuousParameters[cpModDelay],12000.0f,2500.0f);
 	}
-	
-	if(anyPressed && !prevAnyPressed)
-	{
-		synth.modulationDelayStart=currentTick;
-	}
-	
-	prevAnyPressed=anyPressed;
-	
-	if(refreshTickCount)
-		synth.modulationDelayTickCount=exponentialCourse(UINT16_MAX-currentPreset.continuousParameters[cpModDelay],12000.0f,2500.0f);
 }
 
 static void refreshMisc(void)
 {
 	// arp
 
-	arp_setSpeed(currentPreset.continuousParameters[cpSeqArpClock]);
+	arp_setSpeed(currentPreset[currentPart].continuousParameters[cpSeqArpClock]);
 
-	// glide
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+	{
+		// glide
 
-	synth.glideAmount=exponentialCourse(currentPreset.continuousParameters[cpGlide],11000.0f,2100.0f);
-	synth.gliding=synth.glideAmount<2000;
-	
-	// WaveMod mask
-	
-	synth.wmodMask=0;
-	if(currentPreset.steppedParameters[spAWModType]==wmAliasing)
-		synth.wmodMask|=1;
-	if(currentPreset.steppedParameters[spAWModType]==wmWidth)
-		synth.wmodMask|=2;
-	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
-		synth.wmodMask|=4;
-	if(currentPreset.steppedParameters[spAWModEnvEn])
-		synth.wmodMask|=8;
+		synth.partState[part].glideAmount=exponentialCourse(currentPreset[part].continuousParameters[cpGlide],11000.0f,2100.0f);
+		synth.partState[part].gliding=synth.partState[part].glideAmount<2000;
 
-	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
-		synth.wmodMask|=16;
-	if(currentPreset.steppedParameters[spBWModType]==wmWidth)
-		synth.wmodMask|=32;
-	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
-		synth.wmodMask|=64;
-	if(currentPreset.steppedParameters[spBWModEnvEn])
-		synth.wmodMask|=128;
-}
+		// WaveMod mask
 
-void refreshPresetMode(void)
-{
-	if(!preset_loadCurrent(settings.presetNumber))
-		preset_loadDefault(1);
+		synth.partState[part].wmodMask=0;
+		if(currentPreset[part].steppedParameters[spAWModType]==wmAliasing)
+			synth.partState[part].wmodMask|=1;
+		if(currentPreset[part].steppedParameters[spAWModType]==wmWidth)
+			synth.partState[part].wmodMask|=2;
+		if(currentPreset[part].steppedParameters[spAWModType]==wmFrequency)
+			synth.partState[part].wmodMask|=4;
+		if(currentPreset[part].steppedParameters[spAWModEnvEn])
+			synth.partState[part].wmodMask|=8;
 
-	ui_setPresetModified(0);
+		if(currentPreset[part].steppedParameters[spBWModType]==wmAliasing)
+			synth.partState[part].wmodMask|=16;
+		if(currentPreset[part].steppedParameters[spBWModType]==wmWidth)
+			synth.partState[part].wmodMask|=32;
+		if(currentPreset[part].steppedParameters[spBWModType]==wmFrequency)
+			synth.partState[part].wmodMask|=64;
+		if(currentPreset[part].steppedParameters[spBWModEnvEn])
+			synth.partState[part].wmodMask|=128;
+	}
 }
 
 void refreshFullState(void)
@@ -408,7 +427,7 @@ int8_t appendBankName(int8_t ab, char * path)
 {
 	uint8_t bankNum;
 
-	bankNum=currentPreset.steppedParameters[ab?spBBank:spABank];
+	bankNum=currentPreset[currentPart].steppedParameters[ab?spBBank:spABank];
 
 	if(bankNum>=waveData.bankCount)
 		return 0;
@@ -422,7 +441,7 @@ int8_t appendWaveName(int8_t ab, char * path)
 {
 	uint8_t waveNum;
 
-	waveNum=currentPreset.steppedParameters[ab?spBWave:spAWave];
+	waveNum=currentPreset[currentPart].steppedParameters[ab?spBWave:spAWave];
 
 	if(waveNum>=waveData.curWaveCount[ab])
 		return 0;
@@ -551,10 +570,10 @@ static void handleBitInputs(void)
 	
 	// control footswitch 
 	 
-	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INTPUT_FOOTSWITCH) && last&BIT_INTPUT_FOOTSWITCH)
+	if(currentPreset[currentPart].steppedParameters[spUnison] && !(cur&BIT_INTPUT_FOOTSWITCH) && last&BIT_INTPUT_FOOTSWITCH)
 	{
-		assigner_latchPattern();
-		assigner_getPattern(currentPreset.voicePattern,NULL);
+		assigner_latchPattern(&assigner[currentPart]);
+		assigner_getPattern(&assigner[currentPart], currentPreset[currentPart].voicePattern,NULL);
 	}
 	else if(arp_getMode()!=amOff && (cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
 	{
@@ -736,7 +755,8 @@ void synth_init(void)
 	// init subsystems
 	dacspi_init();
 	tuner_init();
-	assigner_init();
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+		assigner_init(&assigner[part]);
 	uartMidi_init();
 	arp_init();
 	ui_init();
@@ -751,15 +771,14 @@ void synth_init(void)
 		adsr_setShape(&synth.filEnvs[i],1);
 	}
 
-	lfo_init(&synth.lfo);
-	lfo_init(&synth.vibrato);
-	lfo_setShape(&synth.vibrato,lsTri);
-	lfo_setSpeedShift(&synth.vibrato,4);
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+	{
+		lfo_init(&synth.lfo[part]);
+		lfo_init(&synth.vibrato[part]);
+		lfo_setShape(&synth.vibrato[part],lsTri);
+		lfo_setSpeedShift(&synth.vibrato[part],4);
+	}
 
-	// default preset
-	
-	preset_loadDefault(1);
-	
 	// load settings from storage; tune when they are bad
 	
 	if(!settings_load())
@@ -770,11 +789,15 @@ void synth_init(void)
 
 	// load last preset & do a full refresh
 	
-	refreshPresetMode();
+	if(!preset_loadCurrent(currentPart, settings.presetNumber))
+		preset_loadDefault(currentPart, 1);
+	ui_setPresetModified(0);
+
 	refreshFullState();
 	
 	__enable_irq();
 	refreshBankNames();
+
 	refreshWaveNames(0);
 	refreshWaveNames(1);
 	refreshWaveforms(0);
@@ -811,70 +834,74 @@ void synth_update(void)
 // 2Khz
 void synth_timerInterrupt(void)
 {
-	int32_t v,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt,resoFactor;
+	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt,resoFactor;
 
 	static int frc=0;
-	static int8_t curVoice=0;
 
 	// lfo
 		
-		// update
-	
-	lfo_update(&synth.lfo);
+	for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+		lfo_update(&synth.lfo[part]);
 		
+	// per voice stuff
+	
+	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		int8_t part=synth.voicePart[v];
+
 		// pitch
-	
-	pitchAVal=pitchBVal=synth.vibrato.output;
-	v=scaleU16S16(currentPreset.continuousParameters[cpLFOPitchAmt],synth.lfo.output>>1);
-	
-	if(currentPreset.steppedParameters[spLFOTargets]&otA)
-		pitchAVal+=v;
-	if(currentPreset.steppedParameters[spLFOTargets]&otB)
-		pitchBVal+=v;
+
+		pitchAVal=pitchBVal=synth.vibrato[part].output;
+		val=scaleU16S16(currentPreset[part].continuousParameters[cpLFOPitchAmt],synth.lfo[part].output>>1);
+
+		if(currentPreset[part].steppedParameters[spLFOTargets]&otA)
+			pitchAVal+=val;
+		if(currentPreset[part].steppedParameters[spLFOTargets]&otB)
+			pitchBVal+=val;
 
 		// filter
 
-	filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo.output);
-	
+		filterVal=scaleU16S16(currentPreset[part].continuousParameters[cpLFOFilAmt],synth.lfo[part].output);
+
 		// amplifier
-	
-	ampVal=synth.benderCVs[cvAmp];
-	ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV);
-	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
-	
-	// global computations
-	
-	filEnvAmt=currentPreset.continuousParameters[cpFilEnvAmt];
-	filEnvAmt+=INT16_MIN;
-	
-	wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
-	if(currentPreset.steppedParameters[spLFOTargets]&otA)
-		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
 
-	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
-	if(currentPreset.steppedParameters[spLFOTargets]&otB)
-		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
+		ampVal=synth.partState[part].benderCVs[cvAmp];
+		ampVal+=UINT16_MAX-scaleU16U16(currentPreset[part].continuousParameters[cpLFOAmpAmt],synth.lfo[part].levelCV);
+		ampVal+=scaleU16S16(currentPreset[part].continuousParameters[cpLFOAmpAmt],synth.lfo[part].output);
 
-	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
-	wmodEnvAmt+=INT16_MIN;
-	
-	pitchAVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchAVal));
-	pitchBVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchBVal));
-	wmodAVal=MAX(0,MIN(UINT16_MAX,wmodAVal));
-	wmodBVal=MAX(0,MIN(UINT16_MAX,wmodBVal));
-	filterVal=MAX(INT16_MIN,MIN(INT16_MAX,filterVal));
-	ampVal=MAX(0,MIN(UINT16_MAX,ampVal));
-	resoFactor=(UINT16_MAX+2*(int32_t)currentPreset.continuousParameters[cpResonance])/(3*256);
-	
-	// per voice stuff
-	
-		// P600_VOICE_COUNT calls
-	refreshVoice(0,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
-	refreshVoice(1,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
-	refreshVoice(2,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
-	refreshVoice(3,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
-	refreshVoice(4,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
-	refreshVoice(5,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.wmodMask,resoFactor);
+		// part computations
+
+		filEnvAmt=currentPreset[part].continuousParameters[cpFilEnvAmt];
+		filEnvAmt+=INT16_MIN;
+
+		wmodAVal=currentPreset[part].continuousParameters[cpABaseWMod];
+		if(currentPreset[part].steppedParameters[spLFOTargets]&otA)
+			wmodAVal+=scaleU16S16(currentPreset[part].continuousParameters[cpLFOWModAmt],synth.lfo[part].output);
+
+		wmodBVal=currentPreset[part].continuousParameters[cpBBaseWMod];
+		if(currentPreset[part].steppedParameters[spLFOTargets]&otB)
+			wmodBVal+=scaleU16S16(currentPreset[part].continuousParameters[cpLFOWModAmt],synth.lfo[part].output);
+
+		wmodEnvAmt=currentPreset[part].continuousParameters[cpWModFilEnv];
+		wmodEnvAmt+=INT16_MIN;
+		
+		// restrict range
+
+		pitchAVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchAVal));
+		pitchBVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchBVal));
+		wmodAVal=MAX(0,MIN(UINT16_MAX,wmodAVal));
+		wmodBVal=MAX(0,MIN(UINT16_MAX,wmodBVal));
+		filterVal=MAX(INT16_MIN,MIN(INT16_MAX,filterVal));
+		ampVal=MAX(0,MIN(UINT16_MAX,ampVal));
+		
+		// compensate vca level for resonance
+		
+		resoFactor=(UINT16_MAX+2*(int32_t)currentPreset[part].continuousParameters[cpResonance])/(3*256);
+
+		// actual voice refresh
+		
+		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState[part].wmodMask,resoFactor);
+	}
 
 	// slower updates
 	
@@ -882,34 +909,34 @@ void synth_timerInterrupt(void)
 	{
 	case 0:
 		// CV update
-		if(curVoice<SYNTH_VOICE_COUNT)
-			refreshCV(curVoice,cvAVol,currentPreset.continuousParameters[cpAVol]);
-		else
-			refreshCV(SYNTH_VOICE_COUNT,cvMasterLeft,currentPreset.continuousParameters[cpMasterLeft]);
+		
+		for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+		{
+			int8_t part=synth.voicePart[v];
+
+			refreshCV(v,cvAVol,currentPreset[part].continuousParameters[cpAVol]);
+			refreshCV(v,cvBVol,currentPreset[part].continuousParameters[cpBVol]);
+			refreshCV(v,cvResonance,currentPreset[part].continuousParameters[cpResonance]);
+		}
+
+		refreshCV(SYNTH_VOICE_COUNT,cvMasterRight,currentPreset[currentPart].continuousParameters[cpMasterRight]);
+		refreshCV(SYNTH_VOICE_COUNT,cvMasterLeft,currentPreset[currentPart].continuousParameters[cpMasterLeft]);
+
 		break;
 	case 1:
-		// CV update
-		if(curVoice<SYNTH_VOICE_COUNT)
-			refreshCV(curVoice,cvBVol,currentPreset.continuousParameters[cpBVol]);
-		else
-			refreshCV(SYNTH_VOICE_COUNT,cvMasterRight,currentPreset.continuousParameters[cpMasterRight]);
+		// midi
+
+		midi_update();
+
 		break;
 	case 2:
-		// CV update
-		if(curVoice<SYNTH_VOICE_COUNT)
-			refreshCV(curVoice,cvResonance,currentPreset.continuousParameters[cpResonance]);
-		else
-			handleFinishedVoices(); // 1/7th of 500hz, good enough
+		// vibrato
+
+		for(int8_t part=0;part<SYNTH_PART_COUNT;++part)
+			lfo_update(&synth.vibrato[part]);
+
 		break;
 	case 3:
-		// midi
-		
-		midi_update();
-		
-		// vibrato
-		
-		lfo_update(&synth.vibrato);
-		
 		// bit inputs (footswitch / tape in)
 	
 		handleBitInputs();
@@ -926,21 +953,24 @@ void synth_timerInterrupt(void)
 
 		// glide
 		
-		if(synth.gliding)
+		for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		{
-			for(v=0;v<SYNTH_VOICE_COUNT;++v)
+			int8_t part=synth.voicePart[v];
+			int16_t amt=synth.partState[part].glideAmount;
+			
+			if(synth.partState[part].gliding)
 			{
-				computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],synth.glideAmount);
-				computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],synth.glideAmount);
-				computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],synth.glideAmount);
+				computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
+				computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
+				computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
 			}
 		}
 
 		// misc
 		
 		++currentTick;
-		curVoice=(curVoice+1)%(SYNTH_VOICE_COUNT+1);
-		
+		handleFinishedVoices();
+
 		break;
 	}
 
@@ -997,9 +1027,9 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	{
 		// handle velocity
 
-		velAmt=currentPreset.continuousParameters[cpFilVelocity];
+		velAmt=currentPreset[synth.voicePart[voice]].continuousParameters[cpFilVelocity];
 		adsr_setCVs(&synth.filEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
-		velAmt=currentPreset.continuousParameters[cpAmpVelocity];
+		velAmt=currentPreset[synth.voicePart[voice]].continuousParameters[cpAmpVelocity];
 		adsr_setCVs(&synth.ampEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 	}
 }
@@ -1021,7 +1051,7 @@ void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 
 	if(mask&1)
 	{
-		synth.benderAmount=bend;
+		synth.partState[currentPart].benderAmount=bend;
 		computeBenderCVs();
 		computeTunedCVs();
 		
@@ -1029,7 +1059,7 @@ void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 	
 	if(mask&2)
 	{
-		synth.modwheelAmount=modulation;
+		synth.partState[currentPart].modwheelAmount=modulation;
 		refreshLfoSettings();
 	}
 }

@@ -43,7 +43,7 @@ static void finishPreviousNote(void)
 	{
 		uint8_t n=arp.previousNote&~ARP_NOTE_HELD_FLAG;
 		
-		assigner_assignNote(n,0,0);
+		assigner_assignNote(&assigner[currentPart],n,0,0);
 	}
 }
 
@@ -55,7 +55,7 @@ static void killAllNotes(void)
 	arp.previousNote=ASSIGNER_NO_NOTE;
 
 	memset(arp.notes,ASSIGNER_NO_NOTE,ARP_NOTE_MEMORY);
-	assigner_voiceDone(-1);
+	assigner_voiceDone(&assigner[currentPart],-1);
 }
 
 static void markNotesAsHeld(void)
@@ -228,7 +228,7 @@ void arp_update(void)
 	
 	// send note to assigner
 	
-	assigner_assignNote(n,1,UINT16_MAX);
+	assigner_assignNote(&assigner[currentPart],n,1,UINT16_MAX);
 
 	arp.previousNote=arp.notes[arp.noteIndex];
 }
