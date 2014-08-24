@@ -207,13 +207,17 @@ static void socket_init()
 static inline void select_card()
 {
 	// SSEL1 P0.6 low
+	LPC_GPIO0->FIOMASK0&=~(1 << 6);
 	GPIO_ClearValue(0, (1 << 6)); // LPC_GPIO0->FIOCLR = (1<<6);
+	LPC_GPIO0->FIOMASK0|=(1 << 6);
 }
 
 static inline void de_select_card()
 {
 	// SSEL1 high
+	LPC_GPIO0->FIOMASK0&=~(1 << 6);
 	GPIO_SetValue(0, (1 << 6)); // LPC_GPIO0->FIOSET = (1<<6);
+	LPC_GPIO0->FIOMASK0|=(1 << 6);
 }
 
 static void spi_set_speed( enum speed_setting speed )

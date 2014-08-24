@@ -29,7 +29,7 @@ static GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT] __attribute__((section(".us
 static volatile uint8_t marker;
 static uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-uint32_t deselectCommands[4][2] =
+static const uint32_t deselectCommands[4][2] =
 {
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
@@ -37,7 +37,7 @@ uint32_t deselectCommands[4][2] =
 	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
 };
 
-uint32_t selectCommands[4][2] =
+static const uint32_t selectCommands[4][2] =
 {
 	{(uint32_t)&LPC_GPIO0->FIOCLR,1<<CVMUX_PIN_CARD0},
 	{(uint32_t)&LPC_GPIO0->FIOCLR,1<<CVMUX_PIN_CARD1},
@@ -45,21 +45,16 @@ uint32_t selectCommands[4][2] =
 	{(uint32_t)&LPC_GPIO4->FIOCLR,1<<CVMUX_PIN_VCA},
 };
 
-uint32_t abcResetCommands[2] =
+static const uint32_t abcCommands[8] =
 {
-	(uint32_t)&LPC_GPIO0->FIOCLR,7<<CVMUX_PIN_A
-};
-
-uint32_t abcCommands[8][2] =
-{
-	{(uint32_t)&LPC_GPIO0->FIOSET,0<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,2<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,3<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,4<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,5<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,6<<CVMUX_PIN_A},
-	{(uint32_t)&LPC_GPIO0->FIOSET,7<<CVMUX_PIN_A},
+	((0<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((1<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((2<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((3<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((4<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((5<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((6<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
 };
 
 static struct
@@ -92,21 +87,13 @@ void buildLLIs(int buffer, int channel, int cv)
 
 		if(buffer&1)
 		{
-			lli[lliPos][0].SrcAddr=(uint32_t)&abcResetCommands[1];
-			lli[lliPos][0].DstAddr=abcResetCommands[0];
-			lli[lliPos][0].NextLLI=(uint32_t)&additionalCvLli[buffer];
+			lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[cv&7];
+			lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
+			lli[lliPos][0].NextLLI=(uint32_t)&markerLli[buffer];
 			lli[lliPos][0].Control=
 				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(2) |
-				GPDMA_DMACCxControl_DWidth(2);
-
-			additionalCvLli[buffer].SrcAddr=(uint32_t)&abcCommands[cv&7][1];
-			additionalCvLli[buffer].DstAddr=abcCommands[cv&7][0];
-			additionalCvLli[buffer].NextLLI=(uint32_t)&markerLli[buffer];
-			additionalCvLli[buffer].Control=
-				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(2) |
-				GPDMA_DMACCxControl_DWidth(2);
+				GPDMA_DMACCxControl_SWidth(0) |
+				GPDMA_DMACCxControl_DWidth(0);
 
 			markerLli[buffer].SrcAddr=(uint32_t)&markerSource[buffer];
 			markerLli[buffer].DstAddr=(uint32_t)&marker;
@@ -214,6 +201,8 @@ void dacspi_init(void)
 	}
 
 	// prepare LLIs
+
+	LPC_GPIO0->FIOMASK2=~(((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16);
 
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
 	{
