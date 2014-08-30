@@ -17,14 +17,13 @@ static const uint8_t voice_ldac_mask[SYNTH_VOICE_COUNT]=
 			GPDMA_DMACCxConfig_TransferType(1) | \
 			GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_BUFFER_COUNT 64
+#define DACSPI_BUFFER_COUNT 32
 
-#define DACSPI_CV_CHANNEL 6
 #define DACSPI_CV_LDAC_MASK 0xbf
 
-static GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][2] __attribute__((section(".eth_ram")));
-static GPDMA_LLI_Type additionalCvLli[DACSPI_BUFFER_COUNT] __attribute__((section(".usb_ram")));
-static GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT] __attribute__((section(".usb_ram")));
+static GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][2] __attribute__((section(".ext_ram")));
+static GPDMA_LLI_Type additionalCvLli[DACSPI_BUFFER_COUNT] __attribute__((section(".ext_ram")));
+static GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT] __attribute__((section(".ext_ram")));
 
 static volatile uint8_t marker;
 static uint8_t markerSource[DACSPI_BUFFER_COUNT];
@@ -62,7 +61,7 @@ static struct
 	uint16_t voiceCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT][2];
 	uint16_t cvCommands[32];
 	uint8_t channelSteps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
-} dacspi __attribute__((section(".eth_ram"))) ;
+} dacspi __attribute__((section(".ext_ram"))) ;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
@@ -75,17 +74,22 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 }
 
-void buildLLIs(int buffer, int channel, int cv)
+int8_t channel2cvHalf[DACSPI_CHANNEL_COUNT] = { 0,-1,-1,-1,-1,-1, 1,-1};
+int8_t channel2voice[DACSPI_CHANNEL_COUNT] =  {-1, 0, 1, 2, 3, 4,-1, 5};
+
+void buildLLIs(int buffer, int channel)
 {
 	int lliPos = buffer * DACSPI_CHANNEL_COUNT + channel;
 	
 	memset(&dacspi.channelSteps[channel][0],0xff,DACSPI_STEP_COUNT);
 
-	if(channel==DACSPI_CV_CHANNEL)
+	if(channel2cvHalf[channel]>=0)
 	{
-		dacspi.channelSteps[channel][DACSPI_STEP_COUNT-1]=DACSPI_CV_LDAC_MASK;
+		int cv=buffer&0x1f;
+		
+		dacspi.channelSteps[channel][2]=DACSPI_CV_LDAC_MASK;
 
-		if(buffer&1)
+		if(channel2cvHalf[channel]==1)
 		{
 			lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[cv&7];
 			lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
@@ -132,9 +136,11 @@ void buildLLIs(int buffer, int channel, int cv)
 	}
 	else
 	{
-		dacspi.channelSteps[channel][DACSPI_STEP_COUNT-1]=voice_ldac_mask[synth_voiceLayout[0][channel]];
+		int voice=channel2voice[channel];
+		
+		dacspi.channelSteps[channel][4]=voice_ldac_mask[synth_voiceLayout[0][voice]];
 
-		lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][channel][0];
+		lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][voice][0];
 		lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
 		lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 		lli[lliPos][0].Control=
@@ -144,7 +150,7 @@ void buildLLIs(int buffer, int channel, int cv)
 			GPDMA_DMACCxControl_SI;
 	}
 
-	if(!(channel==DACSPI_CV_CHANNEL && (buffer&1)))
+	if(channel2cvHalf[channel]!=1)
 	{
 		lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
 		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.channelSteps[channel][0];
@@ -169,7 +175,7 @@ FORCEINLINE void dacspi_setCVCommand(uint16_t command, int channel)
 
 void dacspi_init(void)
 {
-	int i,j,cv;
+	int i,j;
 	
 	memset(&dacspi,0,sizeof(dacspi));
 
@@ -207,10 +213,11 @@ void dacspi_init(void)
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
 	{
 		markerSource[j]=j;
-		cv=j>>1;
 
 		for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
-			buildLLIs(j,i,cv);
+		{
+			buildLLIs(j,i);
+		}
 	}
 	
 	// interrupt triggers

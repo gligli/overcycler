@@ -39,7 +39,7 @@ const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
 
 volatile uint32_t currentTick=0; // 500hz
 
-__attribute__ ((section(".usb_ram"))) static struct
+__attribute__ ((section(".ext_ram"))) static struct
 {
 	int bankCount;
 	int curWaveCount[2];

@@ -25,8 +25,7 @@ MEMORY
   rom (rx)  : ORIGIN = 0x00000000, LENGTH = 512K
   ram (rwx) : ORIGIN = 0x10000000, LENGTH =  32K
   
-  ram1(rwx) : ORIGIN = 0x2007C000, LENGTH = 16k
-  ram2(rwx) : ORIGIN = 0x20080000, LENGTH = 16k
+  extram(rwx) : ORIGIN = 0x2007C000, LENGTH = 32k
 }
 
 /* These force the linker to search for particular symbols from
@@ -159,16 +158,11 @@ SECTIONS
     _end = .;
     __end = .;
   } >ram AT>rom
-  /* This used for USB RAM section */
-	.usb_ram (NOLOAD):
-	{
-		*.o (USB_RAM)
-	} > ram2
 
-	.eth_ram (NOLOAD):
+	.ext_ram (NOLOAD):
 	{
-		*.o (ETH_RAM)
-	} > ram1
+		*.o (EXT_RAM)
+	} > extram
 
   .heap (NOLOAD) :
   {
