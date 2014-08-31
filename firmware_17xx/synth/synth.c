@@ -233,11 +233,19 @@ static void handleFinishedVoices(void)
 {
 	int8_t v;
 	
-	// when amp env finishes, voice is done
-	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		// when amp env finishes, voice is done
 		if(assigner_getAssignment(&assigner[synth.voicePart[v]],v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
 			assigner_voiceDone(&assigner[synth.voicePart[v]],v);
+	
+		// if voice isn't assigned, silence it
+		if(!assigner_getAssignment(&assigner[synth.voicePart[v]],v,NULL) && adsr_getStage(&synth.ampEnvs[v])!=sWait)
+		{
+			adsr_reset(&synth.ampEnvs[v]);
+			adsr_reset(&synth.filEnvs[v]);
+		}
+	}
 }
 
 static void refreshAssignerSettings(void)
