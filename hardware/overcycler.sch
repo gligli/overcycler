@@ -38,7 +38,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Overcycler main board schematics"
-Date "30 mar 2014"
+Date "9 sep 2014"
 Rev "2"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -583,7 +583,7 @@ L R R4
 U 1 1 5215A9CF
 P 10300 5850
 F 0 "R4" V 10380 5850 40  0000 C CNN
-F 1 "100k" V 10307 5851 40  0000 C CNN
+F 1 "10k" V 10307 5851 40  0000 C CNN
 F 2 "~" V 10230 5850 30  0000 C CNN
 F 3 "~" H 10300 5850 30  0000 C CNN
 	1    10300 5850
