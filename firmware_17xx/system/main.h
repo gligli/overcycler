@@ -61,6 +61,8 @@ static inline int __restore_irq_stub(uint32_t pm)
 #define STORAGE_PAGE_SIZE 256
 #define STORAGE_SIZE (256*256)
 
+#define EXT_RAM  __attribute__((section(".ext_ram")))
+
 extern void storage_write(uint32_t pageIdx, uint8_t *buf);
 extern void storage_read(uint32_t pageIdx, uint8_t *buf);
 

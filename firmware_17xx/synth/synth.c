@@ -30,16 +30,9 @@
 
 #define POT_DEAD_ZONE 512
 
-// soft voice to hard voice (mapped so that the upper the voice, the stronger panning it gets)
-const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT] =
-{
-	{0,1,3,4,2,5}, //  for DACs
-	{2,3,1,4,0,5}, //  for VCAs
-};
-
 volatile uint32_t currentTick=0; // 500hz
 
-__attribute__ ((section(".ext_ram"))) static struct
+static EXT_RAM struct
 {
 	int bankCount;
 	int curWaveCount[2];
@@ -623,7 +616,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	case cvAmp:
 	case cvMasterLeft:
 	case cvMasterRight:
-		value=computeShape((uint32_t)value<<8,vcaLinearizationCurve,1);		
+		value=computeShape(value<<8,vcaLinearizationCurve,1);		
 		break;
 	default:
 		;
@@ -634,20 +627,20 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 
 static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
-	uint16_t value,channel,cmd;
+	uint16_t value,channel;
 	
 	v=MIN(v,UINT16_MAX);
 	value=adjustCV(cv,v);
 
 	if(cv<=cvResonance)
 	{
-		channel=(synth_voiceLayout[0][voice]<<2)|cv;
+		channel=(voice<<2)|cv;
 	}
 	else if(cv>=cvAmp)
 	{
 		if(cv==cvAmp)
 		{
-			channel=24|synth_voiceLayout[1][voice];
+			channel=24+voice;
 		}
 		else
 		{
@@ -655,9 +648,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 		}
 	}
 	
-	cmd=(value>>4)|DACSPI_CMD_SET_REF;
-	
-	dacspi_setCVCommand(cmd,channel);
+	dacspi_setCVValue(value>>4,channel);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)

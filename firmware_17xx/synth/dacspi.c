@@ -17,31 +17,34 @@ static const uint8_t voice_ldac_mask[SYNTH_VOICE_COUNT]=
 			GPDMA_DMACCxConfig_TransferType(1) | \
 			GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_BUFFER_COUNT 32
+#define DACSPI_BUFFER_COUNT 48
 
-#define DACSPI_CV_LDAC_MASK 0xbf
+#define DACSPI_CV_CHANNEL_1 6
+#define DACSPI_CV_CHANNEL_2 7
+#define DACSPI_CARD_CV_LDAC_MASK 0xbf
+#define DACSPI_VCA_CV_LDAC_MASK 0xef
 
-static GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][2] __attribute__((section(".ext_ram")));
-static GPDMA_LLI_Type additionalCvLli[DACSPI_BUFFER_COUNT] __attribute__((section(".ext_ram")));
-static GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT] __attribute__((section(".ext_ram")));
+static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][2];
+static EXT_RAM GPDMA_LLI_Type cardLli[DACSPI_BUFFER_COUNT];
+static EXT_RAM GPDMA_LLI_Type vcaLli[DACSPI_BUFFER_COUNT];
+static EXT_RAM GPDMA_LLI_Type markerLli[DACSPI_BUFFER_COUNT];
 
-static volatile uint8_t marker;
-static uint8_t markerSource[DACSPI_BUFFER_COUNT];
+static EXT_RAM volatile uint8_t marker;
+static EXT_RAM volatile uint8_t dummy;
+static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-static const uint32_t deselectCommands[4][2] =
+static const uint32_t deselectCommands[3][2] =
 {
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD0},
 	{(uint32_t)&LPC_GPIO0->FIOSET,1<<CVMUX_PIN_CARD1},
 	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOSET,1<<CVMUX_PIN_VCA},
 };
 
-static const uint32_t selectCommands[4][2] =
+static const uint32_t selectCommands[3][2] =
 {
 	{(uint32_t)&LPC_GPIO0->FIOCLR,1<<CVMUX_PIN_CARD0},
 	{(uint32_t)&LPC_GPIO0->FIOCLR,1<<CVMUX_PIN_CARD1},
 	{(uint32_t)&LPC_GPIO4->FIOCLR,1<<CVMUX_PIN_CARD2},
-	{(uint32_t)&LPC_GPIO4->FIOCLR,1<<CVMUX_PIN_VCA},
 };
 
 static const uint32_t abcCommands[8] =
@@ -56,12 +59,12 @@ static const uint32_t abcCommands[8] =
 	((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
 };
 
-static struct
+static EXT_RAM struct
 {
 	uint16_t voiceCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT][2];
 	uint16_t cvCommands[32];
-	uint8_t channelSteps[DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
-} dacspi __attribute__((section(".ext_ram"))) ;
+	uint8_t channelSteps[DACSPI_BUFFER_COUNT][DACSPI_CHANNEL_COUNT][DACSPI_STEP_COUNT];
+} dacspi;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
@@ -74,73 +77,112 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 }
 
-int8_t channel2cvHalf[DACSPI_CHANNEL_COUNT] = { 0,-1,-1,-1,-1,-1, 1,-1};
-int8_t channel2voice[DACSPI_CHANNEL_COUNT] =  {-1, 0, 1, 2, 3, 4,-1, 5};
-
 void buildLLIs(int buffer, int channel)
 {
-	int lliPos = buffer * DACSPI_CHANNEL_COUNT + channel;
+	int cardCV,vcaDAC,stdSteps;	
+	int lliPos=buffer*DACSPI_CHANNEL_COUNT+channel;
 	
-	memset(&dacspi.channelSteps[channel][0],0xff,DACSPI_STEP_COUNT);
+	cardCV=buffer>>1;
+	vcaDAC=buffer&3;
+	stdSteps=1;
+	
+	memset(&dacspi.channelSteps[buffer][channel][0],0xff,DACSPI_STEP_COUNT);
 
-	if(channel2cvHalf[channel]>=0)
+	if(channel==DACSPI_CV_CHANNEL_1 || channel==DACSPI_CV_CHANNEL_2)
 	{
-		int cv=buffer&0x1f;
+		// insert VCA accessed between both parts of card access to avoid conflict on the address (ABC) bus
+		int isCard=channel==DACSPI_CV_CHANNEL_1 && (buffer&1)==0 || channel==DACSPI_CV_CHANNEL_2 && (buffer&1)==1;
 		
-		dacspi.channelSteps[channel][2]=DACSPI_CV_LDAC_MASK;
-
-		if(channel2cvHalf[channel]==1)
+		if(isCard)
 		{
-			lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[cv&7];
-			lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
-			lli[lliPos][0].NextLLI=(uint32_t)&markerLli[buffer];
-			lli[lliPos][0].Control=
-				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(0) |
-				GPDMA_DMACCxControl_DWidth(0);
+			dacspi.channelSteps[buffer][channel][DACSPI_STEP_COUNT-2]=DACSPI_CARD_CV_LDAC_MASK;
 
-			markerLli[buffer].SrcAddr=(uint32_t)&markerSource[buffer];
-			markerLli[buffer].DstAddr=(uint32_t)&marker;
-			markerLli[buffer].NextLLI=(uint32_t)&lli[lliPos][1];
-			markerLli[buffer].Control=
-				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(0) |
-				GPDMA_DMACCxControl_DWidth(0);
+			if(buffer&1)
+			{
+				stdSteps=0;
 
-			lli[lliPos][1].SrcAddr=(uint32_t)&selectCommands[cv>>3][1];
-			lli[lliPos][1].DstAddr=selectCommands[cv>>3][0];
-			lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
-			lli[lliPos][1].Control=
-				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(2) |
-				GPDMA_DMACCxControl_DWidth(2);
+				lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[cardCV&7];
+				lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
+				lli[lliPos][0].NextLLI=(uint32_t)&markerLli[buffer];
+				lli[lliPos][0].Control=
+					GPDMA_DMACCxControl_TransferSize(1) |
+					GPDMA_DMACCxControl_SWidth(0) |
+					GPDMA_DMACCxControl_DWidth(0);
+
+				markerLli[buffer].SrcAddr=(uint32_t)&markerSource[buffer];
+				markerLli[buffer].DstAddr=(uint32_t)&marker;
+				markerLli[buffer].NextLLI=(uint32_t)&lli[lliPos][1];
+				markerLli[buffer].Control=
+					GPDMA_DMACCxControl_TransferSize(1) |
+					GPDMA_DMACCxControl_SWidth(0) |
+					GPDMA_DMACCxControl_DWidth(0);
+
+				lli[lliPos][1].SrcAddr=(uint32_t)&selectCommands[cardCV>>3][1];
+				lli[lliPos][1].DstAddr=selectCommands[cardCV>>3][0];
+				lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+				lli[lliPos][1].Control=
+					GPDMA_DMACCxControl_TransferSize(1) |
+					GPDMA_DMACCxControl_SWidth(2) |
+					GPDMA_DMACCxControl_DWidth(2);
+			}
+			else
+			{
+				lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.cvCommands[cardCV];
+				lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
+				lli[lliPos][0].NextLLI=(uint32_t)&cardLli[buffer];
+				lli[lliPos][0].Control=
+					GPDMA_DMACCxControl_TransferSize(1) |
+					GPDMA_DMACCxControl_SWidth(1) |
+					GPDMA_DMACCxControl_DWidth(1);
+
+				int idx=MIN(2,((uint32_t)cardCV-1)/8);
+
+				cardLli[buffer].SrcAddr=(uint32_t)&deselectCommands[idx][1];
+				cardLli[buffer].DstAddr=deselectCommands[idx][0];
+				cardLli[buffer].NextLLI=(uint32_t)&lli[lliPos][1];
+				cardLli[buffer].Control=
+					GPDMA_DMACCxControl_TransferSize(1) |
+					GPDMA_DMACCxControl_SWidth(2) |
+					GPDMA_DMACCxControl_DWidth(2);
+			}
 		}
 		else
 		{
-			lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.cvCommands[cv];
-			lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
-			lli[lliPos][0].NextLLI=(uint32_t)&additionalCvLli[buffer];
-			lli[lliPos][0].Control=
-				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(1) |
-				GPDMA_DMACCxControl_DWidth(1);
+			dacspi.channelSteps[buffer][channel][DACSPI_STEP_COUNT-2]=DACSPI_VCA_CV_LDAC_MASK;
+			stdSteps=0;
 
-			additionalCvLli[buffer].SrcAddr=(uint32_t)&deselectCommands[((cv-1)&0x1f)>>3][1];
-			additionalCvLli[buffer].DstAddr=deselectCommands[((cv-1)&0x1f)>>3][0];
-			additionalCvLli[buffer].NextLLI=(uint32_t)&lli[lliPos][1];
-			additionalCvLli[buffer].Control=
+			lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.cvCommands[24+vcaDAC*2];
+			lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
+			lli[lliPos][0].NextLLI=(uint32_t)&vcaLli[buffer];
+			lli[lliPos][0].Control=
+				GPDMA_DMACCxControl_TransferSize(2) |
+				GPDMA_DMACCxControl_SWidth(1) |
+				GPDMA_DMACCxControl_DWidth(1) |
+				GPDMA_DMACCxControl_SI;
+
+			vcaLli[buffer].SrcAddr=(uint32_t)&abcCommands[vcaDAC];
+			vcaLli[buffer].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
+			vcaLli[buffer].NextLLI=(uint32_t)&lli[lliPos][1];
+			vcaLli[buffer].Control=
 				GPDMA_DMACCxControl_TransferSize(1) |
-				GPDMA_DMACCxControl_SWidth(2) |
-				GPDMA_DMACCxControl_DWidth(2);
+				GPDMA_DMACCxControl_SWidth(0) |
+				GPDMA_DMACCxControl_DWidth(0);
+
+			lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.channelSteps[buffer][channel][0];
+			lli[lliPos][1].DstAddr=(uint32_t)&LPC_GPIO4->FIOPIN3;
+			lli[lliPos][1].Control=
+				GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
+				GPDMA_DMACCxControl_SWidth(0) |
+				GPDMA_DMACCxControl_DWidth(0) |
+				GPDMA_DMACCxControl_SI;
 		}
 	}
 	else
 	{
-		int voice=channel2voice[channel];
-		
-		dacspi.channelSteps[channel][4]=voice_ldac_mask[synth_voiceLayout[0][voice]];
+		dacspi.channelSteps[buffer][channel][DACSPI_STEP_COUNT-2]=voice_ldac_mask[channel];
 
-		lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][voice][0];
+		lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][channel][0];
 		lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
 		lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 		lli[lliPos][0].Control=
@@ -150,10 +192,10 @@ void buildLLIs(int buffer, int channel)
 			GPDMA_DMACCxControl_SI;
 	}
 
-	if(channel2cvHalf[channel]!=1)
+	if(stdSteps)
 	{
 		lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
-		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.channelSteps[channel][0];
+		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.channelSteps[buffer][channel][0];
 		lli[lliPos][1].DstAddr=(uint32_t)&LPC_GPIO2->FIOPIN0;
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
@@ -168,9 +210,14 @@ FORCEINLINE void dacspi_setVoiceCommand(int32_t buffer, int voice, int ab, uint1
 	dacspi.voiceCommands[buffer][voice][ab]=command;
 }
 
-FORCEINLINE void dacspi_setCVCommand(uint16_t command, int channel)
+FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
 {
-	dacspi.cvCommands[channel]=command;
+	if(channel<24)
+		dacspi.cvCommands[channel]=value|DACSPI_CMD_SET_REF;
+	else if(channel&1)
+		dacspi.cvCommands[channel]=value|DACSPI_CMD_SET_B;
+	else
+		dacspi.cvCommands[channel]=value|DACSPI_CMD_SET_A;
 }
 
 void dacspi_init(void)
@@ -209,15 +256,13 @@ void dacspi_init(void)
 	// prepare LLIs
 
 	LPC_GPIO0->FIOMASK2=~(((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16);
+	LPC_GPIO4->FIOMASK3=~(((1<<CVMUX_PIN_CARD2)|(1<<CVMUX_PIN_VCA))>>24);
 
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
 	{
 		markerSource[j]=j;
-
 		for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
-		{
 			buildLLIs(j,i);
-		}
 	}
 	
 	// interrupt triggers

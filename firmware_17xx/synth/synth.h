@@ -7,7 +7,7 @@
 #define SYNTH_VOICE_COUNT 6
 #define SYNTH_PART_COUNT 4
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
-#define SYNTH_MASTER_CLOCK 100000000
+#define SYNTH_MASTER_CLOCK 120000000
 
 #define TICKER_1S 500
 
@@ -71,6 +71,5 @@ int getBankCount(void);
 int getWaveCount(int8_t ab);
 
 extern volatile uint32_t currentTick; // 500hz
-extern const int8_t synth_voiceLayout[2][SYNTH_VOICE_COUNT];
 
 #endif
