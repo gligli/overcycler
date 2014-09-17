@@ -1,5 +1,5 @@
-update=24/08/2013 08:47:00
-last_client=pcbnew
+update=17/09/2014 15:25:45
+last_client=cvpcb
 [eeschema]
 version=1
 LibDir=libs
@@ -41,11 +41,6 @@ LibName29=contrib
 LibName30=valves
 LibName31=conn_33
 LibName32=optocoupler
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
 [pcbnew]
 version=1
 LastNetListRead=overcycler.net
@@ -66,7 +61,6 @@ DrawSegmentWidth=0.200000000000
 BoardOutlineThickness=0.100000000000
 ModuleOutlineThickness=0.150000000000
 [pcbnew/libraries]
-LibDir=libs
 LibName1=sockets
 LibName2=connect
 LibName3=discret
@@ -86,3 +80,10 @@ LibName16=valves
 LibName17=SIL-33
 LibName18=optocoupler
 LibName19=TO220-fixed
+LibName20=RV2X15
+LibDir=libs
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms

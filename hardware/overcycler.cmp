@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 24/08/2013 08:48:46
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 17/09/2014 15:29:40
 
 BeginCmp
 TimeStamp = /5215EBBD;
@@ -24,14 +24,14 @@ EndCmp
 BeginCmp
 TimeStamp = /51FF8EA9;
 Reference = C4;
-ValeurCmp = 3300u;
+ValeurCmp = 10000u;
 IdModule  = C2V10;
 EndCmp
 
 BeginCmp
 TimeStamp = /51FF8EC7;
 Reference = C5;
-ValeurCmp = 2200u;
+ValeurCmp = 10000u;
 IdModule  = C2V10;
 EndCmp
 
@@ -39,26 +39,40 @@ BeginCmp
 TimeStamp = /51FF908C;
 Reference = C6;
 ValeurCmp = 6u8;
-IdModule  = C1.5V8V;
+IdModule  = C1V8;
 EndCmp
 
 BeginCmp
 TimeStamp = /51FF909B;
 Reference = C7;
 ValeurCmp = 4u7;
-IdModule  = C1.5V8V;
+IdModule  = C1V8;
 EndCmp
 
 BeginCmp
 TimeStamp = /5213E28D;
 Reference = C8;
 ValeurCmp = 6u8;
-IdModule  = C1.5V8V;
+IdModule  = C1V8;
 EndCmp
 
 BeginCmp
 TimeStamp = /5215ABA1;
 Reference = C9;
+ValeurCmp = 100n;
+IdModule  = C2;
+EndCmp
+
+BeginCmp
+TimeStamp = /54198767;
+Reference = C10;
+ValeurCmp = 100n;
+IdModule  = C2;
+EndCmp
+
+BeginCmp
+TimeStamp = /541987E8;
+Reference = C11;
 ValeurCmp = 100n;
 IdModule  = C2;
 EndCmp
@@ -183,6 +197,13 @@ IdModule  = SIL-2;
 EndCmp
 
 BeginCmp
+TimeStamp = /54198CD6;
+Reference = P14;
+ValeurCmp = VCA_SPI;
+IdModule  = SIL-5;
+EndCmp
+
+BeginCmp
 TimeStamp = /5215D818;
 Reference = R1;
 ValeurCmp = 33k;
@@ -206,7 +227,7 @@ EndCmp
 BeginCmp
 TimeStamp = /5215A9CF;
 Reference = R4;
-ValeurCmp = 100k;
+ValeurCmp = 10k;
 IdModule  = R3-LARGE_PADS;
 EndCmp
 
@@ -228,7 +249,7 @@ BeginCmp
 TimeStamp = /5215D7FC;
 Reference = RV1;
 ValeurCmp = 10k;
-IdModule  = RV2;
+IdModule  = RV2X1.5;
 EndCmp
 
 BeginCmp
