@@ -97,9 +97,9 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer)
 {
 	uint16_t *data;
+	uint16_t r;
 	int32_t buf,counter,curPeriod,phase,curIncrement,sampleCount,halfCount,period[2],increment[2];
-	uint32_t r;
-	uint32_t prevSample,curSample,aliasing,controlData;
+	uint32_t prevSample,curSample,aliasing;
 	int alpha,voice,ab;
 	
 	data=o->data;
@@ -120,7 +120,6 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	aliasing=o->aliasing;	
 	voice=o->voice;
 	ab=o->ab;
-	controlData=ab?DACSPI_CMD_SET_B:DACSPI_CMD_SET_A;
 	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -154,20 +153,20 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		{
 			// we want aliasing, don't interpolate !
 
-			r=curSample>>4;
+			r=curSample;
 		}
 		else
 		{
 			// prepare linear interpolation
 
-			alpha=(counter<<12)/curPeriod;
+			alpha=(counter<<16)/curPeriod;
 
 			// apply it
 
-			r=(alpha*prevSample+(4095-alpha)*curSample)>>16;
+			r=(alpha*prevSample+(UINT16_MAX-alpha)*curSample)>>16;
 		}
 
-		dacspi_setVoiceCommand(buf,voice,ab,r|controlData);
+		dacspi_setVoiceValue(buf,voice,ab,r);
 	}
 	
 	o->counter=counter;

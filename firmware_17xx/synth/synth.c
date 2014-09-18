@@ -648,7 +648,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 		}
 	}
 	
-	dacspi_setCVValue(value>>4,channel);
+	dacspi_setCVValue(value,channel);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)

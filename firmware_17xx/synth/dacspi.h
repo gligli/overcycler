@@ -10,12 +10,8 @@
 
 #define DACSPI_TICK_RATE ((uint32_t)((DACSPI_TIMER_MATCH+1)*DACSPI_TIME_CONSTANT))
 
-#define DACSPI_CMD_SET_A 0x7000
-#define DACSPI_CMD_SET_B 0xf000
-#define DACSPI_CMD_SET_REF 0x7000
-
 void dacspi_init(void);
-void dacspi_setVoiceCommand(int32_t buffer, int voice, int ab, uint16_t command);
-void dacspi_setCVValue(uint16_t command, int channel);
+void dacspi_setVoiceValue(int32_t buffer, int voice, int ab, uint16_t value); // 16bit value
+void dacspi_setCVValue(uint16_t value, int channel); // 16bit value
 
 #endif

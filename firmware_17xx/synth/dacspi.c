@@ -11,6 +11,10 @@ static const uint8_t voice_ldac_mask[SYNTH_VOICE_COUNT]=
 	0xfd,0xfe,0xfb,0xf7,0xef,0x7f,
 };
 
+#define DACSPI_CMD_SET_A 0x7000
+#define DACSPI_CMD_SET_B 0xf000
+#define DACSPI_CMD_SET_REF 0x7000
+
 #define DACSPI_DMACONFIG \
 			GPDMA_DMACCxConfig_E | \
 			GPDMA_DMACCxConfig_DestPeripheral(14) | \
@@ -205,13 +209,20 @@ void buildLLIs(int buffer, int channel)
 	}
 }
 
-FORCEINLINE void dacspi_setVoiceCommand(int32_t buffer, int voice, int ab, uint16_t command)
+FORCEINLINE void dacspi_setVoiceValue(int32_t buffer, int voice, int ab, uint16_t value)
 {
-	dacspi.voiceCommands[buffer][voice][ab]=command;
+	value>>=4;
+	
+	if(ab)
+		dacspi.voiceCommands[buffer][voice][ab]=value|DACSPI_CMD_SET_B;
+	else
+		dacspi.voiceCommands[buffer][voice][ab]=value|DACSPI_CMD_SET_A;
 }
 
 FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
 {
+	value>>=4;
+	
 	if(channel<24)
 		dacspi.cvCommands[channel]=value|DACSPI_CMD_SET_REF;
 	else if(channel&1)
