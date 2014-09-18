@@ -100,6 +100,10 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	uint16_t r;
 	int32_t buf,counter,curPeriod,phase,curIncrement,sampleCount,halfCount,period[2],increment[2];
 	uint32_t prevSample,curSample,aliasing;
+#ifdef WTOSC_CUBIC_INTERP
+	uint32_t prevSample2,prevSample3;
+	int alpha2,alpha3,p0,p1,p2;
+#endif
 	int alpha,voice,ab;
 	
 	data=o->data;
@@ -115,6 +119,10 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	halfCount=o->halfSampleCount;
 	curPeriod=period[phase>=halfCount?1:0];
 
+#ifdef WTOSC_CUBIC_INTERP
+	prevSample2=o->prevSample2;
+	prevSample3=o->prevSample3;
+#endif
 	prevSample=o->prevSample;
 	curSample=o->curSample;
 	aliasing=o->aliasing;	
@@ -145,6 +153,10 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 				phase+=sampleCount;
 
 
+#ifdef WTOSC_CUBIC_INTERP
+			prevSample3=prevSample2;
+			prevSample2=prevSample;
+#endif
 			prevSample=curSample;
 			curSample=data[phase];
 		}
@@ -157,13 +169,26 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		}
 		else
 		{
-			// prepare linear interpolation
+			// prepare interpolation
 
 			alpha=(counter<<16)/curPeriod;
 
-			// apply it
+#ifdef WTOSC_CUBIC_INTERP
+			// do cubic interpolation
+
+			alpha2=(alpha*alpha)>>16;
+			alpha3=(alpha2*alpha)>>16;
+			
+			p0=prevSample3-prevSample2-curSample+prevSample;
+			p1=curSample-prevSample-p0;
+			p2=prevSample2-curSample;
+			
+			r=(p0*alpha3+p1*alpha2+p2*alpha+prevSample)>>16;
+#else
+			// do linear interpolation
 
 			r=(alpha*prevSample+(UINT16_MAX-alpha)*curSample)>>16;
+#endif
 		}
 
 		dacspi_setVoiceValue(buf,voice,ab,r);
@@ -171,6 +196,10 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	o->counter=counter;
 	o->phase=phase;
+#ifdef WTOSC_CUBIC_INTERP
+	o->prevSample2=prevSample2;
+	o->prevSample3=prevSample3;
+#endif
 	o->prevSample=prevSample;
 	o->curSample=curSample;
 }

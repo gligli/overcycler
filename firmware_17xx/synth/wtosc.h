@@ -7,6 +7,8 @@
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 127
 
+//#define WTOSC_CUBIC_INTERP
+
 struct wtosc_s
 {
 	uint16_t data[WTOSC_MAX_SAMPLES];	
@@ -21,7 +23,10 @@ struct wtosc_s
 
 	uint32_t curSample;
 	uint32_t prevSample;
-
+#ifdef WTOSC_CUBIC_INTERP
+	uint32_t prevSample2,prevSample3;
+#endif
+	
 	uint32_t cv;
 	uint32_t aliasing;
 	uint32_t width;
