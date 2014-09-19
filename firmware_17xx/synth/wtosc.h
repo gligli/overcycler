@@ -7,7 +7,7 @@
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 127
 
-//#define WTOSC_CUBIC_INTERP
+#define WTOSC_CUBIC_INTERP
 
 struct wtosc_s
 {

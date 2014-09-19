@@ -102,7 +102,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	uint32_t prevSample,curSample,aliasing;
 #ifdef WTOSC_CUBIC_INTERP
 	uint32_t prevSample2,prevSample3;
-	int alpha2,alpha3,p0,p1,p2;
+	int alpha2,alpha3,p0,p1,p2,p3,total;
 #endif
 	int alpha,voice,ab;
 	
@@ -171,23 +171,25 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		{
 			// prepare interpolation
 
-			alpha=(counter<<16)/curPeriod;
+			alpha=(counter<<12)/curPeriod;
 
 #ifdef WTOSC_CUBIC_INTERP
 			// do cubic interpolation
 
-			alpha2=(alpha*alpha)>>16;
-			alpha3=(alpha2*alpha)>>16;
+			alpha2=(alpha*alpha)>>12;
+			alpha3=(alpha2*alpha)>>12;
 			
 			p0=prevSample3-prevSample2-curSample+prevSample;
 			p1=curSample-prevSample-p0;
 			p2=prevSample2-curSample;
+			p3=prevSample;
 			
-			r=(p0*alpha3+p1*alpha2+p2*alpha+prevSample)>>16;
+			total=((p0*alpha3+p1*alpha2+p2*alpha)>>12)+p3;
+			r=MAX(0,MIN(UINT16_MAX,total));
 #else
 			// do linear interpolation
 
-			r=(alpha*prevSample+(UINT16_MAX-alpha)*curSample)>>16;
+			r=(alpha*prevSample+(4095-alpha)*curSample)>>12;
 #endif
 		}
 
