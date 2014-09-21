@@ -448,7 +448,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		v=currentPreset[currentPart].continuousParameters[prm->number];
 		if(contValue)
 			*contValue=v;
-		sprintf(dv,"%4d",v>>6);
+		sprintf(dv,"%4d",(v*1000)>>16);
 		break;
 	case ptStep:
 	case ptCust:
