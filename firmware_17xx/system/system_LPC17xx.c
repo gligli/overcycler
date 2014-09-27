@@ -319,7 +319,7 @@
 // </e>
 */
 #define FLASH_SETUP           1
-#define FLASHCFG_Val          0x0000403A
+#define FLASHCFG_Val          0x0000503A
 
 /*
 //-------- <<< end of configuration section >>> ------------------------------
