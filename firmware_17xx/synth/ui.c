@@ -7,6 +7,7 @@
 #include "integer.h"
 #include "arp.h"
 #include "ffconf.h"
+#include "lpc17xx_gpio.h"
 
 #define DISPLAY_ACK 6
 
@@ -16,13 +17,13 @@
 #define ADCROW_PIN 25
 
 #define UI_POT_COUNT 10
-#define UI_POT_SAMPLES 32
+#define UI_POT_SAMPLES 80
 
 #define UI_PRESET_SLOTS 20
 #define UI_PRESET_BANKS 10
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*32)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*24)
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*24)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*16)
 #define POT_TIMEOUT (TICKER_1S*5/8)
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*3/4)
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/10)
@@ -808,6 +809,11 @@ void ui_init(void)
 	PINSEL_SetPinFunc(0,25,1);
 	PINSEL_SetPinFunc(0,26,1);
 	PINSEL_SetPinFunc(1,31,3);
+
+		// unused pins 
+	PINSEL_SetPinFunc(1,30,0);
+	GPIO_SetDir(1,1<<30,1);
+	GPIO_ClearValue(1,1<<30);
 	
 	// init adc
 	
