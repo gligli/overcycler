@@ -5,7 +5,7 @@ WINDOW 0 8 -88 Bottom 2
 WINDOW 3 8 88 Top 2
 SYMATTR Prefix X
 SYMATTR Value LM13700/NS
-SYMATTR ModelFile C:\overcycler\hardware\spice\LM13700.MOD
+SYMATTR ModelFile LM13700.MOD
 PIN -32 -48 LEFT 8
 PINATTR PinName 1
 PINATTR SpiceOrder 1
