@@ -36,7 +36,7 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "12 sep 2015"
+Date "13 sep 2015"
 Rev "5"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -734,15 +734,15 @@ F 3 "DOCUMENTATION" H 2800 5000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 2400 3750 2    60   ~ 0
-P_0
+P_9
 Text Label 2400 3850 2    60   ~ 0
-P_2
+P_8
 Text Label 2400 3950 2    60   ~ 0
-P_4
+P_7
 Text Label 2400 4050 2    60   ~ 0
 P_6
 Text Label 2400 4150 2    60   ~ 0
-P_8
+P_5
 $Comp
 L +3.3V #PWR022
 U 1 1 55F0C248
@@ -755,15 +755,15 @@ F 3 "" H 3750 3450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 3200 3750 0    60   ~ 0
-P_1
+P_0
 Text Label 3200 3850 0    60   ~ 0
-P_3
+P_1
 Text Label 3200 3950 0    60   ~ 0
-P_5
+P_2
 Text Label 3200 4050 0    60   ~ 0
-P_7
+P_3
 Text Label 3200 4150 0    60   ~ 0
-P_9
+P_4
 Text Label 2050 4550 2    60   ~ 0
 P_0
 Text Label 2050 4750 2    60   ~ 0
@@ -1974,35 +1974,35 @@ F 3 "" H 13150 2850 60  0000 C CNN
 $EndComp
 $Comp
 L TL074 U6
-U 2 1 55F1212E
+U 4 1 55F1212E
 P 13150 3950
 F 0 "U6" H 13200 4150 60  0000 C CNN
 F 1 "TL074" H 13300 3750 50  0000 C CNN
 F 2 "" H 13150 3950 60  0000 C CNN
 F 3 "" H 13150 3950 60  0000 C CNN
-	2    13150 3950
+	4    13150 3950
 	1    0    0    -1  
 $EndComp
 $Comp
 L TL074 U6
-U 3 1 55F12134
+U 2 1 55F12134
 P 15000 2850
 F 0 "U6" H 15050 3050 60  0000 C CNN
 F 1 "TL074" H 15150 2650 50  0000 C CNN
 F 2 "" H 15000 2850 60  0000 C CNN
 F 3 "" H 15000 2850 60  0000 C CNN
-	3    15000 2850
+	2    15000 2850
 	1    0    0    -1  
 $EndComp
 $Comp
 L TL074 U6
-U 4 1 55F1213A
+U 3 1 55F1213A
 P 15000 3950
 F 0 "U6" H 15050 4150 60  0000 C CNN
 F 1 "TL074" H 15150 3750 50  0000 C CNN
 F 2 "" H 15000 3950 60  0000 C CNN
 F 3 "" H 15000 3950 60  0000 C CNN
-	4    15000 3950
+	3    15000 3950
 	1    0    0    -1  
 $EndComp
 Text Label 7650 2850 0    60   ~ 0

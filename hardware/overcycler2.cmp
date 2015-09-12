@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 12/09/2015 21:17:54
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 13/09/2015 00:57:05
 
 BeginCmp
 TimeStamp = /55F0C26C;
@@ -711,7 +711,7 @@ BeginCmp
 TimeStamp = /55F0C241;
 Reference = P4;
 ValeurCmp = PANEL;
-IdModule  = HE10_40D;
+IdModule  = CONN40;
 EndCmp
 
 BeginCmp
@@ -1775,7 +1775,7 @@ BeginCmp
 TimeStamp = /55F47C7A/55F46826;
 Reference = U12;
 ValeurCmp = MCP4922-E/P;
-IdModule  = DIP-16__300;
+IdModule  = DIP-14__300_ELL;
 EndCmp
 
 BeginCmp
