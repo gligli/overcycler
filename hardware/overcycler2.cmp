@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 13/09/2015 00:57:05
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 13/09/2015 15:43:01
 
 BeginCmp
 TimeStamp = /55F0C26C;
@@ -1632,6 +1632,20 @@ IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
+TimeStamp = /55F57D77;
+Reference = R126;
+ValeurCmp = 220;
+IdModule  = R3-LARGE_PADS;
+EndCmp
+
+BeginCmp
+TimeStamp = /55F58D12;
+Reference = R127;
+ValeurCmp = 120;
+IdModule  = R3-LARGE_PADS;
+EndCmp
+
+BeginCmp
 TimeStamp = /55F2A087;
 Reference = RR1;
 ValeurCmp = 10k;
@@ -1751,9 +1765,9 @@ IdModule  = TO220_VERT_FIXED;
 EndCmp
 
 BeginCmp
-TimeStamp = /55F0C219;
+TimeStamp = /55F5A401;
 Reference = U9;
-ValeurCmp = LM1084IT-3.3/NOPB;
+ValeurCmp = LM1084IT-ADJ/NOPB;
 IdModule  = TO220_VERT_FIXED;
 EndCmp
 
