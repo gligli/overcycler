@@ -743,15 +743,15 @@ F 3 "" H 3750 3450 60  0000 C CNN
 	1    3750 3450
 	1    0    0    -1  
 $EndComp
-Text Label 3200 3750 0    60   ~ 0
+Text Label 3200 4150 0    60   ~ 0
 P_0
-Text Label 3200 3850 0    60   ~ 0
+Text Label 3200 4050 0    60   ~ 0
 P_1
 Text Label 3200 3950 0    60   ~ 0
 P_2
-Text Label 3200 4050 0    60   ~ 0
+Text Label 3200 3850 0    60   ~ 0
 P_3
-Text Label 3200 4150 0    60   ~ 0
+Text Label 3200 3750 0    60   ~ 0
 P_4
 Text Label 2050 4550 2    60   ~ 0
 P_0
