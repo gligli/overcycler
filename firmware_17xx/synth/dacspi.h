@@ -3,10 +3,10 @@
 
 #include "synth.h"
 
-#define DACSPI_CHANNEL_COUNT 8
-#define DACSPI_STEP_COUNT 8
-#define DACSPI_TIMER_MATCH 18
-#define DACSPI_TIME_CONSTANT (7.5*(DACSPI_STEP_COUNT+2)+2.5) // one tick per channel per DMA access
+#define DACSPI_CHANNEL_COUNT 4
+#define DACSPI_STEP_COUNT 6
+#define DACSPI_TIMER_MATCH 39
+#define DACSPI_TIME_CONSTANT (DACSPI_CHANNEL_COUNT*(DACSPI_STEP_COUNT+2+1)) // one tick per channel per DMA access
 
 #define DACSPI_TICK_RATE ((uint32_t)((DACSPI_TIMER_MATCH+1)*DACSPI_TIME_CONSTANT))
 
