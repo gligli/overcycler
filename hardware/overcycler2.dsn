@@ -24,6 +24,7 @@
       (path pcb 0  233680 -25400  233680 -180340  25400 -180340  25400 -25400
             233680 -25400)
     )
+    (plane GND (polygon F.Cu 0  233680 -180340  25400 -180340  25400 -25400  233680 -25400))
     (plane GND (polygon B.Cu 0  233680 -180340  25400 -180340  25400 -25400  233680 -25400))
     (keepout "" (polygon F.Cu 0  43180 -34925  33020 -34925  33020 -27305  43180 -27305))
     (keepout "" (polygon F.Cu 0  71755 -29210  56515 -29210  56515 -26670  71755 -26670))
@@ -34,9 +35,9 @@
     (keepout "" (polygon F.Cu 0  31750 -97790  29210 -97790  29210 -87630  31750 -87630))
     (keepout "" (polygon F.Cu 0  224790 -31750  204470 -31750  204470 -29210  224790 -29210))
     (keepout "" (polygon F.Cu 0  43815 -170815  37465 -170815  37465 -118745  43815 -118745))
-    (via "Via[0-1]_1270:508_um" "Via[0-1]_1270:0_um" "Via[0-1]_1778:508_um" "Via[0-1]_2286:508_um")
+    (via "Via[0-1]_1651:812.8_um" "Via[0-1]_1651:0_um" "Via[0-1]_2286:812.8_um")
     (rule
-      (width 762)
+      (width 635)
       (clearance 355.7)
       (clearance 355.7 (type default_smd))
       (clearance 88.9 (type smd_smd))
@@ -53,7 +54,7 @@
       (place SW1 57785 -53975 front 180 (PN RESET))
     )
     (component "SIL-9"
-      (place RR1 97155 -38100 front 270 (PN 10k))
+      (place RR1 97155 -39370 front 270 (PN 10k))
     )
     (component "SIL-8"
       (place P9 214630 -30480 front 180 (PN AUDIO_OUT))
@@ -85,95 +86,95 @@
     )
     (component "R3-LARGE_PADS"
       (place R61 185420 -70485 front 0 (PN 10k))
-      (place R72 138430 -92075 front 0 (PN 220))
-      (place R73 139065 -83185 front 270 (PN 390))
-      (place R70 160020 -93345 front 90 (PN 5k6))
+      (place R72 139700 -92710 front 0 (PN 220))
+      (place R73 140335 -81280 front 270 (PN 390))
+      (place R70 161290 -93980 front 90 (PN 5k6))
       (place R65 205105 -57785 front 90 (PN 4k7))
-      (place R71 127635 -90170 front 0 (PN 6k8))
-      (place R69 127635 -75565 front 0 (PN 220))
-      (place R75 135890 -83185 front 270 (PN 15k))
-      (place R74 156210 -90805 front 270 (PN 4k7))
-      (place R67 127635 -78740 front 0 (PN 15k))
-      (place R68 127635 -86360 front 0 (PN 15k))
-      (place R66 127635 -82550 front 0 (PN 22k))
-      (place R59 156210 -66675 front 270 (PN 4k7))
+      (place R71 128270 -90170 front 0 (PN 6k8))
+      (place R69 128270 -75565 front 0 (PN 220))
+      (place R75 137160 -81280 front 270 (PN 15k))
+      (place R74 157480 -91440 front 270 (PN 4k7))
+      (place R67 128270 -78740 front 0 (PN 15k))
+      (place R68 128270 -86360 front 0 (PN 15k))
+      (place R66 128270 -82550 front 0 (PN 22k))
+      (place R59 157480 -67310 front 270 (PN 4k7))
       (place R77 174625 -94615 front 0 (PN 4k7))
       (place R78 179070 -85090 front 0 (PN 820))
       (place R79 179070 -90170 front 180 (PN 22k))
       (place R80 205105 -95885 front 270 (PN 4k7))
       (place R76 185420 -78740 front 0 (PN 10k))
-      (place R58 139065 -59055 front 270 (PN 390))
-      (place R45 135890 -34925 front 270 (PN 15k))
-      (place R44 156210 -42545 front 270 (PN 4k7))
-      (place R37 127635 -30480 front 0 (PN 15k))
-      (place R38 127635 -38100 front 0 (PN 15k))
-      (place R36 127635 -34290 front 0 (PN 22k))
-      (place R39 127635 -27305 front 0 (PN 220))
+      (place R58 140335 -57150 front 270 (PN 390))
+      (place R45 137160 -33020 front 270 (PN 15k))
+      (place R44 157480 -43180 front 270 (PN 4k7))
+      (place R37 128270 -30480 front 0 (PN 15k))
+      (place R38 128270 -38100 front 0 (PN 15k))
+      (place R36 128270 -34290 front 0 (PN 22k))
+      (place R39 128270 -27305 front 0 (PN 220))
       (place R47 174625 -46355 front 0 (PN 4k7))
       (place R48 179705 -36830 front 0 (PN 820))
       (place R49 179705 -41910 front 180 (PN 22k))
       (place R50 205105 -47625 front 270 (PN 4k7))
       (place R46 185420 -30480 front 0 (PN 10k))
       (place R64 179070 -66040 front 180 (PN 22k))
-      (place R55 160020 -69215 front 90 (PN 5k6))
-      (place R56 127635 -66040 front 0 (PN 6k8))
-      (place R60 135890 -59055 front 270 (PN 15k))
-      (place R82 127635 -102870 front 0 (PN 15k))
-      (place R52 127635 -54610 front 0 (PN 15k))
-      (place R53 127635 -62230 front 0 (PN 15k))
-      (place R51 127635 -58420 front 0 (PN 22k))
-      (place R54 127635 -51435 front 0 (PN 220))
+      (place R55 161290 -69850 front 90 (PN 5k6))
+      (place R56 128270 -66040 front 0 (PN 6k8))
+      (place R60 137160 -57150 front 270 (PN 15k))
+      (place R82 128270 -102870 front 0 (PN 15k))
+      (place R52 128270 -54610 front 0 (PN 15k))
+      (place R53 128270 -62230 front 0 (PN 15k))
+      (place R51 128270 -58420 front 0 (PN 22k))
+      (place R54 128270 -51435 front 0 (PN 220))
       (place R62 174625 -70485 front 0 (PN 4k7))
       (place R63 179070 -60960 front 0 (PN 820))
-      (place R120 135890 -155575 front 270 (PN 15k))
-      (place R96 127635 -130810 front 0 (PN 22k))
-      (place R99 127635 -123825 front 0 (PN 220))
+      (place R120 137160 -153670 front 270 (PN 15k))
+      (place R96 128270 -130810 front 0 (PN 22k))
+      (place R99 128270 -123825 front 0 (PN 220))
       (place R107 174625 -142875 front 0 (PN 4k7))
       (place R108 179705 -133350 front 0 (PN 820))
       (place R109 179705 -138430 front 180 (PN 22k))
       (place R110 205105 -144145 front 270 (PN 4k7))
       (place R106 185420 -127000 front 0 (PN 10k))
-      (place R117 138430 -164465 front 0 (PN 220))
-      (place R118 139065 -155575 front 270 (PN 390))
-      (place R115 160020 -165735 front 90 (PN 5k6))
-      (place R116 127635 -162560 front 0 (PN 6k8))
-      (place R98 127635 -134620 front 0 (PN 15k))
-      (place R119 156210 -163195 front 270 (PN 4k7))
-      (place R112 127635 -151130 front 0 (PN 15k))
-      (place R113 127635 -158750 front 0 (PN 15k))
-      (place R111 127635 -154940 front 0 (PN 22k))
-      (place R114 127635 -147955 front 0 (PN 220))
+      (place R117 139700 -165100 front 0 (PN 220))
+      (place R118 140335 -153670 front 270 (PN 390))
+      (place R115 161290 -166370 front 90 (PN 5k6))
+      (place R116 128270 -162560 front 0 (PN 6k8))
+      (place R98 128270 -134620 front 0 (PN 15k))
+      (place R119 157480 -163830 front 270 (PN 4k7))
+      (place R112 128270 -151130 front 0 (PN 15k))
+      (place R113 128270 -158750 front 0 (PN 15k))
+      (place R111 128270 -154940 front 0 (PN 22k))
+      (place R114 128270 -147955 front 0 (PN 220))
       (place R122 174625 -167005 front 0 (PN 4k7))
       (place R123 179070 -157480 front 0 (PN 820))
       (place R124 179070 -162560 front 180 (PN 22k))
       (place R125 205105 -154305 front 90 (PN 4k7))
       (place R121 185420 -167005 front 0 (PN 10k))
       (place R93 179070 -109220 front 0 (PN 820))
-      (place R88 139065 -107315 front 270 (PN 390))
-      (place R85 160020 -117475 front 90 (PN 5k6))
-      (place R86 127635 -114300 front 0 (PN 6k8))
-      (place R90 135890 -107315 front 270 (PN 15k))
-      (place R89 156210 -114935 front 270 (PN 4k7))
-      (place R57 138430 -67945 front 0 (PN 220))
-      (place R83 127635 -110490 front 0 (PN 15k))
-      (place R81 127635 -106680 front 0 (PN 22k))
-      (place R84 127635 -99695 front 0 (PN 220))
+      (place R88 140335 -105410 front 270 (PN 390))
+      (place R85 161290 -118110 front 90 (PN 5k6))
+      (place R86 128270 -114300 front 0 (PN 6k8))
+      (place R90 137160 -105410 front 270 (PN 15k))
+      (place R89 157480 -115570 front 270 (PN 4k7))
+      (place R57 139700 -68580 front 0 (PN 220))
+      (place R83 128270 -110490 front 0 (PN 15k))
+      (place R81 128270 -106680 front 0 (PN 22k))
+      (place R84 128270 -99695 front 0 (PN 220))
       (place R92 174625 -118745 front 0 (PN 4k7))
-      (place R87 138430 -116205 front 0 (PN 220))
+      (place R87 139700 -116840 front 0 (PN 220))
       (place R94 179070 -114300 front 180 (PN 22k))
       (place R95 205105 -106045 front 90 (PN 4k7))
       (place R91 185420 -118745 front 0 (PN 10k))
-      (place R102 138430 -140335 front 0 (PN 220))
-      (place R103 139065 -131445 front 270 (PN 390))
-      (place R100 160020 -141605 front 90 (PN 5k6))
-      (place R101 127635 -138430 front 0 (PN 6k8))
-      (place R105 135890 -131445 front 270 (PN 15k))
-      (place R104 156210 -139065 front 270 (PN 4k7))
-      (place R97 127635 -127000 front 0 (PN 15k))
+      (place R102 139700 -140970 front 0 (PN 220))
+      (place R103 140335 -129540 front 270 (PN 390))
+      (place R100 161290 -142240 front 90 (PN 5k6))
+      (place R101 128270 -138430 front 0 (PN 6k8))
+      (place R105 137160 -129540 front 270 (PN 15k))
+      (place R104 157480 -139700 front 270 (PN 4k7))
+      (place R97 128270 -127000 front 0 (PN 15k))
       (place R10 217805 -110490 front 180 (PN 1k))
-      (place R22 217805 -86360 front 180 (PN 150k))
-      (place R21 217805 -83185 front 180 (PN 47k))
-      (place R20 217805 -95885 front 180 (PN 33k))
+      (place R22 220345 -86360 front 180 (PN 150k))
+      (place R21 220345 -83185 front 180 (PN 47k))
+      (place R20 220345 -95885 front 180 (PN 33k))
       (place R32 230505 -45085 front 90 (PN 47k))
       (place R33 220345 -41910 front 180 (PN 47k))
       (place R34 213995 -38735 front 180 (PN 1k))
@@ -181,7 +182,7 @@
       (place R30 227330 -62865 front 90 (PN 15k))
       (place R31 220345 -66040 front 180 (PN 15k))
       (place R6 217805 -172720 front 180 (PN 47k))
-      (place R23 217805 -70485 front 180 (PN 56k))
+      (place R23 220345 -70485 front 180 (PN 56k))
       (place R13 217805 -135890 front 0 (PN 100k))
       (place R18 224790 -147320 front 90 (PN 4k7))
       (place R19 227965 -136525 front 90 (PN 100k))
@@ -193,22 +194,22 @@
       (place R11 227965 -157480 front 270 (PN 10k))
       (place R9 217805 -161290 front 180 (PN 27k))
       (place R5 39370 -85725 front 180 (PN 10k))
-      (place R40 160020 -45085 front 90 (PN 5k6))
-      (place R41 127635 -41910 front 0 (PN 6k8))
-      (place R43 139065 -34925 front 270 (PN 390))
-      (place R42 138430 -43815 front 0 (PN 220))
+      (place R40 161290 -45720 front 90 (PN 5k6))
+      (place R41 128270 -41910 front 0 (PN 6k8))
+      (place R43 140335 -33020 front 270 (PN 390))
+      (place R42 139700 -44450 front 0 (PN 220))
       (place R3 35560 -96520 front 270 (PN 220))
       (place R1 50800 -88900 front 180 (PN 270))
       (place R2 54610 -96520 front 90 (PN 4k7))
       (place R7 39370 -88900 front 0 (PN 4k7))
       (place R4 53340 -178435 front 0 (PN 1k))
-      (place R26 217805 -80010 front 180 (PN 56k))
-      (place R27 217805 -89535 front 180 (PN 150k))
-      (place R28 217805 -92710 front 180 (PN 47k))
+      (place R26 220345 -80010 front 180 (PN 56k))
+      (place R27 220345 -89535 front 180 (PN 150k))
+      (place R28 220345 -92710 front 180 (PN 47k))
       (place R8 227965 -147320 front 90 (PN 1M))
-      (place R29 217805 -99060 front 180 (PN 33k))
-      (place R25 217805 -76835 front 180 (PN 68k))
-      (place R24 217805 -73660 front 180 (PN 68k))
+      (place R29 220345 -99060 front 180 (PN 33k))
+      (place R25 220345 -76835 front 180 (PN 68k))
+      (place R24 220345 -73660 front 180 (PN 68k))
       (place R126 34290 -68580 front 180 (PN 220))
       (place R127 36195 -60960 front 90 (PN 120))
     )
@@ -224,14 +225,14 @@
     )
     (component "DIP-16__300_ELL"
       (place U4 69215 -164465 front 90 (PN LTC1660))
-      (place U21 149225 -158115 front 90 (PN SSM2044))
-      (place U15 149225 -85725 front 90 (PN SSM2044))
-      (place U2 76835 -39370 front 0 (PN 74HCT4051))
-      (place U13 149225 -61595 front 90 (PN SSM2044))
-      (place U11 149225 -37465 front 90 (PN SSM2044))
-      (place U17 149225 -109855 front 90 (PN SSM2044))
+      (place U21 150495 -158750 front 90 (PN SSM2044))
+      (place U15 150495 -86360 front 90 (PN SSM2044))
+      (place U2 79375 -39370 front 0 (PN 74HCT4051))
+      (place U13 150495 -62230 front 90 (PN SSM2044))
+      (place U11 150495 -38100 front 90 (PN SSM2044))
+      (place U17 150495 -110490 front 90 (PN SSM2044))
       (place IC3 191770 -146685 front 0 (PN LM13700))
-      (place U19 149225 -133985 front 90 (PN SSM2044))
+      (place U19 150495 -134620 front 90 (PN SSM2044))
       (place U3 86995 -156845 front 90 (PN LTC1660))
       (place IC2 191770 -98425 front 0 (PN LM13700))
       (place IC1 191770 -50165 front 0 (PN LM13700))
@@ -256,69 +257,69 @@
       (place D6 49530 -29210 front 0 (PN 1N5819))
     )
     (component C2
-      (place C73 156210 -127635 front 90 (PN 10n))
-      (place C74 142240 -135255 front 270 (PN 10n))
-      (place C47 142240 -62865 front 270 (PN 10n))
-      (place C75 142240 -127635 front 270 (PN 10n))
+      (place C73 157480 -128270 front 90 (PN 10n))
+      (place C74 143510 -135890 front 270 (PN 10n))
+      (place C47 143510 -63500 front 270 (PN 10n))
+      (place C75 143510 -128270 front 270 (PN 10n))
       (place C4 216535 -168910 front 180 (PN 100n))
       (place C11 208280 -153035 front 90 (PN 10n))
       (place C68 172085 -111760 front 270 (PN 470n))
-      (place C48 142240 -55245 front 270 (PN 10n))
+      (place C48 143510 -55880 front 270 (PN 10n))
       (place C9 208280 -104775 front 90 (PN 10n))
       (place C41 172085 -39370 front 270 (PN 470n))
       (place C2 54610 -175260 front 180 (PN 100n))
-      (place C37 156210 -31115 front 90 (PN 10n))
-      (place C39 142240 -31115 front 270 (PN 10n))
+      (place C37 157480 -31750 front 90 (PN 10n))
+      (place C39 143510 -31750 front 270 (PN 10n))
       (place C26 36195 -40005 front 270 (PN 100n))
       (place C27 36195 -80010 front 90 (PN 100n))
       (place C77 172085 -135890 front 270 (PN 470n))
-      (place C21 63500 -38100 front 270 (PN 100n))
+      (place C21 66040 -38100 front 270 (PN 100n))
       (place C20 46990 -80645 front 180 (PN 100n))
       (place C10 208280 -145415 front 270 (PN 10n))
-      (place C82 156210 -151765 front 90 (PN 10n))
+      (place C82 157480 -152400 front 90 (PN 10n))
       (place C8 208280 -97155 front 270 (PN 10n))
-      (place C84 142240 -151765 front 270 (PN 10n))
-      (place C83 142240 -159385 front 270 (PN 10n))
+      (place C84 143510 -152400 front 270 (PN 10n))
+      (place C83 143510 -160020 front 270 (PN 10n))
       (place C13 77470 -153035 front 180 (PN 100n))
-      (place C66 142240 -103505 front 270 (PN 10n))
+      (place C66 143510 -104140 front 270 (PN 10n))
       (place C3 49530 -85725 front 0 (PN 100n))
-      (place C46 156210 -55245 front 90 (PN 10n))
+      (place C46 157480 -55880 front 90 (PN 10n))
       (place C59 172085 -87630 front 270 (PN 470n))
-      (place C17 101600 -101600 front 270 (PN 100n))
-      (place C16 101600 -77470 front 270 (PN 100n))
-      (place C15 101600 -53340 front 270 (PN 100n))
-      (place C14 101600 -29845 front 270 (PN 100n))
-      (place C18 101600 -125730 front 270 (PN 100n))
-      (place C38 142240 -38735 front 270 (PN 10n))
-      (place C55 156210 -79375 front 90 (PN 10n))
-      (place C56 142240 -86995 front 270 (PN 10n))
-      (place C57 142240 -79375 front 270 (PN 10n))
+      (place C17 101600 -104140 front 270 (PN 100n))
+      (place C16 101600 -80010 front 270 (PN 100n))
+      (place C15 101600 -55880 front 270 (PN 100n))
+      (place C14 101600 -31750 front 270 (PN 100n))
+      (place C18 101600 -128270 front 270 (PN 100n))
+      (place C38 143510 -39370 front 270 (PN 10n))
+      (place C55 157480 -80010 front 90 (PN 10n))
+      (place C56 143510 -87630 front 270 (PN 10n))
+      (place C57 143510 -80010 front 270 (PN 10n))
       (place C12 59690 -160655 front 180 (PN 100n))
       (place C30 33655 -53340 front 180 (PN 100n))
       (place C50 172085 -63500 front 270 (PN 470n))
-      (place C65 142240 -111125 front 270 (PN 10n))
+      (place C65 143510 -111760 front 270 (PN 10n))
       (place C6 208280 -48895 front 270 (PN 10n))
       (place C32 213360 -46355 front 90 (PN 100p))
       (place C7 208280 -56515 front 90 (PN 10n))
       (place C22 62230 -107950 front 90 (PN 100n))
-      (place C19 101600 -149860 front 270 (PN 100n))
+      (place C19 101600 -152400 front 270 (PN 100n))
       (place C31 227330 -46355 front 90 (PN 100p))
       (place C86 172085 -160020 front 270 (PN 470n))
-      (place C64 156210 -103505 front 90 (PN 10n))
+      (place C64 157480 -104140 front 90 (PN 10n))
     )
     (component C1V7
-      (place C43 117475 -53340 front 0 (PN 22u))
-      (place C44 117475 -63500 front 0 (PN 22u))
-      (place C53 117475 -87630 front 0 (PN 22u))
-      (place C52 117475 -77470 front 0 (PN 22u))
-      (place C71 117475 -135890 front 0 (PN 22u))
-      (place C70 117475 -125730 front 0 (PN 22u))
-      (place C79 117475 -149860 front 0 (PN 22u))
-      (place C35 117475 -39370 front 0 (PN 22u))
-      (place C80 117475 -160020 front 0 (PN 22u))
-      (place C61 117475 -101600 front 0 (PN 22u))
-      (place C62 117475 -111760 front 0 (PN 22u))
-      (place C34 117475 -29210 front 0 (PN 22u))
+      (place C43 117475 -54610 front 270 (PN 22u))
+      (place C44 117475 -62230 front 90 (PN 22u))
+      (place C53 117475 -86360 front 90 (PN 22u))
+      (place C52 117475 -78740 front 270 (PN 22u))
+      (place C71 117475 -134620 front 90 (PN 22u))
+      (place C70 117475 -127000 front 270 (PN 22u))
+      (place C79 117475 -151130 front 270 (PN 22u))
+      (place C35 117475 -38100 front 90 (PN 22u))
+      (place C80 117475 -158750 front 90 (PN 22u))
+      (place C61 117475 -102870 front 270 (PN 22u))
+      (place C62 117475 -110490 front 90 (PN 22u))
+      (place C34 117475 -30480 front 270 (PN 22u))
     )
     (component C1V5
       (place C33 40640 -53975 front 90 (PN 10u))
@@ -346,12 +347,12 @@
       (place P8 38100 -31115 front 180 (PN AC_IN))
     )
     (component "B32520-3"
-      (place C63 160020 -107315 front 90 (PN 820p))
-      (place C81 160020 -155575 front 90 (PN 820p))
-      (place C45 160020 -59055 front 90 (PN 820p))
-      (place C72 160020 -131445 front 90 (PN 820p))
-      (place C54 160020 -83185 front 90 (PN 820p))
-      (place C36 160020 -34925 front 90 (PN 820p))
+      (place C63 161290 -107950 front 90 (PN 820p))
+      (place C81 161290 -156210 front 90 (PN 820p))
+      (place C45 161290 -59690 front 90 (PN 820p))
+      (place C72 161290 -132080 front 90 (PN 820p))
+      (place C54 161290 -83820 front 90 (PN 820p))
+      (place C36 161290 -35560 front 90 (PN 820p))
     )
     (component TO220_VERT_FIXED
       (place U9 30480 -60960 back 180 (PN "LM1084IT-ADJ/NOPB"))
@@ -363,6 +364,14 @@
       (place HOLE3 229870 -176530 front 0 (PN P***))
       (place HOLE4 229870 -29210 front 0 (PN P***))
       (place HOLE1 29210 -29210 front 0 (PN P***))
+    )
+    (component C1V5::1
+      (place C88 139065 -40640 front 180 (PN 1u))
+      (place C89 139065 -64770 front 180 (PN 1u))
+      (place C90 139065 -88900 front 180 (PN 1u))
+      (place C91 139065 -113030 front 180 (PN 1u))
+      (place C92 139065 -137160 front 180 (PN 1u))
+      (place C93 139065 -161290 front 180 (PN 1u))
     )
   )
   (library
@@ -814,7 +823,7 @@
             -2568.63 1866.22  -1866.22 2568.63  -981.128 3019.6  0 3175
             981.128 3019.6  1866.22 2568.63  2568.63 1866.22  3019.6 981.128))
       (pin Rect[A]Pad_1524x1524_um 1 -1270 0)
-      (pin Round[A]Pad_1524_um 2 1270 0)
+      (pin Round[A]Pad_1651_um 2 1270 0)
     )
     (image C1V5
       (outline (path signal 127  2543.17 0  2418.7 -785.883  2057.47 -1494.84  1494.84 -2057.47
@@ -822,8 +831,8 @@
             -2057.47 -1494.84  -2418.7 -785.883  -2543.17 0  -2418.7 785.883
             -2057.47 1494.84  -1494.84 2057.47  -785.883 2418.7  0 2543.17
             785.883 2418.7  1494.84 2057.47  2057.47 1494.84  2418.7 785.883))
-      (pin Rect[A]Pad_1397x1397_um 1 -1270 0)
-      (pin Round[A]Pad_1397_um 2 1270 0)
+      (pin Rect[A]Pad_1524x1524_um 1 -1270 0)
+      (pin Round[A]Pad_1651_um 2 1270 0)
     )
     (image C1.5V8V
       (outline (path signal 381  4445 0  4227.45 -1373.58  3596.08 -2612.7  2612.7 -3596.08
@@ -831,8 +840,8 @@
             -3596.08 -2612.7  -4227.45 -1373.58  -4445 0  -4227.45 1373.58
             -3596.08 2612.7  -2612.7 3596.08  -1373.58 4227.45  0 4445  1373.58 4227.45
             2612.7 3596.08  3596.08 2612.7  4227.45 1373.58))
-      (pin Rect[A]Pad_1397x1397_um 1 -1905 0)
-      (pin Round[A]Pad_1397_um 2 1905 0)
+      (pin Rect[A]Pad_1524x1524_um 1 -1905 0)
+      (pin Round[A]Pad_1651_um 2 1905 0)
     )
     (image bornier2
       (outline (path signal 304.8  5080 -2540  -5080 -2540))
@@ -871,14 +880,18 @@
             706.412 2174.11  1343.68 1849.41  1849.41 1343.68  2174.11 706.412))
       (pin Round[A]Pad_4064_um 1 0 0)
     )
+    (image C1V5::1
+      (outline (path signal 127  2543.17 0  2418.7 -785.883  2057.47 -1494.84  1494.84 -2057.47
+            785.883 -2418.7  0 -2543.17  -785.883 -2418.7  -1494.84 -2057.47
+            -2057.47 -1494.84  -2418.7 -785.883  -2543.17 0  -2418.7 785.883
+            -2057.47 1494.84  -1494.84 2057.47  -785.883 2418.7  0 2543.17
+            785.883 2418.7  1494.84 2057.47  2057.47 1494.84  2418.7 785.883))
+      (pin Rect[A]Pad_1397x1397_um 1 -1270 0)
+      (pin Round[A]Pad_1397_um 2 1270 0)
+    )
     (padstack Round[A]Pad_1397_um
       (shape (circle F.Cu 1397))
       (shape (circle B.Cu 1397))
-      (attach off)
-    )
-    (padstack Round[A]Pad_1524_um
-      (shape (circle F.Cu 1524))
-      (shape (circle B.Cu 1524))
       (attach off)
     )
     (padstack Round[A]Pad_1651_um
@@ -936,22 +949,17 @@
       (shape (rect B.Cu -889 -889 889 889))
       (attach off)
     )
-    (padstack "Via[0-1]_1270:508_um"
-      (shape (circle F.Cu 1270))
-      (shape (circle B.Cu 1270))
+    (padstack "Via[0-1]_1651:812.8_um"
+      (shape (circle F.Cu 1651))
+      (shape (circle B.Cu 1651))
       (attach off)
     )
-    (padstack "Via[0-1]_1270:0_um"
-      (shape (circle F.Cu 1270))
-      (shape (circle B.Cu 1270))
+    (padstack "Via[0-1]_1651:0_um"
+      (shape (circle F.Cu 1651))
+      (shape (circle B.Cu 1651))
       (attach off)
     )
-    (padstack "Via[0-1]_1778:508_um"
-      (shape (circle F.Cu 1778))
-      (shape (circle B.Cu 1778))
-      (attach off)
-    )
-    (padstack "Via[0-1]_2286:508_um"
+    (padstack "Via[0-1]_2286:812.8_um"
       (shape (circle F.Cu 2286))
       (shape (circle B.Cu 2286))
       (attach off)
@@ -1203,7 +1211,7 @@
         U14-12 U10-8 U10-12 U16-8 U16-12 U5-10 U20-8 U20-12 C11-1 C9-1 C2-2 C26-2
         C27-1 C21-2 C20-2 C10-2 C8-2 C13-2 C3-2 C17-2 C16-2 C15-2 C14-2 C18-2 C12-2
         C30-2 C6-2 C7-1 C22-2 C19-2 C33-2 C1-2 C29-1 C28-2 C5-2 P8-2 U7-1 U8-1 U12-8
-        U12-12 R126-1)
+        U12-12 R126-1 C88-2 C89-2 C90-2 C91-2 C92-2 C93-2)
     )
     (net "N-000001"
       (pins R14-2 R12-2 U5-9)
@@ -1227,70 +1235,70 @@
       (pins R44-1 U11-3 C40-1)
     )
     (net "N-00000159"
-      (pins R37-2 R38-2 R36-2 R39-2 U11-1)
+      (pins R37-1 C34-2)
     )
     (net "N-0000016"
       (pins D3-1 D2-2)
     )
     (net "N-00000160"
-      (pins U11-14 C38-2)
+      (pins R37-2 R38-2 R36-2 R39-2 U11-1)
     )
     (net "N-00000161"
-      (pins U11-6 C37-1)
+      (pins U10-14 C34-1)
     )
     (net "N-00000162"
-      (pins U11-7 C37-2)
+      (pins U10-10 C35-1)
     )
     (net "N-00000163"
-      (pins U11-4 C36-1)
+      (pins R38-1 C35-2)
     )
     (net "N-00000164"
-      (pins U11-12 C38-1)
+      (pins U11-6 C37-1)
     )
     (net "N-00000165"
-      (pins U11-11 C39-2)
+      (pins U11-7 C37-2)
     )
     (net "N-00000166"
-      (pins U11-10 C39-1)
+      (pins U11-14 C38-2)
     )
     (net "N-00000167"
-      (pins R42-2 U11-15)
+      (pins U11-12 C38-1)
     )
     (net "N-00000168"
-      (pins R45-2 R41-2 R43-2 U11-13)
+      (pins U11-11 C39-2)
     )
     (net "N-00000169"
-      (pins R50-1 IC1-9 C42-2)
+      (pins U11-10 C39-1)
     )
     (net "N-0000017"
       (pins R15-1 D2-1)
     )
     (net "N-00000170"
-      (pins R46-1 C40-2)
+      (pins R42-2 U11-15)
     )
     (net "N-00000171"
-      (pins R47-2 R48-2 IC1-16 C41-2)
+      (pins U11-4 C36-1)
     )
     (net "N-00000172"
-      (pins U10-14 C34-1)
+      (pins R47-2 R48-2 IC1-16 C41-2)
     )
     (net "N-00000173"
-      (pins U10-10 C35-1)
+      (pins R45-2 R41-2 R43-2 U11-13 C88-1)
     )
     (net "N-00000174"
-      (pins R38-1 C35-2)
-    )
-    (net "N-00000175"
-      (pins R37-1 C34-2)
-    )
-    (net "N-00000176"
       (pins R40-2 U11-2)
     )
-    (net "N-00000177"
+    (net "N-00000175"
       (pins RV2-3 IC1-13)
     )
-    (net "N-00000178"
+    (net "N-00000176"
       (pins R49-1 IC1-10 IC1-12)
+    )
+    (net "N-00000177"
+      (pins R50-1 IC1-9 C42-2)
+    )
+    (net "N-00000178"
+      (pins R46-1 C40-2)
     )
     (net "N-00000179"
       (pins U11-5 C36-2)
@@ -1305,28 +1313,28 @@
       (pins R59-1 U13-3 C49-1)
     )
     (net "N-00000185"
-      (pins R58-2 R56-2 R60-2 U13-13)
+      (pins R52-1 C43-2)
     )
     (net "N-00000186"
       (pins R52-2 R53-2 R51-2 R54-2 U13-1)
     )
     (net "N-00000187"
-      (pins U13-11 C48-2)
+      (pins C43-1 U12-14)
     )
     (net "N-00000188"
-      (pins R65-1 IC1-8 C51-2)
+      (pins C44-1 U12-10)
     )
     (net "N-00000189"
-      (pins U13-6 C46-1)
+      (pins R53-1 C44-2)
     )
     (net "N-0000019"
       (pins R10-2 R13-1 U5-2)
     )
     (net "N-00000190"
-      (pins U13-7 C46-2)
+      (pins U13-6 C46-1)
     )
     (net "N-00000191"
-      (pins U13-4 C45-1)
+      (pins U13-7 C46-2)
     )
     (net "N-00000192"
       (pins U13-14 C47-2)
@@ -1335,22 +1343,22 @@
       (pins U13-12 C47-1)
     )
     (net "N-00000194"
-      (pins U13-10 C48-1)
+      (pins U13-11 C48-2)
     )
     (net "N-00000195"
-      (pins R57-2 U13-15)
+      (pins U13-10 C48-1)
     )
     (net "N-00000196"
-      (pins R61-1 C49-2)
+      (pins R57-2 U13-15)
     )
     (net "N-00000197"
-      (pins R62-2 R63-2 IC1-1 C50-2)
+      (pins U13-4 C45-1)
     )
     (net "N-00000198"
-      (pins C43-1 U12-14)
+      (pins R62-2 R63-2 IC1-1 C50-2)
     )
     (net "N-00000199"
-      (pins C44-1 U12-10)
+      (pins R61-1 C49-2)
     )
     (net "N-000002"
       (pins R11-2 R9-1 U5-5)
@@ -1359,19 +1367,19 @@
       (pins R13-2 R16-2 U5-1)
     )
     (net "N-00000200"
-      (pins R53-1 C44-2)
+      (pins R58-2 R56-2 R60-2 U13-13 C89-1)
     )
     (net "N-00000201"
-      (pins R52-1 C43-2)
-    )
-    (net "N-00000202"
       (pins R55-2 U13-2)
     )
-    (net "N-00000203"
+    (net "N-00000202"
       (pins RV3-3 IC1-4)
     )
-    (net "N-00000204"
+    (net "N-00000203"
       (pins R64-1 IC1-5 IC1-7)
+    )
+    (net "N-00000204"
+      (pins R65-1 IC1-8 C51-2)
     )
     (net "N-00000205"
       (pins U13-5 C45-2)
@@ -1383,70 +1391,70 @@
       (pins R74-1 U15-3 C58-1)
     )
     (net "N-00000209"
-      (pins U15-4 C54-1)
+      (pins R69-2 R67-2 R68-2 R66-2 U15-1)
     )
     (net "N-0000021"
       (pins R10-1 C5-1)
     )
     (net "N-00000210"
-      (pins R69-2 R67-2 R68-2 R66-2 U15-1)
+      (pins U14-14 C52-1)
     )
     (net "N-00000211"
-      (pins U15-11 C57-2)
+      (pins U14-10 C53-1)
     )
     (net "N-00000212"
-      (pins U15-6 C55-1)
+      (pins R68-1 C53-2)
     )
     (net "N-00000213"
-      (pins U15-7 C55-2)
+      (pins R67-1 C52-2)
     )
     (net "N-00000214"
-      (pins U15-14 C56-2)
+      (pins U15-4 C54-1)
     )
     (net "N-00000215"
-      (pins U15-12 C56-1)
+      (pins U15-6 C55-1)
     )
     (net "N-00000216"
-      (pins U15-10 C57-1)
+      (pins U15-7 C55-2)
     )
     (net "N-00000217"
-      (pins R72-2 U15-15)
+      (pins U15-14 C56-2)
     )
     (net "N-00000218"
-      (pins R73-2 R71-2 R75-2 U15-13)
+      (pins U15-12 C56-1)
     )
     (net "N-00000219"
-      (pins R80-1 IC2-9 C60-2)
+      (pins U15-11 C57-2)
     )
     (net "N-0000022"
       (pins R8-2 U5-3 C4-2)
     )
     (net "N-00000220"
-      (pins R76-1 C58-2)
+      (pins U15-10 C57-1)
     )
     (net "N-00000221"
-      (pins R77-2 R78-2 IC2-16 C59-2)
+      (pins R72-2 U15-15)
     )
     (net "N-00000222"
-      (pins U14-14 C52-1)
+      (pins R77-2 R78-2 IC2-16 C59-2)
     )
     (net "N-00000223"
-      (pins U14-10 C53-1)
+      (pins R73-2 R71-2 R75-2 U15-13 C90-1)
     )
     (net "N-00000224"
-      (pins R68-1 C53-2)
-    )
-    (net "N-00000225"
-      (pins R67-1 C52-2)
-    )
-    (net "N-00000226"
       (pins R70-2 U15-2)
     )
-    (net "N-00000227"
+    (net "N-00000225"
       (pins RV4-3 IC2-13)
     )
-    (net "N-00000228"
+    (net "N-00000226"
       (pins R79-1 IC2-10 IC2-12)
+    )
+    (net "N-00000227"
+      (pins R80-1 IC2-9 C60-2)
+    )
+    (net "N-00000228"
+      (pins R76-1 C58-2)
     )
     (net "N-00000229"
       (pins U15-5 C54-2)
@@ -1458,64 +1466,64 @@
       (pins R89-1 U17-3 C67-1)
     )
     (net "N-00000233"
-      (pins R82-2 R83-2 R81-2 R84-2 U17-1)
+      (pins U17-6 C64-1)
     )
     (net "N-00000234"
-      (pins U17-11 C66-2)
+      (pins R82-2 R83-2 R81-2 R84-2 U17-1)
     )
     (net "N-00000235"
       (pins U16-14 C61-1)
     )
     (net "N-00000236"
-      (pins U17-6 C64-1)
+      (pins U16-10 C62-1)
     )
     (net "N-00000237"
-      (pins U17-7 C64-2)
+      (pins R83-1 C62-2)
     )
     (net "N-00000238"
-      (pins U17-4 C63-1)
+      (pins R82-1 C61-2)
     )
     (net "N-00000239"
-      (pins U17-14 C65-2)
+      (pins U17-7 C64-2)
     )
     (net "N-00000240"
-      (pins U17-12 C65-1)
+      (pins U17-14 C65-2)
     )
     (net "N-00000241"
-      (pins U17-10 C66-1)
+      (pins U17-12 C65-1)
     )
     (net "N-00000242"
-      (pins R87-2 U17-15)
+      (pins U17-11 C66-2)
     )
     (net "N-00000243"
-      (pins R88-2 R86-2 R90-2 U17-13)
+      (pins U17-10 C66-1)
     )
     (net "N-00000244"
-      (pins R95-1 IC2-8 C69-2)
+      (pins R87-2 U17-15)
     )
     (net "N-00000245"
-      (pins R91-1 C67-2)
+      (pins U17-4 C63-1)
     )
     (net "N-00000246"
       (pins R93-2 R92-2 IC2-1 C68-2)
     )
     (net "N-00000247"
-      (pins U16-10 C62-1)
+      (pins R88-2 R86-2 R90-2 U17-13 C91-1)
     )
     (net "N-00000248"
-      (pins R83-1 C62-2)
-    )
-    (net "N-00000249"
-      (pins R82-1 C61-2)
-    )
-    (net "N-00000250"
       (pins R85-2 U17-2)
     )
-    (net "N-00000251"
+    (net "N-00000249"
       (pins RV5-3 IC2-4)
     )
-    (net "N-00000252"
+    (net "N-00000250"
       (pins R94-1 IC2-5 IC2-7)
+    )
+    (net "N-00000251"
+      (pins R95-1 IC2-8 C69-2)
+    )
+    (net "N-00000252"
+      (pins R91-1 C67-2)
     )
     (net "N-00000253"
       (pins U17-5 C63-2)
@@ -1530,64 +1538,64 @@
       (pins R96-2 R99-2 R98-2 R97-2 U19-1)
     )
     (net "N-00000258"
-      (pins U19-11 C75-2)
+      (pins U18-14 C70-1)
     )
     (net "N-00000259"
-      (pins U19-6 C73-1)
+      (pins U18-10 C71-1)
     )
     (net "N-0000026"
       (pins Q1-3 R6-1 C4-1)
     )
     (net "N-00000260"
-      (pins U19-7 C73-2)
-    )
-    (net "N-00000261"
-      (pins U19-4 C72-1)
-    )
-    (net "N-00000262"
-      (pins U19-14 C74-2)
-    )
-    (net "N-00000263"
-      (pins U19-12 C74-1)
-    )
-    (net "N-00000264"
-      (pins U19-10 C75-1)
-    )
-    (net "N-00000265"
-      (pins R102-2 U19-15)
-    )
-    (net "N-00000266"
-      (pins R103-2 R101-2 R105-2 U19-13)
-    )
-    (net "N-00000267"
-      (pins R110-1 IC3-9 C78-2)
-    )
-    (net "N-00000268"
-      (pins R106-1 C76-2)
-    )
-    (net "N-00000269"
-      (pins R107-2 R108-2 IC3-16 C77-2)
-    )
-    (net "N-00000270"
-      (pins U18-14 C70-1)
-    )
-    (net "N-00000271"
-      (pins U18-10 C71-1)
-    )
-    (net "N-00000272"
       (pins R98-1 C71-2)
     )
-    (net "N-00000273"
+    (net "N-00000261"
       (pins R97-1 C70-2)
     )
-    (net "N-00000274"
+    (net "N-00000262"
+      (pins U19-6 C73-1)
+    )
+    (net "N-00000263"
+      (pins U19-7 C73-2)
+    )
+    (net "N-00000264"
+      (pins U19-14 C74-2)
+    )
+    (net "N-00000265"
+      (pins U19-12 C74-1)
+    )
+    (net "N-00000266"
+      (pins U19-11 C75-2)
+    )
+    (net "N-00000267"
+      (pins U19-10 C75-1)
+    )
+    (net "N-00000268"
+      (pins R102-2 U19-15)
+    )
+    (net "N-00000269"
+      (pins U19-4 C72-1)
+    )
+    (net "N-00000270"
+      (pins R107-2 R108-2 IC3-16 C77-2)
+    )
+    (net "N-00000271"
+      (pins R103-2 R101-2 R105-2 U19-13 C92-1)
+    )
+    (net "N-00000272"
       (pins R100-2 U19-2)
     )
-    (net "N-00000275"
+    (net "N-00000273"
       (pins RV6-3 IC3-13)
     )
-    (net "N-00000276"
+    (net "N-00000274"
       (pins R109-1 IC3-10 IC3-12)
+    )
+    (net "N-00000275"
+      (pins R110-1 IC3-9 C78-2)
+    )
+    (net "N-00000276"
+      (pins R106-1 C76-2)
     )
     (net "N-00000277"
       (pins U19-5 C72-2)
@@ -1599,22 +1607,22 @@
       (pins R119-1 U21-3 C85-1)
     )
     (net "N-00000281"
-      (pins R120-2 R118-2 R116-2 U21-13)
+      (pins R112-1 C79-2)
     )
     (net "N-00000282"
       (pins R112-2 R113-2 R111-2 R114-2 U21-1)
     )
     (net "N-00000283"
-      (pins U21-11 C84-2)
+      (pins U20-14 C79-1)
     )
     (net "N-00000284"
-      (pins U21-6 C82-1)
+      (pins U20-10 C80-1)
     )
     (net "N-00000285"
-      (pins U21-7 C82-2)
+      (pins R113-1 C80-2)
     )
     (net "N-00000286"
-      (pins U21-4 C81-1)
+      (pins U21-7 C82-2)
     )
     (net "N-00000287"
       (pins U21-14 C83-2)
@@ -1623,43 +1631,43 @@
       (pins U21-12 C83-1)
     )
     (net "N-00000289"
-      (pins U21-10 C84-1)
+      (pins U21-11 C84-2)
     )
     (net "N-00000290"
-      (pins R117-2 U21-15)
+      (pins U21-10 C84-1)
     )
     (net "N-00000291"
-      (pins R125-1 IC3-8 C87-2)
+      (pins R117-2 U21-15)
     )
     (net "N-00000292"
-      (pins R121-1 C85-2)
+      (pins U21-4 C81-1)
     )
     (net "N-00000293"
       (pins R122-2 R123-2 IC3-1 C86-2)
     )
     (net "N-00000294"
-      (pins U20-14 C79-1)
+      (pins R121-1 C85-2)
     )
     (net "N-00000295"
-      (pins U20-10 C80-1)
+      (pins R120-2 R118-2 R116-2 U21-13 C93-1)
     )
     (net "N-00000296"
-      (pins R113-1 C80-2)
-    )
-    (net "N-00000297"
-      (pins R112-1 C79-2)
-    )
-    (net "N-00000298"
       (pins R115-2 U21-2)
     )
-    (net "N-00000299"
+    (net "N-00000297"
       (pins RV7-3 IC3-4)
     )
-    (net "N-00000300"
+    (net "N-00000298"
       (pins R124-1 IC3-5 IC3-7)
     )
-    (net "N-00000301"
+    (net "N-00000299"
+      (pins R125-1 IC3-8 C87-2)
+    )
+    (net "N-00000300"
       (pins U21-5 C81-2)
+    )
+    (net "N-00000301"
+      (pins U21-6 C82-1)
     )
     (net "N-00000302"
       (pins RV7-1 R121-2 IC3-3)
@@ -1800,16 +1808,16 @@
       "N-0000072" "N-0000073" "N-0000074" "N-0000075" "N-0000076" "N-0000077"
       "N-0000078" "N-000008" "N-000009" NOISE SPI_MOSI SPI_SCK
       (circuit
-        (use_via Via[0-1]_1270:508_um)
+        (use_via Via[0-1]_1651:812.8_um)
       )
       (rule
-        (width 762)
+        (width 635)
         (clearance 355.7)
       )
     )
     (class pwr +3.3V +5V -5V GND
       (circuit
-        (use_via Via[0-1]_1778:508_um)
+        (use_via Via[0-1]_1651:812.8_um)
       )
       (rule
         (width 1524)
@@ -1818,7 +1826,7 @@
     )
     (class pwr2 /AC_IN /UNR+ "/UNR-"
       (circuit
-        (use_via Via[0-1]_2286:508_um)
+        (use_via Via[0-1]_2286:812.8_um)
       )
       (rule
         (width 2032)
