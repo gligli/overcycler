@@ -83,7 +83,7 @@ void buildLLIs(int buffer, int channel)
 	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
 	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 	lli[lliPos][0].Control=
-		GPDMA_DMACCxControl_TransferSize(2) |
+		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 
