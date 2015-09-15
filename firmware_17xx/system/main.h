@@ -59,7 +59,7 @@ static inline int __restore_irq_stub(uint32_t pm)
 
 
 #define STORAGE_PAGE_SIZE 256
-#define STORAGE_SIZE (256*256)
+#define STORAGE_SIZE (65536*256)
 
 #define EXT_RAM  __attribute__((section(".ext_ram")))
 

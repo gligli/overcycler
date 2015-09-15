@@ -15,7 +15,7 @@
 #define SETTINGS_PAGE_COUNT 2
 #define SETTINGS_PAGE ((STORAGE_SIZE/STORAGE_PAGE_SIZE)-4)
 
-#define SEQUENCER_START_PAGE 1024
+#define SEQUENCER_START_PAGE 65000
 
 const uint8_t steppedParametersBits[spCount] = 
 {

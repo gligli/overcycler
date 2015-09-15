@@ -241,7 +241,7 @@ static void handleFinishedVoices(void)
 static void refreshAssignerSettings(void)
 {
 	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
-	assigner_setVoiceMask(settings.voiceMask);
+//no way to change this in overcycler	assigner_setVoiceMask(settings.voiceMask);
 	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
 }
 
@@ -923,12 +923,23 @@ void synth_timerInterrupt(void)
 		
 		// arpeggiator
 
-		if(arp_getMode()!=amOff && (settings.syncMode==smInternal || synth.pendingExtClock))
+		if(settings.syncMode==smInternal || synth.pendingExtClock)
 		{
 			if(synth.pendingExtClock)
 				--synth.pendingExtClock;
 			
-			arp_update();
+			if (clock_update())
+			{
+				// sequencer
+
+				if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
+					seq_update();
+			
+				// arpeggiator
+
+				if(arp_getMode()!=amOff)
+					arp_update();
+			}
 		}
 
 		// glide
