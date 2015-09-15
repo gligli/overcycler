@@ -15,7 +15,7 @@
 #define HALF_RANGE (FULL_RANGE/2+1)
 #define HALF_RANGE_L (65536UL*HALF_RANGE) // i.e. HALF_RANGE<<16, as uint32_t
 
-#define SCANNER_BASE_NOTE 24
+#define SCANNER_BASE_NOTE 12
 
 #define CVMUX_PORT_ABC 0
 #define CVMUX_PIN_A 19
