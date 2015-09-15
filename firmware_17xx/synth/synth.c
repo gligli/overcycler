@@ -559,7 +559,7 @@ static void handleBitInputs(void)
 		assigner_latchPattern();
 		assigner_getPattern( currentPreset.voicePattern,NULL);
 	}
-	else if(arp_getMode()!=amOff && (cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
+	else if((cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
 	{
 		if(arp_getMode()!=amOff)
 		{
