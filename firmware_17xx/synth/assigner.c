@@ -4,15 +4,37 @@
 
 #include "assigner.h"
 
-struct assigner_s assigner;
+struct allocation_s
+{
+	uint32_t timestamp;
+	uint16_t velocity;
+	uint8_t rootNote;
+	uint8_t note;
+	int8_t assigned;
+	int8_t gated;
+	int8_t keyPressed;
+	int8_t internalKeyboard;
+};
+
+static struct
+{
+	uint8_t noteStates[16]; // 1 bit per note, 128 notes
+	uint16_t noteVelocities[128];
+	struct allocation_s allocation[SYNTH_VOICE_COUNT];
+	uint8_t patternOffsets[SYNTH_VOICE_COUNT];
+	assignerPriority_t priority;
+	uint8_t voiceMask;
+	int8_t mono;
+	int8_t hold;
+} assigner;
 
 static const uint8_t bit2mask[8] = {1,2,4,8,16,32,64,128};
 
-static inline void setNoteState(struct assigner_s * a, uint8_t note, int8_t gate)
+static inline void setNoteState(uint8_t note, int8_t gate)
 {
 	uint8_t *bf,mask;
 	
-	bf=&a->noteStates[note>>3];
+	bf=&assigner.noteStates[note>>3];
 	mask=bit2mask[note&7];
 	
 	if(gate)	
@@ -21,11 +43,11 @@ static inline void setNoteState(struct assigner_s * a, uint8_t note, int8_t gate
 		*bf&=~mask;
 }
 
-static inline int8_t getNoteState(struct assigner_s * a, uint8_t note)
+static inline int8_t getNoteState(uint8_t note)
 {
 	uint8_t bf,mask;
 	
-	bf=a->noteStates[note>>3];
+	bf=assigner.noteStates[note>>3];
 	
 	if(!bf)
 		return 0;
@@ -35,27 +57,39 @@ static inline int8_t getNoteState(struct assigner_s * a, uint8_t note)
 	return (bf&mask)!=0;
 }
 
-static inline int8_t isVoiceDisabled(struct assigner_s * a, int8_t voice)
+static inline void setNoteVelocity(uint8_t note, uint8_t gate, uint16_t velocity)
 {
-	return !(a->voiceMask&bit2mask[voice]);
+	if (gate)
+		assigner.noteVelocities[note]=velocity;
 }
 
-static inline int8_t getAvailableVoice(struct assigner_s * a, uint8_t note, uint32_t timestamp)
+static inline uint16_t getNoteVelocity(uint8_t note)
 {
-	int8_t v,sameNote=-1,firstFree=-1;
+	return assigner.noteVelocities[note];
+}
+
+static inline int8_t isVoiceDisabled(int8_t voice)
+{
+	return !(assigner.voiceMask&bit2mask[voice]);
+}
+
+static inline int8_t getAvailableVoice(uint8_t note, uint32_t timestamp)
+{
+	int8_t v,oldestVoice=-1,sameNote=-1;
+	uint32_t oldestTimestamp=UINT32_MAX;
 
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		// never assign a disabled voice
 		
-		if(isVoiceDisabled(a,v))
+		if(isVoiceDisabled(v))
 			continue;
 		
-		if(a->allocation[v].assigned)
+		if(assigner.allocation[v].assigned)
 		{
 			// triggering a note that is still allocated to a voice should use this voice
 		
-			if(a->allocation[v].timestamp<timestamp && a->allocation[v].note==note)
+			if(assigner.allocation[v].timestamp<timestamp && assigner.allocation[v].note==note)
 			{
 				sameNote=v;
 				break;
@@ -63,20 +97,23 @@ static inline int8_t getAvailableVoice(struct assigner_s * a, uint8_t note, uint
 		}
 		else
 		{
-			// else use first free voice, if there's one
-			
-			if(firstFree<0)
-				firstFree=v;
+			// else use oldest voice, if there is one
+
+			if (assigner.allocation[v].timestamp<oldestTimestamp)
+			{
+				oldestTimestamp=assigner.allocation[v].timestamp;
+				oldestVoice=v;
+			}
 		}
 	}
 	
 	if(sameNote>=0)
 		return sameNote;
 	else
-		return firstFree;
+		return oldestVoice;
 }
 
-static inline int8_t getDispensableVoice(struct assigner_s * a, uint8_t note)
+static inline int8_t getDispensableVoice(uint8_t note)
 {
 	int8_t v,res=-1;
 	uint32_t ts;
@@ -87,12 +124,12 @@ static inline int8_t getDispensableVoice(struct assigner_s * a, uint8_t note)
 		
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		if(isVoiceDisabled(a,v))
+		if(isVoiceDisabled(v))
 			continue;
 		
-		if(!getNoteState(a,a->allocation[v].rootNote) && a->allocation[v].timestamp<ts)
+		if(!getNoteState(assigner.allocation[v].rootNote) && assigner.allocation[v].timestamp<ts)
 		{
-			ts=a->allocation[v].timestamp;
+			ts=assigner.allocation[v].timestamp;
 			res=v;
 		}
 	}
@@ -106,30 +143,30 @@ static inline int8_t getDispensableVoice(struct assigner_s * a, uint8_t note)
 		
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		if(isVoiceDisabled(a,v))
+		if(isVoiceDisabled(v))
 			continue;
 		
-		switch(a->priority)
+		switch(assigner.priority)
 		{
 		case apLast:
-			if(a->allocation[v].timestamp<ts)
+			if(assigner.allocation[v].timestamp<ts)
 			{
 				res=v;
-				ts=a->allocation[v].timestamp;
+				ts=assigner.allocation[v].timestamp;
 			}
 			break;
 		case apLow:
-			if(a->allocation[v].note>note)
+			if(assigner.allocation[v].note>note)
 			{
 				res=v;
-				note=a->allocation[v].note;
+				note=assigner.allocation[v].note;
 			}
 			break;
 		case apHigh:
-			if(a->allocation[v].note<note)
+			if(assigner.allocation[v].note<note)
 			{
 				res=v;
-				note=a->allocation[v].note;
+				note=assigner.allocation[v].note;
 			}
 			break;
 		}
@@ -138,71 +175,144 @@ static inline int8_t getDispensableVoice(struct assigner_s * a, uint8_t note)
 	return res;
 }
 	
-void assigner_setPriority(struct assigner_s * a, assignerPriority_t prio)
+void assigner_voiceDone(int8_t voice)
 {
-	if(prio==a->priority)
+	if (voice<0||voice>SYNTH_VOICE_COUNT)
+		return;
+
+	assigner.allocation[voice].assigned=0;
+	assigner.allocation[voice].keyPressed=0;
+	assigner.allocation[voice].note=ASSIGNER_NO_NOTE;
+	assigner.allocation[voice].rootNote=ASSIGNER_NO_NOTE;
+}
+
+static void voicesDone(int8_t releaseNotes)
+{
+	int8_t v;
+	for(v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		assigner_voiceDone(v);
+		assigner.allocation[v].timestamp=0; // reset to voice 0 in case all voices stopped at once
+	}
+	if (releaseNotes)
+		// If we have requested all voices to silence, we might want to
+		// clear all pending key status too, or we might get a note
+		// seemingly popping up from nowhere later on if there are keys
+		// to release after this call has been performed.
+		memset(assigner.noteStates, 0, sizeof(assigner.noteStates));
+}
+
+// This is different from voicesDone() in that it does not silence
+// the voice immediately but lets it go through its release phase as usual.
+// Also, only voices corresponding to keys that are down on the keyboard
+// are released.
+void assigner_allKeysOff(void)
+{
+	int8_t v;
+	for(v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		if (!isVoiceDisabled(v) && assigner.allocation[v].gated &&
+		    assigner.allocation[v].internalKeyboard)
+		{
+			synth_assignerEvent(assigner.allocation[v].note,0,v,assigner.allocation[v].velocity,0);
+		    	assigner.allocation[v].gated=0;
+		    	assigner.allocation[v].keyPressed=0;
+		}
+	}
+	// Release all keys and future holds too. This avoids potential
+	// problems with notes seemingly popping up from nowhere due to
+	// reassignment when future keys are released.
+	memset(assigner.noteStates, 0, sizeof(assigner.noteStates));
+	assigner.hold=0;
+}
+
+void assigner_setPriority(assignerPriority_t prio)
+{
+	if(prio==assigner.priority)
 		return;
 	
-	assigner_voiceDone(a,-1);
+	voicesDone(1);
 	
 	if(prio>2)
 		prio=0;
 	
-	a->priority=prio;
+	assigner.priority=prio;
 }
 
-void assigner_setVoiceMask(struct assigner_s * a, uint8_t mask)
+void assigner_setVoiceMask(uint8_t mask)
 {
-	if(mask==a->voiceMask)
+	if(mask==assigner.voiceMask)
 		return;
 	
-	assigner_voiceDone(a,-1);
-	a->voiceMask=mask;
+	voicesDone(1);
+	assigner.voiceMask=mask;
 }
 
-FORCEINLINE int8_t assigner_getAssignment(struct assigner_s * a, int8_t voice, uint8_t * note)
+FORCEINLINE int8_t assigner_getAssignment(int8_t voice, uint8_t * note)
 {
-	int8_t ad;
+	int8_t a;
 	
-	ad=a->allocation[voice].assigned;
+	a=assigner.allocation[voice].assigned;
 	
-	if(ad && note)
-		*note=a->allocation[voice].note;
+	if(a && note)
+		*note=assigner.allocation[voice].note;
 	
-	return ad;
+	return a;
 }
 
-int8_t assigner_getAnyPressed(struct assigner_s * a)
+int8_t assigner_getAnyPressed(void)
 {
 	int8_t i;
 	int8_t v=0;
 	
-	for(i=0;i<sizeof(a->noteStates);++i)
-		v|=a->noteStates[i];
+	for(i=0;i<sizeof(assigner.noteStates);++i)
+		v|=assigner.noteStates[i];
 	
 	return v!=0;
 }
 
-int8_t assigner_getAnyAssigned(struct assigner_s * a)
+int8_t assigner_getLatestNotePressed(uint8_t * note)
+{
+	int8_t v;
+	
+	int8_t latestVoice = -1;
+	
+	for(v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		struct allocation_s *a = &(assigner.allocation[v]);
+		if (a->keyPressed && a->timestamp > assigner.allocation[latestVoice].timestamp)
+			latestVoice = v;
+	}
+	
+	if (latestVoice >= 0 && note) {
+		*note = assigner.allocation[latestVoice].note;
+	}
+
+	return latestVoice >= 0;
+}
+
+int8_t assigner_getAnyAssigned(void)
 {
 	int8_t i;
 	int8_t v=0;
 	
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		v|=a->allocation[i].assigned;
+		v|=assigner.allocation[i].assigned;
 	
 	return v!=0;
 }
 
-void assigner_assignNote(struct assigner_s * a, uint8_t note, int8_t gate, uint16_t velocity)
+void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard)
 {
 	uint32_t timestamp;
 	uint16_t oldVel;
 	uint8_t restoredNote;
-	int8_t v,vi,i,legato=0,forceLegato=0;
+	int8_t v,vi,legato=0;
 	int16_t ni,n;
 	
-	setNoteState(a,note,gate);
+	setNoteState(note,gate);
+	// Save velocity for later, in case note needs to be restored
+	setNoteVelocity(note,gate,velocity);
 
 	if(gate)
 	{
@@ -211,20 +321,19 @@ reassign:
 
 		timestamp=currentTick;
 
-		if(a->mono)
+		if(assigner.mono)
 		{
 			// just handle legato & priority
 			
 			v=0;
-			legato=forceLegato;
 
-			if(a->priority!=apLast)
+			if(assigner.priority!=apLast)
 				for(n=0;n<128;++n)
-					if(n!=note && getNoteState(a,n))
+					if(n!=note && getNoteState(n))
 					{
-						if (note>n && a->priority==apLow)
+						if (note>n && assigner.priority==apLow)
 							return;
-						if (note<n && a->priority==apHigh)
+						if (note<n && assigner.priority==apHigh)
 							return;
 						
 						legato=1;
@@ -234,12 +343,12 @@ reassign:
 		{
 			// first, try to get a free voice
 
-			v=getAvailableVoice(a,note,timestamp);
+			v=getAvailableVoice(note,timestamp);
 
 			// no free voice, try to steal one
 
 			if(v<0)
-				v=getDispensableVoice(a,note);
+				v=getDispensableVoice(note);
 
 			// we might still have no voice
 
@@ -251,140 +360,132 @@ reassign:
 
 		for(vi=0;vi<SYNTH_VOICE_COUNT;++vi)
 		{
-			if(a->patternOffsets[vi]==ASSIGNER_NO_NOTE)
+			if(assigner.patternOffsets[vi]==ASSIGNER_NO_NOTE)
 				break;
 
-			n=note+a->patternOffsets[vi];
+			n=note+assigner.patternOffsets[vi];
 
-			a->allocation[v].assigned=1;
-			a->allocation[v].velocity=velocity;
-			a->allocation[v].rootNote=note;
-			a->allocation[v].note=n;
-			a->allocation[v].timestamp=timestamp;
+			assigner.allocation[v].assigned=1;
+			assigner.allocation[v].gated=1;
+			assigner.allocation[v].keyPressed=1;
+			assigner.allocation[v].velocity=velocity;
+			assigner.allocation[v].rootNote=note;
+			assigner.allocation[v].note=n;
+			assigner.allocation[v].timestamp=timestamp;
+			assigner.allocation[v].internalKeyboard=keyboard;
 
 			synth_assignerEvent(n,1,v,velocity,legato);
 
 			do
 				v=(v+1)%SYNTH_VOICE_COUNT;
-			while(isVoiceDisabled(a,v));
+			while(isVoiceDisabled(v));
 		}
 	}
 	else
 	{
-		oldVel=UINT16_MAX;
 		restoredNote=ASSIGNER_NO_NOTE;
 
 		// some still triggered notes might have been stolen, find them
 
 		for(ni=0;ni<128;++ni)
 		{
-			if(a->priority==apHigh)
+			if(assigner.priority==apHigh)
 				n=127-ni;
 			else
 				n=ni;
 			
-			if(getNoteState(a,n))
+			if(getNoteState(n))
 			{
-				i=0;
 				for(v=0;v<SYNTH_VOICE_COUNT;++v)
-					if(a->allocation[v].assigned && a->allocation[v].rootNote==n)
-					{
-						i=1;
+					if(assigner.allocation[v].assigned && assigner.allocation[v].rootNote==n)
 						break;
-					}
 
-				if(i==0)
+				if(v==SYNTH_VOICE_COUNT)
 				{
 					restoredNote=n;
+					oldVel=getNoteVelocity(n);
 					break;
 				}
 			}
 		}
 
-		// hitting a note spawns a pattern of note, not just one
-
-		for(v=0;v<SYNTH_VOICE_COUNT;++v)
-			if(a->allocation[v].assigned && a->allocation[v].rootNote==note)
+		if(restoredNote==ASSIGNER_NO_NOTE)
+		// no note to restore, gate off all voices with rootNote=note
+		{
+			for(v=0;v<SYNTH_VOICE_COUNT;++v)
 			{
-				if(restoredNote!=ASSIGNER_NO_NOTE)
+				if(assigner.allocation[v].assigned && assigner.allocation[v].rootNote==note)
 				{
-					oldVel=a->allocation[v].velocity;
-				}
-				else
-				{
-					synth_assignerEvent(a->allocation[v].note,0,v,velocity,0);
+					assigner.allocation[v].keyPressed=0;
+					if(!assigner.hold)
+					{
+						assigner.allocation[v].gated=0;
+						synth_assignerEvent(assigner.allocation[v].note,0,v,velocity,0);
+					}
 				}
 			}
-
+		}
+		else
 		// restored notes can be assigned again
-
-		if(restoredNote!=ASSIGNER_NO_NOTE)
 		{
 			note=restoredNote;
-			gate=1;
 			velocity=oldVel;
-			forceLegato=1;
+			gate=1;
+			legato=1;
 			
 			goto reassign;
 		}
 	}
 }
 
-void assigner_voiceDone(struct assigner_s * a, int8_t voice)
-{
-	int8_t v;
-	for(v=0;v<SYNTH_VOICE_COUNT;++v)
-		if(v==voice || voice<0)
-		{
-			a->allocation[v].assigned=0;
-			a->allocation[v].note=ASSIGNER_NO_NOTE;
-			a->allocation[v].rootNote=ASSIGNER_NO_NOTE;
-			a->allocation[v].timestamp=0;
-		}
-}
-
-LOWERCODESIZE void assigner_setPattern(struct assigner_s * a, uint8_t * pattern, int8_t mono)
+LOWERCODESIZE void assigner_setPattern(uint8_t * pattern, int8_t mono)
 {
 	int8_t i,count=0;
 	
-	if(mono==a->mono && !memcmp(pattern,&a->patternOffsets[0],SYNTH_VOICE_COUNT))
+	if(mono==assigner.mono && !memcmp(pattern,&assigner.patternOffsets[0],SYNTH_VOICE_COUNT))
 		return;
 
-	if(mono!=a->mono)
-		assigner_voiceDone(a,-1);
+	if(mono!=assigner.mono)
+		// We don't want to clear the note status in this case,
+		// as the result would be that if we get any contact bounce
+		// in the Unison switch, we will get Unison rather than
+		// Chord Memory if there are keys held, as the keys would have
+		// been considered released by the time the second bounce to
+		// the Unison position was registered.
+		voicesDone(0);
 	
-	a->mono=mono;
-	memset(&a->patternOffsets[0],ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
+	assigner.mono=mono;
+	memset(&assigner.patternOffsets[0],ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
 		if(pattern[i]==ASSIGNER_NO_NOTE)
 			break;
 		
-		a->patternOffsets[i]=pattern[i];
+		assigner.patternOffsets[i]=pattern[i];
 		++count;
 	}
 
 	if(count>0)
 	{
-		a->patternOffsets[0]=0; // root note always has offset 0
+		assigner.patternOffsets[0]=0; // root note always has offset 0
 	}
 	else
 	{
 		// empty pattern means unison
-		memset(a->patternOffsets,0,SYNTH_VOICE_COUNT);
+		memset(assigner.patternOffsets,0,SYNTH_VOICE_COUNT);
 	}
 }
 
-void assigner_getPattern(struct assigner_s * a, uint8_t * pattern, int8_t * mono)
+void assigner_getPattern(uint8_t * pattern, int8_t * mono)
 {
-	memcpy(pattern,a->patternOffsets,SYNTH_VOICE_COUNT);
+	memcpy(pattern,assigner.patternOffsets,SYNTH_VOICE_COUNT);
 	
 	if(mono!=NULL)
-		*mono=a->mono;
+		*mono=assigner.mono;
 }
 
-LOWERCODESIZE void assigner_latchPattern(struct assigner_s * a)
+LOWERCODESIZE void assigner_latchPattern(void)
 {
 	int16_t i;
 	int8_t count;
@@ -394,7 +495,7 @@ LOWERCODESIZE void assigner_latchPattern(struct assigner_s * a)
 	memset(pattern,ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
 	
 	for(i=0;i<128;++i)
-		if(getNoteState(a,i))
+		if(getNoteState(i))
 		{
 			pattern[count]=i;
 			
@@ -407,21 +508,42 @@ LOWERCODESIZE void assigner_latchPattern(struct assigner_s * a)
 				break;
 		}
 
-	assigner_setPattern(a,pattern,1);
+	assigner_setPattern(pattern,1);
 }
 
-LOWERCODESIZE void assigner_setPoly(struct assigner_s * a)
+LOWERCODESIZE void assigner_setPoly(void)
 {
 	uint8_t polyPattern[SYNTH_VOICE_COUNT]={0,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE};	
-	assigner_setPattern(a,polyPattern,0);
+	assigner_setPattern(polyPattern,0);
 }
 
-void assigner_init(struct assigner_s * a)
+void assigner_holdEvent(int8_t hold)
+{
+	int8_t v;
+
+	if (hold) {
+		assigner.hold=1;
+		return;
+	}
+
+	assigner.hold=0;
+	// Send gate off to all voices whose corresponding key is up
+	for(v=0;v<SYNTH_VOICE_COUNT;++v) {
+		if (!isVoiceDisabled(v) && 
+		    assigner.allocation[v].gated &&
+		    !assigner.allocation[v].keyPressed) {
+			synth_assignerEvent(assigner.allocation[v].note,0,v,assigner.allocation[v].velocity,0);
+		    	assigner.allocation[v].gated=0;
+		}
+	}
+}
+
+void assigner_init(void)
 {
 	memset(&assigner,0,sizeof(assigner));
 
-	a->voiceMask=0x3f;
-	memset(&a->patternOffsets[0],ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
-	a->patternOffsets[0]=0;
+	assigner.voiceMask=0x3f;
+	memset(&assigner.patternOffsets[0],ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
+	assigner.patternOffsets[0]=0;
 }
 

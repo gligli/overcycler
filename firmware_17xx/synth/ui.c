@@ -597,10 +597,10 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			{
 				// unison latch
 				if(data)
-					assigner_latchPattern(&assigner);
+					assigner_latchPattern();
 				else
-					assigner_setPoly(&assigner);
-				assigner_getPattern(&assigner, currentPreset.voicePattern,NULL);
+					assigner_setPoly();
+				assigner_getPattern( currentPreset.voicePattern,NULL);
 			}
 			else if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
 			{

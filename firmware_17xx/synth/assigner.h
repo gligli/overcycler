@@ -10,43 +10,25 @@ typedef enum
 	apLast=0,apLow=1,apHigh=2
 } assignerPriority_t;
 
-struct assignerAllocation_s
-{
-	uint32_t timestamp;
-	uint16_t velocity;
-	uint8_t rootNote;
-	uint8_t note;
-	int8_t assigned;
-};
+void assigner_setPriority(assignerPriority_t prio);
+void assigner_setVoiceMask(uint8_t mask);
 
-struct assigner_s
-{
-	uint8_t noteStates[16]; // 1 bit per note, 128 notes
-	struct assignerAllocation_s allocation[SYNTH_VOICE_COUNT];
-	uint8_t patternOffsets[SYNTH_VOICE_COUNT];
-	assignerPriority_t priority;
-	uint8_t voiceMask;
-	int8_t mono;
-};
+int8_t assigner_getAssignment(int8_t voice, uint8_t * note);
+int8_t assigner_getAnyPressed(void);
+int8_t assigner_getAnyAssigned(void);
+int8_t assigner_getLatestNotePressed(uint8_t * note);
 
-extern struct assigner_s assigner;
+void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard);
+void assigner_voiceDone(int8_t voice); // -1 -> all voices finished
+void assigner_allKeysOff(void);
 
-void assigner_setPriority(struct assigner_s * a, assignerPriority_t prio);
-void assigner_setVoiceMask(struct assigner_s * a, uint8_t mask);
+void assigner_setPattern(uint8_t * pattern, int8_t mono);
+void assigner_getPattern(uint8_t * pattern, int8_t * mono);
+void assigner_setPoly(void);
+void assigner_latchPattern(void);
+void assigner_holdEvent(int8_t hold);
 
-int8_t assigner_getAssignment(struct assigner_s * a, int8_t voice, uint8_t * note);
-int8_t assigner_getAnyPressed(struct assigner_s * a);
-int8_t assigner_getAnyAssigned(struct assigner_s * a);
-
-void assigner_assignNote(struct assigner_s * a, uint8_t note, int8_t gate, uint16_t velocity);
-void assigner_voiceDone(struct assigner_s * a, int8_t voice); // -1 -> all voices finished
-
-void assigner_setPattern(struct assigner_s * a, uint8_t * pattern, int8_t mono);
-void assigner_getPattern(struct assigner_s * a, uint8_t * pattern, int8_t * mono);
-void assigner_setPoly(struct assigner_s * a);
-void assigner_latchPattern(struct assigner_s * a);
-
-void assigner_init(struct assigner_s * a);
+void assigner_init(void);
 
 #endif	/* ASSIGNER_H */
 

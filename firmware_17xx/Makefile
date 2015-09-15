@@ -70,6 +70,8 @@ SRC+=fat_sd/ccsbcs.c
 
 SRC+=synth/adsr.c
 SRC+=synth/arp.c
+SRC+=synth/seq.c
+SRC+=synth/clock.c
 SRC+=synth/assigner.c
 SRC+=synth/dacspi.c
 SRC+=synth/lfo.c

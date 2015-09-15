@@ -14,6 +14,8 @@
 #include "tuner.h"
 #include "assigner.h"
 #include "arp.h"
+#include "seq.h"
+#include "clock.h"
 #include "storage.h"
 #include "vca_curves.h"
 #include "../xnormidi/midi.h"
@@ -80,6 +82,8 @@ static struct
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
 
+const uint16_t extClockDividers[16] = {192,168,144,128,96,72,48,36,24,18,12,9,6,4,3,2};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +102,7 @@ static void computeTunedCVs(void)
 	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		if (!assigner_getAssignment(&assigner,v,&note))
+		if (!assigner_getAssignment(v,&note))
 			continue;
 		
 		// get raw values
@@ -222,11 +226,11 @@ static void handleFinishedVoices(void)
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		// when amp env finishes, voice is done
-		if(assigner_getAssignment(&assigner,v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
-			assigner_voiceDone(&assigner,v);
+		if(assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
+			assigner_voiceDone(v);
 	
 		// if voice isn't assigned, silence it
-		if(!assigner_getAssignment(&assigner,v,NULL) && adsr_getStage(&synth.ampEnvs[v])!=sWait)
+		if(!assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])!=sWait)
 		{
 			adsr_reset(&synth.ampEnvs[v]);
 			adsr_reset(&synth.filEnvs[v]);
@@ -236,9 +240,9 @@ static void handleFinishedVoices(void)
 
 static void refreshAssignerSettings(void)
 {
-	assigner_setPattern(&assigner,currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
-	assigner_setVoiceMask(&assigner,settings.voiceMask);
-	assigner_setPriority(&assigner,currentPreset.steppedParameters[spAssignerPriority]);
+	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
+	assigner_setVoiceMask(settings.voiceMask);
+	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
 }
 
 static void refreshEnvSettings(int8_t type)
@@ -339,8 +343,8 @@ static void refreshModulationDelay(int8_t refreshTickCount)
 	int8_t anyPressed, anyAssigned;
 	static int8_t prevAnyPressed=0;
 	
-	anyPressed=assigner_getAnyPressed(&assigner);	
-	anyAssigned=assigner_getAnyAssigned(&assigner);	
+	anyPressed=assigner_getAnyPressed();	
+	anyAssigned=assigner_getAnyAssigned();	
 
 	if(!anyAssigned)
 	{
@@ -362,7 +366,7 @@ static void refreshMisc(void)
 {
 	// arp
 
-	arp_setSpeed(currentPreset.continuousParameters[cpSeqArpClock]);
+	clock_setSpeed(currentPreset.continuousParameters[cpSeqArpClock]);
 
 	// glide
 
@@ -552,12 +556,19 @@ static void handleBitInputs(void)
 	 
 	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INTPUT_FOOTSWITCH) && last&BIT_INTPUT_FOOTSWITCH)
 	{
-		assigner_latchPattern(&assigner);
-		assigner_getPattern(&assigner, currentPreset.voicePattern,NULL);
+		assigner_latchPattern();
+		assigner_getPattern( currentPreset.voicePattern,NULL);
 	}
 	else if(arp_getMode()!=amOff && (cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
 	{
-		arp_setMode(arp_getMode(),(cur&BIT_INTPUT_FOOTSWITCH)?0:2);
+		if(arp_getMode()!=amOff)
+		{
+			arp_setMode(arp_getMode(),(cur&BIT_INTPUT_FOOTSWITCH)?0:1);
+		}
+		else
+		{
+			assigner_holdEvent((cur&BIT_INTPUT_FOOTSWITCH)?0:1);
+		}
 	}
 
 	// this must stay last
@@ -733,8 +744,9 @@ void synth_init(void)
 	// init subsystems
 	dacspi_init();
 	tuner_init();
-	assigner_init(&assigner);
+	assigner_init();
 	uartMidi_init();
+	seq_init();
 	arp_init();
 	ui_init();
 	midi_init();
@@ -1042,8 +1054,15 @@ void synth_realtimeEvent(uint8_t midiEvent)
 			++synth.pendingExtClock;
 			break;
 		case MIDI_START:
-			arp_resetCounter();
+			seq_resetCounter(0,0);
+			seq_resetCounter(1,0);
+			arp_resetCounter(0);
+			clock_reset(); // always do a beat reset on MIDI START
 			synth.pendingExtClock=0;
+			break;
+		case MIDI_STOP:
+			seq_silence(0);
+			seq_silence(1);
 			break;
 	}
 }

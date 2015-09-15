@@ -50,7 +50,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(&assigner,intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1);
+		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1,0);
 	}
 	else
 	{
@@ -76,7 +76,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 	
 	if(arp_getMode()==amOff)
 	{
-		assigner_assignNote(&assigner,intNote,0,0);
+		assigner_assignNote(intNote,0,0,0);
 	}
 	else
 	{
@@ -87,6 +87,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8_t value)
 {
 	int16_t param;
+	int8_t change=0;
 	
 	if(!midiFilterChannel(channel))
 		return;
@@ -103,33 +104,68 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 	{
 		synth_wheelEvent(0,value<<9,2);
 	}
+	else if(control==64) // hold pedal
+	{
+		assigner_holdEvent(value);
+		return;
+	}
 	
 	if(control>=MIDI_BASE_COARSE_CC && control<MIDI_BASE_COARSE_CC+cpCount)
 	{
 		param=control-MIDI_BASE_COARSE_CC;
-
-		currentPreset.continuousParameters[param]&=0x01fc;
-		currentPreset.continuousParameters[param]|=(uint16_t)value<<9;
-		ui_setPresetModified(1);	
+		
+		if((currentPreset.continuousParameters[param]>>9)!=value)
+		{
+			currentPreset.continuousParameters[param]&=0x01fc;
+			currentPreset.continuousParameters[param]|=(uint16_t)value<<9;
+			change=1;	
+		}
 	}
 	else if(control>=MIDI_BASE_FINE_CC && control<MIDI_BASE_FINE_CC+cpCount)
 	{
 		param=control-MIDI_BASE_FINE_CC;
 
-		currentPreset.continuousParameters[param]&=0xfe00;
-		currentPreset.continuousParameters[param]|=(uint16_t)value<<2;
-		ui_setPresetModified(1);	
+		if(((currentPreset.continuousParameters[param]>>2)&0x7f)!=value)
+		{
+			currentPreset.continuousParameters[param]&=0xfe00;
+			currentPreset.continuousParameters[param]|=(uint16_t)value<<2;
+			change=1;	
+		}
 	}
 	else if(control>=MIDI_BASE_STEPPED_CC && control<MIDI_BASE_STEPPED_CC+spCount)
 	{
 		param=control-MIDI_BASE_STEPPED_CC;
+		uint8_t v;
 		
-		currentPreset.steppedParameters[param]=value>>(7-steppedParametersBits[param]);
-		ui_setPresetModified(1);	
+		v=value>>(7-steppedParametersBits[param]);
+		
+		if(currentPreset.steppedParameters[param]!=v)
+		{
+			currentPreset.steppedParameters[param]=v;
+			change=1;	
+		}
+		
+		// special case for unison (pattern latch)
+		
+		if(param==spUnison)
+		{
+			if(v)
+			{
+				assigner_latchPattern();
+			}
+			else
+			{
+				assigner_setPoly();
+			}
+			assigner_getPattern(currentPreset.voicePattern,NULL);
+		}
 	}
 
-	if(ui_isPresetModified())
+	if(change)
+	{
+		ui_setPresetModified(1);
 		refreshFullState();
+	}
 }
 
 static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t program)

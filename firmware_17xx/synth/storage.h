@@ -81,5 +81,8 @@ void settings_loadDefault(void);
 void storage_export(uint16_t number, uint8_t * buf, int16_t * size);
 void storage_import(uint16_t number, uint8_t * buf, int16_t size);
 
+int8_t storage_loadSequencer(int8_t track, uint8_t * data, uint8_t size);
+void storage_saveSequencer(int8_t track, uint8_t * data, uint8_t size);
+
 #endif	/* STORAGE_H */
 
