@@ -40,8 +40,7 @@ const uint8_t steppedParametersBits[spCount] =
 };
 
 struct settings_s settings;
-struct preset_s currentPreset[SYNTH_PART_COUNT];
-int8_t currentPart=0;
+struct preset_s currentPreset;
 
 static struct
 {
@@ -241,7 +240,7 @@ LOWERCODESIZE void settings_save(void)
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
 }
 
-LOWERCODESIZE int8_t preset_loadCurrent(int8_t part, uint16_t number)
+LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 {
 	int8_t i;
 	
@@ -254,19 +253,19 @@ LOWERCODESIZE int8_t preset_loadCurrent(int8_t part, uint16_t number)
 
 	continuousParameter_t cp;
 	for(cp=0;cp<=cpCount;++cp)
-		currentPreset[part].continuousParameters[cp]=storageRead16();
+		currentPreset.continuousParameters[cp]=storageRead16();
 
 	steppedParameter_t sp;
 	for(sp=0;sp<=spCount;++sp)
-		currentPreset[part].steppedParameters[sp]=storageRead8();
+		currentPreset.steppedParameters[sp]=storageRead8();
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		currentPreset[part].voicePattern[i]=storageRead8();
+		currentPreset.voicePattern[i]=storageRead8();
 	
 	// v2
 
 	if(storage.version<3)
-		currentPreset[part].continuousParameters[cpBFreq]=(currentPreset[part].continuousParameters[cpBFreq]/2)+(UINT16_MAX/2);
+		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+(UINT16_MAX/2);
 
 	// v3
 	
@@ -275,7 +274,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(int8_t part, uint16_t number)
 	return 1;
 }
 
-LOWERCODESIZE void preset_saveCurrent(int8_t part, uint16_t number)
+LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 {
 	int8_t i;
 	
@@ -285,14 +284,14 @@ LOWERCODESIZE void preset_saveCurrent(int8_t part, uint16_t number)
 
 	continuousParameter_t cp;
 	for(cp=0;cp<=cpCount;++cp)
-		storageWrite16(currentPreset[part].continuousParameters[cp]);
+		storageWrite16(currentPreset.continuousParameters[cp]);
 
 	steppedParameter_t sp;
 	for(sp=0;sp<=spCount;++sp)
-		storageWrite8(currentPreset[part].steppedParameters[sp]);
+		storageWrite8(currentPreset.steppedParameters[sp]);
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		storageWrite8(currentPreset[part].voicePattern[i]);
+		storageWrite8(currentPreset.voicePattern[i]);
 
 	// this must stay last
 	storageFinishStore(number,1);
@@ -323,45 +322,45 @@ LOWERCODESIZE void storage_import(uint16_t number, uint8_t * buf, int16_t size)
 	storageFinishStore(number,1);
 }
 
-LOWERCODESIZE void preset_loadDefault(int8_t part, int8_t makeSound)
+LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 {
 	int8_t i;
 
-	memset(&currentPreset[part],0,sizeof(struct preset_s));
+	memset(&currentPreset,0,sizeof(struct preset_s));
 
-	currentPreset[part].continuousParameters[cpUnisonDetune]=512;
-	currentPreset[part].continuousParameters[cpMasterTune]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpMasterLeft]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpMasterRight]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpUnisonDetune]=512;
+	currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
 
-	currentPreset[part].continuousParameters[cpBFreq]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpBFineFreq]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpABaseWMod]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpBBaseWMod]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpCutoff]=UINT16_MAX;
-	currentPreset[part].continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-	currentPreset[part].continuousParameters[cpLFOFreq]=UINT16_MAX/2;
-	currentPreset[part].continuousParameters[cpAmpSus]=UINT16_MAX;
+	currentPreset.continuousParameters[cpBFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpABaseWMod]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpBBaseWMod]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
+	currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
+	currentPreset.continuousParameters[cpLFOFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
-	currentPreset[part].steppedParameters[spBenderRange]=1;
-	currentPreset[part].steppedParameters[spBenderTarget]=modPitch;
-	currentPreset[part].steppedParameters[spModwheelRange]=2;
-	currentPreset[part].steppedParameters[spChromaticPitch]=2; // octave
-	currentPreset[part].steppedParameters[spAssignerPriority]=apLast;
-	currentPreset[part].steppedParameters[spLFOShape]=lsTri;
-	currentPreset[part].steppedParameters[spLFOTargets]=otBoth;
-	currentPreset[part].steppedParameters[spLFOShift]=1;
+	currentPreset.steppedParameters[spBenderRange]=1;
+	currentPreset.steppedParameters[spBenderTarget]=modPitch;
+	currentPreset.steppedParameters[spModwheelRange]=2;
+	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
+	currentPreset.steppedParameters[spAssignerPriority]=apLast;
+	currentPreset.steppedParameters[spLFOShape]=lsTri;
+	currentPreset.steppedParameters[spLFOTargets]=otBoth;
+	currentPreset.steppedParameters[spLFOShift]=1;
 
-	currentPreset[part].steppedParameters[spABank]=26; // perfectwaves (saw)
-	currentPreset[part].steppedParameters[spBBank]=26;
+	currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
+	currentPreset.steppedParameters[spBBank]=26;
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		currentPreset[part].voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
+		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 
 	if(makeSound)
 	{
-		currentPreset[part].continuousParameters[cpAVol]=UINT16_MAX;
+		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
 	}
 }
 

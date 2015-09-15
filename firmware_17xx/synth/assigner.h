@@ -29,7 +29,7 @@ struct assigner_s
 	int8_t mono;
 };
 
-extern struct assigner_s assigner[SYNTH_PART_COUNT];
+extern struct assigner_s assigner;
 
 void assigner_setPriority(struct assigner_s * a, assignerPriority_t prio);
 void assigner_setVoiceMask(struct assigner_s * a, uint8_t mask);

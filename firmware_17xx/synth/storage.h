@@ -65,18 +65,17 @@ struct preset_s
 };
 
 extern struct settings_s settings;
-extern struct preset_s currentPreset[SYNTH_PART_COUNT];
-extern int8_t currentPart;
+extern struct preset_s currentPreset;
 
 extern const uint8_t steppedParametersBits[spCount];
 
 int8_t settings_load(void);
 void settings_save(void);
 
-int8_t preset_loadCurrent(int8_t part, uint16_t number);
-void preset_saveCurrent(int8_t part, uint16_t number);
+int8_t preset_loadCurrent(uint16_t number);
+void preset_saveCurrent(uint16_t number);
 
-void preset_loadDefault(int8_t part, int8_t makeSound);
+void preset_loadDefault(int8_t makeSound);
 void settings_loadDefault(void);
 
 void storage_export(uint16_t number, uint8_t * buf, int16_t * size);

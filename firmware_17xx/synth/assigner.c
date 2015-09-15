@@ -4,7 +4,7 @@
 
 #include "assigner.h"
 
-struct assigner_s assigner[SYNTH_PART_COUNT];
+struct assigner_s assigner;
 
 static const uint8_t bit2mask[8] = {1,2,4,8,16,32,64,128};
 

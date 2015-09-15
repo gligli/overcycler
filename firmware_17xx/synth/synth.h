@@ -5,7 +5,6 @@
 #include "utils.h"
 
 #define SYNTH_VOICE_COUNT 6
-#define SYNTH_PART_COUNT 4
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 120000000
 

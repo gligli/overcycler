@@ -446,7 +446,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 	switch(prm->type)
 	{
 	case ptCont:
-		v=currentPreset[currentPart].continuousParameters[prm->number];
+		v=currentPreset.continuousParameters[prm->number];
 		if(contValue)
 			*contValue=v;
 		sprintf(dv,"%4d",(v*1000)>>16);
@@ -460,7 +460,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		
 		if(prm->type==ptStep)
 		{
-			v=currentPreset[currentPart].steppedParameters[prm->number];
+			v=currentPreset.steppedParameters[prm->number];
 		}
 		else
 		{
@@ -555,8 +555,8 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	switch(prm->type)
 	{
 	case ptCont:
-		change=currentPreset[currentPart].continuousParameters[prm->number]!=getPotValue(potnum);
-		currentPreset[currentPart].continuousParameters[prm->number]=getPotValue(potnum);
+		change=currentPreset.continuousParameters[prm->number]!=getPotValue(potnum);
+		currentPreset.continuousParameters[prm->number]=getPotValue(potnum);
 		break;
 	case ptStep:
 		valCount=0;
@@ -585,10 +585,10 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		if(source<0)
 			data=(getPotValue(potnum)*valCount)>>16;
 		else
-			data=(currentPreset[currentPart].steppedParameters[prm->number]+1)%valCount;
+			data=(currentPreset.steppedParameters[prm->number]+1)%valCount;
 
-		change=currentPreset[currentPart].steppedParameters[prm->number]!=data;
-		currentPreset[currentPart].steppedParameters[prm->number]=data;
+		change=currentPreset.steppedParameters[prm->number]!=data;
+		currentPreset.steppedParameters[prm->number]=data;
 		
 		//	special cases
 		if(change)
@@ -597,10 +597,10 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			{
 				// unison latch
 				if(data)
-					assigner_latchPattern(&assigner[currentPart]);
+					assigner_latchPattern(&assigner);
 				else
-					assigner_setPoly(&assigner[currentPart]);
-				assigner_getPattern(&assigner[currentPart], currentPreset[currentPart].voicePattern,NULL);
+					assigner_setPoly(&assigner);
+				assigner_getPattern(&assigner, currentPreset.voicePattern,NULL);
 			}
 			else if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
 			{
@@ -627,17 +627,17 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.presetSlot=(getPotValue(potnum)*UI_PRESET_SLOTS)>>16;
 				break;
 			case 6:
-				preset_saveCurrent(currentPart, ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS);
+				preset_saveCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS);
 				/* fall through */
 			case 5:
-				if(preset_loadCurrent(currentPart, ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS))
+				if(preset_loadCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS))
 				{
 					settings.presetNumber=ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS;
 					settings_save();                
 				}
 				else
 				{
-					preset_loadDefault(currentPart, 1);
+					preset_loadDefault(1);
 				}
 
 				refreshWaveNames(0);
