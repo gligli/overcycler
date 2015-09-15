@@ -57,8 +57,8 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	
 	aliasing>>=7;
 	
-	width=MAX(UINT16_MAX/8,width);
-	width=MIN((7*UINT16_MAX)/8,width);
+	width=MAX(UINT16_MAX/16,width);
+	width=MIN((15*UINT16_MAX)/16,width);
 	width>>=6;
 
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
