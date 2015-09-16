@@ -889,7 +889,7 @@ void synth_timerInterrupt(void)
 		
 		// compensate vca level for resonance
 		
-		resoFactor=(2*UINT16_MAX+(int32_t)currentPreset.continuousParameters[cpResonance])/(3*256);
+		resoFactor=(UINT16_MAX+(int32_t)currentPreset.continuousParameters[cpResonance])/(2*256);
 
 		// actual voice refresh
 		
