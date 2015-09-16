@@ -34,7 +34,7 @@
 #define CVMUX_PORT_VCA 4
 #define CVMUX_PIN_VCA 28
 
-typedef enum {cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvAmp=6,cvMasterLeft=7,cvMasterRight=8} cv_t; 
+typedef enum {cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvAmp=6,cvNoiseVol=7} cv_t; 
 
 typedef enum
 {

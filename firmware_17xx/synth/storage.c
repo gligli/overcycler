@@ -7,7 +7,7 @@
 #include "wtosc.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 3
+#define STORAGE_VERSION 4
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -254,8 +254,9 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	// v1
 
 	continuousParameter_t cp;
-	for(cp=0;cp<=cpCount;++cp)
+	for(cp=0;cp<=cpSeqArpClock;++cp)
 		currentPreset.continuousParameters[cp]=storageRead16();
+	storageRead16(); // bw compat fix
 
 	steppedParameter_t sp;
 	for(sp=0;sp<=spCount;++sp)
@@ -269,9 +270,10 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	if(storage.version<3)
 		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+(UINT16_MAX/2);
 
-	// v3
+	// v4
 	
-	// ...
+	if(storage.version<5)
+		currentPreset.continuousParameters[cpNoiseVol]=storageRead16();
 	
 	return 1;
 }
@@ -285,8 +287,9 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	// v1
 
 	continuousParameter_t cp;
-	for(cp=0;cp<=cpCount;++cp)
+	for(cp=0;cp<=cpSeqArpClock;++cp)
 		storageWrite16(currentPreset.continuousParameters[cp]);
+	storageWrite16(0); // bw compat fix
 
 	steppedParameter_t sp;
 	for(sp=0;sp<=spCount;++sp)
@@ -295,6 +298,10 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		storageWrite8(currentPreset.voicePattern[i]);
 
+	// v4
+	
+	storageWrite16(currentPreset.continuousParameters[cpNoiseVol]);
+	
 	// this must stay last
 	storageFinishStore(number,1);
 }

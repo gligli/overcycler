@@ -47,6 +47,7 @@
         <in>uart_midi.c</in>
         <in>ui.c</in>
         <in>utils.c</in>
+        <in>vcnoise_curves.h</in>
         <in>wtosc.c</in>
       </df>
       <df name="system">
@@ -446,6 +447,8 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="../synth/vcnoise_curves.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">

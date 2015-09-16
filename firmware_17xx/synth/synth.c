@@ -18,6 +18,7 @@
 #include "clock.h"
 #include "storage.h"
 #include "vca_curves.h"
+#include "vcnoise_curves.h"
 #include "../xnormidi/midi.h"
 #include "lpc17xx_gpio.h"
 #include "lpc17xx_pinsel.h"
@@ -604,9 +605,10 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
-	case cvMasterLeft:
-	case cvMasterRight:
 		value=computeShape(value<<8,vcaLinearizationCurve,1);		
+		break;
+	case cvNoiseVol:
+		value=computeShape(value<<8,vcNoiseLinearizationCurve,1);		
 		break;
 	default:
 		;
@@ -622,20 +624,28 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	v=MIN(v,UINT16_MAX);
 	value=adjustCV(cv,v);
 
-	if(cv<=cvResonance)
+	switch(cv)
 	{
-		channel=(voice<<2)|cv;
-	}
-	else if(cv>=cvAmp)
-	{
-		if(cv==cvAmp)
-		{
-			channel=24+voice;
-		}
-		else
-		{
-			channel=30+(cv-cvMasterLeft);
-		}
+	case cvAmp:
+		channel=voice;
+		break;
+	case cvNoiseVol:
+		channel=6;
+		break;
+	case cvResonance:
+		channel=7;
+		break;
+	case cvCutoff:
+		channel=voice+8;
+		break;
+	case cvAVol:
+		channel=14;
+		break;
+	case cvBVol:
+		channel=15;
+		break;
+	default:
+		return;
 	}
 	
 	dacspi_setCVValue(value,channel);
@@ -893,15 +903,10 @@ void synth_timerInterrupt(void)
 	case 0:
 		// CV update
 		
-		for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-		{
-			refreshCV(v,cvAVol,currentPreset.continuousParameters[cpAVol]);
-			refreshCV(v,cvBVol,currentPreset.continuousParameters[cpBVol]);
-			refreshCV(v,cvResonance,currentPreset.continuousParameters[cpResonance]);
-		}
-
-		refreshCV(SYNTH_VOICE_COUNT,cvMasterRight,currentPreset.continuousParameters[cpMasterRight]);
-		refreshCV(SYNTH_VOICE_COUNT,cvMasterLeft,currentPreset.continuousParameters[cpMasterLeft]);
+		refreshCV(-1,cvAVol,currentPreset.continuousParameters[cpAVol]);
+		refreshCV(-1,cvBVol,currentPreset.continuousParameters[cpBVol]);
+		refreshCV(-1,cvNoiseVol,currentPreset.continuousParameters[cpNoiseVol]);
+		refreshCV(-1,cvResonance,currentPreset.continuousParameters[cpResonance]);
 
 		break;
 	case 1:

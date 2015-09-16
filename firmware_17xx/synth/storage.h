@@ -19,7 +19,7 @@ typedef enum
 	cpAmpVelocity=30,cpFilVelocity=31,
 	cpMasterTune=32,cpUnisonDetune=33,
 	cpMasterLeft=34,cpMasterRight=35,
-	cpSeqArpClock=36,
+	cpSeqArpClock=36,cpNoiseVol=37,
 
 	// /!\ this must stay last
 	cpCount

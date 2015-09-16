@@ -125,8 +125,8 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
 			{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
 			{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
-			{.type=ptCont,.number=cpMasterLeft,.shortName="MLfV",.longName="Master Left volume"},
-			{.type=ptCont,.number=cpMasterRight,.shortName="MRtV",.longName="Master Right volume"},
+			{.type=ptNone},
+			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise volume"},
 			/* 2nd row of pots */
 			{.type=ptCont,.number=cpAmpAtt,.shortName="AAtk",.longName="Amplifier Attack"},
 			{.type=ptCont,.number=cpAmpDec,.shortName="ADec",.longName="Amplifier Decay"},

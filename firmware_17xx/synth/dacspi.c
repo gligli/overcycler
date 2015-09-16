@@ -113,16 +113,22 @@ FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
 	switch(channel)
 	{
 	case 0:
-	case 1:
-	case 2:
-	case 3:
-		dacspi.cvCommands[channel]=value|((channel+1)<<12);
-		break;
-	case 24:
 		dacspi.cvCommands[4]=value|(5<<12);
 		break;
-	case 30:
+	case 6:
 		dacspi.cvCommands[5]=value|(6<<12);
+		break;
+	case 7:
+		dacspi.cvCommands[3]=value|(4<<12);
+		break;
+	case 8:
+		dacspi.cvCommands[2]=value|(3<<12);
+		break;
+	case 14:
+		dacspi.cvCommands[0]=value|(1<<12);
+		break;
+	case 15:
+		dacspi.cvCommands[1]=value|(2<<12);
 		break;
 	}
 }
