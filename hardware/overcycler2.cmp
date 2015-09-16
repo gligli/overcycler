@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 14/09/2015 23:17:08
+Cmp-Mod V01 Created by CvPcb (2013-07-07 BZR 4022)-stable date = 16/09/2015 12:01:22
 
 BeginCmp
 TimeStamp = /55F0C26C;
@@ -164,14 +164,14 @@ EndCmp
 BeginCmp
 TimeStamp = /55F0C210;
 Reference = C24;
-ValeurCmp = 10000u;
+ValeurCmp = 10000u 16v;
 IdModule  = Elko_vert_DM16_RM7-5_CopperClear;
 EndCmp
 
 BeginCmp
 TimeStamp = /55F0C211;
 Reference = C25;
-ValeurCmp = 10000u;
+ValeurCmp = 10000u 16v;
 IdModule  = Elko_vert_DM16_RM7-5_CopperClear;
 EndCmp
 
@@ -656,6 +656,13 @@ TimeStamp = /55F48D8A/55F73E3B;
 Reference = C94;
 ValeurCmp = 470n;
 IdModule  = C2;
+EndCmp
+
+BeginCmp
+TimeStamp = /55F94794;
+Reference = C95;
+ValeurCmp = 100u;
+IdModule  = C1.5V8V;
 EndCmp
 
 BeginCmp
@@ -1702,6 +1709,13 @@ IdModule  = R3-LARGE_PADS;
 EndCmp
 
 BeginCmp
+TimeStamp = /55F93FB4;
+Reference = R129;
+ValeurCmp = 10k;
+IdModule  = R3-LARGE_PADS;
+EndCmp
+
+BeginCmp
 TimeStamp = /55F0C242;
 Reference = RV1;
 ValeurCmp = 10k;
@@ -1767,7 +1781,7 @@ EndCmp
 BeginCmp
 TimeStamp = /55F75810;
 Reference = U2;
-ValeurCmp = 74LS138;
+ValeurCmp = 74HC138;
 IdModule  = DIP-16__300_ELL;
 EndCmp
 
