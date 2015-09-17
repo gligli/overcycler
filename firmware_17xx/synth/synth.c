@@ -605,6 +605,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
+		value=(11*value)/20; // limit VCA output level to 4Vpp
 		value=computeShape(value<<8,vcaLinearizationCurve,1);		
 		break;
 	case cvNoiseVol:
@@ -651,7 +652,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	dacspi_setCVValue(value,channel);
 }
 
-static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask, int32_t resoFactor)
+static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
 {
 	int32_t vpa,vpb,vma,vmb,vf,vamp,envVal,envValScale;
 
@@ -709,7 +710,6 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	vamp=(vamp*resoFactor)>>8;
 	refreshCV(v,cvAmp,vamp);
 }
 
@@ -887,13 +887,9 @@ void synth_timerInterrupt(void)
 		filterVal=MAX(INT16_MIN,MIN(INT16_MAX,filterVal));
 		ampVal=MAX(0,MIN(UINT16_MAX,ampVal));
 		
-		// compensate vca level for resonance
-		
-		resoFactor=(UINT16_MAX+(int32_t)currentPreset.continuousParameters[cpResonance])/(2*256);
-
 		// actual voice refresh
 		
-		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask,resoFactor);
+		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
 	}
 
 	// slower updates
@@ -901,11 +897,15 @@ void synth_timerInterrupt(void)
 	switch(frc&0x03) // 4 phases, each 500hz
 	{
 	case 0:
+		// compensate pre filter mixer level for resonance
+
+		resoFactor=(23*UINT16_MAX+77*(uint32_t)currentPreset.continuousParameters[cpResonance])/(100*256);
+
 		// CV update
 		
-		refreshCV(-1,cvAVol,currentPreset.continuousParameters[cpAVol]);
-		refreshCV(-1,cvBVol,currentPreset.continuousParameters[cpBVol]);
-		refreshCV(-1,cvNoiseVol,currentPreset.continuousParameters[cpNoiseVol]);
+		refreshCV(-1,cvAVol,(uint32_t)currentPreset.continuousParameters[cpAVol]*resoFactor/256);
+		refreshCV(-1,cvBVol,(uint32_t)currentPreset.continuousParameters[cpBVol]*resoFactor/256);
+		refreshCV(-1,cvNoiseVol,(uint32_t)currentPreset.continuousParameters[cpNoiseVol]*resoFactor/256);
 		refreshCV(-1,cvResonance,currentPreset.continuousParameters[cpResonance]);
 
 		break;
