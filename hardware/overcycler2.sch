@@ -3085,4 +3085,16 @@ Wire Wire Line
 Connection ~ 7350 5600
 Wire Wire Line
 	7150 6200 7150 6350
+Text Notes 7500 6150 0    60   ~ 0
+Select Q1 for\n0.3Vpp..0.4Vpp\nof noise at U5.1\nR6 value can be \nadjusted if need be
+Text Notes 12100 6900 0    60   ~ 0
+All capacitors should be minimum 16V unless specified\nAll polarized capacitors are electrolytic\nAll unpolarised capacitors are film\nAll resistors are 5% 1/4w\nData entry potentiometers are 4.7k linear taper\nMaster volume potentiometer is 47k dual audio taper
+Text Notes 14500 5100 0    60   ~ 0
+1: left master volume to pot\n2: left master volume from pot\n3: master volume ground\n4: right master volume to pot\n5: right master volume from pot\n6: master jacks ground\n7: left master jack\n8: right master jack
+Text Notes 5800 1700 0    60   ~ 0
+Pin 1 is DIN socket pin 4\nPin 2 is DIN socket pin 5
+Text Notes 4000 600  0    60   ~ 0
+Solder a microSD to SD adapter using a pin strip\nPins are per SD specifications
+Text Notes 10400 850  0    60   ~ 0
+Use mininum 7.5VAC 1A power supply\nHigher voltage may overheat the regulators
 $EndSCHEMATC
