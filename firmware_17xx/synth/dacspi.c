@@ -45,6 +45,10 @@ static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
 	4,4,4,4,4,4,8
 };
 
+static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
+{
+	4,4,4,4,4,5,10 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
+};
 
 static EXT_RAM struct
 {
@@ -96,7 +100,7 @@ void buildLLIs(int buffer, int channel)
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
 	lli[lliPos][2].NextLLI=(uint32_t)&lli[lliPos][3];
 	lli[lliPos][2].Control=
-		GPDMA_DMACCxControl_TransferSize(channel==DACSPI_CV_CHANNEL?DACSPI_STEP_COUNT_CV:DACSPI_STEP_COUNT_OSC) |
+		GPDMA_DMACCxControl_TransferSize(channelWaitStates[channel]) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 
