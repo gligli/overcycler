@@ -19,8 +19,7 @@
 #define DACSPI_BUFFER_COUNT 48
 #define DACSPI_CV_COUNT 16
 
-#define DACSPI_CV_CHANNEL_1 3
-#define DACSPI_CV_CHANNEL_2 7
+#define DACSPI_CV_CHANNEL 6
 #define DACSPI_CARD_CV_LDAC_MASK 0xbf
 #define DACSPI_VCA_CV_LDAC_MASK 0xef
 
@@ -62,7 +61,7 @@ void buildLLIs(int buffer, int channel)
 {
 	int lliPos=buffer*DACSPI_CHANNEL_COUNT+channel;
 	
-	if(channel==DACSPI_CV_CHANNEL_1)
+	if(channel==DACSPI_CV_CHANNEL)
 	{
 		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer&3)<<1];
 	}
@@ -144,7 +143,7 @@ void dacspi_init(void)
 	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
 
-	LPC_SSP0->CPSR=8; // SYNTH_MASTER_CLOCK / 8
+	LPC_SSP0->CPSR=8; // SYNTH_MASTER_CLOCK / n
 	LPC_SSP0->CR0=0x0f; // 16Bit SPI(0,0)
 	LPC_SSP0->CR1=2; // Enable
 	LPC_SSP0->DMACR=3; // DMA
