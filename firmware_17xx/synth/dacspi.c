@@ -23,7 +23,7 @@
 #define DACSPI_CARD_CV_LDAC_MASK 0xbf
 #define DACSPI_VCA_CV_LDAC_MASK 0xef
 
-static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
+static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][4];
 static EXT_RAM volatile uint8_t marker;
 static EXT_RAM volatile uint8_t dummy;
 static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
@@ -39,6 +39,12 @@ static const uint32_t abcCommands[8] =
 	((6<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
 	((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
 };
+
+static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
+{
+	4,4,4,4,4,4,8
+};
+
 
 static EXT_RAM struct
 {
@@ -70,14 +76,6 @@ void buildLLIs(int buffer, int channel)
 		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][channel][0];
 	}
 	
-	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
-	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
-	lli[lliPos][1].Control=
-		GPDMA_DMACCxControl_TransferSize(2) |
-		GPDMA_DMACCxControl_SWidth(1) |
-		GPDMA_DMACCxControl_DWidth(1) |
-		GPDMA_DMACCxControl_SI;
-
 	lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[channel];
 	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
 	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
@@ -86,11 +84,27 @@ void buildLLIs(int buffer, int channel)
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 
+	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
+	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
+	lli[lliPos][1].Control=
+		GPDMA_DMACCxControl_TransferSize(2) |
+		GPDMA_DMACCxControl_SWidth(1) |
+		GPDMA_DMACCxControl_DWidth(1) |
+		GPDMA_DMACCxControl_SI;
+
 	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
-	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+	lli[lliPos][2].NextLLI=(uint32_t)&lli[lliPos][3];
 	lli[lliPos][2].Control=
-		GPDMA_DMACCxControl_TransferSize(DACSPI_STEP_COUNT) |
+		GPDMA_DMACCxControl_TransferSize(channel==DACSPI_CV_CHANNEL?DACSPI_STEP_COUNT_CV:DACSPI_STEP_COUNT_OSC) |
+		GPDMA_DMACCxControl_SWidth(0) |
+		GPDMA_DMACCxControl_DWidth(0);
+
+	lli[lliPos][3].SrcAddr=(uint32_t)&channelCPSR[(channel+1)%DACSPI_CHANNEL_COUNT];
+	lli[lliPos][3].DstAddr=(uint32_t)&LPC_SSP0->CPSR;
+	lli[lliPos][3].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+	lli[lliPos][3].Control=
+		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 }
