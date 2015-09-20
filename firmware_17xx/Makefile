@@ -38,6 +38,7 @@ SRC+=system/rprintf.c
 SRC+=system/serial.c
 SRC+=system/syscalls.c
 SRC+=system/main.c
+SRC+=system/hd44780.c
 
 SRC+=drivers/lpc17xx_adc.c
 SRC+=drivers/lpc17xx_can.c

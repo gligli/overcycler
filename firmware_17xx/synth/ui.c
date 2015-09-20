@@ -8,6 +8,7 @@
 #include "arp.h"
 #include "ffconf.h"
 #include "lpc17xx_gpio.h"
+#include "hd44780.h"
 
 #define DISPLAY_ACK 6
 
@@ -292,6 +293,8 @@ static struct
 	int8_t presetSlot;
 	
 	int8_t tunerActiveVoice;
+	
+	struct hd44780_data lcd1, lcd2;
 } ui;
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
@@ -329,8 +332,8 @@ static uint16_t getPotValue(int8_t pot)
 
 int sendChar(int ch)
 {
-	while(UART_CheckBusy((LPC_UART_TypeDef*)LPC_UART1)==SET);
-	UART_SendData((LPC_UART_TypeDef*)LPC_UART1,ch);
+	hd44780_driver.write(&ui.lcd1, ch);	
+	hd44780_driver.write(&ui.lcd2, ch);	
 	return -1;
 }
 
@@ -684,7 +687,7 @@ static void readKeypad(void)
 {
 	int key,i;
 	char response[10],*rb;
-
+return;
 	// get all awaiting keys
 	
 	for(;;)
@@ -757,46 +760,42 @@ void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
 	
-	// init screen serial
+	// init screen
 	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_UART1,CLKPWR_PCLKSEL_CCLK_DIV_1);	
-	PINSEL_SetPinFunc(0,15,1);
-	PINSEL_SetPinFunc(0,16,1);
+	ui.lcd1.port = 2;
+	ui.lcd1.pins.d4 = 1;
+	ui.lcd1.pins.d5 = 0;
+	ui.lcd1.pins.d6 = 2;
+	ui.lcd1.pins.d7 = 3;
+	ui.lcd1.pins.rs = 4;
+	ui.lcd1.pins.rw = 5;
+	ui.lcd1.pins.e = 6;
+	ui.lcd1.Te = 1;
+	ui.lcd1.caps = HD44780_CAPS_2LINES;
 
-	UART_CFG_Type uart;
-	UART_ConfigStructInit(&uart);
-	uart.Baud_rate=115200;
-	UART_Init((LPC_UART_TypeDef*)LPC_UART1,&uart);
+	ui.lcd2.port = 2;
+	ui.lcd2.pins.d4 = 1;
+	ui.lcd2.pins.d5 = 0;
+	ui.lcd2.pins.d6 = 2;
+	ui.lcd2.pins.d7 = 3;
+	ui.lcd2.pins.rs = 4;
+	ui.lcd2.pins.rw = 5;
+	ui.lcd2.pins.e = 7;
+	ui.lcd2.Te = 1;
+	ui.lcd2.caps = HD44780_CAPS_2LINES;
 	
-	UART_FIFO_CFG_Type fifo;
-	UART_FIFOConfigStructInit(&fifo);
-	UART_FIFOConfig((LPC_UART_TypeDef*)LPC_UART1,&fifo);
+	hd44780_driver.init(&ui.lcd1);
+	hd44780_driver.onoff(&ui.lcd1, HD44780_ONOFF_DISPLAY_ON);
+	hd44780_driver.init(&ui.lcd2);
+	hd44780_driver.onoff(&ui.lcd2, HD44780_ONOFF_DISPLAY_ON);
 	
-	UART_TxCmd((LPC_UART_TypeDef*)LPC_UART1,ENABLE);
-
 	rprintf_devopen(1,sendChar);
-	
-	// init screen (autobaud)
-	sendChar(0x0d);
-	delay_ms(500);
 
 	// welcome message
+
 	rprintf(1,"Gli's OverCycler");
 	rprintf(1,"    " __DATE__);
-	sendCommand("[1b",0,NULL); // default at 115200bps
-	delay_ms(500);
-	sendCommand("[?27S",0,NULL); // save it as start screen
-	delay_ms(500);
-	
-	// configure screen
-	sendCommand("[6k",0,NULL); // ack = DISPLAY_ACK
-	sendCommand("[20c",1,NULL); // screen size (20 cols)
-	sendCommand("[4L",1,NULL); // screen size (4 rows)
-	sendCommand("[?25I",1,NULL); // hide cursor
-	sendCommand("[1x",1,NULL); // disable scrolling
-	sendCommand("[2J",1,NULL); // clear screen
-	sendCommand("[50r",1,NULL); // keypad debounce
-	
+
 	// init row select
 	
 	PINSEL_SetPinFunc(ADCROW_PORT,ADCROW_PIN,0);
