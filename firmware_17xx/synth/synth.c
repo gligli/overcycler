@@ -724,6 +724,10 @@ void synth_init(void)
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
 
+	// init ui first to get a splash screen
+	
+	ui_init();
+
 	// init footswitch in
 
 	GPIO_SetDir(3,1<<26,0);
@@ -758,7 +762,6 @@ void synth_init(void)
 	uartMidi_init();
 	seq_init();
 	arp_init();
-	ui_init();
 	midi_init();
 	
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)

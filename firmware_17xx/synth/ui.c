@@ -264,9 +264,12 @@ static const uint8_t potToCh[UI_POT_COUNT]=
 
 static const uint8_t keypadButtonCode[16]=
 {
-	0xee,0xde,0xbe,0xed,0xdd,0xbd,0xeb,0xdb,0xbb,0xd7,
-	0x7e,0x7d,0x7b,0x77,
-	0xb7,0xe7
+//	0xee,0xde,0xbe,0xed,0xdd,0xbd,0xeb,0xdb,0xbb,0xd7,
+//	0x7e,0x7d,0x7b,0x77,
+//	0xb7,0xe7
+	'1','2','3','4','5','6','7','8','9','0',
+	'a','b','c','d',
+	'*','/'
 };
 
 static struct
@@ -279,7 +282,6 @@ static struct
 	
 	int8_t presetModified;
 	enum uiPage_e activePage;
-	int8_t displayMode;
 	
 	int8_t activeSource;
 	uint32_t activeSourceTimeout;
@@ -330,49 +332,24 @@ static uint16_t getPotValue(int8_t pot)
 	return ui.value[pot]&0xffc0;
 }
 
-int sendChar(int ch)
+int sendChar(int lcd, int ch)
 {
-	hd44780_driver.write(&ui.lcd1, ch);	
-	hd44780_driver.write(&ui.lcd2, ch);	
+	if(lcd==2)
+		hd44780_driver.write(&ui.lcd2, ch);	
+	else
+		hd44780_driver.write(&ui.lcd1, ch);	
 	return -1;
 }
 
-void sendString(const char * s)
+void sendString(int lcd, const char * s)
 {
 	while(*s)
-		sendChar(*s++);
+		sendChar(lcd, *s++);
 }
 
 uint8_t receiveChar(void)
 {
 	return UART_ReceiveData((LPC_UART_TypeDef*)LPC_UART1);
-}
-
-static void sendCommand(const char * command, int8_t waitAck, char * response)
-{
-	uint8_t c;
-
-	// empty receive fifo
-	while(receiveChar());
-		
-	// send command
-	sendChar(0x1b);
-	while(*command)
-		sendChar(*command++);
-
-	if(waitAck)
-	{
-		do
-		{
-			c=receiveChar();
-			if(response && c && c!=DISPLAY_ACK)
-				*response++=c;
-		}
-		while(c!=DISPLAY_ACK);
-	}
-
-	if(response)
-		*response=0;
 }
 
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
@@ -470,7 +447,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			switch(prm->number)
 			{
 			case 0:
-				v=ui.displayMode;
+				v=0;
 				break;
 			case 1:
 				v=0;
@@ -617,9 +594,6 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		change=1;
 		switch(prm->number)
 		{
-			case 0:
-				ui.displayMode=1-ui.displayMode;
-				break;
 			case 2:
 				arp_setMode((arp_getMode()+1)%4,arp_getHold());
 				break;
@@ -686,22 +660,12 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 static void readKeypad(void)
 {
 	int key,i;
-	char response[10],*rb;
-return;
+
 	// get all awaiting keys
 	
 	for(;;)
 	{
-		sendCommand("[k",1,response);
-
-		key=0;
-		rb=response;
-		while(*rb)
-		{
-			if(*rb>='0' && *rb<='9')
-				key=key*10+(*rb-'0');
-			++rb;
-		}
+		key=getkey_serial0();
 		
 		if(!key) break;
 		
@@ -789,12 +753,10 @@ void ui_init(void)
 	hd44780_driver.init(&ui.lcd2);
 	hd44780_driver.onoff(&ui.lcd2, HD44780_ONOFF_DISPLAY_ON);
 	
-	rprintf_devopen(1,sendChar);
-
 	// welcome message
 
-	rprintf(1,"Gli's OverCycler");
-	rprintf(1,"    " __DATE__);
+	sendString(1,"GliGli's OverCycler2                        ");
+	sendString(1,"Build " __DATE__);
 
 	// init row select
 	
@@ -855,8 +817,8 @@ void ui_update(void)
 	
 	// update pot values
 
-	for(i=0;i<UI_POT_COUNT;++i)
-		updatePotValue(i);
+//	for(i=0;i<UI_POT_COUNT;++i)
+//		updatePotValue(i);
 
 	// slow updates (if needed)
 	
@@ -891,91 +853,111 @@ void ui_update(void)
 	}
 	
 	if(ui.pendingScreenClear)
-		sendCommand("[2J",1,NULL); // clear screen
+	{
+		hd44780_driver.clear(&ui.lcd1);
+		hd44780_driver.clear(&ui.lcd2);
+	}
 
-	sendCommand("[H",1,NULL); // home pos
+	hd44780_driver.home(&ui.lcd1);
+	hd44780_driver.home(&ui.lcd2);
 
 	if(ui.activePage==upNone)
 	{
-		sendString("GliGli's OverCycler ");
-		sendString("A: Oscs   B: Filter ");
-		sendString("C: Ampli  D: LFO/Mod");
-		sendString("*: Misc   #: Seq/Arp");
+		sendString(1,"GliGli's OverCycler2                    ");
+		sendString(1,"A: Oscillator      B: Filter            ");
+		sendString(2,"C: Amplifier       D: LFO/Modulations   ");
+		sendString(2,"*: Miscellaneous   #: Sequencer/Arp     ");
 	}
 	else if(fsDisp) // fullscreen display
 	{
 		if(ui.pendingScreenClear)
-			sendString(getName(ui.activeSource,1));
+			sendString(1,getName(ui.activeSource,1));
 
-		sendCommand("[3;9H",1,NULL);
-		sendString(getDisplayValue(ui.activeSource,&v));
+		hd44780_driver.set_position(&ui.lcd2,18);
+		sendString(2,getDisplayValue(ui.activeSource,&v));
 		
-		sendString("\r");
+		hd44780_driver.set_position(&ui.lcd2,40);
 		s=getDisplayFulltext(ui.activeSource);
 		if(s)
 		{
-			sendString(s);
+			sendString(2,s);
 		}
 		else
 		{
 			// bargraph			
 			for(i=0;i<20;++i)
-				if(i<(((int32_t)v+UINT16_MAX/40)*20>>16))
-					sendChar(255);
+				if(i<(((int32_t)v+UINT16_MAX/40)*40>>16))
+					sendChar(2,255);
 				else
-					sendChar(' ');
+					sendChar(2,' ');
 		}
 	}
-	else if(ui.displayMode) // buttons
+	else
 	{
 		ui.activeSource=INT8_MAX;
 
-		if(ui.pendingScreenClear)
-			for(i=0;i<3;++i)
-			{
-				sendString(getName(i,0));
-				sendChar(' ');
-				sendChar(' ');
-			}
-
-		sendChar('\r');
- 
+		 // buttons
+		
+		hd44780_driver.set_position(&ui.lcd1,64+26);
+		hd44780_driver.set_position(&ui.lcd2,26);
 		for(i=0;i<6;++i)
 		{
-			if(i==3) sendChar('\r');
-			sendString(getDisplayValue(i,NULL));
-			sendChar(' ');
-			sendChar(' ');
+			int lcd=(i<3)?1:2;
+			sendString(lcd,getDisplayValue(i,NULL));
+			if(i!=5 && i!=2)
+				sendChar(lcd,' ');
 		}
 	
 		if(ui.pendingScreenClear)
 		{
-			sendChar('\r');
+			hd44780_driver.set_position(&ui.lcd1,26);
+			
+			for(i=0;i<3;++i)
+			{
+				sendString(1,getName(i,0));
+				if(i<2)
+					sendChar(1,' ');
+			}
 
+			hd44780_driver.set_position(&ui.lcd2,64+26);
 			for(i=3;i<6;++i)
 			{
-				sendString(getName(i,0));
-				sendChar(' ');
-				sendChar(' ');
+				sendString(2,getName(i,0));
+				if(i<5)
+					sendChar(2,' ');
 			}
 		}
-	}
-	else // pots
-	{
-		ui.activeSource=INT8_MAX;
 
-		if(ui.pendingScreenClear)
-			for(i=0;i<UI_POT_COUNT/2;++i)
-				sendString(getName(-i-1,0));
-			
-		sendCommand("[H",1,NULL);
-		sendString("\r");
+		// pots
+
+		hd44780_driver.set_position(&ui.lcd1,64);
+		hd44780_driver.home(&ui.lcd2);
 		for(i=0;i<UI_POT_COUNT;++i)
-			sendString(getDisplayValue(-i-1,NULL));
+		{
+			int lcd=(i<UI_POT_COUNT/2)?1:2;
+			sendString(lcd,getDisplayValue(-i-1,NULL));
+			if(i!=UI_POT_COUNT-1 && i!=UI_POT_COUNT/2-1)
+				sendChar(lcd,' ');
+		}
 
 		if(ui.pendingScreenClear)
+		{
+			hd44780_driver.home(&ui.lcd1);
+			for(i=0;i<UI_POT_COUNT/2;++i)
+			{
+				sendString(1,getName(-i-1,0));
+				if(i<UI_POT_COUNT/2-1)
+					sendChar(1,' ');
+			}
+
+			hd44780_driver.set_position(&ui.lcd2,64);
 			for(i=UI_POT_COUNT/2;i<UI_POT_COUNT;++i)
-				sendString(getName(-i-1,0));
+			{
+				sendString(2,getName(-i-1,0));
+				if(i<UI_POT_COUNT-1)
+					sendChar(2,' ');
+			}
+		}
 	}
 
 	ui.pendingScreenClear=0;
