@@ -11,25 +11,19 @@
 #include "hd44780.h"
 #include "lpc17xx_pinsel.h"
 
-#define DEBOUNCE_THRESHOLD 8
+#define DEBOUNCE_THRESHOLD 5
 
-#define DISPLAY_ACK 6
-
-#define ADC_QUANTUM (1<<(16-12)) // 12bit resolution
-
-#define ADCROW_PORT 3
-#define ADCROW_PIN 25
-
-#define UI_POT_COUNT 10
-#define UI_POT_SAMPLES 80
+#define ADC_QUANTUM (1<<(16-10)) // 10bit resolution
 
 #define UI_PRESET_SLOTS 20
 #define UI_PRESET_BANKS 20
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*32)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*24)
-#define POT_TIMEOUT (TICKER_1S*5/8)
-#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*3/4)
+#define UI_POT_COUNT 10
+
+#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*8)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*6)
+#define POT_TIMEOUT TICKER_1S
+#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*5/4)
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/10)
 
 enum uiDigitInput_e{
@@ -259,12 +253,6 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 	},
 };
 
-static const uint8_t potToCh[UI_POT_COUNT]=
-{
-	1<<0,1<<1,1<<2,1<<3,1<<5,
-	1<<0,1<<1,1<<2,1<<3,1<<5,
-};
-
 static const uint8_t keypadButtonCode[16]=
 {
 	0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,0x32,
@@ -274,7 +262,6 @@ static const uint8_t keypadButtonCode[16]=
 
 static struct
 {
-	uint16_t pots[UI_POT_COUNT][UI_POT_SAMPLES];
 	int16_t curSample;
 	int8_t curPot;
 	uint16_t value[UI_POT_COUNT];
@@ -301,37 +288,9 @@ static struct
 	int8_t keypadState[16];
 } ui;
 
-__attribute__ ((used)) void ADC_IRQHandler(void)
-{
-	
-	if(LPC_ADC->ADGDR & ADC_DR_DONE_FLAG)
-		ui.pots[ui.curPot][ui.curSample]=(uint16_t)LPC_ADC->ADGDR;
-
-	++ui.curPot;
-	
-	if(ui.curPot==UI_POT_COUNT/2)
-	{
-		GPIO_SetValue(ADCROW_PORT,1<<ADCROW_PIN);
-	}
-	else if(ui.curPot>=UI_POT_COUNT)
-	{
-		ui.curPot=0;
-		GPIO_ClearValue(ADCROW_PORT,1<<ADCROW_PIN);
-		
-		// scanned all the pots, move to next sample
-		
-		++ui.curSample;
-		if(ui.curSample>=UI_POT_SAMPLES)
-			ui.curSample=0;
-	}
-	
-	
-	LPC_ADC->ADCR=(LPC_ADC->ADCR&~0xff) | potToCh[ui.curPot] | ADC_CR_START_NOW;
-}
-
 static uint16_t getPotValue(int8_t pot)
 {
-	return ui.value[pot]&0xffc0;
+	return ui.value[pot]&~(ADC_QUANTUM-1);
 }
 
 static int sendChar(int lcd, int ch)
@@ -411,9 +370,9 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 				return NULL;
 		}
 
-		// always 20chars
-		for(int i=strlen(dv);i<20;++i) dv[i]=' ';
-		dv[20]=0;
+		// always 40chars
+		for(int i=strlen(dv);i<40;++i) dv[i]=' ';
+		dv[40]=0;
 		
 		return dv;
 	}
@@ -706,32 +665,70 @@ static void readKeypad(void)
 	}
 }
 
-static void updatePotValue(int8_t pot)
+static void updatePotsValue(void)
 {
-	uint16_t tmp[UI_POT_SAMPLES];
 	uint32_t new,delta;
+	int i,pot;
 	
-	// sort values
-	
-	memcpy(&tmp[0],&ui.pots[pot][0],UI_POT_SAMPLES*sizeof(uint16_t));
-	qsort(tmp,UI_POT_SAMPLES,sizeof(uint16_t),uint16Compare);
-	
-	// median
-	
-	new=tmp[UI_POT_SAMPLES/2];
-	
-	// ignore small changes
-	
-	delta=abs(new-ui.value[pot]);
-
-	if(delta>POT_CHANGE_DETECT_THRESHOLD || currentTick<ui.lockTimeout[pot])
+	for(pot=0;pot<UI_POT_COUNT;++pot)
 	{
-		if(delta>POT_TIMEOUT_THRESHOLD)
-			ui.lockTimeout[pot]=currentTick+POT_TIMEOUT;
-		
-		ui.value[pot]=new;
+		// read pot on TLV1543 ADC
 
-		handleUserInput(-pot-1);
+			// wait acquisition
+
+		do
+			delay_us(1);
+		while(!(GPIO_ReadValue(0)&(1<<28))); // EOC
+
+		new=0;
+
+		GPIO_ClearValue(0,1<<24); // CS
+		delay_us(2);
+
+		for(i=0;i<10;++i)
+		{
+			// send next address
+
+			if(i<4)
+			{
+				int nextPot=(pot+1)%UI_POT_COUNT;
+
+				if(nextPot&(1<<(3-i)))
+					GPIO_SetValue(0,1<<26); // ADDR 
+				else
+					GPIO_ClearValue(0,1<<26); // ADDR 
+			}
+			
+			// wiggle clock
+
+			delay_us(5);
+			GPIO_SetValue(0,1<<27); // CLK
+			delay_us(5);
+			GPIO_ClearValue(0,1<<27); // CLK
+
+			// read value back
+
+			new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
+		}
+
+		GPIO_SetValue(0,0b00001ul<<24); // CS
+		delay_us(2);
+		
+//		rprintf(0,"% 8d", new>>6);
+
+		// ignore small changes
+
+		delta=abs(new-ui.value[pot]);
+
+		if(delta>POT_CHANGE_DETECT_THRESHOLD || currentTick<ui.lockTimeout[pot])
+		{
+			if(delta>POT_TIMEOUT_THRESHOLD)
+				ui.lockTimeout[pot]=currentTick+POT_TIMEOUT;
+
+			ui.value[pot]=new;
+
+			handleUserInput(-pot-1);
+		}
 	}
 }
 
@@ -750,6 +747,19 @@ void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
 	
+	// init TLV1543 ADC
+	
+	PINSEL_SetI2C0Pins(PINSEL_I2C_Fast_Mode, DISABLE);
+	
+	PINSEL_SetPinFunc(0,24,0); // CS
+	PINSEL_SetPinFunc(0,25,0); // OUT
+	PINSEL_SetPinFunc(0,26,0); // ADDR
+	PINSEL_SetPinFunc(0,27,0); // CLK
+	PINSEL_SetPinFunc(0,28,0); // EOC
+	
+	GPIO_SetValue(0,0b01101ul<<24);
+	GPIO_SetDir(0,0b01101ul<<24,1);
+	
 	// init keypad
 	
 	PINSEL_SetPinFunc(0,22,0); // R1
@@ -765,8 +775,8 @@ void ui_init(void)
 	PINSEL_SetResistorMode(4,28,PINSEL_PINMODE_PULLUP);
 	PINSEL_SetResistorMode(2,13,PINSEL_PINMODE_PULLUP);
 
-	GPIO_SetDir(0,0b1111ul<<19,1);
 	GPIO_SetValue(0,0b1111ul<<19);
+	GPIO_SetDir(0,0b1111ul<<19,1);
 	
 	// init screen
 	
@@ -796,46 +806,13 @@ void ui_init(void)
 	hd44780_driver.onoff(&ui.lcd1, HD44780_ONOFF_DISPLAY_ON);
 	hd44780_driver.init(&ui.lcd2);
 	hd44780_driver.onoff(&ui.lcd2, HD44780_ONOFF_DISPLAY_ON);
-	
+		
 	// welcome message
 
 	sendString(1,"GliGli's OverCycler2");
 	setPos(1,0,1);
 	sendString(1,"Build " __DATE__ " " __TIME__);
 
-//	// init row select
-//	
-//	PINSEL_SetPinFunc(ADCROW_PORT,ADCROW_PIN,0);
-//	GPIO_SetDir(ADCROW_PORT,1<<ADCROW_PIN,1);
-//	
-//	// init adc pins
-//
-//	PINSEL_SetPinFunc(0,23,1);
-//	PINSEL_SetPinFunc(0,24,1);
-//	PINSEL_SetPinFunc(0,25,1);
-//	PINSEL_SetPinFunc(0,26,1);
-//	PINSEL_SetPinFunc(1,31,3);
-//
-//		// unused pins 
-//	PINSEL_SetPinFunc(1,30,0);
-//	GPIO_SetDir(1,1<<30,1);
-//	GPIO_ClearValue(1,1<<30);
-//	
-//	// init adc
-//	
-//	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_1);
-//	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,ENABLE);
-//
-//	LPC_ADC->ADCR=ADC_CR_CLKDIV(9);
-//	LPC_ADC->ADINTEN=ADC_INTEN_GLOBAL;
-//	
-//	NVIC_SetPriority(ADC_IRQn,7);
-//	NVIC_EnableIRQ(ADC_IRQn);
-//
-//	// start
-//	
-//	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_START_NOW;
-	
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
 	ui.presetSlot=-1;
@@ -862,8 +839,7 @@ void ui_update(void)
 	
 	// update pot values
 
-//	for(i=0;i<UI_POT_COUNT;++i)
-//		updatePotValue(i);
+	updatePotsValue();
 
 	// slow updates (if needed)
 	
@@ -930,7 +906,7 @@ void ui_update(void)
 		else
 		{
 			// bargraph			
-			for(i=0;i<20;++i)
+			for(i=0;i<40;++i)
 				if(i<(((int32_t)v+UINT16_MAX/40)*40>>16))
 					sendChar(2,255);
 				else
