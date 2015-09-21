@@ -9,6 +9,9 @@
 #include "ffconf.h"
 #include "lpc17xx_gpio.h"
 #include "hd44780.h"
+#include "lpc17xx_pinsel.h"
+
+#define DEBOUNCE_THRESHOLD 8
 
 #define DISPLAY_ACK 6
 
@@ -42,7 +45,7 @@ enum uiKeypadButton_e
 {
 	kb1=0,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,kb0,
 	kbA,kbB,kbC,kbD,
-	kbAsterisk,kbSharp
+	kbSharp,kbAsterisk,
 };
 
 enum uiPage_e
@@ -87,7 +90,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Filter page (B) */
@@ -116,7 +119,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Amplifier page (C) */
@@ -145,7 +148,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Modulation page (D) */
@@ -174,7 +177,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Sequencer/arpeggiator page (#) */
@@ -193,7 +196,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Miscellaneous page (*) */
@@ -222,7 +225,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 	/* Tuner page */
@@ -251,7 +254,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=0,.shortName="Disp",.longName="Display mode",.values={"Pots","Btns"}},
+			/*0*/ {.type=ptNone},
 		},
 	},
 };
@@ -264,12 +267,9 @@ static const uint8_t potToCh[UI_POT_COUNT]=
 
 static const uint8_t keypadButtonCode[16]=
 {
-//	0xee,0xde,0xbe,0xed,0xdd,0xbd,0xeb,0xdb,0xbb,0xd7,
-//	0x7e,0x7d,0x7b,0x77,
-//	0xb7,0xe7
-	'1','2','3','4','5','6','7','8','9','0',
-	'a','b','c','d',
-	'*','/'
+	0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,0x32,
+	0x08,0x18,0x28,0x38,
+	0x34,0x31
 };
 
 static struct
@@ -297,6 +297,8 @@ static struct
 	int8_t tunerActiveVoice;
 	
 	struct hd44780_data lcd1, lcd2;
+	
+	int8_t keypadState[16];
 } ui;
 
 __attribute__ ((used)) void ADC_IRQHandler(void)
@@ -332,7 +334,7 @@ static uint16_t getPotValue(int8_t pot)
 	return ui.value[pot]&0xffc0;
 }
 
-int sendChar(int lcd, int ch)
+static int sendChar(int lcd, int ch)
 {
 	if(lcd==2)
 		hd44780_driver.write(&ui.lcd2, ch);	
@@ -341,15 +343,26 @@ int sendChar(int lcd, int ch)
 	return -1;
 }
 
-void sendString(int lcd, const char * s)
+static void sendString(int lcd, const char * s)
 {
 	while(*s)
 		sendChar(lcd, *s++);
 }
 
-uint8_t receiveChar(void)
+static void clear(int lcd)
 {
-	return UART_ReceiveData((LPC_UART_TypeDef*)LPC_UART1);
+	if(lcd==2)
+		hd44780_driver.clear(&ui.lcd2);	
+	else
+		hd44780_driver.clear(&ui.lcd1);	
+}
+
+static void setPos(int lcd, int col, int row)
+{
+	if(lcd==2)
+		hd44780_driver.set_position(&ui.lcd2,col+row*64);	
+	else
+		hd44780_driver.set_position(&ui.lcd1,col+row*64);	
 }
 
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
@@ -659,24 +672,37 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 
 static void readKeypad(void)
 {
-	int key,i;
+	int key;
+	int row,col[4];
+	int8_t newState;
 
-	// get all awaiting keys
-	
-	for(;;)
+	for(row=0;row<4;++row)
 	{
-		key=getkey_serial0();
+		GPIO_SetValue(0,0b1111<<19);
+		GPIO_ClearValue(0,(8>>row)<<19);
+		delay_us(100);
+		col[row]=0;
+		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
+		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
+		col[row]|=((GPIO_ReadValue(4)>>28)&1)?0:4;
+		col[row]|=((GPIO_ReadValue(2)>>13)&1)?0:8;
+	}
+	
+	for(key=0;key<16;++key)
+	{
+		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
 		
-		if(!key) break;
-		
-		for(i=0;i<16;++i)
-			if(key==keypadButtonCode[i])
-			{
-				key=i;
-				break;
-			}
-		
-		handleUserInput(key);
+		if(newState && ui.keypadState[key])
+		{
+			ui.keypadState[key]=MIN(INT8_MAX,ui.keypadState[key]+1);
+
+			if(ui.keypadState[key]==DEBOUNCE_THRESHOLD)
+				handleUserInput(key);
+		}
+		else
+		{
+			ui.keypadState[key]=newState;
+		}
 	}
 }
 
@@ -724,6 +750,24 @@ void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
 	
+	// init keypad
+	
+	PINSEL_SetPinFunc(0,22,0); // R1
+	PINSEL_SetPinFunc(0,21,0); // R2
+	PINSEL_SetPinFunc(0,20,0); // R3
+	PINSEL_SetPinFunc(0,19,0); // R4
+	PINSEL_SetPinFunc(0,10,0); // C1
+	PINSEL_SetPinFunc(4,29,0); // C2
+	PINSEL_SetPinFunc(4,28,0); // C3
+	PINSEL_SetPinFunc(2,13,0); // C4
+	PINSEL_SetResistorMode(0,10,PINSEL_PINMODE_PULLUP);
+	PINSEL_SetResistorMode(4,29,PINSEL_PINMODE_PULLUP);
+	PINSEL_SetResistorMode(4,28,PINSEL_PINMODE_PULLUP);
+	PINSEL_SetResistorMode(2,13,PINSEL_PINMODE_PULLUP);
+
+	GPIO_SetDir(0,0b1111ul<<19,1);
+	GPIO_SetValue(0,0b1111ul<<19);
+	
 	// init screen
 	
 	ui.lcd1.port = 2;
@@ -755,41 +799,42 @@ void ui_init(void)
 	
 	// welcome message
 
-	sendString(1,"GliGli's OverCycler2                        ");
-	sendString(1,"Build " __DATE__);
+	sendString(1,"GliGli's OverCycler2");
+	setPos(1,0,1);
+	sendString(1,"Build " __DATE__ " " __TIME__);
 
-	// init row select
-	
-	PINSEL_SetPinFunc(ADCROW_PORT,ADCROW_PIN,0);
-	GPIO_SetDir(ADCROW_PORT,1<<ADCROW_PIN,1);
-	
-	// init adc pins
-
-	PINSEL_SetPinFunc(0,23,1);
-	PINSEL_SetPinFunc(0,24,1);
-	PINSEL_SetPinFunc(0,25,1);
-	PINSEL_SetPinFunc(0,26,1);
-	PINSEL_SetPinFunc(1,31,3);
-
-		// unused pins 
-	PINSEL_SetPinFunc(1,30,0);
-	GPIO_SetDir(1,1<<30,1);
-	GPIO_ClearValue(1,1<<30);
-	
-	// init adc
-	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,ENABLE);
-
-	LPC_ADC->ADCR=ADC_CR_CLKDIV(9);
-	LPC_ADC->ADINTEN=ADC_INTEN_GLOBAL;
-	
-	NVIC_SetPriority(ADC_IRQn,7);
-	NVIC_EnableIRQ(ADC_IRQn);
-
-	// start
-	
-	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_START_NOW;
+//	// init row select
+//	
+//	PINSEL_SetPinFunc(ADCROW_PORT,ADCROW_PIN,0);
+//	GPIO_SetDir(ADCROW_PORT,1<<ADCROW_PIN,1);
+//	
+//	// init adc pins
+//
+//	PINSEL_SetPinFunc(0,23,1);
+//	PINSEL_SetPinFunc(0,24,1);
+//	PINSEL_SetPinFunc(0,25,1);
+//	PINSEL_SetPinFunc(0,26,1);
+//	PINSEL_SetPinFunc(1,31,3);
+//
+//		// unused pins 
+//	PINSEL_SetPinFunc(1,30,0);
+//	GPIO_SetDir(1,1<<30,1);
+//	GPIO_ClearValue(1,1<<30);
+//	
+//	// init adc
+//	
+//	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_ADC,CLKPWR_PCLKSEL_CCLK_DIV_1);
+//	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCAD,ENABLE);
+//
+//	LPC_ADC->ADCR=ADC_CR_CLKDIV(9);
+//	LPC_ADC->ADINTEN=ADC_INTEN_GLOBAL;
+//	
+//	NVIC_SetPriority(ADC_IRQn,7);
+//	NVIC_EnableIRQ(ADC_IRQn);
+//
+//	// start
+//	
+//	LPC_ADC->ADCR|= ADC_CR_PDN | ADC_CR_START_NOW;
 	
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
@@ -854,17 +899,17 @@ void ui_update(void)
 	
 	if(ui.pendingScreenClear)
 	{
-		hd44780_driver.clear(&ui.lcd1);
-		hd44780_driver.clear(&ui.lcd2);
+		clear(1);
+		clear(2);
 	}
 
-	hd44780_driver.home(&ui.lcd1);
-	hd44780_driver.home(&ui.lcd2);
+	setPos(1,0,0);
+	setPos(2,0,0);
 
 	if(ui.activePage==upNone)
 	{
 		sendString(1,"GliGli's OverCycler2                    ");
-		sendString(1,"A: Oscillator      B: Filter            ");
+		sendString(1,"A: Oscillators     B: Filter            ");
 		sendString(2,"C: Amplifier       D: LFO/Modulations   ");
 		sendString(2,"*: Miscellaneous   #: Sequencer/Arp     ");
 	}
@@ -873,10 +918,10 @@ void ui_update(void)
 		if(ui.pendingScreenClear)
 			sendString(1,getName(ui.activeSource,1));
 
-		hd44780_driver.set_position(&ui.lcd2,18);
+		setPos(2,18,0);
 		sendString(2,getDisplayValue(ui.activeSource,&v));
 		
-		hd44780_driver.set_position(&ui.lcd2,40);
+		setPos(2,0,1);
 		s=getDisplayFulltext(ui.activeSource);
 		if(s)
 		{
@@ -898,8 +943,8 @@ void ui_update(void)
 
 		 // buttons
 		
-		hd44780_driver.set_position(&ui.lcd1,64+26);
-		hd44780_driver.set_position(&ui.lcd2,26);
+		setPos(1,26,1);
+		setPos(2,26,0);
 		for(i=0;i<6;++i)
 		{
 			int lcd=(i<3)?1:2;
@@ -910,7 +955,7 @@ void ui_update(void)
 	
 		if(ui.pendingScreenClear)
 		{
-			hd44780_driver.set_position(&ui.lcd1,26);
+			setPos(1,26,0);
 			
 			for(i=0;i<3;++i)
 			{
@@ -919,7 +964,7 @@ void ui_update(void)
 					sendChar(1,' ');
 			}
 
-			hd44780_driver.set_position(&ui.lcd2,64+26);
+			setPos(2,26,1);
 			for(i=3;i<6;++i)
 			{
 				sendString(2,getName(i,0));
@@ -930,7 +975,7 @@ void ui_update(void)
 
 		// pots
 
-		hd44780_driver.set_position(&ui.lcd1,64);
+		setPos(1,0,1);
 		hd44780_driver.home(&ui.lcd2);
 		for(i=0;i<UI_POT_COUNT;++i)
 		{
@@ -950,7 +995,7 @@ void ui_update(void)
 					sendChar(1,' ');
 			}
 
-			hd44780_driver.set_position(&ui.lcd2,64);
+			setPos(2,0,1);
 			for(i=UI_POT_COUNT/2;i<UI_POT_COUNT;++i)
 			{
 				sendString(2,getName(-i-1,0));
