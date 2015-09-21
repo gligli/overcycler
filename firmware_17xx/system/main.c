@@ -13,6 +13,7 @@
 #include "ff.h"
 
 #include "synth/synth.h"
+#include "synth/ui.h"
 
 #define IRQ_MASK 0x00000080
 #define FIQ_MASK 0x00000040
@@ -116,6 +117,8 @@ int main(void)
     rprintf_devopen(0,putc_serial0); 
 	
 	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
+	
+	ui_init(); // called early to get a splash screen
 	
 	rprintf(0,"storage init...\n");
 

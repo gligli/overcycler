@@ -6,6 +6,11 @@
 #include "LPC17xx.h"
 #include "lpc17xx_gpdma.h"
 
+#define SPIMUX_PORT_ABC 0
+#define SPIMUX_PIN_A 0
+#define SPIMUX_PIN_B 1
+#define SPIMUX_PIN_C 5
+
 #define DACSPI_CMD_SET_A 0x7000
 #define DACSPI_CMD_SET_B 0xf000
 #define DACSPI_CMD_SET_REF 0x7000
@@ -30,14 +35,14 @@ static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
 static const uint32_t abcCommands[8] =
 {
-	((0<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((1<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((2<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((3<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((4<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((5<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((6<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
-	((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16,
+	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
 };
 
 static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
@@ -81,7 +86,7 @@ void buildLLIs(int buffer, int channel)
 	}
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[channel];
-	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN2;
+	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN1;
 	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 	lli[lliPos][0].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
@@ -175,10 +180,14 @@ void dacspi_init(void)
 	LPC_GPIO1->FIODIR2|=0x20;
 	LPC_GPIO1->FIOMASK2&=~0x20;
 	
-	// prepare LLIs
+	// init SPI mux
 
-	LPC_GPIO0->FIOMASK2=~(((7<<CVMUX_PIN_A)|(1<<CVMUX_PIN_CARD0))>>16);
-	LPC_GPIO4->FIOMASK3=~(((1<<CVMUX_PIN_CARD2)|(1<<CVMUX_PIN_VCA))>>24);
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_B,1); // B
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_C,1); // C
+	LPC_GPIO0->FIOMASK0&=~((1<<SPIMUX_PIN_A)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_C));
+	
+	// prepare LLIs
 
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
 	{

@@ -724,25 +724,11 @@ void synth_init(void)
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
 
-	// init ui first to get a splash screen
-	
-	ui_init();
-
 	// init footswitch in
 
 	GPIO_SetDir(3,1<<26,0);
 	PINSEL_SetResistorMode(3,26,PINSEL_PINMODE_TRISTATE);
 	PINSEL_SetOpenDrainMode(3,26,PINSEL_PINMODE_NORMAL);
-	
-	// init cv mux
-
-	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_A,1); // A
-	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_B,1); // B
-	GPIO_SetDir(CVMUX_PORT_ABC,1<<CVMUX_PIN_C,1); // C
-	GPIO_SetDir(CVMUX_PORT_CARD0,1<<CVMUX_PIN_CARD0,1); // voice card 0
-	GPIO_SetDir(CVMUX_PORT_CARD1,1<<CVMUX_PIN_CARD1,1); // voice card 1
-	GPIO_SetDir(CVMUX_PORT_CARD2,1<<CVMUX_PIN_CARD2,1); // voice card 2
-	GPIO_SetDir(CVMUX_PORT_VCA,1<<CVMUX_PIN_VCA,1); // VCAs
 	
 	// init wavetable oscs
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
@@ -756,6 +742,7 @@ void synth_init(void)
 	waveData.curFile.lfsize=sizeof(waveData.lfname);
 	
 	// init subsystems
+	// ui_init() done in main.c
 	dacspi_init();
 	tuner_init();
 	assigner_init();
