@@ -972,7 +972,16 @@ void ui_update(void)
 					sendChar(2,' ');
 			}
 		}
+		
+		// delimiter
 
+#define DELIM(x) sendChar(x,0b01111100); sendChar(x,0b01111100);
+
+		setPos(1,24,0); DELIM(1)
+		setPos(1,24,1); DELIM(1)
+		setPos(2,24,0); DELIM(2)
+		setPos(2,24,1); DELIM(2)
+		
 		// pots
 
 		setPos(1,0,1);
