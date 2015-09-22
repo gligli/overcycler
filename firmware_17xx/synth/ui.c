@@ -213,7 +213,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptCust,.number=6,.shortName="Save",.longName="Save preset"},
 			/*4*/ {.type=ptNone},
-			/*5*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune hardware"},
+			/*5*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune hardware",.values={""}},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptNone},
 			/*8*/ {.type=ptNone},
