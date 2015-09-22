@@ -296,11 +296,17 @@ static uint16_t getPotValue(int8_t pot)
 static int sendChar(int lcd, int ch)
 {
 	if(lcd==2)
-		hd44780_driver.write(&ui.lcd2, ch);	
+		hd44780_driver.write(&ui.lcd2,ch);	
 	else
-		hd44780_driver.write(&ui.lcd1, ch);	
+		hd44780_driver.write(&ui.lcd1,ch);	
 	return -1;
 }
+
+static int putc_lcd2 (int ch)
+{
+	return sendChar(2,ch);
+}
+
 
 static void sendString(int lcd, const char * s)
 {
@@ -319,9 +325,9 @@ static void clear(int lcd)
 static void setPos(int lcd, int col, int row)
 {
 	if(lcd==2)
-		hd44780_driver.set_position(&ui.lcd2,col+row*64);	
+		hd44780_driver.set_position(&ui.lcd2,col+row*HD44780_LINE_OFFSET);	
 	else
-		hd44780_driver.set_position(&ui.lcd1,col+row*64);	
+		hd44780_driver.set_position(&ui.lcd1,col+row*HD44780_LINE_OFFSET);	
 }
 
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
@@ -342,7 +348,7 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 
 static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
-	static char dv[_MAX_LFN];
+	static char dv[41];
 	const struct uiParam_s * prm;
 	int8_t potnum;
 	
@@ -807,6 +813,8 @@ void ui_init(void)
 	hd44780_driver.init(&ui.lcd2);
 	hd44780_driver.onoff(&ui.lcd2, HD44780_ONOFF_DISPLAY_ON);
 		
+    rprintf_devopen(1,putc_lcd2); 
+
 	// welcome message
 
 	sendString(1,"GliGli's OverCycler2");

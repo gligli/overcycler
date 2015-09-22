@@ -11,6 +11,8 @@
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
+
+
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -30,23 +32,20 @@ void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab)
 	o->voice=voice;
 	o->ab=ab;
 	
-	wtosc_setSampleData(o,NULL,256);
+	wtosc_setSampleData(o,NULL,-1);
 	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0,UINT16_MAX/2);
 }
 
-void wtosc_setSampleData(struct wtosc_s * o, int16_t * data, uint16_t sampleCount)
+void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount)
 {
-	int i;
-
-	memset(o->data,0,WTOSC_MAX_SAMPLES*sizeof(uint16_t));
+	o->data=NULL;
+	o->sampleCount=0;
+	o->halfSampleCount=0;
 
 	if(sampleCount>WTOSC_MAX_SAMPLES)
 		return;
 
-	if(data)
-		for(i=0;i<sampleCount;++i)
-			o->data[i]=(int32_t)data[i]-INT16_MIN;
-
+	o->data=data;
 	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
 }
@@ -107,6 +106,9 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	int alpha,voice,ab;
 	
 	data=o->data;
+	
+	if(!data)
+		return;
 	
 	period[0]=o->period[0];
 	period[1]=o->period[1];

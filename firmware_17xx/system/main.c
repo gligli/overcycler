@@ -109,6 +109,8 @@ int main(void)
 {
 	FRESULT res;
 	
+	ui_init(); // called early to get a splash screen
+	
 	delay_ms(500);
 
 	SystemCoreClockUpdate();
@@ -118,8 +120,6 @@ int main(void)
 	
 	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
 	
-	ui_init(); // called early to get a splash screen
-	
 	rprintf(0,"storage init...\n");
 
 	synthReady=0;
@@ -127,10 +127,16 @@ int main(void)
 	NVIC_SetPriority(SysTick_IRQn,16);
 	
 	if((res=disk_initialize(0)))
+	{
 		rprintf(0,"disk_initialize res=%d\n",res);
+		rprintf(1,"Error: disk_initialize res=%d",res);
+	}
 	
 	if((res=f_mount(0,&fatFS)))
+	{
 		rprintf(0,"f_mount res=%d\n",res);
+		rprintf(1,"Error: f_mount res=%d",res);
+	}
 
 	f_mkdir(STORAGE_PATH);
 	

@@ -28,19 +28,21 @@
 #define WAVEDATA_PATH "/WAVEDATA"
 
 #define MAX_BANKS 80
-#define MAX_BANK_WAVES 100
+#define MAX_BANK_WAVES 160
 #define MAX_FILENAME _MAX_LFN
 
 #define POT_DEAD_ZONE 512
 
 volatile uint32_t currentTick=0; // 500hz
 
-static EXT_RAM struct
+static struct
 {
 	int bankCount;
 	int curWaveCount[2];
 	char bankNames[MAX_BANKS][MAX_FILENAME];
 	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
+
+	uint16_t sampleData[2][WTOSC_MAX_SAMPLES];
 
 	DIR curDir;
 	FILINFO curFile;
@@ -534,15 +536,16 @@ void refreshWaveforms(int8_t ab)
 		if((res=f_lseek(&f,0x2c)))
 			rprintf(0,"f_lseek res=%d\n",res);
 
-		int16_t data[WTOSC_MAX_SAMPLES];
-
-		if((res=f_read(&f,data,sizeof(data),&i)))
+		if((res=f_read(&f,waveData.sampleData[ab],sizeof(waveData.sampleData[ab]),&i)))
 			rprintf(0,"f_lseek res=%d\n",res);
 
 		f_close(&f);
+		
+		for(i=0;i<WTOSC_MAX_SAMPLES;++i)
+			waveData.sampleData[ab][i]=(int32_t)waveData.sampleData[ab][i]-INT16_MIN;
 
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			wtosc_setSampleData(&synth.osc[i][ab],data,WTOSC_MAX_SAMPLES);
+			wtosc_setSampleData(&synth.osc[i][ab],waveData.sampleData[ab],WTOSC_MAX_SAMPLES);
 	}
 }
 
