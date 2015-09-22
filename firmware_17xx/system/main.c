@@ -109,15 +109,14 @@ int main(void)
 {
 	FRESULT res;
 	
+	SystemCoreClockUpdate();
+	init_serial0(230400);
+    rprintf_devopen(0,putc_serial0); 
+	
 	ui_init(); // called early to get a splash screen
 	
 	delay_ms(500);
 
-	SystemCoreClockUpdate();
-	
-	init_serial0(230400);
-    rprintf_devopen(0,putc_serial0); 
-	
 	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
 	
 	rprintf(0,"storage init...\n");
