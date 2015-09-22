@@ -13,18 +13,17 @@
 
 #define DEBOUNCE_THRESHOLD 5
 
-#define ADC_QUANTUM (1<<(16-10)) // 10bit resolution
+#define PRESET_SLOTS 20
+#define PRESET_BANKS 20
 
-#define UI_PRESET_SLOTS 20
-#define UI_PRESET_BANKS 20
+#define POT_COUNT 10
+#define POT_SAMPLES 5
+#define POT_THRESHOLD 128
+#define POT_TIMEOUT (TICKER_1S)
 
-#define UI_POT_COUNT 10
+#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
 
-#define POT_CHANGE_DETECT_THRESHOLD (ADC_QUANTUM*8)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*6)
-#define POT_TIMEOUT TICKER_1S
-#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S*5/4)
-#define SLOW_UPDATE_TIMEOUT (TICKER_1S/10)
+#define SLOW_UPDATE_TIMEOUT (TICKER_1S/50)
 
 enum uiDigitInput_e{
 	diSynth,diLoadDecadeDigit,diStoreDecadeDigit,diLoadUnitDigit,diStoreUnitDigit
@@ -262,15 +261,16 @@ static const uint8_t keypadButtonCode[16]=
 
 static struct
 {
+	uint16_t pots[POT_COUNT][POT_SAMPLES];
 	int16_t curSample;
-	int8_t curPot;
-	uint16_t value[UI_POT_COUNT];
-	uint32_t lockTimeout[UI_POT_COUNT];
+	uint16_t value[POT_COUNT];
+	uint32_t lockTimeout[POT_COUNT];
 	
 	int8_t presetModified;
 	enum uiPage_e activePage;
 	
 	int8_t activeSource;
+	int8_t sourceChanges,prevSourceChanges;
 	uint32_t activeSourceTimeout;
 	
 	uint32_t slowUpdateTimeout;
@@ -290,7 +290,7 @@ static struct
 
 static uint16_t getPotValue(int8_t pot)
 {
-	return ui.value[pot]&~(ADC_QUANTUM-1);
+	return ui.value[pot];
 }
 
 static int sendChar(int lcd, int ch)
@@ -441,7 +441,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				break;
 			case 5:
 			case 6:
-				v=ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS;
+				v=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
 				break;
 			case 7:
 				v=settings.midiReceiveChannel;
@@ -491,7 +491,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 
 		// cancel ongoing changes
 		ui.activeSourceTimeout=0;
-		memset(&ui.lockTimeout[0],0,UI_POT_COUNT*sizeof(uint32_t));
+		memset(&ui.lockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
 
 		ui.pendingScreenClear=1;
 		
@@ -505,10 +505,15 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		return;
 
 	// fullscreen display
-	if (ui.activeSource!=source)
-		ui.pendingScreenClear=1;
-	ui.activeSource=source;
+	++ui.sourceChanges;
 	ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+	if (ui.activeSource!=source)
+	{
+		ui.pendingScreenClear=ui.sourceChanges==1 || ui.sourceChanges!=ui.prevSourceChanges;
+		if(!ui.pendingScreenClear)
+			ui.activeSourceTimeout=0;
+		ui.activeSource=source;
+	}
 	
 	switch(prm->type)
 	{
@@ -579,15 +584,15 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				ui.presetSlot=(getPotValue(potnum)*UI_PRESET_SLOTS)>>16;
+				ui.presetSlot=(getPotValue(potnum)*PRESET_SLOTS)>>16;
 				break;
 			case 6:
-				preset_saveCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS);
+				preset_saveCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS);
 				/* fall through */
 			case 5:
-				if(preset_loadCurrent(ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS))
+				if(preset_loadCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS))
 				{
-					settings.presetNumber=ui.presetSlot+ui.presetBank*UI_PRESET_SLOTS;
+					settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
 					settings_save();                
 				}
 				else
@@ -616,7 +621,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.tunerActiveVoice=source-kb1;
 				break;
 			case 11:
-				ui.presetBank=(getPotValue(potnum)*UI_PRESET_BANKS)>>16;
+				ui.presetBank=(getPotValue(potnum)*PRESET_BANKS)>>16;
 				break;
 			case 12:
 				settings.syncMode=(getPotValue(potnum)*2)>>16;
@@ -671,12 +676,15 @@ static void readKeypad(void)
 	}
 }
 
-static void updatePotsValue(void)
+static void readPots(void)
 {
 	uint32_t new,delta;
 	int i,pot;
+	uint16_t tmp[POT_SAMPLES];
 	
-	for(pot=0;pot<UI_POT_COUNT;++pot)
+	ui.curSample=(ui.curSample+1)%POT_SAMPLES;
+	
+	for(pot=0;pot<POT_COUNT;++pot)
 	{
 		// read pot on TLV1543 ADC
 
@@ -697,7 +705,7 @@ static void updatePotsValue(void)
 
 			if(i<4)
 			{
-				int nextPot=(pot+1)%UI_POT_COUNT;
+				int nextPot=(pot+1)%POT_COUNT;
 
 				if(nextPot&(1<<(3-i)))
 					GPIO_SetValue(0,1<<26); // ADDR 
@@ -707,9 +715,9 @@ static void updatePotsValue(void)
 			
 			// wiggle clock
 
-			delay_us(5);
+			delay_us(2);
 			GPIO_SetValue(0,1<<27); // CLK
-			delay_us(5);
+			delay_us(2);
 			GPIO_ClearValue(0,1<<27); // CLK
 
 			// read value back
@@ -720,15 +728,26 @@ static void updatePotsValue(void)
 		GPIO_SetValue(0,0b00001ul<<24); // CS
 		delay_us(2);
 		
+		ui.pots[pot][ui.curSample]=new;
+		
+		// sort values
+
+		memcpy(&tmp[0],&ui.pots[pot][0],POT_SAMPLES*sizeof(uint16_t));
+		qsort(tmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
+		
+		// median
+	
+		new=tmp[POT_SAMPLES/2];
+		
 //		rprintf(0,"% 8d", new>>6);
 
 		// ignore small changes
 
-		delta=abs(new-ui.value[pot]);
+		delta=abs((int32_t)new-(int32_t)ui.value[pot]);
 
-		if(delta>POT_CHANGE_DETECT_THRESHOLD || currentTick<ui.lockTimeout[pot])
+		if(delta>=POT_THRESHOLD || currentTick<ui.lockTimeout[pot])
 		{
-			if(delta>POT_TIMEOUT_THRESHOLD)
+			if(delta>=POT_THRESHOLD)
 				ui.lockTimeout[pot]=currentTick+POT_TIMEOUT;
 
 			ui.value[pot]=new;
@@ -841,13 +860,13 @@ void ui_update(void)
 	
 	if(ui.presetSlot==-1)
 	{
-		ui.presetSlot=settings.presetNumber%UI_PRESET_SLOTS;
-		ui.presetBank=settings.presetNumber/UI_PRESET_SLOTS;
+		ui.presetSlot=settings.presetNumber%PRESET_SLOTS;
+		ui.presetBank=settings.presetNumber/PRESET_SLOTS;
 	}
 	
 	// update pot values
 
-	updatePotsValue();
+	readPots();
 
 	// slow updates (if needed)
 	
@@ -874,7 +893,8 @@ void ui_update(void)
 
 	// display
 	
-	fsDisp=ui.activeSourceTimeout>currentTick;
+		// don't go fullscreen if more than one source is edited at the same time
+	fsDisp=ui.activeSourceTimeout>currentTick && ui.sourceChanges<2;
 	if(!fsDisp && ui.activeSourceTimeout)
 	{
 		ui.activeSourceTimeout=0;
@@ -970,35 +990,37 @@ void ui_update(void)
 
 		setPos(1,0,1);
 		hd44780_driver.home(&ui.lcd2);
-		for(i=0;i<UI_POT_COUNT;++i)
+		for(i=0;i<POT_COUNT;++i)
 		{
-			int lcd=(i<UI_POT_COUNT/2)?1:2;
+			int lcd=(i<POT_COUNT/2)?1:2;
 			sendString(lcd,getDisplayValue(-i-1,NULL));
-			if(i!=UI_POT_COUNT-1 && i!=UI_POT_COUNT/2-1)
+			if(i!=POT_COUNT-1 && i!=POT_COUNT/2-1)
 				sendChar(lcd,' ');
 		}
 
 		if(ui.pendingScreenClear)
 		{
 			hd44780_driver.home(&ui.lcd1);
-			for(i=0;i<UI_POT_COUNT/2;++i)
+			for(i=0;i<POT_COUNT/2;++i)
 			{
 				sendString(1,getName(-i-1,0));
-				if(i<UI_POT_COUNT/2-1)
+				if(i<POT_COUNT/2-1)
 					sendChar(1,' ');
 			}
 
 			setPos(2,0,1);
-			for(i=UI_POT_COUNT/2;i<UI_POT_COUNT;++i)
+			for(i=POT_COUNT/2;i<POT_COUNT;++i)
 			{
 				sendString(2,getName(-i-1,0));
-				if(i<UI_POT_COUNT-1)
+				if(i<POT_COUNT-1)
 					sendChar(2,' ');
 			}
 		}
 	}
 
 	ui.pendingScreenClear=0;
+	ui.prevSourceChanges=ui.sourceChanges;
+	ui.sourceChanges=0;
 
 	// read keypad
 			
