@@ -23,7 +23,7 @@
 #include "lpc17xx_gpio.h"
 #include "lpc17xx_pinsel.h"
 
-#define BIT_INTPUT_FOOTSWITCH (1<<26)
+#define BIT_INPUT_FOOTSWITCH (1<<26)
 
 #define WAVEDATA_PATH "/WAVEDATA"
 
@@ -558,20 +558,20 @@ static void handleBitInputs(void)
 	
 	// control footswitch 
 	 
-	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INTPUT_FOOTSWITCH) && last&BIT_INTPUT_FOOTSWITCH)
+	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INPUT_FOOTSWITCH) && last&BIT_INPUT_FOOTSWITCH)
 	{
 		assigner_latchPattern();
 		assigner_getPattern( currentPreset.voicePattern,NULL);
 	}
-	else if((cur&BIT_INTPUT_FOOTSWITCH)!=(last&BIT_INTPUT_FOOTSWITCH))
+	else if((cur&BIT_INPUT_FOOTSWITCH)!=(last&BIT_INPUT_FOOTSWITCH))
 	{
 		if(arp_getMode()!=amOff)
 		{
-			arp_setMode(arp_getMode(),(cur&BIT_INTPUT_FOOTSWITCH)?0:1);
+			arp_setMode(arp_getMode(),(cur&BIT_INPUT_FOOTSWITCH)?0:1);
 		}
 		else
 		{
-			assigner_holdEvent((cur&BIT_INTPUT_FOOTSWITCH)?0:1);
+			assigner_holdEvent((cur&BIT_INPUT_FOOTSWITCH)?0:1);
 		}
 	}
 
