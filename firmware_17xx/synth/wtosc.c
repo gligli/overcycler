@@ -33,7 +33,7 @@ void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab)
 	o->ab=ab;
 	
 	wtosc_setSampleData(o,NULL,-1);
-	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0,UINT16_MAX/2);
+	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0,HALF_RANGE);
 }
 
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount)

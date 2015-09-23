@@ -268,7 +268,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	// v2
 
 	if(storage.version<3)
-		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+(UINT16_MAX/2);
+		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
 
 	// v4
 	
@@ -366,18 +366,18 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	memset(&currentPreset,0,sizeof(struct preset_s));
 
 	currentPreset.continuousParameters[cpUnisonDetune]=512;
-	currentPreset.continuousParameters[cpMasterTune]=UINT16_MAX/2;
-	currentPreset.continuousParameters[cpMasterLeft]=UINT16_MAX/2;
-	currentPreset.continuousParameters[cpMasterRight]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpMasterTune]=HALF_RANGE;
+	currentPreset.continuousParameters[cpMasterLeft]=HALF_RANGE;
+	currentPreset.continuousParameters[cpMasterRight]=HALF_RANGE;
 
-	currentPreset.continuousParameters[cpBFreq]=UINT16_MAX/2;
-	currentPreset.continuousParameters[cpBFineFreq]=UINT16_MAX/2;
-	currentPreset.continuousParameters[cpABaseWMod]=UINT16_MAX/2;
-	currentPreset.continuousParameters[cpBBaseWMod]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpBFreq]=HALF_RANGE;
+	currentPreset.continuousParameters[cpBFineFreq]=HALF_RANGE;
+	currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE;
+	currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE;
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
-	currentPreset.continuousParameters[cpFilEnvAmt]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-	currentPreset.continuousParameters[cpLFOFreq]=UINT16_MAX/2;
+	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
 	currentPreset.steppedParameters[spBenderRange]=1;

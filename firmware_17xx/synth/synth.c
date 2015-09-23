@@ -124,14 +124,14 @@ static void computeTunedCVs(void)
 		fineBFreq=(fineBFreqRaw>>8)+INT8_MIN;
 		baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
 
-		if(baseBPitchRaw>=UINT16_MAX/2)
+		if(baseBPitchRaw>=HALF_RANGE)
 		{
 			baseAPitch=0;
-			baseBPitch=(baseBPitchRaw-(UINT16_MAX/2))>>1;
+			baseBPitch=(baseBPitchRaw-HALF_RANGE)>>1;
 		}
 		else
 		{
-			baseAPitch=((UINT16_MAX/2)-baseBPitchRaw)>>1;
+			baseAPitch=(HALF_RANGE-baseBPitchRaw)>>1;
 			baseBPitch=0;
 		}
 
@@ -692,11 +692,11 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 
 	vpa=pitchAVal;
 	if(wmodMask&4)
-		vpa+=vma-(UINT16_MAX/2);
+		vpa+=vma-HALF_RANGE;
 
 	vpb=pitchBVal;
 	if(wmodMask&64)
-		vpb+=vmb-(UINT16_MAX/2);
+		vpb+=vmb-HALF_RANGE;
 
 	// osc A
 
