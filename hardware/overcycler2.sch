@@ -36,8 +36,8 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "21 sep 2015"
-Rev "8"
+Date "23 sep 2015"
+Rev "9"
 Comp "GliGli's DIY"
 Comment1 ""
 Comment2 ""
@@ -858,10 +858,6 @@ Text Label 5000 3300 2    60   ~ 0
 SPI_SSEL
 Text Label 1050 7300 0    60   ~ 0
 SPI_SSEL
-Text Label 1050 7200 0    60   ~ 0
-SPI_SCK
-Text Label 1050 7500 0    60   ~ 0
-SPI_MOSI
 Text Label 6200 2600 0    60   ~ 0
 SPI_CS0
 Text Label 6200 2700 0    60   ~ 0
@@ -911,10 +907,6 @@ F 3 "" H 6850 3800 60  0000 C CNN
 	1    6850 3800
 	1    0    0    -1  
 $EndComp
-Text Label 6350 4800 0    60   ~ 0
-SPI_MOSI
-Text Label 4850 4800 2    60   ~ 0
-SPI_SCK
 Text Label 4850 4700 2    60   ~ 0
 SPI_CS6
 Text Label 4850 4600 2    60   ~ 0
@@ -1019,8 +1011,6 @@ F 3 "" H 6850 5000 60  0000 C CNN
 	1    6850 5000
 	1    0    0    -1  
 $EndComp
-Text Label 4850 6000 2    60   ~ 0
-SPI_SCK
 Text Label 4850 5800 2    60   ~ 0
 DAC_VREF
 Text Label 4850 5400 2    60   ~ 0
@@ -1037,8 +1027,6 @@ Text Label 6350 5600 0    60   ~ 0
 DAC_FC5
 Text Label 4850 5900 2    60   ~ 0
 SPI_CS7
-Text Label 6350 6000 0    60   ~ 0
-SPI_MOSI
 $Comp
 L R R26
 U 1 1 55F0C280
@@ -3117,4 +3105,18 @@ Wire Wire Line
 Wire Wire Line
 	4050 4150 4050 4200
 Connection ~ 3650 4150
+Text GLabel 1050 7500 2    39   Output ~ 0
+SPI_MOSI
+Text GLabel 1450 7200 2    39   Output ~ 0
+SPI_SCK
+Wire Wire Line
+	1050 7200 1450 7200
+Text GLabel 4850 4800 0    39   Input ~ 0
+SPI_SCK
+Text GLabel 4850 6000 0    39   Input ~ 0
+SPI_SCK
+Text GLabel 6350 6000 2    39   Input ~ 0
+SPI_MOSI
+Text GLabel 6350 4800 2    39   Input ~ 0
+SPI_MOSI
 $EndSCHEMATC
