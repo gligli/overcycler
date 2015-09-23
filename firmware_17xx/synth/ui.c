@@ -7,8 +7,9 @@
 #include "integer.h"
 #include "arp.h"
 #include "ffconf.h"
-#include "lpc17xx_gpio.h"
+#include "dacspi.h"
 #include "hd44780.h"
+#include "lpc17xx_gpio.h"
 #include "lpc17xx_pinsel.h"
 
 #define DEBOUNCE_THRESHOLD 5
@@ -16,10 +17,12 @@
 #define PRESET_SLOTS 20
 #define PRESET_BANKS 20
 
+#define ADC_QUANTUM 64 // 10 bit
+
 #define POT_COUNT 10
 #define POT_SAMPLES 5
-#define POT_THRESHOLD 256
-#define POT_TIMEOUT_THRESHOLD 128
+#define POT_THRESHOLD (ADC_QUANTUM*4)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*2)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
@@ -290,7 +293,7 @@ static struct
 
 static uint16_t getPotValue(int8_t pot)
 {
-	return ui.potValue[pot];
+	return ui.potValue[pot]&~(ADC_QUANTUM-1);
 }
 
 static int sendChar(int lcd, int ch)
@@ -648,8 +651,8 @@ static void readKeypad(void)
 
 	for(row=0;row<4;++row)
 	{
-		GPIO_SetValue(0,0b1111<<19);
-		GPIO_ClearValue(0,(8>>row)<<19);
+		dacspi_port0Set(0b1111<<19);
+		dacspi_port0Clear((8>>row)<<19);
 		delay_us(100);
 		col[row]=0;
 		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
@@ -684,23 +687,26 @@ static void readPots(void)
 	
 	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
 	
+	dacspi_port0Clear(1<<24); // CS
+	delay_us(2);
+
 	for(pot=0;pot<POT_COUNT;++pot)
 	{
 		// read pot on TLV1543 ADC
 
 			// wait acquisition
 
-		do
-			delay_us(1);
 		while(!(GPIO_ReadValue(0)&(1<<28))); // EOC
+		delay_us(1);
 
 		new=0;
 
-		GPIO_ClearValue(0,1<<24); // CS
-		delay_us(2);
-
 		for(i=0;i<10;++i)
 		{
+			// read value back
+
+			new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
+
 			// send next address
 
 			if(i<4)
@@ -708,28 +714,24 @@ static void readPots(void)
 				int nextPot=(pot+1)%POT_COUNT;
 
 				if(nextPot&(1<<(3-i)))
-					GPIO_SetValue(0,1<<26); // ADDR 
+					dacspi_port0Set(1<<26); // ADDR 
 				else
-					GPIO_ClearValue(0,1<<26); // ADDR 
+					dacspi_port0Clear(1<<26); // ADDR 
 			}
 			
 			// wiggle clock
 
-			delay_us(2);
-			GPIO_SetValue(0,1<<27); // CLK
-			delay_us(2);
-			GPIO_ClearValue(0,1<<27); // CLK
-
-			// read value back
-
-			new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
+			delay_us(20);
+			dacspi_port0Set(1<<27); // CLK
+			delay_us(20);
+			dacspi_port0Clear(1<<27); // CLK
+			delay_us(1);
 		}
 
-		GPIO_SetValue(0,0b00001ul<<24); // CS
-		delay_us(2);
-		
 		ui.potSamples[pot][ui.curPotSample]=new;
 		
+		rprintf(0,"% 8d", new>>6);
+
 		// sort values
 
 		memcpy(&tmp[0],&ui.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
@@ -739,8 +741,6 @@ static void readPots(void)
 	
 		new=tmp[POT_SAMPLES/2];
 		
-//		rprintf(0,"% 8d", new>>6);
-
 		// ignore small changes
 
 		if(abs(new-ui.potValue[pot])>=POT_THRESHOLD || currentTick<ui.potLockTimeout[pot])
@@ -756,6 +756,9 @@ static void readPots(void)
 			handleUserInput(-pot-1);
 		}
 	}
+
+	dacspi_port0Set(1<<24); // CS
+	delay_us(2);
 }
 
 void ui_setPresetModified(int8_t modified)

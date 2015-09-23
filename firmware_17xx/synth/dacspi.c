@@ -5,11 +5,14 @@
 #include "dacspi.h"
 #include "LPC17xx.h"
 #include "lpc17xx_gpdma.h"
+#include "lpc17xx_gpio.h"
 
 #define SPIMUX_PORT_ABC 0
-#define SPIMUX_PIN_A 0
-#define SPIMUX_PIN_B 1
+#define SPIMUX_PIN_A 15
+#define SPIMUX_PIN_B 16
 #define SPIMUX_PIN_C 5
+
+#define SPIMUX_MASK ((1<<SPIMUX_PIN_A)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_C))
 
 #define DACSPI_CMD_SET_A 0x7000
 #define DACSPI_CMD_SET_B 0xf000
@@ -29,21 +32,8 @@
 #define DACSPI_VCA_CV_LDAC_MASK 0xef
 
 static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][4];
-static EXT_RAM volatile uint8_t marker;
-static EXT_RAM volatile uint8_t dummy;
-static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
-
-static const uint32_t abcCommands[8] =
-{
-	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
-	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
-	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
-	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
-	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
-	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
-	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
-	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
-};
+static EXT_RAM volatile uint16_t marker;
+static EXT_RAM uint16_t markerSource[DACSPI_BUFFER_COUNT][DACSPI_CHANNEL_COUNT];
 
 static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
 {
@@ -55,6 +45,18 @@ static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
 	4,4,4,4,4,5,10 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
 };
 
+static uint32_t abcCommands[8] =
+{
+	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A),
+	(1<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A),
+};
+
 static EXT_RAM struct
 {
 	uint16_t voiceCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT][2];
@@ -64,7 +66,7 @@ static EXT_RAM struct
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
+	int8_t secondHalfPlaying=(marker&0xff)>=DACSPI_BUFFER_COUNT/2;
 	
 	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
 
@@ -86,12 +88,12 @@ void buildLLIs(int buffer, int channel)
 	}
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&abcCommands[channel];
-	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN1;
+	lli[lliPos][0].DstAddr=(uint32_t)&LPC_GPIO0->FIOPIN;
 	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 	lli[lliPos][0].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
-		GPDMA_DMACCxControl_SWidth(0) |
-		GPDMA_DMACCxControl_DWidth(0);
+		GPDMA_DMACCxControl_SWidth(2) |
+		GPDMA_DMACCxControl_DWidth(2);
 
 	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
@@ -101,13 +103,13 @@ void buildLLIs(int buffer, int channel)
 		GPDMA_DMACCxControl_DWidth(1) |
 		GPDMA_DMACCxControl_SI;
 
-	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
+	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer][channel];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
 	lli[lliPos][2].NextLLI=(uint32_t)&lli[lliPos][3];
 	lli[lliPos][2].Control=
 		GPDMA_DMACCxControl_TransferSize(channelWaitStates[channel]) |
-		GPDMA_DMACCxControl_SWidth(0) |
-		GPDMA_DMACCxControl_DWidth(0);
+		GPDMA_DMACCxControl_SWidth(1) |
+		GPDMA_DMACCxControl_DWidth(1);
 
 	lli[lliPos][3].SrcAddr=(uint32_t)&channelCPSR[(channel+1)%DACSPI_CHANNEL_COUNT];
 	lli[lliPos][3].DstAddr=(uint32_t)&LPC_SSP0->CPSR;
@@ -155,6 +157,42 @@ FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
 	}
 }
 
+void dacspi_port0Set(uint32_t value)
+{
+	uint16_t prev;
+	
+	value&=~SPIMUX_MASK;
+	abcCommands[0]|=value;
+	abcCommands[1]|=value;
+	abcCommands[2]|=value;
+	abcCommands[3]|=value;
+	abcCommands[4]|=value;
+	abcCommands[5]|=value;
+	abcCommands[6]|=value;
+	abcCommands[7]|=value;
+
+	prev=marker;
+	while(marker==prev);
+}
+
+void dacspi_port0Clear(uint32_t value)
+{
+	uint16_t prev;
+	
+	value=(~value)|SPIMUX_MASK;
+	abcCommands[0]&=value;
+	abcCommands[1]&=value;
+	abcCommands[2]&=value;
+	abcCommands[3]&=value;
+	abcCommands[4]&=value;
+	abcCommands[5]&=value;
+	abcCommands[6]&=value;
+	abcCommands[7]&=value;
+
+	prev=marker;
+	while(marker==prev);
+}
+
 void dacspi_init(void)
 {
 	int i,j;
@@ -185,16 +223,19 @@ void dacspi_init(void)
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_B,1); // B
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_C,1); // C
-	LPC_GPIO0->FIOMASK0&=~((1<<SPIMUX_PIN_A)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_C));
+	LPC_GPIO0->FIOMASK&=~SPIMUX_MASK;
+	
+	for(i=0;i<8;++i)
+		abcCommands[i]|=LPC_GPIO0->FIOPIN&~SPIMUX_MASK; // ensure proper transition to DMA overtake of port 0
 	
 	// prepare LLIs
 
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
-	{
-		markerSource[j]=j;
 		for(i=0;i<DACSPI_CHANNEL_COUNT;++i)
+		{
+			markerSource[j][i]=j|i<<8;
 			buildLLIs(j,i);
-	}
+		}
 
 	// interrupt triggers
 	

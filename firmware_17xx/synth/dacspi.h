@@ -13,5 +13,9 @@
 void dacspi_init(void);
 void dacspi_setVoiceValue(int32_t buffer, int voice, int ab, uint16_t value); // 16bit value
 void dacspi_setCVValue(uint16_t value, int channel); // 16bit value
+// dacspi needs to be able to write the whole GPIO port 0, so all port 0 accesses
+// must go through dacspi
+void dacspi_port0Set(uint32_t value);
+void dacspi_port0Clear(uint32_t value);
 
 #endif
