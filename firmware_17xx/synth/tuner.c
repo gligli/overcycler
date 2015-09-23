@@ -7,14 +7,6 @@
 #include "synth.h"
 #include "storage.h"
 
-#define TUNER_MIDDLE_C_HERTZ 261.63
-#define TUNER_LOWEST_HERTZ (TUNER_MIDDLE_C_HERTZ/16)
-
-static struct
-{
-	cv_t currentCV;
-} tuner;
-
 static uint16_t extapolateUpperOctavesTunes(int8_t voice, int8_t oct)
 {
 	uint32_t v;
@@ -64,8 +56,6 @@ NOINLINE uint16_t tuner_computeCVFromNote(int8_t voice, uint8_t note, uint8_t ne
 LOWERCODESIZE void tuner_init(void)
 {
 	int8_t i,j;
-	
-	memset(&tuner,0,sizeof(tuner));
 	
 	// theoretical base tuning
 	
