@@ -977,12 +977,12 @@ void synth_updateDACsEvent(int32_t start, int32_t count)
 	wtosc_update(&synth.osc[0][1],start,end);
 	wtosc_update(&synth.osc[1][0],start,end);
 	wtosc_update(&synth.osc[1][1],start,end);
+	wtosc_update(&synth.osc[2][0],start,end);
+	wtosc_update(&synth.osc[2][1],start,end);
 	wtosc_update(&synth.osc[3][0],start,end);
 	wtosc_update(&synth.osc[3][1],start,end);
 	wtosc_update(&synth.osc[4][0],start,end);
 	wtosc_update(&synth.osc[4][1],start,end);
-	wtosc_update(&synth.osc[2][0],start,end);
-	wtosc_update(&synth.osc[2][1],start,end);
 	wtosc_update(&synth.osc[5][0],start,end);
 	wtosc_update(&synth.osc[5][1],start,end);
 }
