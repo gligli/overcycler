@@ -34,7 +34,6 @@
         <in>spi_sd_lpc17xx.c</in>
       </df>
       <df name="synth">
-        <in>PowFast.c</in>
         <in>adsr.c</in>
         <in>arp.c</in>
         <in>assigner.c</in>
@@ -335,13 +334,6 @@
           <incDir>
             <pElem>../drivers</pElem>
             <pElem>../system</pElem>
-            <pElem>..</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="../synth/PowFast.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-          <incDir>
             <pElem>..</pElem>
           </incDir>
         </cTool>
