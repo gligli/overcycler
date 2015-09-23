@@ -18,7 +18,8 @@
 
 #define POT_COUNT 10
 #define POT_SAMPLES 5
-#define POT_THRESHOLD 128
+#define POT_THRESHOLD 256
+#define POT_TIMEOUT_THRESHOLD 128
 #define POT_TIMEOUT (TICKER_1S)
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
@@ -261,36 +262,35 @@ static const uint8_t keypadButtonCode[16]=
 
 static struct
 {
-	uint16_t pots[POT_COUNT][POT_SAMPLES];
-	int16_t curSample;
-	uint16_t value[POT_COUNT];
-	uint32_t lockTimeout[POT_COUNT];
+	uint16_t potSamples[POT_COUNT][POT_SAMPLES];
+	int16_t curPotSample;
+	uint16_t potValue[POT_COUNT];
+	uint32_t potLockTimeout[POT_COUNT];
+	uint32_t potLockValue[POT_COUNT];
 	
-	int8_t presetModified;
+	int8_t keypadState[16];
+
 	enum uiPage_e activePage;
-	
 	int8_t activeSource;
 	int8_t sourceChanges,prevSourceChanges;
 	uint32_t activeSourceTimeout;
-	
 	uint32_t slowUpdateTimeout;
 	int8_t slowUpdateTimeoutNumber;
-	
 	int8_t pendingScreenClear;
 
 	int8_t presetBank;
 	int8_t presetSlot;
+	int8_t presetModified;
 	
 	int8_t tunerActiveVoice;
 	
 	struct hd44780_data lcd1, lcd2;
-	
-	int8_t keypadState[16];
+
 } ui;
 
 static uint16_t getPotValue(int8_t pot)
 {
-	return ui.value[pot];
+	return ui.potValue[pot];
 }
 
 static int sendChar(int lcd, int ch)
@@ -491,7 +491,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 
 		// cancel ongoing changes
 		ui.activeSourceTimeout=0;
-		memset(&ui.lockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
+		memset(&ui.potLockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
 
 		ui.pendingScreenClear=1;
 		
@@ -678,11 +678,11 @@ static void readKeypad(void)
 
 static void readPots(void)
 {
-	uint32_t new,delta;
+	uint32_t new;
 	int i,pot;
 	uint16_t tmp[POT_SAMPLES];
 	
-	ui.curSample=(ui.curSample+1)%POT_SAMPLES;
+	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
 	
 	for(pot=0;pot<POT_COUNT;++pot)
 	{
@@ -728,11 +728,11 @@ static void readPots(void)
 		GPIO_SetValue(0,0b00001ul<<24); // CS
 		delay_us(2);
 		
-		ui.pots[pot][ui.curSample]=new;
+		ui.potSamples[pot][ui.curPotSample]=new;
 		
 		// sort values
 
-		memcpy(&tmp[0],&ui.pots[pot][0],POT_SAMPLES*sizeof(uint16_t));
+		memcpy(&tmp[0],&ui.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
 		qsort(tmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
 		
 		// median
@@ -743,14 +743,15 @@ static void readPots(void)
 
 		// ignore small changes
 
-		delta=abs((int32_t)new-(int32_t)ui.value[pot]);
-
-		if(delta>=POT_THRESHOLD || currentTick<ui.lockTimeout[pot])
+		if(abs(new-ui.potValue[pot])>=POT_THRESHOLD || currentTick<ui.potLockTimeout[pot])
 		{
-			if(delta>=POT_THRESHOLD)
-				ui.lockTimeout[pot]=currentTick+POT_TIMEOUT;
+			if(abs(new-ui.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
+			{
+				ui.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
+				ui.potLockValue[pot]=new;
+			}
 
-			ui.value[pot]=new;
+			ui.potValue[pot]=new;
 
 			handleUserInput(-pot-1);
 		}
@@ -979,12 +980,15 @@ void ui_update(void)
 		
 		// delimiter
 
-#define DELIM(x) sendChar(x,0b01111100); sendChar(x,0b01111100);
+		if(ui.pendingScreenClear)
+		{
+			#define DELIM(x) sendChar(x,'|'); sendChar(x,'|');
 
-		setPos(1,24,0); DELIM(1)
-		setPos(1,24,1); DELIM(1)
-		setPos(2,24,0); DELIM(2)
-		setPos(2,24,1); DELIM(2)
+			setPos(1,24,0); DELIM(1)
+			setPos(1,24,1); DELIM(1)
+			setPos(2,24,0); DELIM(2)
+			setPos(2,24,1); DELIM(2)
+		}
 		
 		// pots
 
