@@ -651,8 +651,8 @@ static void readKeypad(void)
 
 	for(row=0;row<4;++row)
 	{
-		dacspi_port0Set(0b1111<<19);
-		dacspi_port0Clear((8>>row)<<19);
+		GPIO_SetValue(0,0b1111<<19);
+		GPIO_ClearValue(0,(8>>row)<<19);
 		delay_us(100);
 		col[row]=0;
 		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
@@ -664,6 +664,14 @@ static void readKeypad(void)
 	for(key=0;key<16;++key)
 	{
 		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
+		
+		if(key==kb7 && (!!newState)^(!!ui.keypadState[key]))
+			assigner_assignNote(26,newState,newState?FULL_RANGE:0,0);
+		if(key==kb8 && (!!newState)^(!!ui.keypadState[key]))
+			assigner_assignNote(57,newState,newState?FULL_RANGE:0,0);
+		if(key==kb9 && (!!newState)^(!!ui.keypadState[key]))
+			assigner_assignNote(108,newState,newState?FULL_RANGE:0,0);
+			
 		
 		if(newState && ui.keypadState[key])
 		{
@@ -687,7 +695,7 @@ static void readPots(void)
 	
 	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
 	
-	dacspi_port0Clear(1<<24); // CS
+	GPIO_ClearValue(0,1<<24); // CS
 	delay_us(2);
 
 	for(pot=0;pot<POT_COUNT;++pot)
@@ -696,36 +704,40 @@ static void readPots(void)
 
 			// wait acquisition
 
-		while(!(GPIO_ReadValue(0)&(1<<28))); // EOC
-		delay_us(1);
+		while(!(GPIO_ReadValue(0)&(1<<28))) // EOC
+			delay_us(1);
 
 		new=0;
 
-		for(i=0;i<10;++i)
+		BLOCK_INT
 		{
-			// read value back
-
-			new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
-
-			// send next address
-
-			if(i<4)
+			for(i=0;i<16;++i)
 			{
-				int nextPot=(pot+1)%POT_COUNT;
+				// read value back
 
-				if(nextPot&(1<<(3-i)))
-					dacspi_port0Set(1<<26); // ADDR 
-				else
-					dacspi_port0Clear(1<<26); // ADDR 
+				if(i<10)
+					new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
+
+				// send next address
+
+				if(i<4)
+				{
+					int nextPot=(pot+1)%POT_COUNT;
+
+					if(nextPot&(1<<(3-i)))
+						GPIO_SetValue(0,1<<26); // ADDR 
+					else
+						GPIO_ClearValue(0,1<<26); // ADDR 
+				}
+
+				// wiggle clock
+
+				delay_us(2);
+				GPIO_SetValue(0,1<<27); // CLK
+				delay_us(2);
+				GPIO_ClearValue(0,1<<27); // CLK
+				delay_us(1);
 			}
-			
-			// wiggle clock
-
-			delay_us(20);
-			dacspi_port0Set(1<<27); // CLK
-			delay_us(20);
-			dacspi_port0Clear(1<<27); // CLK
-			delay_us(1);
 		}
 
 		ui.potSamples[pot][ui.curPotSample]=new;
@@ -757,7 +769,7 @@ static void readPots(void)
 		}
 	}
 
-	dacspi_port0Set(1<<24); // CS
+	GPIO_SetValue(0,1<<24); // CS
 	delay_us(2);
 }
 
