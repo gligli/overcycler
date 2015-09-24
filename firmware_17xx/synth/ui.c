@@ -21,8 +21,8 @@
 
 #define POT_COUNT 10
 #define POT_SAMPLES 5
-#define POT_THRESHOLD (ADC_QUANTUM*4)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*2)
+#define POT_THRESHOLD (ADC_QUANTUM*8)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*4)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
@@ -695,9 +695,6 @@ static void readPots(void)
 	
 	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
 	
-	GPIO_ClearValue(0,1<<24); // CS
-	delay_us(2);
-
 	for(pot=0;pot<POT_COUNT;++pot)
 	{
 		// read pot on TLV1543 ADC
@@ -711,7 +708,10 @@ static void readPots(void)
 
 		BLOCK_INT
 		{
-			for(i=0;i<16;++i)
+			GPIO_ClearValue(0,1<<24); // CS
+			delay_us(2);
+
+			for(i=0;i<10;++i)
 			{
 				// read value back
 
@@ -723,6 +723,8 @@ static void readPots(void)
 				if(i<4)
 				{
 					int nextPot=(pot+1)%POT_COUNT;
+					if(nextPot>2 && nextPot<7)
+						nextPot+=8;
 
 					if(nextPot&(1<<(3-i)))
 						GPIO_SetValue(0,1<<26); // ADDR 
@@ -732,17 +734,21 @@ static void readPots(void)
 
 				// wiggle clock
 
-				delay_us(2);
+				delay_us(3);
 				GPIO_SetValue(0,1<<27); // CLK
-				delay_us(2);
+				delay_us(3);
 				GPIO_ClearValue(0,1<<27); // CLK
-				delay_us(1);
+				delay_us(2);
 			}
+
+			GPIO_SetValue(0,1<<24); // CS
+			delay_us(2);
 		}
 
 		ui.potSamples[pot][ui.curPotSample]=new;
 		
-		rprintf(0,"% 8d", new>>6);
+		if(ui.activePage==upNone)
+			rprintf(0,"% 8d", new>>6);
 
 		// sort values
 
@@ -768,9 +774,6 @@ static void readPots(void)
 			handleUserInput(-pot-1);
 		}
 	}
-
-	GPIO_SetValue(0,1<<24); // CS
-	delay_us(2);
 }
 
 void ui_setPresetModified(int8_t modified)
@@ -860,6 +863,7 @@ void ui_init(void)
 	ui.activeSource=INT8_MAX;
 	ui.presetSlot=-1;
 	ui.presetBank=-1;
+	ui.pendingScreenClear=1;
 }
 
 void ui_update(void)
@@ -928,10 +932,13 @@ void ui_update(void)
 
 	if(ui.activePage==upNone)
 	{
-		sendString(1,"GliGli's OverCycler2                    ");
-		sendString(1,"A: Oscillators     B: Filter            ");
-		sendString(2,"C: Amplifier       D: LFO/Modulations   ");
-		sendString(2,"*: Miscellaneous   #: Sequencer/Arp     ");
+		if(ui.pendingScreenClear)
+		{
+			sendString(1,"GliGli's OverCycler2                    ");
+			sendString(1,"A: Oscillators     B: Filter            ");
+			sendString(2,"C: Amplifier       D: LFO/Modulations   ");
+			sendString(2,"*: Miscellaneous   #: Sequencer/Arp     ");
+		}
 	}
 	else if(fsDisp) // fullscreen display
 	{
