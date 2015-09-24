@@ -173,7 +173,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		{
 			// prepare interpolation
 
-			alpha=(counter<<12)/curPeriod;
+			alpha=((uint32_t)counter<<12)/curPeriod;
 
 #ifdef WTOSC_CUBIC_INTERP
 			// do cubic interpolation
