@@ -42,7 +42,7 @@ static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
 
 static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
 {
-	4,4,4,4,4,5,10 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
+	4,4,4,4,4,5,4 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
 };
 
 static uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3] =
@@ -89,13 +89,22 @@ void buildLLIs(int buffer, int channel)
 	if(channel==DACSPI_CV_CHANNEL)
 	{
 		if(muxChannel==6)
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[buffer&6];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer>>1)&7];
 		else
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+(buffer&6)];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+((buffer>>1)&7)];
+		lli[lliPos][1].Control=
+			GPDMA_DMACCxControl_TransferSize(1) |
+			GPDMA_DMACCxControl_SWidth(1) |
+			GPDMA_DMACCxControl_DWidth(1);
 	}
 	else
 	{
 		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][muxChannel][0];
+		lli[lliPos][1].Control=
+			GPDMA_DMACCxControl_TransferSize(2) |
+			GPDMA_DMACCxControl_SWidth(1) |
+			GPDMA_DMACCxControl_DWidth(1) |
+			GPDMA_DMACCxControl_SI;
 	}
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&spiMuxCommands[muxIndex][0];
@@ -108,11 +117,6 @@ void buildLLIs(int buffer, int channel)
 
 	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
-	lli[lliPos][1].Control=
-		GPDMA_DMACCxControl_TransferSize(2) |
-		GPDMA_DMACCxControl_SWidth(1) |
-		GPDMA_DMACCxControl_DWidth(1) |
-		GPDMA_DMACCxControl_SI;
 
 	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
