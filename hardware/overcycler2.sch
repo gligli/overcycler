@@ -36,8 +36,8 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "23 sep 2015"
-Rev "9"
+Date "24 sep 2015"
+Rev "10"
 Comp "GliGli's DIY"
 Comment1 ""
 Comment2 ""
@@ -3092,7 +3092,7 @@ L R R130
 U 1 1 56008F98
 P 4050 4450
 F 0 "R130" V 4130 4450 40  0000 C CNN
-F 1 "10k" V 4057 4451 40  0000 C CNN
+F 1 "1k" V 4057 4451 40  0000 C CNN
 F 2 "~" V 3980 4450 30  0000 C CNN
 F 3 "~" H 4050 4450 30  0000 C CNN
 	1    4050 4450

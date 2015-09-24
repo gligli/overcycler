@@ -36,8 +36,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 2 7
 Title "Voice for OverCycler 2"
-Date "23 sep 2015"
-Rev "9"
+Date "24 sep 2015"
+Rev "10"
 Comp "GliGli's DIY"
 Comment1 ""
 Comment2 ""
