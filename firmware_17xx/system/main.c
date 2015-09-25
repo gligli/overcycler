@@ -82,7 +82,8 @@ void storage_write(uint32_t pageIdx, uint8_t *buf)
 	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
 	f_close(&f);
 
-	rprintf(0,"%d bytes\n",bw);
+	if(bw!=STORAGE_PAGE_SIZE)
+		rprintf(0,"storage_write %d bytes\n",bw);
 }
 
 void storage_read(uint32_t pageIdx, uint8_t *buf)
@@ -102,7 +103,8 @@ void storage_read(uint32_t pageIdx, uint8_t *buf)
 	f_read(&f,buf,STORAGE_PAGE_SIZE,&br);
 	f_close(&f);
 
-	rprintf(0,"%d bytes\n",br);
+	if(br!=STORAGE_PAGE_SIZE)
+		rprintf(0,"storage_write %d bytes\n",br);
 }
 
 int main(void)
