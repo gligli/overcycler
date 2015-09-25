@@ -666,11 +666,13 @@ static void readKeypad(void)
 		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
 		
 		if(key==kb7 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(26,newState,newState?FULL_RANGE:0,0);
+			assigner_assignNote(26,newState,newState?FULL_RANGE:0,1);
 		if(key==kb8 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(57,newState,newState?FULL_RANGE:0,0);
+			assigner_assignNote(57,newState,newState?FULL_RANGE:0,1);
 		if(key==kb9 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(108,newState,newState?FULL_RANGE:0,0);
+			assigner_assignNote(108,newState,newState?FULL_RANGE:0,1);
+		if(key==kb0 && newState && !ui.keypadState[key])
+			assigner_allKeysOff();
 			
 		
 		if(newState && ui.keypadState[key])
