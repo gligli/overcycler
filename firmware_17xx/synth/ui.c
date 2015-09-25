@@ -20,9 +20,9 @@
 #define ADC_QUANTUM 64 // 10 bit
 
 #define POT_COUNT 10
-#define POT_SAMPLES 5
-#define POT_THRESHOLD (ADC_QUANTUM*8)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*4)
+#define POT_SAMPLES 15
+#define POT_THRESHOLD (ADC_QUANTUM*16)
+#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*16)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
@@ -653,7 +653,7 @@ static void readKeypad(void)
 	{
 		GPIO_SetValue(0,0b1111<<19);
 		GPIO_ClearValue(0,(8>>row)<<19);
-		delay_us(100);
+		delay_us(20);
 		col[row]=0;
 		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
 		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
@@ -697,23 +697,18 @@ static void readPots(void)
 	
 	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
 	
+	GPIO_ClearValue(0,1<<24); // CS
+	delay_us(8);
+
 	for(pot=0;pot<POT_COUNT;++pot)
 	{
 		// read pot on TLV1543 ADC
-
-			// wait acquisition
-
-		while(!(GPIO_ReadValue(0)&(1<<28))) // EOC
-			delay_us(1);
 
 		new=0;
 
 		BLOCK_INT
 		{
-			GPIO_ClearValue(0,1<<24); // CS
-			delay_us(2);
-
-			for(i=0;i<10;++i)
+			for(i=0;i<16;++i)
 			{
 				// read value back
 
@@ -725,9 +720,6 @@ static void readPots(void)
 				if(i<4)
 				{
 					int nextPot=(pot+1)%POT_COUNT;
-					if(nextPot>2 && nextPot<7)
-						nextPot+=8;
-
 					if(nextPot&(1<<(3-i)))
 						GPIO_SetValue(0,1<<26); // ADDR 
 					else
@@ -736,15 +728,12 @@ static void readPots(void)
 
 				// wiggle clock
 
-				delay_us(3);
+				delay_us(4);
 				GPIO_SetValue(0,1<<27); // CLK
-				delay_us(3);
+				delay_us(4);
 				GPIO_ClearValue(0,1<<27); // CLK
 				delay_us(2);
 			}
-
-			GPIO_SetValue(0,1<<24); // CS
-			delay_us(2);
 		}
 
 		ui.potSamples[pot][ui.curPotSample]=new;
@@ -776,6 +765,8 @@ static void readPots(void)
 			handleUserInput(-pot-1);
 		}
 	}
+
+	GPIO_SetValue(0,1<<24); // CS
 }
 
 void ui_setPresetModified(int8_t modified)
