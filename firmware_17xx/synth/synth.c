@@ -522,6 +522,7 @@ void refreshWaveforms(int8_t ab)
 	FIL f;
 	FRESULT res;
 	char fn[256];
+	int16_t data[WTOSC_MAX_SAMPLES];
 	
 	strcpy(fn,WAVEDATA_PATH "/");
 	if(!appendBankName(ab,fn)) return;
@@ -536,13 +537,13 @@ void refreshWaveforms(int8_t ab)
 		if((res=f_lseek(&f,0x2c)))
 			rprintf(0,"f_lseek res=%d\n",res);
 
-		if((res=f_read(&f,waveData.sampleData[ab],sizeof(waveData.sampleData[ab]),&i)))
+		if((res=f_read(&f,data,sizeof(data),&i)))
 			rprintf(0,"f_lseek res=%d\n",res);
 
 		f_close(&f);
 		
 		for(i=0;i<WTOSC_MAX_SAMPLES;++i)
-			waveData.sampleData[ab][i]=(int32_t)waveData.sampleData[ab][i]-INT16_MIN;
+			waveData.sampleData[ab][i]=(int32_t)data[i]-INT16_MIN;
 
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
 			wtosc_setSampleData(&synth.osc[i][ab],waveData.sampleData[ab],WTOSC_MAX_SAMPLES);
