@@ -42,7 +42,7 @@ static const uint8_t channelCPSR[DACSPI_CHANNEL_COUNT] =
 
 static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
 {
-	4,4,4,4,4,5,4 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
+	4,4,4,4,4,5,5 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
 };
 
 static uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3] =

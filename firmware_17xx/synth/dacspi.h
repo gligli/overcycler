@@ -4,7 +4,7 @@
 #include "synth.h"
 
 #define DACSPI_CHANNEL_COUNT 7
-#define DACSPI_WAIT_STATES_COUNT 29
+#define DACSPI_WAIT_STATES_COUNT 30
 #define DACSPI_TIMER_MATCH 21
 #define DACSPI_TIME_CONSTANT (DACSPI_CHANNEL_COUNT*(2+1+1)+DACSPI_WAIT_STATES_COUNT) // one tick per channel per DMA access
 
