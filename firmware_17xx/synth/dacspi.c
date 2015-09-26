@@ -148,28 +148,7 @@ FORCEINLINE void dacspi_setVoiceValue(int32_t buffer, int voice, int ab, uint16_
 FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
 {
 	value>>=4;
-	
-	switch(channel)
-	{
-	case 0:
-		dacspi.cvCommands[4]=value|(5<<12);
-		break;
-	case 6:
-		dacspi.cvCommands[5]=value|(6<<12);
-		break;
-	case 7:
-		dacspi.cvCommands[3]=value|(4<<12);
-		break;
-	case 8:
-		dacspi.cvCommands[2]=value|(3<<12);
-		break;
-	case 14:
-		dacspi.cvCommands[0]=value|(1<<12);
-		break;
-	case 15:
-		dacspi.cvCommands[1]=value|(2<<12);
-		break;
-	}
+	dacspi.cvCommands[channel]=value|(((channel&7)+1)<<12);
 }
 
 void dacspi_init(void)
