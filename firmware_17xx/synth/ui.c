@@ -851,6 +851,8 @@ void ui_init(void)
 	sendString(1,"GliGli's OverCycler2");
 	setPos(1,0,1);
 	sendString(1,"Build " __DATE__ " " __TIME__);
+	rprintf(1,"Sampling at %d Hz", SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
+	setPos(2,0,1);
 
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
