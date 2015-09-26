@@ -72,7 +72,7 @@ static EXT_RAM struct
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-	int8_t secondHalfPlaying=(marker&0xff)>=DACSPI_BUFFER_COUNT/2;
+	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
 	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
 
