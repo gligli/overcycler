@@ -542,7 +542,7 @@ void assigner_init(void)
 {
 	memset(&assigner,0,sizeof(assigner));
 
-	assigner.voiceMask=0x01;
+	assigner.voiceMask=0x3f;
 	memset(&assigner.patternOffsets[0],ASSIGNER_NO_NOTE,SYNTH_VOICE_COUNT);
 	assigner.patternOffsets[0]=0;
 }
