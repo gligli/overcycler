@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source C:/overcycler/hardware/overcycler2.sch)
-    (date "26/09/2015 09:42:12")
+    (date "27/09/2015 12:37:52")
     (tool "eeschema (2013-07-07 BZR 4022)-stable"))
   (components
     (comp (ref P8)
@@ -325,7 +325,7 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 55F1D175))
     (comp (ref R6)
-      (value 47k)
+      (value 470k)
       (libsource (lib device) (part R))
       (sheetpath (names /) (tstamps /))
       (tstamp 55F1D3A8))
