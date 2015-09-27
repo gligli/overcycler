@@ -187,7 +187,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 			p3=prevSample;
 			
 			total=((p0*alpha3+p1*alpha2+p2*alpha)>>12)+p3;
-			r=MAX(0,MIN(UINT16_MAX,total));
+			r=__USAT(total,16);
 #else
 			// do linear interpolation
 
