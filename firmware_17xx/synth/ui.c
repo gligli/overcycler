@@ -664,17 +664,7 @@ static void readKeypad(void)
 	for(key=0;key<16;++key)
 	{
 		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
-		
-		if(key==kb7 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(26,newState,newState?FULL_RANGE:0,1);
-		if(key==kb8 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(57,newState,newState?FULL_RANGE:0,1);
-		if(key==kb9 && (!!newState)^(!!ui.keypadState[key]))
-			assigner_assignNote(108,newState,newState?FULL_RANGE:0,1);
-		if(key==kb0 && newState && !ui.keypadState[key])
-			assigner_allKeysOff();
-			
-		
+	
 		if(newState && ui.keypadState[key])
 		{
 			ui.keypadState[key]=MIN(INT8_MAX,ui.keypadState[key]+1);
@@ -955,7 +945,7 @@ void ui_update(void)
 		{
 			// bargraph			
 			for(i=0;i<40;++i)
-				if(i<(((int32_t)v+UINT16_MAX/40)*40>>16))
+				if(i<(((int32_t)v+UINT16_MAX/80)*40>>16))
 					sendChar(2,255);
 				else
 					sendChar(2,' ');
