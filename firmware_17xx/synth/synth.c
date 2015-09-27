@@ -609,7 +609,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
-		value=(10*value)/16; // limit VCA output level to 4Vpp
+		value=(9*value)/16; // limit VCA output level to 4Vpp
 		value=computeShape(value<<8,vcaLinearizationCurve,1);		
 		break;
 	case cvNoiseVol:
@@ -893,7 +893,7 @@ void synth_timerInterrupt(void)
 	case 0:
 		// compensate pre filter mixer level for resonance
 
-		resoFactor=(23*UINT16_MAX+77*(uint32_t)currentPreset.continuousParameters[cpResonance])/(100*256);
+		resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,currentPreset.continuousParameters[cpResonance]-6000))/(100*256);
 
 		// CV update
 		
