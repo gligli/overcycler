@@ -2,6 +2,7 @@
 // Usefull code not directly synth-related
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "main.h"
 #include "utils.h"
 
 inline uint16_t satAddU16U16(uint16_t a, uint16_t b)
@@ -19,8 +20,7 @@ inline uint16_t satAddU16S32(uint16_t a, int32_t b)
 
 	r=a;
 	r+=b;
-	r=MAX(r,0);
-	r=MIN(r,UINT16_MAX);
+	r=__USAT(r,16);
 	
 	return (uint16_t)r;
 }
@@ -31,9 +31,7 @@ inline uint16_t satAddU16S16(uint16_t a, int16_t b)
 
 	r=a;
 	r+=b;
-	
-	r=MAX(r,0);
-	r=MIN(r,UINT16_MAX);
+	r=__USAT(r,16);
 	
 	return r;
 }

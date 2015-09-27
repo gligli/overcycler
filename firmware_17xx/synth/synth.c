@@ -626,7 +626,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
 	uint16_t value,channel;
 	
-	v=MIN(v,UINT16_MAX);
+	v=__USAT(v,16);
 	value=adjustCV(cv,v);
 
 	switch(cv)
@@ -681,14 +681,14 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 	if(wmodMask&8)
 	{
 		vma+=envValScale;
-		vma=MAX(0,MIN(UINT16_MAX,vma));
+		vma=__USAT(vma,16);
 	}
 
 	vmb=wmodBVal;
 	if(wmodMask&128)
 	{
 		vmb+=envValScale;
-		vmb=MAX(0,MIN(UINT16_MAX,vmb));
+		vmb=__USAT(vmb,16);
 	}
 
 	vpa=pitchAVal;
@@ -702,13 +702,13 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvA
 	// osc A
 
 	vpa+=synth.oscANoteCV[v];
-	vpa=MAX(0,MIN(UINT16_MAX,vpa));
+	vpa=__USAT(vpa,16);
 	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:0,(wmodMask&2)?vma:32768);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
-	vpb=MAX(0,MIN(UINT16_MAX,vpb));
+	vpb=__USAT(vpb,16);
 	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:0,(wmodMask&32)?vmb:32768);
 
 	// amplifier
@@ -874,12 +874,12 @@ void synth_timerInterrupt(void)
 		
 		// restrict range
 
-		pitchAVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchAVal));
-		pitchBVal=MAX(INT16_MIN,MIN(INT16_MAX,pitchBVal));
-		wmodAVal=MAX(0,MIN(UINT16_MAX,wmodAVal));
-		wmodBVal=MAX(0,MIN(UINT16_MAX,wmodBVal));
-		filterVal=MAX(INT16_MIN,MIN(INT16_MAX,filterVal));
-		ampVal=MAX(0,MIN(UINT16_MAX,ampVal));
+		pitchAVal=__SSAT(pitchAVal,16);
+		pitchBVal=__SSAT(pitchBVal,16);
+		wmodAVal=__USAT(wmodAVal,16);
+		wmodBVal=__USAT(wmodBVal,16);
+		filterVal=__SSAT(filterVal,16);
+		ampVal=__USAT(ampVal,16);
 		
 		// actual voice refresh
 		
