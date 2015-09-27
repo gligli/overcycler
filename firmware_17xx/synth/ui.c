@@ -728,11 +728,13 @@ static void readPots(void)
 
 				// wiggle clock
 
-				delay_us(4);
+				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
+				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 				GPIO_SetValue(0,1<<27); // CLK
-				delay_us(4);
+				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
+				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 				GPIO_ClearValue(0,1<<27); // CLK
-				delay_us(2);
+				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 			}
 		}
 
