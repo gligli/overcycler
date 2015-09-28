@@ -89,11 +89,11 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	o->cv=cv;
 	o->aliasing=aliasing;
 	o->width=width;
-		
+	
 //	rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",o->increment[0],o->increment[1],o->cv,sampleRate[0]/(o->increment[0]<<8),sampleRate[1]/(o->increment[1]<<8));
 }
 
-FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer)
+FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
 	uint16_t *data;
 	uint16_t r;
@@ -104,6 +104,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	int alpha2,alpha3,p0,p1,p2,p3,total;
 #endif
 	int alpha,voice,ab;
+	uint32_t slaveSyncResets;
 	
 	data=o->data;
 	
@@ -130,10 +131,21 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	aliasing=o->aliasing;	
 	voice=o->voice;
 	ab=o->ab;
+
+	slaveSyncResets=0;
+	if(syncMode==osmMaster)
+		*syncResets=0; // init
+	else if(syncMode==osmSlave)
+		slaveSyncResets=*syncResets;
 	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
 		counter-=VIRTUAL_DAC_TICK_RATE;
+		
+		// sync (slave side)
+		phase|=-(slaveSyncResets&1);
+		slaveSyncResets>>=1;
+
 		if(counter<0)
 		{
 			if (phase>=halfCount)
@@ -152,8 +164,13 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 			phase-=curIncrement;
 
 			if(phase<0)
+			{
 				phase+=sampleCount;
 
+				// sync (master side)
+				if(syncMode==osmMaster)
+					*syncResets|=(1<<(buf-startBuffer));
+			}
 
 #ifdef WTOSC_CUBIC_INTERP
 			prevSample3=prevSample2;

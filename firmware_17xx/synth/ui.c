@@ -81,7 +81,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*1*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency mode",.values={"Free","Semi","Oct "}},
 			/*2*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*3*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod type",.values={"Off ","Alia","Wdth","Freq"}},
-			/*4*/ {.type=ptNone},
+			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptNone},
@@ -730,8 +730,8 @@ static void readPots(void)
 
 		ui.potSamples[pot][ui.curPotSample]=new;
 		
-		if(ui.activePage==upNone)
-			rprintf(0,"% 8d", new>>6);
+//		if(ui.activePage==upNone)
+//			rprintf(0,"% 8d", new>>6);
 
 		// sort values
 

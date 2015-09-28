@@ -39,6 +39,8 @@ typedef enum
 			
 	spUnison=17,spAssignerPriority=18,spChromaticPitch=19,
 			
+	spOscSync=20,
+			
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;

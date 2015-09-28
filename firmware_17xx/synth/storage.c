@@ -7,7 +7,7 @@
 #include "wtosc.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 4
+#define STORAGE_VERSION 5
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -39,6 +39,7 @@ const uint8_t steppedParametersBits[spCount] =
 	/*Unison*/1,
 	/*AssignerPriority*/2,
 	/*ChromaticPitch*/2,
+	/*Sync*/1,
 };
 
 struct settings_s settings;
@@ -248,6 +249,9 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	storageLoad(number,1);
 
+	currentPreset.continuousParameters[cpNoiseVol]=0;
+	currentPreset.steppedParameters[spOscSync]=0;
+
 	if (storage.version<1)
 		return 0;
 
@@ -259,22 +263,35 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	storageRead16(); // bw compat fix
 
 	steppedParameter_t sp;
-	for(sp=0;sp<=spCount;++sp)
+	for(sp=0;sp<=spChromaticPitch;++sp)
 		currentPreset.steppedParameters[sp]=storageRead8();
+	storageRead8(); // bw compat fix
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=storageRead8();
 	
-	// v2
+	if (storage.version<2)
+		return 1;
 
+	// v2
+	
 	if(storage.version<3)
 		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
 
+	if(storage.version<4)
+		return 1;
+
 	// v4
 	
-	if(storage.version<5)
-		currentPreset.continuousParameters[cpNoiseVol]=storageRead16();
+	currentPreset.continuousParameters[cpNoiseVol]=storageRead16();
 	
+	if(storage.version<5)
+		return 1;
+	
+	// v5
+	
+	currentPreset.steppedParameters[spOscSync]=storageRead8();
+
 	return 1;
 }
 
@@ -292,8 +309,9 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite16(0); // bw compat fix
 
 	steppedParameter_t sp;
-	for(sp=0;sp<=spCount;++sp)
+	for(sp=0;sp<=spChromaticPitch;++sp)
 		storageWrite8(currentPreset.steppedParameters[sp]);
+	storageWrite8(0); // bw compat fix
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		storageWrite8(currentPreset.voicePattern[i]);
@@ -301,6 +319,10 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	// v4
 	
 	storageWrite16(currentPreset.continuousParameters[cpNoiseVol]);
+	
+	// v5
+	
+	storageWrite8(currentPreset.steppedParameters[spOscSync]);
 	
 	// this must stay last
 	storageFinishStore(number,1);

@@ -972,20 +972,30 @@ void synth_timerInterrupt(void)
 
 void synth_updateDACsEvent(int32_t start, int32_t count)
 {
+	uint32_t syncResets; // /!\ this won't work if count > 32
+	oscSyncMode_t ms,ss;
 	int32_t end=start+count-1;
 	
-	wtosc_update(&synth.osc[0][0],start,end);
-	wtosc_update(&synth.osc[0][1],start,end);
-	wtosc_update(&synth.osc[1][0],start,end);
-	wtosc_update(&synth.osc[1][1],start,end);
-	wtosc_update(&synth.osc[2][0],start,end);
-	wtosc_update(&synth.osc[2][1],start,end);
-	wtosc_update(&synth.osc[3][0],start,end);
-	wtosc_update(&synth.osc[3][1],start,end);
-	wtosc_update(&synth.osc[4][0],start,end);
-	wtosc_update(&synth.osc[4][1],start,end);
-	wtosc_update(&synth.osc[5][0],start,end);
-	wtosc_update(&synth.osc[5][1],start,end);
+	ms=osmNone;
+	ss=osmNone;
+	if(currentPreset.steppedParameters[spOscSync])
+	{
+		ms=osmMaster;
+		ss=osmSlave;
+	}
+	
+	wtosc_update(&synth.osc[0][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[0][1],start,end,ss,&syncResets);
+	wtosc_update(&synth.osc[1][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[1][1],start,end,ss,&syncResets);
+	wtosc_update(&synth.osc[2][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[2][1],start,end,ss,&syncResets);
+	wtosc_update(&synth.osc[3][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[3][1],start,end,ss,&syncResets);
+	wtosc_update(&synth.osc[4][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[4][1],start,end,ss,&syncResets);
+	wtosc_update(&synth.osc[5][0],start,end,ms,&syncResets);
+	wtosc_update(&synth.osc[5][1],start,end,ss,&syncResets);
 }
 
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato)
