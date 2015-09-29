@@ -401,6 +401,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
 	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
+	currentPreset.continuousParameters[cpVibFreq]=8*UINT16_MAX/10+1;
 
 	currentPreset.steppedParameters[spBenderRange]=1;
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
