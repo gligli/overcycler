@@ -177,7 +177,7 @@ CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 CFLAGS += #-Wa,-adhlns=$(subst $(suffix $<),.lst,$<) 
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
-CFLAGS += -fno-unroll-loops -fno-inline-functions # done by hand
+CFLAGS += -fno-unroll-loops # done by hand
 CFLAGS += -flto -fuse-linker-plugin
 CFLAGS += -O$(OPT)
 
