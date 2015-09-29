@@ -65,10 +65,10 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(16+(cv>>12)); // no oversampling for bass, more and more as we go higher
+	maxSampleRate=MAX_SAMPLERATE(36); // 2.25x oversampling (ensures 20KHz response if DAC samplerate > 90KHz)
 	frequency=cvToFrequency(cv)<<10;
 
-	sampleRate[0]=frequency/(1023-width);
+	sampleRate[0]=frequency/(1024-width);
 	sampleRate[1]=frequency/width;
 	
 	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
