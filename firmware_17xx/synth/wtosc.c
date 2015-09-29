@@ -104,7 +104,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	int alpha2,alpha3,p0,p1,p2,p3,total;
 #endif
 	int alpha,voice,ab;
-	uint32_t slaveSyncResets;
+	uint32_t slaveSyncResets,slaveSyncResetsMask;
 	
 	data=o->data;
 	
@@ -143,7 +143,9 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		counter-=VIRTUAL_DAC_TICK_RATE;
 		
 		// sync (slave side)
-		phase|=-(slaveSyncResets&1);
+		slaveSyncResetsMask=-(slaveSyncResets&1);
+		phase|=slaveSyncResetsMask;
+		counter|=slaveSyncResetsMask;
 		slaveSyncResets>>=1;
 
 		if(counter<0)
