@@ -270,14 +270,14 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=storageRead8();
 	
+	if(storage.version<3)
+		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
+
 	if (storage.version<2)
 		return 1;
 
 	// v2
 	
-	if(storage.version<3)
-		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
-
 	if(storage.version<4)
 		return 1;
 
