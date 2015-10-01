@@ -25,6 +25,6 @@ void uartMidi_init(void)
 	
 	UART_IntConfig(LPC_UART2,UART_INTCFG_RBR,ENABLE);
 
-	NVIC_SetPriority(UART2_IRQn,1);
+	NVIC_SetPriority(UART2_IRQn,2);
 	NVIC_EnableIRQ(UART2_IRQn);
 }

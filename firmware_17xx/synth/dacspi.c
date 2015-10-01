@@ -225,7 +225,7 @@ void dacspi_init(void)
 
 	TIM_ConfigMatch(LPC_TIM3,&tm);
 	
-	NVIC_SetPriority(DMA_IRQn,0);
+	NVIC_SetPriority(DMA_IRQn,1);
 	NVIC_EnableIRQ(DMA_IRQn);
 
 	// start

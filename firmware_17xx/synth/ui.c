@@ -696,7 +696,7 @@ static void readPots(void)
 
 		new=0;
 
-		BLOCK_INT
+		BLOCK_INT(1)
 		{
 			for(i=0;i<16;++i)
 			{
@@ -730,8 +730,8 @@ static void readPots(void)
 
 		ui.potSamples[pot][ui.curPotSample]=new;
 		
-//		if(ui.activePage==upNone)
-//			rprintf(0,"% 8d", new>>6);
+		if(ui.activePage==upNone)
+			rprintf(0,"% 8d", new>>6);
 
 		// sort values
 

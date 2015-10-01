@@ -25,7 +25,7 @@
 #include <main.h>
 
 interrupt_setting_t store_and_clear_interrupt(void) {
-   return __disable_irq_stub();
+   return __disable_irq_stub(2); // MIDI UART priority
 }
 
 void restore_interrupt_setting(interrupt_setting_t setting) {

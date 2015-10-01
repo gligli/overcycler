@@ -42,20 +42,19 @@
 void delay_us(uint32_t);
 void delay_ms(uint32_t);
 
-static inline uint32_t __disable_irq_stub(void)
+static inline uint32_t __disable_irq_stub(uint32_t basepri)
 {
-	uint32_t pm=__get_PRIMASK();
-	__set_PRIMASK(1);
+	uint32_t pm=__get_BASEPRI();
+	__set_BASEPRI(basepri << (8 - __NVIC_PRIO_BITS));
 	return pm;
 }
 
-static inline int __restore_irq_stub(uint32_t pm)
+static inline void __restore_irq_stub(uint32_t basepri)
 {
-	__set_PRIMASK(pm);
-	return 2;
+	__set_BASEPRI(basepri);
 }
 
-#define BLOCK_INT for(uint32_t __ctr=1,__int_block=__disable_irq_stub();__ctr;__int_block=__restore_irq_stub(__int_block),__ctr=0)
+#define BLOCK_INT(basepri) for(uint32_t __ctr=1,__int_block=__disable_irq_stub(basepri);__ctr;__restore_irq_stub(__int_block),__ctr=0)
 
 
 #define STORAGE_PAGE_SIZE 256

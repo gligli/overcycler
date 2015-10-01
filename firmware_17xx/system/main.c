@@ -145,7 +145,7 @@ int main(void)
 	
 	rprintf(0,"synth init...\n");
 
-	BLOCK_INT
+	BLOCK_INT(1)
 	{
 		synth_init();
 		synthReady=1;
