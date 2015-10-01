@@ -111,6 +111,8 @@ int main(void)
 {
 	FRESULT res;
 	
+	delay_ms(250);
+
 	SystemCoreClockUpdate();
 	init_serial0(230400);
     rprintf_devopen(0,putc_serial0); 
