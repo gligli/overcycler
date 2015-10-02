@@ -682,7 +682,7 @@ static void readKeypad(void)
 static void readPots(void)
 {
 	uint32_t new;
-	int i,pot;
+	int i,pot,nextPot;
 	uint16_t tmp[POT_SAMPLES];
 	
 	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
@@ -695,7 +695,8 @@ static void readPots(void)
 		// read pot on TLV1543 ADC
 
 		new=0;
-
+		nextPot=(pot+1)%POT_COUNT;
+		
 		BLOCK_INT(1)
 		{
 			for(i=0;i<16;++i)
@@ -703,27 +704,26 @@ static void readPots(void)
 				// read value back
 
 				if(i<10)
-					new|=((GPIO_ReadValue(0)&(1<<25))?1:0)<<(15-i);
+					new|=((LPC_GPIO0->FIOPIN3&(1<<(25-24)))?1:0)<<(15-i);
 
 				// send next address
 
 				if(i<4)
 				{
-					int nextPot=(pot+1)%POT_COUNT;
 					if(nextPot&(1<<(3-i)))
-						GPIO_SetValue(0,1<<26); // ADDR 
+						LPC_GPIO0->FIOSET3=1<<(26-24); // ADDR 
 					else
-						GPIO_ClearValue(0,1<<26); // ADDR 
+						LPC_GPIO0->FIOCLR3=1<<(26-24); // ADDR 
 				}
 
 				// wiggle clock
 
 				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				GPIO_SetValue(0,1<<27); // CLK
+				LPC_GPIO0->FIOSET3=1<<(27-24); // CLK 
 				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				GPIO_ClearValue(0,1<<27); // CLK
+				LPC_GPIO0->FIOCLR3=1<<(27-24); // CLK 
 				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 			}
 		}
