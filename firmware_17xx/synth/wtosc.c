@@ -200,7 +200,13 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 		// interpolate
 		
-		r=interpolate(((uint32_t)o->counter<<12)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3);
+		r=interpolate(((uint32_t)o->counter<<12)/alphaDiv,o->curSample,o->prevSample,
+#ifdef WTOSC_HERMITE_INTERP
+				o->prevSample2,o->prevSample3
+#else
+				0,0
+#endif
+		);
 		
 		// dend value to DACs
 
