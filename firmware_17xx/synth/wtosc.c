@@ -54,6 +54,9 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 {
 	uint32_t sampleRate[2], underSample[2], maxSampleRate, frequency;
 	
+	if(!o->data)
+		return;
+	
 	aliasing>>=7;
 	
 	width=MAX(UINT16_MAX/16,width);
@@ -93,44 +96,83 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 //	rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",o->increment[0],o->increment[1],o->cv,sampleRate[0]/(o->increment[0]<<8),sampleRate[1]/(o->increment[1]<<8));
 }
 
+static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
+{
+	int32_t curPeriod,curIncrement;
+	
+	if (o->phase>=o->halfSampleCount)
+	{
+		curPeriod=o->period[1];
+		curIncrement=o->increment[1];
+	}
+	else
+	{
+		curPeriod=o->period[0];
+		curIncrement=o->increment[0];
+	}
+
+	o->counter+=curPeriod;
+
+	o->phase-=curIncrement;
+
+	if(o->phase<0)
+	{
+		o->phase+=o->sampleCount;
+
+		// sync (master side)
+		if(syncMode==osmMaster)
+			*syncResets|=(1<<bufIdx);
+	}
+
+#ifdef WTOSC_HERMITE_INTERP
+	o->prevSample3=o->prevSample2;
+	o->prevSample2=o->prevSample;
+#endif
+	o->prevSample=o->curSample;
+	o->curSample=o->data[o->phase];
+	
+	return o->aliasing?INT32_MAX:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
+}
+
+static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3)
+{
+	uint16_t r;
+	
+#ifdef WTOSC_HERMITE_INTERP
+	int32_t v,p0,p1,p2,total;
+
+	// do 4-point, 3rd-order Hermite/Catmull-Rom spline (x-form) interpolation
+
+	v=prev2-prev;
+	p0=((prev3-cur-v)>>1)-v;
+	p1=cur+v*2-((prev3+prev)>>1);
+	p2=(prev2-cur)>>1;
+
+	total=((p0*alpha)>>12)+p1;
+	total=((total*alpha)>>12)+p2;
+	total=((total*alpha)>>12)+prev;
+
+	r=__USAT(total,16);
+#else
+	// do linear interpolation
+
+	r=(alpha*prev+(4095-alpha)*cur)>>12;
+#endif
+	
+	return r;
+}
+
 FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
-	uint16_t *data;
 	uint16_t r;
-	int32_t buf,counter,curPeriod,phase,curIncrement,sampleCount,halfCount,period[2],increment[2];
-	uint32_t prevSample,curSample,aliasing;
-#ifdef WTOSC_CUBIC_INTERP
-	uint32_t prevSample2,prevSample3;
-	int alpha2,alpha3,p0,p1,p2,p3,total;
-#endif
-	int alpha,voice,ab;
+	int32_t buf;
+	int32_t alphaDiv;
 	uint32_t slaveSyncResets,slaveSyncResetsMask;
 	
-	data=o->data;
-	
-	if(!data)
+	if(!o->data)
 		return;
 	
-	period[0]=o->period[0];
-	period[1]=o->period[1];
-	increment[0]=o->increment[0];
-	increment[1]=o->increment[1];
-	
-	counter=o->counter;
-	phase=o->phase;
-	sampleCount=o->sampleCount;
-	halfCount=o->halfSampleCount;
-	curPeriod=period[phase>=halfCount?1:0];
-
-#ifdef WTOSC_CUBIC_INTERP
-	prevSample2=o->prevSample2;
-	prevSample3=o->prevSample3;
-#endif
-	prevSample=o->prevSample;
-	curSample=o->curSample;
-	aliasing=o->aliasing;	
-	voice=o->voice;
-	ab=o->ab;
+	alphaDiv=o->period[o->phase>=o->halfSampleCount?1:0];
 
 	slaveSyncResets=0;
 	if(syncMode==osmMaster)
@@ -140,89 +182,28 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
-		counter-=VIRTUAL_DAC_TICK_RATE;
+		// counter management
+		
+		o->counter-=VIRTUAL_DAC_TICK_RATE;
 		
 		// sync (slave side)
+		
 		slaveSyncResetsMask=-(slaveSyncResets&1);
-		phase|=slaveSyncResetsMask;
-		counter|=slaveSyncResetsMask;
+		o->phase|=slaveSyncResetsMask;
+		o->counter|=slaveSyncResetsMask;
 		slaveSyncResets>>=1;
 
-		if(counter<0)
-		{
-			if (phase>=halfCount)
-			{
-				curPeriod=period[1];
-				curIncrement=increment[1];
-			}
-			else
-			{
-				curPeriod=period[0];
-				curIncrement=increment[0];
-			}
-			
-			counter+=curPeriod;
+		// counter underflow management
+		
+		if(o->counter<0)
+			alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncResets);
 
-			phase-=curIncrement;
+		// interpolate
+		
+		r=interpolate(((uint32_t)o->counter<<12)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3);
+		
+		// dend value to DACs
 
-			if(phase<0)
-			{
-				phase+=sampleCount;
-
-				// sync (master side)
-				if(syncMode==osmMaster)
-					*syncResets|=(1<<(buf-startBuffer));
-			}
-
-#ifdef WTOSC_CUBIC_INTERP
-			prevSample3=prevSample2;
-			prevSample2=prevSample;
-#endif
-			prevSample=curSample;
-			curSample=data[phase];
-		}
-
-		if(aliasing)
-		{
-			// we want aliasing, don't interpolate !
-
-			r=curSample;
-		}
-		else
-		{
-			// prepare interpolation
-
-			alpha=((uint32_t)counter<<12)/curPeriod;
-
-#ifdef WTOSC_CUBIC_INTERP
-			// do cubic interpolation
-
-			alpha2=(alpha*alpha)>>12;
-			alpha3=(alpha2*alpha)>>12;
-			
-			p0=prevSample3-prevSample2-curSample+prevSample;
-			p1=curSample-prevSample-p0;
-			p2=prevSample2-curSample;
-			p3=prevSample;
-			
-			total=((p0*alpha3+p1*alpha2+p2*alpha)>>12)+p3;
-			r=__USAT(total,16);
-#else
-			// do linear interpolation
-
-			r=(alpha*prevSample+(4095-alpha)*curSample)>>12;
-#endif
-		}
-
-		dacspi_setVoiceValue(buf,voice,ab,r);
+		dacspi_setVoiceValue(buf,o->voice,o->ab,r);
 	}
-	
-	o->counter=counter;
-	o->phase=phase;
-#ifdef WTOSC_CUBIC_INTERP
-	o->prevSample2=prevSample2;
-	o->prevSample3=prevSample3;
-#endif
-	o->prevSample=prevSample;
-	o->curSample=curSample;
 }

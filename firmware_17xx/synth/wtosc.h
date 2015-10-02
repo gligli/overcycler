@@ -7,9 +7,7 @@
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
 
-#define WTOSC_MAX_SYNC_RESETS 16
-
-#define WTOSC_CUBIC_INTERP
+#define WTOSC_HERMITE_INTERP
 
 struct wtosc_s
 {
@@ -23,10 +21,10 @@ struct wtosc_s
 	int32_t sampleCount;
 	int32_t halfSampleCount;
 
-	uint32_t curSample;
-	uint32_t prevSample;
-#ifdef WTOSC_CUBIC_INTERP
-	uint32_t prevSample2,prevSample3;
+	int32_t curSample;
+	int32_t prevSample;
+#ifdef WTOSC_HERMITE_INTERP
+	int32_t prevSample2,prevSample3;
 #endif
 	
 	uint32_t cv;
