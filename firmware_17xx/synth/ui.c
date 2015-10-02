@@ -730,8 +730,8 @@ static void readPots(void)
 
 		ui.potSamples[pot][ui.curPotSample]=new;
 		
-		if(ui.activePage==upNone)
-			rprintf(0,"% 8d", new>>6);
+//		if(ui.activePage==upNone)
+//			rprintf(0,"% 8d", new>>6);
 
 		// sort values
 
