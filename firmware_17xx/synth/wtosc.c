@@ -100,7 +100,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 {
 	int32_t curPeriod,curIncrement;
 	
-	if (o->phase>=o->halfSampleCount)
+	if(o->phase>=o->halfSampleCount)
 	{
 		curPeriod=o->period[1];
 		curIncrement=o->increment[1];
@@ -131,7 +131,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	o->prevSample=o->curSample;
 	o->curSample=o->data[o->phase];
 	
-	return o->aliasing?INT32_MAX:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
+	return o->aliasing?0:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
 }
 
 static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3)
