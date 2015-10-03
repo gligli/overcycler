@@ -53,7 +53,7 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
 {
 	uint32_t sampleRate[2], maxSampleRate, frequency;
-	int32_t increment[2];
+	int32_t increment[2], period[2];
 	
 	if(!o->data)
 		return;
@@ -62,47 +62,60 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	
 	width=MAX(UINT16_MAX/16,width);
 	width=MIN((15*UINT16_MAX)/16,width);
-	width>>=6;
+	width>>=5;
 
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(36); // 2.25x oversampling (ensures 20KHz response if DAC samplerate > 90KHz)
+	maxSampleRate=MAX_SAMPLERATE(16+((10*cv)>>13)); // 1x-3.5x oversampling (high notes have more oversampling)
 	frequency=cvToFrequency(cv)<<10;
 
-	sampleRate[0]=frequency/(1024-width);
+	sampleRate[0]=frequency/(2048-width);
 	sampleRate[1]=frequency/width;
 	
-	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
-	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
+	sampleRate[0]=sampleRate[0]*o->sampleCount;
+	sampleRate[1]=sampleRate[1]*o->sampleCount;
 
-	increment[0]=1+(sampleRate[0]>>8)/maxSampleRate;
-	increment[1]=1+(sampleRate[1]>>8)/maxSampleRate;
+	increment[0]=1+((sampleRate[0]/maxSampleRate)>>8);
+	increment[1]=1+((sampleRate[1]/maxSampleRate)>>8);
 
-	while(o->halfSampleCount%increment[0]) ++increment[0];
-	while(o->halfSampleCount%increment[1]) ++increment[1];
+	while(o->sampleCount%increment[0]) ++increment[0];
+	while(o->sampleCount%increment[1]) ++increment[1];
 	
 	increment[0]+=aliasing;
 	increment[1]+=aliasing;
+	period[0]=VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8);
+	period[1]=VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8);	
 	
-	o->period[0]=(VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8));	
-	o->period[1]=(VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8));	
-
-	o->increment[0]=increment[0];
-	o->increment[1]=increment[1];
+	while(o->pendingPeriod[0]!=o->period[0] || o->pendingPeriod[1]!=o->period[1] ||
+			o->pendingIncrement[0]!=o->increment[0] || o->pendingIncrement[1]!=o->increment[1])
+	{
+		/* wait */
+	};
+	
+	o->pendingPeriod[0]=period[0];	
+	o->pendingPeriod[1]=period[1];	
+	o->pendingIncrement[0]=increment[0];
+	o->pendingIncrement[1]=increment[1];
 
 	o->cv=cv;
 	o->aliasing=aliasing;
 	o->width=width;
 	
-//	rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",o->increment[0],o->increment[1],o->cv,sampleRate[0]/(o->increment[0]<<8),sampleRate[1]/(o->increment[1]<<8));
+	if(!o->voice && !o->ab)
+		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
 	int32_t curPeriod,curIncrement;
+	
+	o->period[0]=o->pendingPeriod[0];
+	o->period[1]=o->pendingPeriod[1];
+	o->increment[0]=o->pendingIncrement[0];
+	o->increment[1]=o->pendingIncrement[1];
 	
 	if(o->phase>=o->halfSampleCount)
 	{
@@ -186,7 +199,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
-		// counter management
+		// counter update
 		
 		o->counter-=VIRTUAL_DAC_TICK_RATE;
 		

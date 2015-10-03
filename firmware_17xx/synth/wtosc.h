@@ -13,8 +13,8 @@ struct wtosc_s
 {
 	uint16_t * data;	
 
-	int32_t period[2]; // one per waveform half
-	int32_t increment[2];
+	int32_t period[2],pendingPeriod[2]; // one per waveform half
+	int32_t increment[2],pendingIncrement[2];
 	
 	int32_t counter;
 	int32_t phase;
