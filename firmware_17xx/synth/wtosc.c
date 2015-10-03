@@ -52,7 +52,8 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
 {
-	uint32_t sampleRate[2], underSample[2], maxSampleRate, frequency;
+	uint32_t sampleRate[2], maxSampleRate, frequency;
+	int32_t increment[2];
 	
 	if(!o->data)
 		return;
@@ -77,17 +78,20 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
 	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
 
-	underSample[0]=1+(sampleRate[0]>>8)/maxSampleRate;
-	underSample[1]=1+(sampleRate[1]>>8)/maxSampleRate;
+	increment[0]=1+(sampleRate[0]>>8)/maxSampleRate;
+	increment[1]=1+(sampleRate[1]>>8)/maxSampleRate;
 
-	while(o->halfSampleCount%underSample[0]) ++underSample[0];
-	while(o->halfSampleCount%underSample[1]) ++underSample[1];
+	while(o->halfSampleCount%increment[0]) ++increment[0];
+	while(o->halfSampleCount%increment[1]) ++increment[1];
 	
-	o->increment[0]=underSample[0]+aliasing;
-	o->increment[1]=underSample[1]+aliasing;
+	increment[0]+=aliasing;
+	increment[1]+=aliasing;
 	
-	o->period[0]=(VIRTUAL_CLOCK/((sampleRate[0]/o->increment[0])>>8));	
-	o->period[1]=(VIRTUAL_CLOCK/((sampleRate[1]/o->increment[1])>>8));	
+	o->period[0]=(VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8));	
+	o->period[1]=(VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8));	
+
+	o->increment[0]=increment[0];
+	o->increment[1]=increment[1];
 
 	o->cv=cv;
 	o->aliasing=aliasing;
