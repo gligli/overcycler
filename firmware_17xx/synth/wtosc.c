@@ -208,7 +208,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 #endif
 		);
 		
-		// dend value to DACs
+		// send value to DACs
 
 		dacspi_setVoiceValue(buf,o->voice,o->ab,r);
 	}
