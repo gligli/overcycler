@@ -11,6 +11,9 @@
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
+#define MULTISAMPLE_SHIFT 2
+#define FRAC_SHIFT 12
+
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -107,8 +110,6 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
-#define MULTISAMPLE_SHIFT 2
-
 static FORCEINLINE uint32_t multiSample(uint16_t * data, int32_t increment)
 {
 	uint32_t s;
@@ -194,15 +195,15 @@ static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev
 	p1=cur+v*2-((prev3+prev)>>1);
 	p2=(prev2-cur)>>1;
 
-	total=((p0*alpha)>>12)+p1;
-	total=((total*alpha)>>12)+p2;
-	total=((total*alpha)>>12)+prev;
+	total=((p0*alpha)>>FRAC_SHIFT)+p1;
+	total=((total*alpha)>>FRAC_SHIFT)+p2;
+	total=((total*alpha)>>FRAC_SHIFT)+prev;
 
 	r=__USAT(total,16);
 #else
 	// do linear interpolation
 
-	r=(alpha*prev+(4095-alpha)*cur)>>12;
+	r=(alpha*prev+(((1<<FRAC_SHIFT)-1)-alpha)*cur)>>FRAC_SHIFT;
 #endif
 	
 	return r;
@@ -263,7 +264,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 		// interpolate
 		
-		r=interpolate(((uint32_t)o->counter<<12)/alphaDiv,o->curSample,o->prevSample,
+		r=interpolate(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,
 #ifdef WTOSC_HERMITE_INTERP
 				o->prevSample2,o->prevSample3
 #else
