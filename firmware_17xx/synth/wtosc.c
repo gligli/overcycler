@@ -13,8 +13,6 @@
 
 #define MULTISAMPLE_SHIFT 2
 
-int16_t samplePos[WTOSC_MAX_SAMPLES*2];
-
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -50,9 +48,6 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 	o->data=data;
 	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
-	
-	for(int i=0;i<o->sampleCount*2;++i)
-		samplePos[i]=i%o->sampleCount;
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
@@ -114,6 +109,20 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
+static FORCEINLINE uint32_t multiSample(uint16_t * data, int32_t increment)
+{
+	uint32_t s;
+	
+	increment>>=MULTISAMPLE_SHIFT;
+
+	s=*data;
+	data+=increment; s+=*data;
+	data+=increment; s+=*data;
+	data+=increment; s+=*data;
+
+	return s>>MULTISAMPLE_SHIFT;
+}
+
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
 	int32_t curPeriod,curIncrement;
@@ -147,17 +156,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	o->prevSample2=o->prevSample;
 #endif
 	o->prevSample=o->curSample;
-	
-	int32_t i,s;
-	uint16_t *d = o->data;
-	int16_t *sp;
-	i=curIncrement>>MULTISAMPLE_SHIFT;
-	sp=&samplePos[o->phase];
-	s=d[o->phase];
-	sp+=i; s+=d[*sp];
-	sp+=i; s+=d[*sp];
-	sp+=i; s+=d[*sp];
-	o->curSample=s>>MULTISAMPLE_SHIFT;
+	o->curSample=multiSample(&o->data[o->phase],curIncrement);
 	
 	return o->aliasing?0:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
 }
