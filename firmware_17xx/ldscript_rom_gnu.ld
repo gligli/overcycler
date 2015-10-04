@@ -159,10 +159,10 @@ SECTIONS
     __end = .;
   } >ram AT>rom
 
-	.ext_ram (NOLOAD):
-	{
-		*.o (EXT_RAM)
-	} > extram
+  .ext_ram (NOLOAD):
+  {
+    *(.ext_ram)
+  } > extram
 
   .heap (NOLOAD) :
   {
