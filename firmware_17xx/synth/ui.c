@@ -653,7 +653,7 @@ static void readKeypad(void)
 	{
 		GPIO_SetValue(0,0b1111<<19);
 		GPIO_ClearValue(0,(8>>row)<<19);
-		delay_us(20);
+		delay_us(2);
 		col[row]=0;
 		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
 		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
