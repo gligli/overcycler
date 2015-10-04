@@ -16,6 +16,9 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
+#define xstr(s) str(s)
+#define str(s) #s
+
 uint16_t satAddU16U16(uint16_t a, uint16_t b);
 uint16_t satAddU16S32(uint16_t a, int32_t b);
 uint16_t satAddU16S16(uint16_t a, int16_t b);
