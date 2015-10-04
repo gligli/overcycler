@@ -62,27 +62,27 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	
 	width=MAX(UINT16_MAX/16,width);
 	width=MIN((15*UINT16_MAX)/16,width);
-	width>>=5;
+	width>>=6;
 
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(16+(cv>>11)); // 1x-2x oversampling (high notes have more oversampling)
+	maxSampleRate=MAX_SAMPLERATE(16+(MAX(0,cv-13000)>>11)); // 1x-1.6x oversampling (high notes have more oversampling)
 	frequency=cvToFrequency(cv)<<10;
 
-	sampleRate[0]=frequency/(2048-width);
+	sampleRate[0]=frequency/(1024-width);
 	sampleRate[1]=frequency/width;
 	
-	sampleRate[0]=sampleRate[0]*o->sampleCount;
-	sampleRate[1]=sampleRate[1]*o->sampleCount;
+	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
+	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
 
 	increment[0]=1+((sampleRate[0]/maxSampleRate)>>8);
 	increment[1]=1+((sampleRate[1]/maxSampleRate)>>8);
 
-	while(o->sampleCount%increment[0]) ++increment[0];
-	while(o->sampleCount%increment[1]) ++increment[1];
+	while(o->halfSampleCount%increment[0]) ++increment[0];
+	while(o->halfSampleCount%increment[1]) ++increment[1];
 	
 	increment[0]+=aliasing;
 	increment[1]+=aliasing;
@@ -105,7 +105,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	o->aliasing=aliasing;
 	o->width=width;
 	
-//	if(!o->voice && !o->ab)
+//	if(!o->channel)
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
