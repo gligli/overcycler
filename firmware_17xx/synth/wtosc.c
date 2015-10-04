@@ -166,7 +166,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 		if(syncMode==osmMaster)
 			*syncResets|=(1<<bufIdx);
 	}
-
+	
 	o->prevSample3=o->prevSample2;
 	o->prevSample2=o->prevSample;
 	o->prevSample=o->curSample;
@@ -208,7 +208,6 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	uint16_t r;
 	int32_t buf;
 	int32_t alphaDiv,curHalf;
-	uint32_t slaveSyncResets,slaveSyncResetsMask;
 	
 	if(!o->data)
 		return;
@@ -229,11 +228,8 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 	alphaDiv=o->period[curHalf];
 
-	slaveSyncResets=0;
 	if(syncMode==osmMaster)
 		*syncResets=0; // init
-	else if(syncMode==osmSlave)
-		slaveSyncResets=*syncResets;
 	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -245,10 +241,12 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		
 		if(syncMode==osmSlave)
 		{
-			slaveSyncResetsMask=-(slaveSyncResets&1);
-			o->phase|=slaveSyncResetsMask;
-			o->counter|=slaveSyncResetsMask;
-			slaveSyncResets>>=1;
+			if(*syncResets&1)
+			{
+				o->phase=-1;
+				o->counter=-1;
+			}
+			*syncResets>>=1;
 		}
 
 		// counter underflow management
