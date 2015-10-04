@@ -11,6 +11,8 @@
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
+#define USE_HERMITE_INTERP
+
 #define MULTISAMPLE_SHIFT 2
 #define FRAC_SHIFT 12
 
@@ -26,7 +28,7 @@ static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency 
 	return v;
 }
 
-void wtosc_init(struct wtosc_s * o, int8_t channel)
+void wtosc_init(struct wtosc_s * o, int32_t channel)
 {
 	memset(o,0,sizeof(struct wtosc_s));
 
@@ -88,11 +90,6 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	increment[1]+=aliasing;
 	period[0]=VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8);
 	period[1]=VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8);	
-	
-	while(o->pendingUpdate)
-	{
-		/* wait */
-	}
 	
 	o->pendingPeriod[0]=period[0];	
 	o->pendingPeriod[1]=period[1];	
@@ -170,10 +167,8 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 			*syncResets|=(1<<bufIdx);
 	}
 
-#ifdef WTOSC_HERMITE_INTERP
 	o->prevSample3=o->prevSample2;
 	o->prevSample2=o->prevSample;
-#endif
 	o->prevSample=o->curSample;
 	o->curSample=multiSample(&o->data[o->phase],curIncrement);
 	
@@ -184,7 +179,7 @@ static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev
 {
 	uint16_t r;
 	
-#ifdef WTOSC_HERMITE_INTERP
+#ifdef USE_HERMITE_INTERP
 	int32_t v,p0,p1,p2,total;
 
 	// do 4-point, 3rd-order Hermite/Catmull-Rom spline (x-form) interpolation
@@ -263,13 +258,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 		// interpolate
 		
-		r=interpolate(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,
-#ifdef WTOSC_HERMITE_INTERP
-				o->prevSample2,o->prevSample3
-#else
-				0,0
-#endif
-		);
+		r=interpolate(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3);
 		
 		// send value to DACs
 

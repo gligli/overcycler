@@ -7,8 +7,6 @@
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
 
-#define WTOSC_HERMITE_INTERP
-
 struct wtosc_s
 {
 	uint16_t * data;	
@@ -21,18 +19,14 @@ struct wtosc_s
 	int32_t sampleCount;
 	int32_t halfSampleCount;
 
-	int32_t curSample;
-	int32_t prevSample;
-#ifdef WTOSC_HERMITE_INTERP
-	int32_t prevSample2,prevSample3;
-#endif
+	int32_t curSample,prevSample,prevSample2,prevSample3;
 	
 	uint32_t cv;
-	uint32_t aliasing;
 	uint32_t width;
+	uint32_t aliasing;
 	
-	int channel;
-	volatile int pendingUpdate;
+	int32_t channel;
+	int32_t pendingUpdate;
 };
 
 typedef enum
@@ -40,7 +34,7 @@ typedef enum
 	osmNone, osmMaster, osmSlave
 } oscSyncMode_t;
 
-void wtosc_init(struct wtosc_s * o, int8_t channel);
+void wtosc_init(struct wtosc_s * o, int32_t channel);
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount); // data must contain values in the range 0-65535, be persistent and be filled with twice the waveform
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width);
 void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets);
