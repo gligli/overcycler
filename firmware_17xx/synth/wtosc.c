@@ -11,7 +11,9 @@
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
+#define MULTISAMPLE_SHIFT 2
 
+int16_t samplePos[WTOSC_MAX_SAMPLES*2];
 
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
@@ -48,6 +50,9 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 	o->data=data;
 	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
+	
+	for(int i=0;i<o->sampleCount*2;++i)
+		samplePos[i]=i%o->sampleCount;
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
@@ -69,7 +74,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(16+((10*cv)>>13)); // 1x-3.5x oversampling (high notes have more oversampling)
+	maxSampleRate=MAX_SAMPLERATE(16+(cv>>11)); // 1x-2x oversampling (high notes have more oversampling)
 	frequency=cvToFrequency(cv)<<10;
 
 	sampleRate[0]=frequency/(2048-width);
@@ -89,33 +94,29 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	period[0]=VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8);
 	period[1]=VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8);	
 	
-	while(o->pendingPeriod[0]!=o->period[0] || o->pendingPeriod[1]!=o->period[1] ||
-			o->pendingIncrement[0]!=o->increment[0] || o->pendingIncrement[1]!=o->increment[1])
+	while(o->pendingUpdate)
 	{
 		/* wait */
-	};
+	}
 	
 	o->pendingPeriod[0]=period[0];	
 	o->pendingPeriod[1]=period[1];	
 	o->pendingIncrement[0]=increment[0];
 	o->pendingIncrement[1]=increment[1];
 
+	o->pendingUpdate=1;
+	
 	o->cv=cv;
 	o->aliasing=aliasing;
 	o->width=width;
 	
-	if(!o->voice && !o->ab)
-		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
+//	if(!o->voice && !o->ab)
+//		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
 	int32_t curPeriod,curIncrement;
-	
-	o->period[0]=o->pendingPeriod[0];
-	o->period[1]=o->pendingPeriod[1];
-	o->increment[0]=o->pendingIncrement[0];
-	o->increment[1]=o->pendingIncrement[1];
 	
 	if(o->phase>=o->halfSampleCount)
 	{
@@ -146,7 +147,17 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	o->prevSample2=o->prevSample;
 #endif
 	o->prevSample=o->curSample;
-	o->curSample=o->data[o->phase];
+	
+	int32_t i,s;
+	uint16_t *d = o->data;
+	int16_t *sp;
+	i=curIncrement>>MULTISAMPLE_SHIFT;
+	sp=&samplePos[o->phase];
+	s=d[o->phase];
+	sp+=i; s+=d[*sp];
+	sp+=i; s+=d[*sp];
+	sp+=i; s+=d[*sp];
+	o->curSample=s>>MULTISAMPLE_SHIFT;
 	
 	return o->aliasing?0:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
 }
@@ -183,13 +194,27 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 {
 	uint16_t r;
 	int32_t buf;
-	int32_t alphaDiv;
+	int32_t alphaDiv,curHalf;
 	uint32_t slaveSyncResets,slaveSyncResetsMask;
 	
 	if(!o->data)
 		return;
 	
-	alphaDiv=o->period[o->phase>=o->halfSampleCount?1:0];
+	curHalf=o->phase>=o->halfSampleCount?1:0;
+
+	if(o->pendingUpdate)
+	{
+		// ajdust phase to avoid audio glitches on increment changes
+		o->phase-=o->pendingIncrement[curHalf]-o->increment[curHalf];
+		
+		o->period[0]=o->pendingPeriod[0];
+		o->period[1]=o->pendingPeriod[1];
+		o->increment[0]=o->pendingIncrement[0];
+		o->increment[1]=o->pendingIncrement[1];
+		o->pendingUpdate=0;
+	}
+
+	alphaDiv=o->period[curHalf];
 
 	slaveSyncResets=0;
 	if(syncMode==osmMaster)

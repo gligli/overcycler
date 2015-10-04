@@ -33,6 +33,7 @@ struct wtosc_s
 	
 	int voice;
 	int ab;
+	volatile int pendingUpdate;
 };
 
 typedef enum
