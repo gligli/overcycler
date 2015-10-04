@@ -26,12 +26,11 @@ static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency 
 	return v;
 }
 
-void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab)
+void wtosc_init(struct wtosc_s * o, int8_t channel)
 {
 	memset(o,0,sizeof(struct wtosc_s));
 
-	o->voice=voice;
-	o->ab=ab;
+	o->channel=channel;
 	
 	wtosc_setSampleData(o,NULL,-1);
 	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0,HALF_RANGE);
@@ -274,6 +273,6 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		
 		// send value to DACs
 
-		dacspi_setVoiceValue(buf,o->voice,o->ab,r);
+		dacspi_setOscValue(buf,o->channel,r);
 	}
 }

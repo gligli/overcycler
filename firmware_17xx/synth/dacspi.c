@@ -63,9 +63,20 @@ static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 	{(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 7},
 };
 
+
+static const uint32_t oscChannelCommand[SYNTH_VOICE_COUNT*2] = 
+{
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
+};
+
 static EXT_RAM struct
 {
-	uint16_t voiceCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT][2];
+	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
 	uint16_t cvCommands[DACSPI_CV_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
 	uint8_t channelCPSR[DACSPI_CHANNEL_COUNT];
@@ -101,7 +112,7 @@ void buildLLIs(int buffer, int channel)
 	}
 	else
 	{
-		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.voiceCommands[buffer][muxChannel][0];
+		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][muxChannel*2];
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(2) |
 			GPDMA_DMACCxControl_SWidth(1) |
@@ -137,20 +148,14 @@ void buildLLIs(int buffer, int channel)
 		GPDMA_DMACCxControl_DWidth(0);
 }
 
-FORCEINLINE void dacspi_setVoiceValue(int32_t buffer, int voice, int ab, uint16_t value)
+FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 {
-	value>>=4;
-	
-	if(ab)
-		dacspi.voiceCommands[buffer][voice][ab]=value|DACSPI_CMD_SET_B;
-	else
-		dacspi.voiceCommands[buffer][voice][ab]=value|DACSPI_CMD_SET_A;
+	dacspi.oscCommands[buffer][channel]=(value>>4)|oscChannelCommand[channel];
 }
 
-FORCEINLINE void dacspi_setCVValue(uint16_t value, int channel)
+FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value)
 {
-	value>>=4;
-	dacspi.cvCommands[channel]=value|(((channel&7)+1)<<12);
+	dacspi.cvCommands[channel]=(value>>4)|(((channel&7)+1)<<12);
 }
 
 void dacspi_init(void)

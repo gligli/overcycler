@@ -657,7 +657,7 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 		return;
 	}
 	
-	dacspi_setCVValue(value,channel);
+	dacspi_setCVValue(channel,value);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
@@ -741,8 +741,8 @@ void synth_init(void)
 	// init wavetable oscs
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		wtosc_init(&synth.osc[i][0],i,0);
-		wtosc_init(&synth.osc[i][1],i,1);
+		wtosc_init(&synth.osc[i][0],i*2);
+		wtosc_init(&synth.osc[i][1],i*2+1);
 	}
 
 	// give it some memory

@@ -31,8 +31,7 @@ struct wtosc_s
 	uint32_t aliasing;
 	uint32_t width;
 	
-	int voice;
-	int ab;
+	int channel;
 	volatile int pendingUpdate;
 };
 
@@ -41,7 +40,7 @@ typedef enum
 	osmNone, osmMaster, osmSlave
 } oscSyncMode_t;
 
-void wtosc_init(struct wtosc_s * o, int8_t voice, int8_t ab);
+void wtosc_init(struct wtosc_s * o, int8_t channel);
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount); // data must contain values in the range 0-65535, be persistent and be filled with twice the waveform
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width);
 void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets);
