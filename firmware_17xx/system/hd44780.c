@@ -6,6 +6,8 @@
 #include <system/main.h>
 #include <drivers/lpc17xx_gpio.h>
 
+#define HALF_CYCLE_DELAY() DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
+
 /* there are actually read commands/data too, but we won't use that.. for now... maybe BF is important */
 
 static void lcd_put(struct hd44780_data *lcd, int rs, int data)
@@ -15,9 +17,9 @@ static void lcd_put(struct hd44780_data *lcd, int rs, int data)
 	else
 		GPIO_ClearValue(lcd->port, 1<<lcd->pins.rs);
 	GPIO_ClearValue(lcd->port, 1<<lcd->pins.rw);
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 	if(data&1)
 		GPIO_SetValue(lcd->port, 1<<lcd->pins.d4);
 	else
@@ -50,9 +52,9 @@ int lcd_read(struct hd44780_data *lcd, int rs)
 	else
 		GPIO_ClearValue(lcd->port, 1<<lcd->pins.rs);
 	GPIO_SetValue(lcd->port, 1<<lcd->pins.rw);
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 
 	int gv;
 	gv = GPIO_ReadValue(lcd->port);
@@ -63,9 +65,9 @@ int lcd_read(struct hd44780_data *lcd, int rs)
 	tmp |= ((gv&(1<<lcd->pins.d7))>>lcd->pins.d7) << 7;
 	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
 
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	delay_us(lcd->Te);
+	HALF_CYCLE_DELAY();
 
 	gv = GPIO_ReadValue(lcd->port);
 	tmp |= ((gv&(1<<lcd->pins.d4))>>lcd->pins.d4) << 0;

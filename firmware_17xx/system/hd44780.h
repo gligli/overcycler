@@ -7,7 +7,6 @@ struct hd44780_data {
 		int rs, rw, e;
 		int d4, d5, d6, d7;
 	} pins;
-	int Te; /* TcycE/2 in us, must be >= 1 */
 	int caps;
 };
 

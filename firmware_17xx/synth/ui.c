@@ -817,7 +817,6 @@ void ui_init(void)
 	ui.lcd1.pins.rs = 4;
 	ui.lcd1.pins.rw = 5;
 	ui.lcd1.pins.e = 6;
-	ui.lcd1.Te = 1;
 	ui.lcd1.caps = HD44780_CAPS_2LINES;
 
 	ui.lcd2.port = 2;
@@ -828,7 +827,6 @@ void ui_init(void)
 	ui.lcd2.pins.rs = 4;
 	ui.lcd2.pins.rw = 5;
 	ui.lcd2.pins.e = 7;
-	ui.lcd2.Te = 1;
 	ui.lcd2.caps = HD44780_CAPS_2LINES;
 	
 	hd44780_driver.init(&ui.lcd1);
