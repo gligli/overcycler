@@ -11,8 +11,6 @@
 
 #define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
 
-#define MULTISAMPLE_SHIFT 2
-
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -109,10 +107,12 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
+#define MULTISAMPLE_SHIFT 2
+
 static FORCEINLINE uint32_t multiSample(uint16_t * data, int32_t increment)
 {
 	uint32_t s;
-	
+#ifndef __arm__	
 	increment>>=MULTISAMPLE_SHIFT;
 
 	s=*data;
@@ -120,7 +120,26 @@ static FORCEINLINE uint32_t multiSample(uint16_t * data, int32_t increment)
 	data+=increment; s+=*data;
 	data+=increment; s+=*data;
 
-	return s>>MULTISAMPLE_SHIFT;
+	s>>=MULTISAMPLE_SHIFT;
+#else
+	asm volatile
+	(
+		"mov %[increment],%[increment],lsr#" xstr(MULTISAMPLE_SHIFT) "\n"
+		"ldrh %[s],[%[data]] \n"
+		"ldrh r3,[%[data],%[increment],lsl#1] \n"
+		"add %[s],%[s],r3 \n"
+		"ldrh r3,[%[data],%[increment],lsl#2] \n"
+		"add %[increment],%[increment],%[increment],lsl#1 \n"
+		"add %[s],%[s],r3 \n"
+		"ldrh r3,[%[data],%[increment],lsl#1] \n"
+		"add %[s],%[s],r3 \n"
+		"mov %[s],%[s],lsr#" xstr(MULTISAMPLE_SHIFT) "\n"
+		: [increment] "+r" (increment), [s] "=&r" (s) /* output */
+		: [data] "r" (data) /* input */
+		: "r3"  /* clobber */
+	);
+#endif
+	return s;	
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
@@ -229,10 +248,13 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		
 		// sync (slave side)
 		
-		slaveSyncResetsMask=-(slaveSyncResets&1);
-		o->phase|=slaveSyncResetsMask;
-		o->counter|=slaveSyncResetsMask;
-		slaveSyncResets>>=1;
+		if(syncMode==osmSlave)
+		{
+			slaveSyncResetsMask=-(slaveSyncResets&1);
+			o->phase|=slaveSyncResetsMask;
+			o->counter|=slaveSyncResetsMask;
+			slaveSyncResets>>=1;
+		}
 
 		// counter underflow management
 		
