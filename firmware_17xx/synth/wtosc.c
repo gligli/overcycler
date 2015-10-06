@@ -13,7 +13,6 @@
 
 #define USE_HERMITE_INTERP
 
-#define MULTISAMPLE_SHIFT 2
 #define FRAC_SHIFT 12
 
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
@@ -106,39 +105,6 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,VIRTUAL_CLOCK/period[0],VIRTUAL_CLOCK/period[1]);
 }
 
-static FORCEINLINE uint32_t multiSample(uint16_t * data, int32_t increment)
-{
-	uint32_t s;
-#ifndef __arm__	
-	increment>>=MULTISAMPLE_SHIFT;
-
-	s=*data;
-	data+=increment; s+=*data;
-	data+=increment; s+=*data;
-	data+=increment; s+=*data;
-
-	s>>=MULTISAMPLE_SHIFT;
-#else
-	asm volatile
-	(
-		"mov %[increment],%[increment],lsr#" xstr(MULTISAMPLE_SHIFT) "\n"
-		"ldrh %[s],[%[data]] \n"
-		"ldrh r3,[%[data],%[increment],lsl#1] \n"
-		"add %[s],%[s],r3 \n"
-		"ldrh r3,[%[data],%[increment],lsl#2] \n"
-		"add %[increment],%[increment],%[increment],lsl#1 \n"
-		"add %[s],%[s],r3 \n"
-		"ldrh r3,[%[data],%[increment],lsl#1] \n"
-		"add %[s],%[s],r3 \n"
-		"mov %[s],%[s],lsr#" xstr(MULTISAMPLE_SHIFT) "\n"
-		: [increment] "+r" (increment), [s] "=&r" (s) /* output */
-		: [data] "r" (data) /* input */
-		: "r3"  /* clobber */
-	);
-#endif
-	return s;	
-}
-
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
 	int32_t curPeriod,curIncrement;
@@ -170,7 +136,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	o->prevSample3=o->prevSample2;
 	o->prevSample2=o->prevSample;
 	o->prevSample=o->curSample;
-	o->curSample=multiSample(&o->data[o->phase],curIncrement);
+	o->curSample=o->data[o->phase];
 	
 	return o->aliasing?0:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
 }
