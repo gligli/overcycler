@@ -524,6 +524,7 @@ void refreshWaveforms(int8_t ab)
 	FRESULT res;
 	char fn[256];
 	int16_t data[WTOSC_MAX_SAMPLES];
+	int32_t d;
 	
 	strcpy(fn,WAVEDATA_PATH "/");
 	if(!appendBankName(ab,fn)) return;
@@ -545,8 +546,11 @@ void refreshWaveforms(int8_t ab)
 		
 		for(i=0;i<WTOSC_MAX_SAMPLES;++i)
 		{
-			waveData.sampleData[ab][i]=(int32_t)data[i]-INT16_MIN;
-			waveData.sampleData[ab][i+WTOSC_MAX_SAMPLES]=waveData.sampleData[ab][i];
+			d=data[i];
+			d=(d*(INT16_MAX-WTOSC_SAMPLES_GUARD_BAND))>>15;
+			d-=INT16_MIN;
+			waveData.sampleData[ab][i]=d;
+			waveData.sampleData[ab][i+WTOSC_MAX_SAMPLES]=d;
 		}
 
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)

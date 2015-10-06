@@ -6,6 +6,7 @@
 #define WTOSC_MAX_SAMPLES 600 // samples
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
+#define WTOSC_SAMPLES_GUARD_BAND 4600 // about -3 decibels
 
 struct wtosc_s
 {
@@ -35,7 +36,10 @@ typedef enum
 } oscSyncMode_t;
 
 void wtosc_init(struct wtosc_s * o, int32_t channel);
-void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount); // data must contain values in the range 0-65535, be persistent and be filled with twice the waveform
+// data must be persistent and be filled with values in the range
+// WTOSC_SAMPLES_GUARD_BAND..65535-WTOSC_SAMPLES_GUARD_BAND
+// this is because hermite interpolation will overshoot on sharp transitions
+void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount);
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width);
 void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets);
 
