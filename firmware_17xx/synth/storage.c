@@ -5,9 +5,10 @@
 #include "storage.h"
 #include "lfo.h"
 #include "wtosc.h"
+#include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 5
+#define STORAGE_VERSION 6
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -204,12 +205,12 @@ LOWERCODESIZE int8_t settings_load(void)
 
 	settings.syncMode=storageRead8();
 
-	if (storage.version<3)
+	if (storage.version<6)
 		return 1;
 		
-	// v3
+	// v6
 	
-	// ...
+	settings.sequencerBank=storageRead16();
 	
 	return 1;
 }
@@ -235,9 +236,9 @@ LOWERCODESIZE void settings_save(void)
 
 	storageWrite8(settings.syncMode);
 	
-	// v3
+	// v6
 		
-	// ...
+	storageWrite16(settings.sequencerBank);
 
 	// this must stay last
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
@@ -330,7 +331,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 
 LOWERCODESIZE int8_t storage_loadSequencer(int8_t track, uint8_t * data, uint8_t size)
 {
-	if (!storageLoad(SEQUENCER_START_PAGE+track,1))
+	if (!storageLoad(SEQUENCER_START_PAGE+track+settings.sequencerBank*SEQ_TRACK_COUNT,1))
 		return 0;
 
 	while(size--)
@@ -347,7 +348,7 @@ LOWERCODESIZE void storage_saveSequencer(int8_t track, uint8_t * data, uint8_t s
 		storageWrite8(*data++);
 
 	// this must stay last
-	storageFinishStore(SEQUENCER_START_PAGE+track,1);
+	storageFinishStore(SEQUENCER_START_PAGE+track+settings.sequencerBank*SEQ_TRACK_COUNT,1);
 }
 
 LOWERCODESIZE void storage_export(uint16_t number, uint8_t * buf, int16_t * size)

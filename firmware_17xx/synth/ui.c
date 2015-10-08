@@ -6,6 +6,7 @@
 #include "storage.h"
 #include "integer.h"
 #include "arp.h"
+#include "seq.h"
 #include "ffconf.h"
 #include "dacspi.h"
 #include "hd44780.h"
@@ -47,7 +48,7 @@ enum uiKeypadButton_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upFil=1,upAmp=2,upMod=3,upSeqArp=4,upMisc=5,upTuner=6
+	upNone=-1,upOscs=0,upFil=1,upAmp=2,upMod=3,upArp=4,upSeq=5,upMisc=6,upTuner=7
 };
 
 struct uiParam_s
@@ -59,7 +60,7 @@ struct uiParam_s
 	const char * values[8]; // 4 chars + zero termination
 };
 
-const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/key num]
 {
 	/* Oscillators page (A) */
 	{
@@ -84,7 +85,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -113,7 +114,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -142,7 +143,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -171,26 +172,65 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptStep,.number=spLFOTargets,.shortName="LTgt",.longName="LFO Osc Target",.values={"Off ","OscA","OscB","Both"}},
 			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO ","Vib "}},
 			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"Off ","Pit ","Fil ","Amp "}},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
 		},
 	},
-	/* Sequencer/arpeggiator page (#) */
+	/* Arpeggiator page (#) */
 	{
 		{
 			/* 1st row of pots */
 			{.type=ptCont,.number=cpSeqArpClock,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			/* 2nd row of pots */
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)"},
 		},
 		{
-			/*1*/ {.type=ptCust,.number=1,.shortName="ArSq",.longName="Seq/Arp choice",.values={"Arp ","Seq "}},
-			/*2*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
-			/*3*/ {.type=ptCust,.number=3,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
+			/*1*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
+			/*2*/ {.type=ptCust,.number=3,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
+			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptNone},
+		},
+	},
+	/* Sequencer page (#) */
+	{
+		{
+			/* 1st row of pots */
+			{.type=ptCont,.number=cpSeqArpClock,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			/* 2nd row of pots */
+			{.type=ptCust,.number=21,.shortName="SBnk",.longName="Sequencer memory Bank"},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptNone},
+			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)"},
+		},
+		{
+			/*1*/ {.type=ptCust,.number=13,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
+			/*2*/ {.type=ptCust,.number=14,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "}},
+			/*3*/ {.type=ptCust,.number=15,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
+			/*4*/ {.type=ptCust,.number=17,.shortName="TiRe",.longName="Add Tie/Rest"},
+			/*5*/ {.type=ptCust,.number=16,.shortName="Back",.longName="Back one step"},
+			/*6*/ {.type=ptCust,.number=18,.shortName="Clr ",.longName="Clear sequence"},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -219,7 +259,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune filters",.values={""}},
 			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -248,7 +288,7 @@ const struct uiParam_s uiParameters[7][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*4*/ {.type=ptCust,.number=10,.shortName="Vce4",.longName="Tuner voice 4"},
 			/*5*/ {.type=ptCust,.number=10,.shortName="Vce5",.longName="Tuner voice 5"},
 			/*6*/ {.type=ptCust,.number=10,.shortName="Vce6",.longName="Tuner voice 6"},
-			/*7*/ {.type=ptNone},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transposition",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptNone},
@@ -286,6 +326,10 @@ static struct
 	int8_t presetModified;
 	
 	int8_t tunerActiveVoice;
+	
+	int8_t seqRecordingTrack;
+	int8_t isTransposing;
+	int32_t transpose;
 	
 	struct hd44780_data lcd1, lcd2;
 
@@ -395,7 +439,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 	const struct uiParam_s * prm;
 	int8_t potnum;
 	int32_t valCount;
-	uint32_t v;
+	int32_t v;
 
 	sprintf(dv,"    ");
 	if(contValue)
@@ -430,9 +474,6 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 0:
 				v=0;
 				break;
-			case 1:
-				v=0;
-				break;
 			case 2:
 				v=arp_getMode();
 				break;
@@ -464,10 +505,33 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 12:
 				v=settings.syncMode;
 				break;
+			case 13:
+			case 14:
+				v=seq_getMode(prm->number-13);
+				break;
+			case 15:
+				v=ui.seqRecordingTrack+1;
+				break;
+			case 16:
+			case 17:
+			case 18:
+				v=-1;
+				if(ui.seqRecordingTrack>=0)
+					v=seq_getStepCount(ui.seqRecordingTrack)-1;
+				break;
+			case 19:
+				v=ui.isTransposing;
+				break;
+			case 20:
+				v=ui.transpose-1;
+				break;
+			case 21:
+				v=settings.sequencerBank;
+				break;
 			}
 		}
 		
-		if(v<valCount)
+		if(v>=0 && v<valCount)
 			strcpy(dv,prm->values[v]);
 		else
 			sprintf(dv,"%4d",v+1);
@@ -489,7 +553,28 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	
 	if(source>=kbA)
 	{
-		ui.activePage=source-kbA;
+		switch(source)
+		{
+			case kbA: 
+				ui.activePage=upOscs;
+				break;
+			case kbB: 
+				ui.activePage=upFil;
+				break;
+			case kbC: 
+				ui.activePage=upAmp;
+				break;
+			case kbD: 
+				ui.activePage=upMod;
+				break;
+			case kbAsterisk: 
+				ui.activePage=upMisc;
+				break;
+			case kbSharp: 
+				ui.activePage=(ui.activePage==upArp)?upSeq:upArp;
+				break;
+		}
+
 		rprintf(0,"page %d\n",ui.activePage);
 
 		// cancel ongoing changes
@@ -593,24 +678,23 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				preset_saveCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS);
 				/* fall through */
 			case 5:
-				if(preset_loadCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS))
-				{
-					settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
-					settings_save();                
-				}
-				else
-				{
+				settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
+				settings_save();                
+				if(!preset_loadCurrent(settings.presetNumber))
 					preset_loadDefault(1);
-				}
-
+				
 				refreshWaveNames(0);
 				refreshWaveNames(1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				break;
 			case 7:
-				settings.midiReceiveChannel=((getPotValue(potnum)*17)>>16)-1;
-				settings_save();
+				data=((getPotValue(potnum)*17)>>16)-1;
+				if(settings.midiReceiveChannel!=data)
+				{
+					settings.midiReceiveChannel=data;
+					settings_save();
+				}
 				break;
 			case 8:
 				ui.activePage=upTuner;
@@ -627,9 +711,54 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.presetBank=(getPotValue(potnum)*PRESET_BANKS)>>16;
 				break;
 			case 12:
-				settings.syncMode=(getPotValue(potnum)*2)>>16;
-				settings_save();
+				data=(getPotValue(potnum)*2)>>16;
+				if(settings.syncMode!=data)
+				{
+					settings.syncMode=data;
+					settings_save();
+				}
 				break;
+			case 13:
+			case 14:
+				data=prm->number-13;
+				seq_setMode(data,seq_getMode(data)==smPlaying?smOff:smPlaying);
+				if(data==ui.seqRecordingTrack)
+					ui.seqRecordingTrack=-1;
+				break;
+			case 15:
+				ui.seqRecordingTrack=ui.seqRecordingTrack>=1?-1:ui.seqRecordingTrack+1;
+				if(seq_getMode(0)==smRecording) seq_setMode(0,smOff);
+				if(seq_getMode(1)==smRecording) seq_setMode(1,smOff);
+				if(ui.seqRecordingTrack>=0)
+					seq_setMode(ui.seqRecordingTrack,smRecording);
+				break;
+			case 16:
+				if(ui.seqRecordingTrack>=0)
+					seq_inputNote(SEQ_NOTE_UNDO,1);
+				break;
+			case 17:
+				if(ui.seqRecordingTrack>=0)
+					seq_inputNote(SEQ_NOTE_STEP,1);
+				break;
+			case 18:
+				if(ui.seqRecordingTrack>=0)
+					seq_inputNote(SEQ_NOTE_CLEAR,1);
+				break;
+			case 19:
+				ui.isTransposing=(ui.isTransposing+1)%3;
+				break;
+			case 20:
+				data=(((int32_t)97*getPotValue(potnum))>>16)-48;
+				ui_setTranspose(data);
+				break;
+			case 21:
+				data=((int32_t)20*getPotValue(potnum))>>16;
+				if(settings.sequencerBank!=data)
+				{
+					settings.sequencerBank=data;
+					settings_save();
+				}
+				break;				
 		}
 		break;
 	default:
@@ -653,7 +782,7 @@ static void readKeypad(void)
 	{
 		GPIO_SetValue(0,0b1111<<19);
 		GPIO_ClearValue(0,(8>>row)<<19);
-		delay_us(2);
+		delay_us(10);
 		col[row]=0;
 		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
 		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
@@ -771,6 +900,32 @@ int8_t ui_isPresetModified(void)
 	return ui.presetModified;
 }
 
+int8_t ui_isTransposing(void)
+{
+	return ui.isTransposing;
+}
+
+int32_t ui_getTranspose(void)
+{
+	return ui.transpose;
+}
+
+void ui_setTranspose(int32_t transpose)
+{
+	if(ui.transpose==transpose)
+		return;
+	
+	// prevent hanging notes on transposition changes
+	if(assigner_getAnyPressed())
+		assigner_allKeysOff();
+	
+	ui.transpose=transpose;
+	seq_setTranspose(transpose);
+	arp_setTranspose(transpose);
+	if(ui.isTransposing==1) //once?
+		ui.isTransposing=0;
+}
+
 
 void ui_init(void)
 {
@@ -849,6 +1004,7 @@ void ui_init(void)
 	ui.presetSlot=-1;
 	ui.presetBank=-1;
 	ui.pendingScreenClear=1;
+	ui.seqRecordingTrack=-1;
 }
 
 void ui_update(void)
@@ -921,8 +1077,8 @@ void ui_update(void)
 		{
 			sendString(1,"GliGli's OverCycler2                    ");
 			sendString(1,"A: Oscillators     B: Filter            ");
-			sendString(2,"C: Amplifier       D: LFO/Modulations   ");
-			sendString(2,"*: Miscellaneous   #: Sequencer/Arp     ");
+			sendString(2,"C: Amplifier       D: Modulation        ");
+			sendString(2,"*: Miscellaneous   #: Arp/Sequencer     ");
 		}
 	}
 	else if(fsDisp) // fullscreen display

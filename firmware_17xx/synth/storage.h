@@ -56,6 +56,8 @@ struct settings_s
 	uint8_t voiceMask;
 	
 	int8_t syncMode;
+	
+	uint16_t sequencerBank;
 };
 
 struct preset_s

@@ -37,20 +37,22 @@
         <in>adsr.c</in>
         <in>arp.c</in>
         <in>assigner.c</in>
+        <in>clock.c</in>
         <in>dacspi.c</in>
         <in>lfo.c</in>
         <in>midi.c</in>
+        <in>seq.c</in>
         <in>storage.c</in>
         <in>synth.c</in>
         <in>tuner.c</in>
         <in>uart_midi.c</in>
         <in>ui.c</in>
         <in>utils.c</in>
-        <in>vcnoise_curves.h</in>
         <in>wtosc.c</in>
       </df>
       <df name="system">
         <in>core_cm3.c</in>
+        <in>hd44780.c</in>
         <in>main.c</in>
         <in>rprintf.c</in>
         <in>serial.c</in>
@@ -67,6 +69,8 @@
         <in>sysex_tools.c</in>
       </df>
     </df>
+    <logicalFolder name="synth" displayName="synth" projectFiles="true">
+    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -362,6 +366,14 @@
           </incDir>
         </cTool>
       </item>
+      <item path="../synth/clock.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
           <incDir>
@@ -384,6 +396,14 @@
           <incDir>
             <pElem>../xnormidi</pElem>
             <pElem>../xnormidi/bytequeue</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -436,11 +456,10 @@
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
           <incDir>
+            <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
-      </item>
-      <item path="../synth/vcnoise_curves.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
@@ -453,6 +472,15 @@
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
           <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../system/hd44780.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>../drivers</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>

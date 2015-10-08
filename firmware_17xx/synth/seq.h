@@ -5,16 +5,15 @@
 
 // Sequencer event list definitions
 
-#define SEQ_NOTEBITS 0x3f /* bits 0..5 */
+#define SEQ_NOTEBITS 0x7f /* bits 0..6 */
 
 // event is a continuation of previous event - only used for notes
 #define SEQ_CONT 128 /* bit 7 */
 
-/* These must be > highest note which is 60 */
 // A lone rest means an unused entry (i.e. at the end of the sequence).
 // In a valid sequence a rest always is the first (and only) entry in a step,
 // consequently it always comes with SEQ_CONT clear.
-#define SEQ_REST (ASSIGNER_NO_NOTE&0x3f)
+#define SEQ_REST (ASSIGNER_NO_NOTE&0x7f)
 // A tie extends the timing of the previous step
 #define SEQ_TIE (SEQ_REST-1)
 
