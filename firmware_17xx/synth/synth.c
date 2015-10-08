@@ -42,7 +42,7 @@ static struct
 	char bankNames[MAX_BANKS][MAX_FILENAME];
 	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
 
-	uint16_t sampleData[2][WTOSC_MAX_SAMPLES*2];
+	uint16_t sampleData[2][WTOSC_MAX_SAMPLES];
 
 	DIR curDir;
 	FILINFO curFile;
@@ -550,7 +550,6 @@ void refreshWaveforms(int8_t ab)
 			d=(d*(INT16_MAX-WTOSC_SAMPLES_GUARD_BAND))>>15;
 			d-=INT16_MIN;
 			waveData.sampleData[ab][i]=d;
-			waveData.sampleData[ab][i+WTOSC_MAX_SAMPLES]=d;
 		}
 
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
