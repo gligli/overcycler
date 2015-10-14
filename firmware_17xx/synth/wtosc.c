@@ -133,12 +133,20 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 			*syncResets|=(1<<bufIdx);
 	}
 	
-	o->prevSample3=o->prevSample2;
-	o->prevSample2=o->prevSample;
+	if(o->aliasing) // we want aliasing, so make interpolation less effective !
+	{
+		o->prevSample3=o->prevSample2=o->curSample;
+	}
+	else
+	{
+		o->prevSample3=o->prevSample2;
+		o->prevSample2=o->prevSample;
+	}
+	
 	o->prevSample=o->curSample;
 	o->curSample=o->data[o->phase];
 	
-	return o->aliasing?0:curPeriod; // we want aliasing, so make alpha fixed to deactivate interpolation !
+	return curPeriod;
 }
 
 static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3)
