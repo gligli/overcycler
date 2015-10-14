@@ -862,7 +862,7 @@ void synth_timerInterrupt(void)
 		// amplifier
 
 		ampVal=synth.partState.benderCVs[cvAmp];
-		ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV);
+		ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV>>1);
 		ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
 
 		// part computations
