@@ -319,7 +319,7 @@ static struct
 	int8_t sourceChanges,prevSourceChanges;
 	uint32_t activeSourceTimeout;
 	uint32_t slowUpdateTimeout;
-	int8_t slowUpdateTimeoutNumber;
+	int16_t slowUpdateTimeoutNumber;
 	int8_t pendingScreenClear;
 
 	int8_t presetBank;
@@ -700,20 +700,10 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			case 4:
 				ui.presetSlot=(getPotValue(potnum)*PRESET_SLOTS)>>16;
 				break;
-			case 6:
-				preset_saveCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS);
-				/* fall through */
 			case 5:
-				settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
-				settings_save();                
-				if(!preset_loadCurrent(settings.presetNumber))
-					preset_loadDefault(1);
-				
-				refreshWaveNames(0);
-				refreshWaveNames(1);
-				refreshWaveforms(0);
-				refreshWaveforms(1);
-				refreshWaveforms(2);
+			case 6:
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case 7:
 				data=((getPotValue(potnum)*17)>>16)-1;
@@ -1073,6 +1063,22 @@ void ui_update(void)
 				break;
 			case spBWave:
 				refreshWaveforms(1);
+				break;
+			case 0x80+6:
+				preset_saveCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS);
+				/* fall through */
+			case 0x80+5:
+				settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
+				settings_save();                
+				if(!preset_loadCurrent(settings.presetNumber))
+					preset_loadDefault(1);
+				
+				refreshWaveNames(0);
+				refreshWaveNames(1);
+				refreshWaveforms(0);
+				refreshWaveforms(1);
+				refreshWaveforms(2);
+				refreshFullState();
 				break;
 		}
 		
