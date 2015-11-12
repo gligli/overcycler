@@ -271,7 +271,7 @@ int8_t assigner_getAnyPressed(void)
 	return v!=0;
 }
 
-int8_t assigner_getLatestNotePressed(uint8_t * note)
+int8_t assigner_getLatestAssigned(uint8_t * note)
 {
 	int8_t v;
 	
@@ -280,7 +280,7 @@ int8_t assigner_getLatestNotePressed(uint8_t * note)
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		struct allocation_s *a = &(assigner.allocation[v]);
-		if (a->keyPressed && a->timestamp > assigner.allocation[latestVoice].timestamp)
+		if (a->assigned && a->timestamp > assigner.allocation[latestVoice].timestamp)
 			latestVoice = v;
 	}
 	
@@ -288,7 +288,7 @@ int8_t assigner_getLatestNotePressed(uint8_t * note)
 		*note = assigner.allocation[latestVoice].note;
 	}
 
-	return latestVoice >= 0;
+	return latestVoice;
 }
 
 int8_t assigner_getAnyAssigned(void)

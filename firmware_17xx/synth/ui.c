@@ -80,11 +80,11 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		},
 		{
-			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
+			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq","XOvr"}},
 			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
 			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
-			/*5*/ {.type=ptNone},
+			/*5*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy B Bank/Wave"},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
@@ -543,6 +543,10 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 					v=(((int)settings.seqArpClock*1000)>>16)-1;
 				}
 				break;
+			case 23:
+				v=(currentPreset.steppedParameters[spXOvrBank]+1)*100;
+				v+=(currentPreset.steppedParameters[spXOvrWave]+1)%100;
+				--v;
 			}
 		}
 		
@@ -709,6 +713,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				refreshWaveNames(1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
+				refreshWaveforms(2);
 				break;
 			case 7:
 				data=((getPotValue(potnum)*17)>>16)-1;
@@ -775,6 +780,11 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 			case 22:
 				settings.seqArpClock=getPotValue(potnum);
 				ui.settingsModified=1;
+				break;
+			case 23:
+				currentPreset.steppedParameters[spXOvrBank]=currentPreset.steppedParameters[spBBank];
+				currentPreset.steppedParameters[spXOvrWave]=currentPreset.steppedParameters[spBWave];
+				refreshWaveforms(2);
 				break;
 		}
 		break;

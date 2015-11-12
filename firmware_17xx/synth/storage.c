@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 7
+#define STORAGE_VERSION 8
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -41,6 +41,8 @@ const uint8_t steppedParametersBits[spCount] =
 	/*AssignerPriority*/2,
 	/*ChromaticPitch*/2,
 	/*Sync*/1,
+	/*XOvrBank*/7,
+	/*XOvrWave*/7,
 };
 
 struct settings_s settings;
@@ -304,6 +306,14 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	currentPreset.steppedParameters[spOscSync]=storageRead8();
 
+	if(storage.version<8)
+		return 1;
+	
+	// v8
+	
+	currentPreset.steppedParameters[spXOvrBank]=storageRead8();
+	currentPreset.steppedParameters[spXOvrWave]=storageRead8();
+
 	return 1;
 }
 
@@ -335,6 +345,11 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	// v5
 	
 	storageWrite8(currentPreset.steppedParameters[spOscSync]);
+	
+	// v8
+	
+	storageWrite8(currentPreset.steppedParameters[spXOvrBank]);
+	storageWrite8(currentPreset.steppedParameters[spXOvrWave]);
 	
 	// this must stay last
 	storageFinishStore(number,1);
@@ -418,6 +433,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
 	currentPreset.steppedParameters[spBBank]=26;
+	currentPreset.steppedParameters[spXOvrBank]=26;
 
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	

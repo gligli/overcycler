@@ -41,6 +41,8 @@ typedef enum
 			
 	spOscSync=20,
 			
+	spXOvrBank=21,spXOvrWave=22,
+			
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;

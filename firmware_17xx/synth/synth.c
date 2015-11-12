@@ -38,11 +38,11 @@ volatile uint32_t currentTick=0; // 500hz
 static struct
 {
 	int bankCount;
-	int curWaveCount[2];
 	char bankNames[MAX_BANKS][MAX_FILENAME];
+	int curWaveCount[3];
 	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
 
-	uint16_t sampleData[2][WTOSC_MAX_SAMPLES];
+	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: XOvr source, 3: XOvr mix
 
 	DIR curDir;
 	FILINFO curFile;
@@ -79,6 +79,7 @@ static struct
 
 		uint8_t wmodMask;
 		uint32_t syncResetsMask;
+		int32_t oldCrossOver;
 	} partState;
 	
 	uint8_t pendingExtClock;
@@ -397,6 +398,15 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=64;
 	if(currentPreset.steppedParameters[spBWModEnvEn])
 		synth.partState.wmodMask|=128;
+	
+	// waveforms
+	
+	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
+	{
+		int p=currentPreset.steppedParameters[spAWModType]==wmCrossOver?3:0;
+		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],WTOSC_MAX_SAMPLES);
+		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],WTOSC_MAX_SAMPLES);
+	}
 }
 
 void refreshFullState(void)
@@ -411,11 +421,12 @@ void refreshFullState(void)
 	computeTunedCVs();
 }
 
-int8_t appendBankName(int8_t ab, char * path)
+int8_t appendBankName(int8_t abx, char * path)
 {
 	uint8_t bankNum;
+	static const uint8_t abx2sp[3] = {spABank, spBBank, spXOvrBank};
 
-	bankNum=currentPreset.steppedParameters[ab?spBBank:spABank];
+	bankNum=currentPreset.steppedParameters[abx2sp[abx]];
 
 	if(bankNum>=waveData.bankCount)
 		return 0;
@@ -425,17 +436,28 @@ int8_t appendBankName(int8_t ab, char * path)
 	return 1;
 }
 
-int8_t appendWaveName(int8_t ab, char * path)
+int8_t appendWaveName(int8_t abx, char * path)
 {
 	uint8_t waveNum;
+	static const uint8_t abx2sp[3] = {spAWave, spBWave, spXOvrWave};
 
-	waveNum=currentPreset.steppedParameters[ab?spBWave:spAWave];
+	waveNum=currentPreset.steppedParameters[abx2sp[abx]];
 
-	if(waveNum>=waveData.curWaveCount[ab])
-		return 0;
+	if(abx==2)
+	{
+		refreshWaveNames(2);
+		if(waveNum>=waveData.curWaveCount[1])
+			return 0;
+		strcat(path,waveData.waveNames[1][waveNum]);
+		refreshWaveNames(1);
+	}
+	else
+	{
+		if(waveNum>=waveData.curWaveCount[abx])
+			return 0;
+		strcat(path,waveData.waveNames[abx][waveNum]);
+	}
 
-	strcat(path,waveData.waveNames[ab][waveNum]);
-	
 	return 1;
 }
 
@@ -480,15 +502,16 @@ static void refreshBankNames(void)
 	rprintf(0,"bankCount %d\n",waveData.bankCount);
 }
 
-void refreshWaveNames(int8_t ab)
+void refreshWaveNames(int8_t abx)
 {
 	FRESULT res;
 	char fn[256];
+	int8_t ab=MIN(1,abx); // CrossMod waveNames are temporarily stored in B waveNames to save RAM
 	
 	waveData.curWaveCount[ab]=0;
 
 	strcpy(fn,WAVEDATA_PATH "/");
-	if(!appendBankName(ab,fn)) return;
+	if(!appendBankName(abx,fn)) return;
 
 	rprintf(0,"loading %s\n",fn);
 	
@@ -517,7 +540,7 @@ void refreshWaveNames(int8_t ab)
 	rprintf(0,"curWaveCount %d %d\n",ab,waveData.curWaveCount[ab]);
 }
 
-void refreshWaveforms(int8_t ab)
+void refreshWaveforms(int8_t abx)
 {
 	int i;
 	FIL f;
@@ -527,9 +550,9 @@ void refreshWaveforms(int8_t ab)
 	int32_t d;
 	
 	strcpy(fn,WAVEDATA_PATH "/");
-	if(!appendBankName(ab,fn)) return;
+	if(!appendBankName(abx,fn)) return;
 	strcat(fn,"/");
-	if(!appendWaveName(ab,fn)) return;
+	if(!appendWaveName(abx,fn)) return;
 
 	rprintf(0,"loading %s\n",fn);
 	
@@ -549,12 +572,11 @@ void refreshWaveforms(int8_t ab)
 			d=data[i];
 			d=(d*(INT16_MAX-WTOSC_SAMPLES_GUARD_BAND))>>15;
 			d-=INT16_MIN;
-			waveData.sampleData[ab][i]=d;
+			waveData.sampleData[abx][i]=d;
 		}
-
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			wtosc_setSampleData(&synth.osc[i][ab],waveData.sampleData[ab],WTOSC_MAX_SAMPLES);
 	}
+	
+	synth.partState.oldCrossOver=-1;
 }
 
 static void handleBitInputs(void)
@@ -661,6 +683,34 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	}
 	
 	dacspi_setCVValue(channel,value);
+}
+
+static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
+{
+	int i;
+	int8_t v;
+	uint32_t xovr;
+	
+	xovr=wmod;
+
+	// paraphonic filter envelope mod
+	if(currentPreset.steppedParameters[spAWModEnvEn])
+	{
+		v=assigner_getLatestAssigned(NULL);
+		if(v>=0)
+		{
+			xovr+=scaleU16S16(synth.filEnvs[v].output,wmodEnvAmt);
+			xovr=__USAT(xovr,16);
+		}
+	}
+	
+	if(xovr==synth.partState.oldCrossOver)
+		return;
+
+	for(i=0;i<WTOSC_MAX_SAMPLES;++i)
+		waveData.sampleData[3][i]=lerp16(waveData.sampleData[0][i], waveData.sampleData[2][i], xovr);
+	
+	synth.partState.oldCrossOver=xovr;
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
@@ -799,6 +849,7 @@ void synth_init(void)
 	refreshWaveNames(1);
 	refreshWaveforms(0);
 	refreshWaveforms(1);
+	refreshWaveforms(2);
 }
 
 
@@ -889,6 +940,11 @@ void synth_timerInterrupt(void)
 		wmodBVal=__USAT(wmodBVal,16);
 		filterVal=__SSAT(filterVal,16);
 		ampVal=__USAT(ampVal,16);
+		
+		// crossover
+		
+		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+			refreshCrossOver(wmodAVal,wmodEnvAmt);
 		
 		// actual voice refresh
 		
