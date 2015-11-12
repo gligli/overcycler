@@ -12,6 +12,7 @@
 #include "hd44780.h"
 #include "lpc17xx_gpio.h"
 #include "lpc17xx_pinsel.h"
+#include "clock.h"
 
 #define DEBOUNCE_THRESHOLD 5
 
@@ -182,7 +183,7 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCont,.number=cpSeqArpClock,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock"},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
@@ -211,7 +212,7 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCont,.number=cpSeqArpClock,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock"},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
@@ -324,6 +325,7 @@ static struct
 	int8_t presetBank;
 	int8_t presetSlot;
 	int8_t presetModified;
+	int8_t settingsModified;
 	
 	int8_t tunerActiveVoice;
 	
@@ -528,6 +530,19 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 21:
 				v=settings.sequencerBank;
 				break;
+			case 22:
+				if(settings.syncMode==smMIDI)
+				{
+					v=clock_getSpeed();
+					if(v==UINT16_MAX)
+						v=0;
+					--v;
+				}
+				else
+				{
+					v=(((int)settings.seqArpClock*1000)>>16)-1;
+				}
+				break;
 			}
 		}
 		
@@ -582,6 +597,13 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		memset(&ui.potLockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
 
 		ui.pendingScreenClear=1;
+		
+		// to store changes made to settings thru UI
+		if(ui.settingsModified)
+		{
+			settings_save();
+			ui.settingsModified=0;
+		}
 		
 		return;
 	}
@@ -690,11 +712,8 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 7:
 				data=((getPotValue(potnum)*17)>>16)-1;
-				if(settings.midiReceiveChannel!=data)
-				{
-					settings.midiReceiveChannel=data;
-					settings_save();
-				}
+				settings.midiReceiveChannel=data;
+				ui.settingsModified=1;
 				break;
 			case 8:
 				ui.activePage=upTuner;
@@ -712,11 +731,8 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 12:
 				data=(getPotValue(potnum)*2)>>16;
-				if(settings.syncMode!=data)
-				{
-					settings.syncMode=data;
-					settings_save();
-				}
+				settings.syncMode=data;
+				ui.settingsModified=1;
 				break;
 			case 13:
 			case 14:
@@ -753,12 +769,13 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				break;
 			case 21:
 				data=((int32_t)20*getPotValue(potnum))>>16;
-				if(settings.sequencerBank!=data)
-				{
-					settings.sequencerBank=data;
-					settings_save();
-				}
+				settings.sequencerBank=data;
+				ui.settingsModified=1;
 				break;				
+			case 22:
+				settings.seqArpClock=getPotValue(potnum);
+				ui.settingsModified=1;
+				break;
 		}
 		break;
 	default:

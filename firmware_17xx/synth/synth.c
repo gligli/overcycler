@@ -370,7 +370,7 @@ static void refreshMisc(void)
 {
 	// arp
 
-	clock_setSpeed(currentPreset.continuousParameters[cpSeqArpClock]);
+	clock_setSpeed(settings.seqArpClock);
 
 	// glide
 

@@ -18,8 +18,8 @@ typedef enum
 	cpModDelay=28,cpGlide=29,
 	cpAmpVelocity=30,cpFilVelocity=31,
 	cpMasterTune=32,cpUnisonDetune=33,
-	cpMasterLeft=34,cpMasterRight=35,
-	cpSeqArpClock=36,cpNoiseVol=37,
+	cpMasterLeft_Legacy=34,cpMasterRight_Legacy=35,
+	cpSeqArpClock_Legacy=36,cpNoiseVol=37,
 
 	// /!\ this must stay last
 	cpCount
@@ -58,6 +58,7 @@ struct settings_s
 	int8_t syncMode;
 	
 	uint16_t sequencerBank;
+	uint16_t seqArpClock;
 };
 
 struct preset_s

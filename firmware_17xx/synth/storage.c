@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 6
+#define STORAGE_VERSION 7
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -212,6 +212,13 @@ LOWERCODESIZE int8_t settings_load(void)
 	
 	settings.sequencerBank=storageRead16();
 	
+	if (storage.version<7)
+		return 1;
+		
+	// v7
+	
+	settings.seqArpClock=storageRead16();
+
 	return 1;
 }
 
@@ -240,6 +247,10 @@ LOWERCODESIZE void settings_save(void)
 		
 	storageWrite16(settings.sequencerBank);
 
+	// v7
+		
+	storageWrite16(settings.seqArpClock);
+
 	// this must stay last
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
 }
@@ -259,7 +270,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	// v1
 
 	continuousParameter_t cp;
-	for(cp=0;cp<=cpSeqArpClock;++cp)
+	for(cp=0;cp<=cpSeqArpClock_Legacy;++cp)
 		currentPreset.continuousParameters[cp]=storageRead16();
 	storageRead16(); // bw compat fix
 
@@ -305,7 +316,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	// v1
 
 	continuousParameter_t cp;
-	for(cp=0;cp<=cpSeqArpClock;++cp)
+	for(cp=0;cp<=cpSeqArpClock_Legacy;++cp)
 		storageWrite16(currentPreset.continuousParameters[cp]);
 	storageWrite16(0); // bw compat fix
 
@@ -384,8 +395,6 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	currentPreset.continuousParameters[cpUnisonDetune]=512;
 	currentPreset.continuousParameters[cpMasterTune]=HALF_RANGE;
-	currentPreset.continuousParameters[cpMasterLeft]=HALF_RANGE;
-	currentPreset.continuousParameters[cpMasterRight]=HALF_RANGE;
 
 	currentPreset.continuousParameters[cpBFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpBFineFreq]=HALF_RANGE;
@@ -397,7 +406,6 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 	currentPreset.continuousParameters[cpVibFreq]=8*UINT16_MAX/10+1;
-	currentPreset.continuousParameters[cpSeqArpClock]=6*UINT16_MAX/10+1;
 
 	currentPreset.steppedParameters[spBenderRange]=1;
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
@@ -426,6 +434,7 @@ LOWERCODESIZE void settings_loadDefault(void)
 
 	settings.midiReceiveChannel=-1;
 	settings.voiceMask=0x3f;
+	settings.seqArpClock=6*UINT16_MAX/10+1;
 
 	tuner_init(); // use theoretical tuning
 }
