@@ -695,6 +695,7 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 	int i;
 	int8_t v;
 	uint32_t xovr;
+	uint16_t *p0,*p2,*p3;
 	
 	xovr=wmod;
 
@@ -712,8 +713,17 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 	if(xovr==synth.partState.oldCrossOver)
 		return;
 
-	for(i=0;i<WTOSC_MAX_SAMPLES;++i)
-		waveData.sampleData[3][i]=lerp16(waveData.sampleData[0][i], waveData.sampleData[2][i], xovr);
+	p0=waveData.sampleData[0];
+	p2=waveData.sampleData[2];
+	p3=waveData.sampleData[3];
+	
+	for(i=0;i<WTOSC_MAX_SAMPLES/4;++i)
+	{
+		*p3++=lerp16(*p0++,*p2++,xovr);
+		*p3++=lerp16(*p0++,*p2++,xovr);
+		*p3++=lerp16(*p0++,*p2++,xovr);
+		*p3++=lerp16(*p0++,*p2++,xovr);
+	}
 	
 	synth.partState.oldCrossOver=xovr;
 }
