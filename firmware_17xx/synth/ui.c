@@ -112,7 +112,7 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*1*/ {.type=ptStep,.number=spAWModEnvEn,.shortName="AWmE",.longName="Osc A WaveMod Envelope",.values={"Off ","On  "}},
 			/*2*/ {.type=ptStep,.number=spBWModEnvEn,.shortName="BWmE",.longName="Osc B WaveMod Envelope",.values={"Off ","On  "}},
 			/*3*/ {.type=ptStep,.number=spFilEnvSlow,.shortName="FEnT",.longName="Filter Envelope Type",.values={"Fast","Slow"}},
-			/*4*/ {.type=ptNone},
+			/*4*/ {.type=ptStep,.number=spFilEnvLin,.shortName="FEnS",.longName="Filter Envelope Shape",.values={"Exp ","Lin "}},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},

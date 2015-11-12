@@ -261,9 +261,14 @@ static void refreshEnvSettings(int8_t type)
 		slow=currentPreset.steppedParameters[(type)?spFilEnvSlow:spAmpEnvSlow];
 
 		if(type)
+		{
 			a=&synth.filEnvs[i];
+			adsr_setShape(a,currentPreset.steppedParameters[spFilEnvLin]?0:1);
+		}
 		else
+		{
 			a=&synth.ampEnvs[i];
+		}
 
 		adsr_setSpeedShift(a,(slow)?3:1);
 

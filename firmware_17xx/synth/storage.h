@@ -42,6 +42,7 @@ typedef enum
 	spOscSync=20,
 			
 	spXOvrBank=21,spXOvrWave=22,
+	spFilEnvLin=23,
 			
 	// /!\ this must stay last
 	spCount

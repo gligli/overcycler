@@ -22,11 +22,11 @@ const uint8_t steppedParametersBits[spCount] =
 {
 	/*ABank*/7,
 	/*AWave*/7,
-	/*ABaseWMod*/2,
+	/*ABaseWMod*/3,
 	/*AFilWMod*/1,
 	/*BBank*/7,
 	/*BWave*/7,
-	/*BBaseWMod*/2,
+	/*BBaseWMod*/3,
 	/*BWFilMod*/1,
 	/*LFOShape*/3,
 	/*LFOShift*/2,
@@ -43,6 +43,7 @@ const uint8_t steppedParametersBits[spCount] =
 	/*Sync*/1,
 	/*XOvrBank*/7,
 	/*XOvrWave*/7,
+	/*FilEnvLin*/1,
 };
 
 struct settings_s settings;
@@ -265,6 +266,9 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 
 	currentPreset.continuousParameters[cpNoiseVol]=0;
 	currentPreset.steppedParameters[spOscSync]=0;
+	currentPreset.steppedParameters[spXOvrBank]=26; // perfectwaves (saw)
+	currentPreset.steppedParameters[spXOvrWave]=0;
+	currentPreset.steppedParameters[spFilEnvLin]=0;
 
 	if (storage.version<1)
 		return 0;
@@ -313,6 +317,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	currentPreset.steppedParameters[spXOvrBank]=storageRead8();
 	currentPreset.steppedParameters[spXOvrWave]=storageRead8();
+	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
 
 	return 1;
 }
@@ -350,6 +355,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	storageWrite8(currentPreset.steppedParameters[spXOvrBank]);
 	storageWrite8(currentPreset.steppedParameters[spXOvrWave]);
+	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
 	
 	// this must stay last
 	storageFinishStore(number,1);
