@@ -16,7 +16,7 @@
 
 #define ARP_LAST_NOTE (ARP_NOTE_MEMORY-1)
 
-static struct
+static EXT_RAM struct
 {
 	uint8_t notes[ARP_NOTE_MEMORY];
 	int16_t noteIndex;

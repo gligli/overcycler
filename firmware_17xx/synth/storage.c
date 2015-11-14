@@ -46,8 +46,8 @@ const uint8_t steppedParametersBits[spCount] =
 	/*FilEnvLin*/1,
 };
 
-struct settings_s settings;
-struct preset_s currentPreset;
+EXT_RAM struct settings_s settings;
+EXT_RAM struct preset_s currentPreset;
 
 static struct
 {
