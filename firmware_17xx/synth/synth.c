@@ -593,7 +593,7 @@ static void handleBitInputs(void)
 	
 	// control footswitch 
 	 
-	if(currentPreset.steppedParameters[spUnison] && !(cur&BIT_INPUT_FOOTSWITCH) && last&BIT_INPUT_FOOTSWITCH)
+	if(arp_getMode()==amOff && currentPreset.steppedParameters[spUnison] && !(cur&BIT_INPUT_FOOTSWITCH) && last&BIT_INPUT_FOOTSWITCH)
 	{
 		assigner_latchPattern();
 		assigner_getPattern( currentPreset.voicePattern,NULL);
