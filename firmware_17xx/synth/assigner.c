@@ -19,7 +19,7 @@ struct allocation_s
 static struct
 {
 	uint8_t noteStates[16]; // 1 bit per note, 128 notes
-	uint16_t noteVelocities[128];
+	uint8_t noteVelocities[128];
 	struct allocation_s allocation[SYNTH_VOICE_COUNT];
 	uint8_t patternOffsets[SYNTH_VOICE_COUNT];
 	assignerPriority_t priority;
@@ -60,12 +60,12 @@ static inline int8_t getNoteState(uint8_t note)
 static inline void setNoteVelocity(uint8_t note, uint8_t gate, uint16_t velocity)
 {
 	if (gate)
-		assigner.noteVelocities[note]=velocity;
+		assigner.noteVelocities[note]=velocity>>8;
 }
 
 static inline uint16_t getNoteVelocity(uint8_t note)
 {
-	return assigner.noteVelocities[note];
+	return (uint16_t)assigner.noteVelocities[note]<<8;
 }
 
 static inline int8_t isVoiceDisabled(int8_t voice)
@@ -186,7 +186,7 @@ void assigner_voiceDone(int8_t voice)
 	assigner.allocation[voice].rootNote=ASSIGNER_NO_NOTE;
 }
 
-static void voicesDone(int8_t releaseNotes)
+LOWERCODESIZE static void voicesDone(int8_t releaseNotes)
 {
 	int8_t v;
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
@@ -473,7 +473,7 @@ LOWERCODESIZE void assigner_setPattern(uint8_t * pattern, int8_t mono)
 	else
 	{
 		// empty pattern means unison
-		memset(assigner.patternOffsets,0,SYNTH_VOICE_COUNT);
+		memset(&assigner.patternOffsets[0],0,SYNTH_VOICE_COUNT);
 	}
 }
 
