@@ -257,9 +257,9 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*1*/ {.type=ptCust,.number=5,.shortName="Load",.longName="Load preset"},
 			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptCust,.number=6,.shortName="Save",.longName="Save preset"},
-			/*4*/ {.type=ptNone},
-			/*5*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune filters",.values={""}},
-			/*6*/ {.type=ptNone},
+			/*4*/ {.type=ptCust,.number=24,.shortName="LPrv",.longName="Load previous preset",.values={""}},
+			/*5*/ {.type=ptCust,.number=25,.shortName="LNxt",.longName="Load next preset",.values={""}},
+			/*6*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune filters",.values={""}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
 			/*9*/ {.type=ptNone},
@@ -547,6 +547,10 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				v=(currentPreset.steppedParameters[spXOvrBank]+1)*100;
 				v+=(currentPreset.steppedParameters[spXOvrWave]+1)%100;
 				--v;
+			case 24:
+			case 25:
+				v=0;
+				break;
 			}
 		}
 		
@@ -775,6 +779,24 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				currentPreset.steppedParameters[spXOvrBank]=currentPreset.steppedParameters[spBBank];
 				currentPreset.steppedParameters[spXOvrWave]=currentPreset.steppedParameters[spBWave];
 				refreshWaveforms(2);
+				break;
+			case 24:
+			case 25:
+				ui.presetSlot = ui.presetSlot + ((prm->number == 24) ? -1 : 1);
+				if(ui.presetSlot >= PRESET_SLOTS)
+				{
+					ui.presetSlot = 0;
+					++ui.presetBank;
+				}
+				else if(ui.presetSlot < 0)
+				{
+					ui.presetSlot = PRESET_SLOTS - 1;
+					--ui.presetBank;
+				}
+				ui.presetBank = ui.presetBank % PRESET_BANKS;
+
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=0x85;
 				break;
 		}
 		break;
