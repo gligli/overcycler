@@ -21,7 +21,7 @@ struct track
 	int8_t previousTranspose;
 };
 
-static struct
+static EXT_RAM struct
 {
 	struct track tracks[SEQ_TRACK_COUNT];
 

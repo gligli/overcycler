@@ -304,7 +304,7 @@ static const uint8_t keypadButtonCode[16]=
 	0x34,0x31
 };
 
-static struct
+static EXT_RAM struct
 {
 	uint16_t potSamples[POT_COUNT][POT_SAMPLES];
 	int16_t curPotSample;

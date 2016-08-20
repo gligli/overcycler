@@ -16,7 +16,7 @@ struct allocation_s
 	int8_t internalKeyboard;
 };
 
-static struct
+static EXT_RAM struct
 {
 	uint8_t noteStates[16]; // 1 bit per note, 128 notes
 	uint8_t noteVelocities[128];
@@ -29,6 +29,7 @@ static struct
 } assigner;
 
 static const uint8_t bit2mask[8] = {1,2,4,8,16,32,64,128};
+static const uint8_t polyPattern[SYNTH_VOICE_COUNT]={0,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE};	
 
 static inline void setNoteState(uint8_t note, int8_t gate)
 {
@@ -438,7 +439,7 @@ reassign:
 	}
 }
 
-LOWERCODESIZE void assigner_setPattern(uint8_t * pattern, int8_t mono)
+LOWERCODESIZE void assigner_setPattern(const uint8_t * pattern, int8_t mono)
 {
 	int8_t i,count=0;
 	
@@ -513,7 +514,6 @@ LOWERCODESIZE void assigner_latchPattern(void)
 
 LOWERCODESIZE void assigner_setPoly(void)
 {
-	uint8_t polyPattern[SYNTH_VOICE_COUNT]={0,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE};	
 	assigner_setPattern(polyPattern,0);
 }
 
