@@ -547,6 +547,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				v=(currentPreset.steppedParameters[spXOvrBank]+1)*100;
 				v+=(currentPreset.steppedParameters[spXOvrWave]+1)%100;
 				--v;
+				break;
 			case 24:
 			case 25:
 				v=0;
