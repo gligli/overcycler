@@ -27,8 +27,8 @@
 
 #define WAVEDATA_PATH "/WAVEDATA"
 
-#define MAX_BANKS 80
-#define MAX_BANK_WAVES 160
+#define MAX_BANKS 75
+#define MAX_BANK_WAVES 150
 #define MAX_FILENAME _MAX_LFN
 
 #define POT_DEAD_ZONE 512
@@ -43,6 +43,7 @@ static struct
 	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
 
 	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: XOvr source, 3: XOvr mix
+	uint16_t sampleCount[4];
 
 	DIR curDir;
 	FILINFO curFile;
@@ -409,8 +410,8 @@ static void refreshMisc(void)
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
 		int p=currentPreset.steppedParameters[spAWModType]==wmCrossOver?3:0;
-		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],WTOSC_MAX_SAMPLES);
-		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],WTOSC_MAX_SAMPLES);
+		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],waveData.sampleCount[p]);
+		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleCount[1]);
 	}
 }
 
@@ -553,6 +554,7 @@ void refreshWaveforms(int8_t abx)
 	char fn[256];
 	int16_t data[WTOSC_MAX_SAMPLES];
 	int32_t d;
+	int32_t smpSize = 0;
 	
 	strcpy(fn,WAVEDATA_PATH "/");
 	if(!appendBankName(abx,fn)) return;
@@ -564,11 +566,18 @@ void refreshWaveforms(int8_t abx)
 	if(!f_open(&f,fn,FA_READ))
 	{
 
-		if((res=f_lseek(&f,0x2c)))
+		if((res=f_lseek(&f,0x28)))
 			rprintf(0,"f_lseek res=%d\n",res);
 
-		if((res=f_read(&f,data,sizeof(data),&i)))
-			rprintf(0,"f_lseek res=%d\n",res);
+		if((res=f_read(&f,&smpSize,sizeof(smpSize),&i)))
+			rprintf(0,"f_read res=%d\n",res);
+		
+		smpSize=MIN(smpSize,WTOSC_MAX_SAMPLES*2);
+		
+		rprintf(0, "smpSize %d\n", smpSize);
+
+		if((res=f_read(&f,data,smpSize,&i)))
+			rprintf(0,"f_read res=%d\n",res);
 
 		f_close(&f);
 		
@@ -579,6 +588,8 @@ void refreshWaveforms(int8_t abx)
 			d-=INT16_MIN;
 			waveData.sampleData[abx][i]=d;
 		}
+		
+		waveData.sampleCount[abx]=smpSize>>1; 
 	}
 	
 	synth.partState.oldCrossOver=-1;
@@ -816,6 +827,9 @@ void synth_init(void)
 	// give it some memory
 	waveData.curFile.lfname=waveData.lfname;
 	waveData.curFile.lfsize=sizeof(waveData.lfname);
+
+	for(i=0;i<4;++i)
+		waveData.sampleCount[i]=WTOSC_MAX_SAMPLES;
 	
 	// init subsystems
 	// ui_init() done in main.c
