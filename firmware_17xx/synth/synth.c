@@ -592,6 +592,9 @@ void refreshWaveforms(int8_t abx)
 		waveData.sampleCount[abx]=smpSize>>1; 
 	}
 	
+	// XOvr mix waveform
+	waveData.sampleCount[3]=MAX(waveData.sampleCount[0], waveData.sampleCount[2]); 
+	
 	synth.partState.oldCrossOver=-1;
 }
 
