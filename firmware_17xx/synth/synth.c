@@ -253,7 +253,7 @@ static void refreshAssignerSettings(void)
 
 static void refreshEnvSettings(int8_t type)
 {
-	uint8_t slow;
+	int8_t slow;
 	int8_t i;
 	struct adsr_s * a;
 		
@@ -271,7 +271,7 @@ static void refreshEnvSettings(int8_t type)
 			a=&synth.ampEnvs[i];
 		}
 
-		adsr_setSpeedShift(a,(slow)?3:1);
+		adsr_setSpeedShift(a,(slow)?4:2);
 
 		adsr_setCVs(&synth.ampEnvs[i],
 				 currentPreset.continuousParameters[cpAmpAtt],
@@ -298,7 +298,7 @@ static void refreshLfoSettings(void)
 	uint32_t elapsed;
 
 	shape=currentPreset.steppedParameters[spLFOShape];
-	shift=1+currentPreset.steppedParameters[spLFOShift]*3;
+	shift=currentPreset.steppedParameters[spLFOShift]*3;
 
 	lfo_setShape(&synth.lfo,shape);
 	lfo_setSpeedShift(&synth.lfo,shift);
@@ -856,7 +856,7 @@ void synth_init(void)
 	lfo_init(&synth.lfo);
 	lfo_init(&synth.vibrato);
 	lfo_setShape(&synth.vibrato,lsTri);
-	lfo_setSpeedShift(&synth.vibrato,4);
+	lfo_setSpeedShift(&synth.vibrato,3);
 
 	// load settings from storage; tune when they are bad
 	
@@ -913,7 +913,7 @@ void synth_update(void)
 // Synth interrupts
 ////////////////////////////////////////////////////////////////////////////////
 
-// 2Khz
+// 4Khz
 void synth_timerInterrupt(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt,resoFactor;
@@ -924,68 +924,61 @@ void synth_timerInterrupt(void)
 		
 	lfo_update(&synth.lfo);
 		
-	// per voice stuff
+	// global computations
 	
-	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-	{
 		// pitch
 
-		pitchAVal=pitchBVal=synth.vibrato.output;
-		val=scaleU16S16(currentPreset.continuousParameters[cpLFOPitchAmt],synth.lfo.output>>1);
+	pitchAVal=pitchBVal=synth.vibrato.output;
+	val=scaleU16S16(currentPreset.continuousParameters[cpLFOPitchAmt],synth.lfo.output>>1);
 
-		if(currentPreset.steppedParameters[spLFOTargets]&otA)
-			pitchAVal+=val;
-		if(currentPreset.steppedParameters[spLFOTargets]&otB)
-			pitchBVal+=val;
+	if(currentPreset.steppedParameters[spLFOTargets]&otA)
+		pitchAVal+=val;
+	if(currentPreset.steppedParameters[spLFOTargets]&otB)
+		pitchBVal+=val;
 
 		// filter
 
-		filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo.output);
+	filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo.output);
 
 		// amplifier
 
-		ampVal=synth.partState.benderCVs[cvAmp];
-		ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV>>1);
-		ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
+	ampVal=synth.partState.benderCVs[cvAmp];
+	ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV>>1);
+	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
 
-		// part computations
+		// misc
 
-		filEnvAmt=currentPreset.continuousParameters[cpFilEnvAmt];
-		filEnvAmt+=INT16_MIN;
+	filEnvAmt=currentPreset.continuousParameters[cpFilEnvAmt];
+	filEnvAmt+=INT16_MIN;
 
-		wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
-		if(currentPreset.steppedParameters[spLFOTargets]&otA)
-			wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
+	wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
+	if(currentPreset.steppedParameters[spLFOTargets]&otA)
+		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
 
-		wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
-		if(currentPreset.steppedParameters[spLFOTargets]&otB)
-			wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
+	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
+	if(currentPreset.steppedParameters[spLFOTargets]&otB)
+		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
 
-		wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
-		wmodEnvAmt+=INT16_MIN;
-		
+	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
+	wmodEnvAmt+=INT16_MIN;
+
 		// restrict range
 
-		pitchAVal=__SSAT(pitchAVal,16);
-		pitchBVal=__SSAT(pitchBVal,16);
-		wmodAVal=__USAT(wmodAVal,16);
-		wmodBVal=__USAT(wmodBVal,16);
-		filterVal=__SSAT(filterVal,16);
-		ampVal=__USAT(ampVal,16);
+	pitchAVal=__SSAT(pitchAVal,16);
+	pitchBVal=__SSAT(pitchBVal,16);
+	wmodAVal=__USAT(wmodAVal,16);
+	wmodBVal=__USAT(wmodBVal,16);
+	filterVal=__SSAT(filterVal,16);
+	ampVal=__USAT(ampVal,16);
+
+	// voices computations
 		
-		// crossover
-		
-		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
-			refreshCrossOver(wmodAVal,wmodEnvAmt);
-		
-		// actual voice refresh
-		
+	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
-	}
 
 	// slower updates
 	
-	switch(frc&0x03) // 4 phases, each 500hz
+	switch(frc&0x03) // 4 phases, each 1Khz
 	{
 	case 0:
 		// compensate pre filter mixer level for resonance
@@ -1011,51 +1004,64 @@ void synth_timerInterrupt(void)
 
 		lfo_update(&synth.vibrato);
 
+		// crossover
+
+		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+			refreshCrossOver(wmodAVal,wmodEnvAmt);
+
 		break;
 	case 3:
 		// bit inputs (footswitch / tape in)
 	
 		handleBitInputs();
 		
-		// arpeggiator
-
-		if(settings.syncMode==smInternal || synth.pendingExtClock)
-		{
-			if(synth.pendingExtClock)
-				--synth.pendingExtClock;
-			
-			if (clock_update())
-			{
-				// sequencer
-
-				if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
-					seq_update();
-			
-				// arpeggiator
-
-				if(arp_getMode()!=amOff)
-					arp_update();
-			}
-		}
-
-		// glide
+		// assigner
 		
-		for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-		{
-			int16_t amt=synth.partState.glideAmount;
-			
-			if(synth.partState.gliding)
-			{
-				computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
-				computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
-				computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
-			}
-		}
-
-		// misc
-		
-		++currentTick;
 		handleFinishedVoices();
+		
+		if(frc&0x04)
+		{
+			// clocking
+
+			if(settings.syncMode==smInternal || synth.pendingExtClock)
+			{
+				if(synth.pendingExtClock)
+					--synth.pendingExtClock;
+
+				if (clock_update())
+				{
+					// sequencer
+
+					if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
+						seq_update();
+
+					// arpeggiator
+
+					if(arp_getMode()!=amOff)
+						arp_update();
+				}
+			}
+		}
+		else
+		{
+			// glide
+
+			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+			{
+				int16_t amt=synth.partState.glideAmount;
+
+				if(synth.partState.gliding)
+				{
+					computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
+					computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
+					computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
+				}
+			}
+
+			// 500hz tick counter
+
+			++currentTick;
+		}
 
 		break;
 	}
