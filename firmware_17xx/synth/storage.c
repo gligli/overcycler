@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 8
+#define STORAGE_VERSION 9
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -44,10 +44,13 @@ const uint8_t steppedParametersBits[spCount] =
 	/*XOvrBank*/7,
 	/*XOvrWave*/7,
 	/*FilEnvLin*/1,
+	/*LFO2Shape*/3,
+	/*LFO2Shift*/2,
+	/*LFO2Targets*/2,
 };
 
-EXT_RAM struct settings_s settings;
-EXT_RAM struct preset_s currentPreset;
+struct settings_s settings EXT_RAM;
+struct preset_s currentPreset EXT_RAM;
 
 static struct
 {
@@ -264,11 +267,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	storageLoad(number,1);
 
-	currentPreset.continuousParameters[cpNoiseVol]=0;
-	currentPreset.steppedParameters[spOscSync]=0;
-	currentPreset.steppedParameters[spXOvrBank]=26; // perfectwaves (saw)
-	currentPreset.steppedParameters[spXOvrWave]=0;
-	currentPreset.steppedParameters[spFilEnvLin]=0;
+	preset_loadDefault(0);
 
 	if (storage.version<1)
 		return 0;
@@ -319,6 +318,22 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spXOvrWave]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
 
+	if(storage.version<9)
+		return 1;
+	
+	// v9
+
+	currentPreset.continuousParameters[cpLFO2PitchAmt]=storageRead16();
+	currentPreset.continuousParameters[cpLFO2WModAmt]=storageRead16();
+	currentPreset.continuousParameters[cpLFO2FilAmt]=storageRead16();
+	currentPreset.continuousParameters[cpLFO2AmpAmt]=storageRead16();
+	currentPreset.continuousParameters[cpLFOResAmt]=storageRead16();
+	currentPreset.continuousParameters[cpLFO2ResAmt]=storageRead16();
+	
+	currentPreset.steppedParameters[spLFO2Shape]=storageRead8();
+	currentPreset.steppedParameters[spLFO2Shift]=storageRead8();
+	currentPreset.steppedParameters[spLFO2Targets]=storageRead8();
+
 	return 1;
 }
 
@@ -357,6 +372,19 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite8(currentPreset.steppedParameters[spXOvrWave]);
 	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
 	
+	// v9
+
+	storageWrite16(currentPreset.continuousParameters[cpLFO2PitchAmt]);
+	storageWrite16(currentPreset.continuousParameters[cpLFO2WModAmt]);
+	storageWrite16(currentPreset.continuousParameters[cpLFO2FilAmt]);
+	storageWrite16(currentPreset.continuousParameters[cpLFO2AmpAmt]);
+	storageWrite16(currentPreset.continuousParameters[cpLFOResAmt]);
+	storageWrite16(currentPreset.continuousParameters[cpLFO2ResAmt]);
+	
+	storageWrite8(currentPreset.steppedParameters[spLFO2Shape]);
+	storageWrite8(currentPreset.steppedParameters[spLFO2Shift]);
+	storageWrite8(currentPreset.steppedParameters[spLFO2Targets]);
+
 	// this must stay last
 	storageFinishStore(number,1);
 }
@@ -425,8 +453,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
 	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
+	currentPreset.continuousParameters[cpLFO2PitchAmt]=UINT16_MAX/8;
+	currentPreset.continuousParameters[cpLFO2Freq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
-	currentPreset.continuousParameters[cpVibFreq]=8*UINT16_MAX/10+1;
 
 	currentPreset.steppedParameters[spBenderRange]=1;
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
@@ -436,6 +465,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spLFOShape]=lsTri;
 	currentPreset.steppedParameters[spLFOTargets]=otBoth;
 	currentPreset.steppedParameters[spLFOShift]=1;
+	currentPreset.steppedParameters[spLFO2Shape]=lsTri;
+	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
+	currentPreset.steppedParameters[spLFO2Shift]=1;
 
 	currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
 	currentPreset.steppedParameters[spBBank]=26;

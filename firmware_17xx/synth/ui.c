@@ -49,7 +49,7 @@ enum uiKeypadButton_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upFil=1,upAmp=2,upMod=3,upArp=4,upSeq=5,upMisc=6,upTuner=7
+	upNone=-1,upOscs=0,upFil=1,upAmp=2,upLFO1=3,upLFO2=4,upArp=5,upSeq=6,upMisc=7,upTuner=8
 };
 
 struct uiParam_s
@@ -61,7 +61,7 @@ struct uiParam_s
 	const char * values[8]; // 4 chars + zero termination
 };
 
-const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/key num]
 {
 	/* Oscillators page (A) */
 	{
@@ -150,28 +150,57 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*0*/ {.type=ptNone},
 		},
 	},
-	/* Modulation page (D) */
+	/* LFO1 page (D) */
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCont,.number=cpLFOFreq,.shortName="LFrq",.longName="LFO Frequency"},
-			{.type=ptCont,.number=cpLFOAmt,.shortName="LAmt",.longName="LFO Amount (base)"},
-			{.type=ptStep,.number=spLFOShape,.shortName="LWav",.longName="LFO Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
-			{.type=ptCont,.number=cpLFOPitchAmt,.shortName="LPit",.longName="Pitch LFO Amount"},
-			{.type=ptCont,.number=cpLFOWModAmt,.shortName="LWmo",.longName="WaveMod LFO Amount"},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpVibFreq,.shortName="VFrq",.longName="Vibrato Frequency"},
-			{.type=ptCont,.number=cpVibAmt,.shortName="VAmt",.longName="Vibrato Amount (base)"},
+			{.type=ptCont,.number=cpLFOFreq,.shortName="1Frq",.longName="LFO1 Frequency"},
+			{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
+			{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
+			{.type=ptNone},
 			{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
-			{.type=ptCont,.number=cpLFOFilAmt,.shortName="LFil",.longName="Filter LFO Amount"},
-			{.type=ptCont,.number=cpLFOAmpAmt,.shortName="LAmp",.longName="Amplifier LFO Amount"},
+			/* 2nd row of pots */
+			{.type=ptCont,.number=cpLFOPitchAmt,.shortName="1Pit",.longName="Pitch LFO1 Amount"},
+			{.type=ptCont,.number=cpLFOWModAmt,.shortName="1Wmo",.longName="WaveMod LFO1 Amount"},
+			{.type=ptCont,.number=cpLFOFilAmt,.shortName="1Fil",.longName="Filter frequency LFO1 Amount"},
+			{.type=ptCont,.number=cpLFOResAmt,.shortName="1Res",.longName="Filter resonance LFO1 Amount"},
+			{.type=ptCont,.number=cpLFOAmpAmt,.shortName="1Amp",.longName="Amplifier LFO1 Amount"},
 		},
 		{
-			/*1*/ {.type=ptStep,.number=spLFOShift,.shortName="LRng",.longName="LFO Range",.values={"Slow","Fast"}},
+			/*1*/ {.type=ptStep,.number=spLFOShift,.shortName="1Rng",.longName="LFO1 Range",.values={"Slow","Fast"}},
 			/*2*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
 			/*3*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
-			/*4*/ {.type=ptStep,.number=spLFOTargets,.shortName="LTgt",.longName="LFO Osc Target",.values={"Off ","OscA","OscB","Both"}},
-			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO ","Vib "}},
+			/*4*/ {.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"Off ","OscA","OscB","Both"}},
+			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
+			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"Off ","Pit ","Fil ","Amp "}},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptNone},
+		},
+	},
+	/* LFO2 page (D) */
+	{
+		{
+			/* 1st row of pots */
+			{.type=ptCont,.number=cpLFO2Freq,.shortName="2Frq",.longName="LFO2 Frequency"},
+			{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
+			{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
+			{.type=ptNone},
+			{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
+			/* 2nd row of pots */
+			{.type=ptCont,.number=cpLFO2PitchAmt,.shortName="2Pit",.longName="Pitch LFO2 Amount"},
+			{.type=ptCont,.number=cpLFO2WModAmt,.shortName="2Wmo",.longName="WaveMod LFO2 Amount"},
+			{.type=ptCont,.number=cpLFO2FilAmt,.shortName="2Fil",.longName="Filter frequency LFO2 Amount"},
+			{.type=ptCont,.number=cpLFO2ResAmt,.shortName="2Res",.longName="Filter resonance LFO2 Amount"},
+			{.type=ptCont,.number=cpLFO2AmpAmt,.shortName="2Amp",.longName="Amplifier LFO2 Amount"},
+		},
+		{
+			/*1*/ {.type=ptStep,.number=spLFO2Shift,.shortName="2Rng",.longName="LFO2 Range",.values={"Slow","Fast"}},
+			/*2*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
+			/*3*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
+			/*4*/ {.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"Off ","OscA","OscB","Both"}},
+			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
 			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"Off ","Pit ","Fil ","Amp "}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
@@ -589,7 +618,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.activePage=upAmp;
 				break;
 			case kbD: 
-				ui.activePage=upMod;
+				ui.activePage=(ui.activePage==upLFO1)?upLFO2:upLFO1;
 				break;
 			case kbAsterisk: 
 				ui.activePage=upMisc;

@@ -4,7 +4,7 @@
 
 #include "lfo.h"
 
-static uint16_t sineShape[256];
+static uint16_t sineShape[256] EXT_RAM;
 
 static void updateIncrement(struct lfo_s * lfo)
 {

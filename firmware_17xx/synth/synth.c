@@ -55,8 +55,7 @@ static struct
 	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	struct adsr_s filEnvs[SYNTH_VOICE_COUNT];
 	struct adsr_s ampEnvs[SYNTH_VOICE_COUNT];
-	struct lfo_s lfo;
-	struct lfo_s vibrato;
+	struct lfo_s lfo[2];
 	
 	uint16_t oscANoteCV[SYNTH_VOICE_COUNT];
 	uint16_t oscBNoteCV[SYNTH_VOICE_COUNT];
@@ -292,16 +291,14 @@ static void refreshEnvSettings(int8_t type)
 static void refreshLfoSettings(void)
 {
 	static const int8_t mr[]={5,3,1,0};
-	lfoShape_t shape;
-	uint8_t shift;
-	uint16_t mwAmt,lfoAmt,vibAmt,dlyAmt;
+	uint16_t mwAmt,lfoAmt,lfo2Amt,dlyAmt;
 	uint32_t elapsed;
 
-	shape=currentPreset.steppedParameters[spLFOShape];
-	shift=currentPreset.steppedParameters[spLFOShift]*3;
-
-	lfo_setShape(&synth.lfo,shape);
-	lfo_setSpeedShift(&synth.lfo,shift);
+	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
+	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
+	
+	lfo_setSpeedShift(&synth.lfo[0],currentPreset.steppedParameters[spLFOShift]*3);
+	lfo_setSpeedShift(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shift]*3);
 
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
@@ -326,26 +323,26 @@ static void refreshLfoSettings(void)
 	lfoAmt=currentPreset.continuousParameters[cpLFOAmt];
 	lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
 
-	vibAmt=currentPreset.continuousParameters[cpVibAmt]>>2;
-	vibAmt=(vibAmt<POT_DEAD_ZONE)?0:(vibAmt-POT_DEAD_ZONE);
+	lfo2Amt=currentPreset.continuousParameters[cpLFO2Amt];
+	lfo2Amt=(lfo2Amt<POT_DEAD_ZONE)?0:(lfo2Amt-POT_DEAD_ZONE);
 
-	if(currentPreset.steppedParameters[spModwheelTarget]==0) // targeting lfo?
+	if(currentPreset.steppedParameters[spModwheelTarget]==0) // targeting lfo1?
 	{
-		lfo_setCVs(&synth.lfo,
+		lfo_setCVs(&synth.lfo[0],
 				currentPreset.continuousParameters[cpLFOFreq],
 				satAddU16U16(lfoAmt,mwAmt));
-		lfo_setCVs(&synth.vibrato,
-				 currentPreset.continuousParameters[cpVibFreq],
-				 scaleU16U16(vibAmt,dlyAmt));
+		lfo_setCVs(&synth.lfo[1],
+				 currentPreset.continuousParameters[cpLFO2Freq],
+				 scaleU16U16(lfo2Amt,dlyAmt));
 	}
 	else
 	{
-		lfo_setCVs(&synth.lfo,
+		lfo_setCVs(&synth.lfo[0],
 				currentPreset.continuousParameters[cpLFOFreq],
 				scaleU16U16(lfoAmt,dlyAmt));
-		lfo_setCVs(&synth.vibrato,
-				currentPreset.continuousParameters[cpVibFreq],
-				satAddU16U16(vibAmt,mwAmt));
+		lfo_setCVs(&synth.lfo[1],
+				currentPreset.continuousParameters[cpLFO2Freq],
+				satAddU16U16(lfo2Amt,mwAmt));
 	}
 }
 
@@ -853,10 +850,8 @@ void synth_init(void)
 		adsr_setShape(&synth.filEnvs[i],1);
 	}
 
-	lfo_init(&synth.lfo);
-	lfo_init(&synth.vibrato);
-	lfo_setShape(&synth.vibrato,lsTri);
-	lfo_setSpeedShift(&synth.vibrato,3);
+	lfo_init(&synth.lfo[0]);
+	lfo_init(&synth.lfo[1]);
 
 	// load settings from storage; tune when they are bad
 	
@@ -916,35 +911,47 @@ void synth_update(void)
 // 4Khz
 void synth_timerInterrupt(void)
 {
-	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt,resoFactor;
+	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,resVal,wmodEnvAmt,filEnvAmt,resoFactor;
 
 	static int frc=0;
 
-	// lfo
+	// lfos
 		
-	lfo_update(&synth.lfo);
+	lfo_update(&synth.lfo[0]);
+	lfo_update(&synth.lfo[1]);
 		
 	// global computations
 	
 		// pitch
 
-	pitchAVal=pitchBVal=synth.vibrato.output;
-	val=scaleU16S16(currentPreset.continuousParameters[cpLFOPitchAmt],synth.lfo.output>>1);
+	pitchAVal=pitchBVal=0;
 
+	val=scaleU16S16(currentPreset.continuousParameters[cpLFOPitchAmt],synth.lfo[0].output>>1);
 	if(currentPreset.steppedParameters[spLFOTargets]&otA)
 		pitchAVal+=val;
 	if(currentPreset.steppedParameters[spLFOTargets]&otB)
 		pitchBVal+=val;
 
+	val=scaleU16S16(currentPreset.continuousParameters[cpLFO2PitchAmt],synth.lfo[1].output>>1);
+	if(currentPreset.steppedParameters[spLFO2Targets]&otA)
+		pitchAVal+=val;
+	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
+		pitchBVal+=val;
+
 		// filter
 
-	filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo.output);
-
+	filterVal=scaleU16S16(currentPreset.continuousParameters[cpLFOFilAmt],synth.lfo[0].output);
+	filterVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2FilAmt],synth.lfo[1].output);
+	
 		// amplifier
 
-	ampVal=synth.partState.benderCVs[cvAmp];
-	ampVal+=UINT16_MAX-scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.levelCV>>1);
-	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo.output);
+	ampVal=synth.partState.benderCVs[cvAmp]+UINT16_MAX;
+
+	ampVal-=scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo[0].levelCV>>1);
+	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo[0].output);
+
+	ampVal-=scaleU16U16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].levelCV>>1);
+	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].output);
 
 		// misc
 
@@ -953,11 +960,15 @@ void synth_timerInterrupt(void)
 
 	wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
 	if(currentPreset.steppedParameters[spLFOTargets]&otA)
-		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
+		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
+	if(currentPreset.steppedParameters[spLFO2Targets]&otA)
+		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[1].output);
 
 	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
 	if(currentPreset.steppedParameters[spLFOTargets]&otB)
-		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo.output);
+		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
+	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
+		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[1].output);
 
 	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
 	wmodEnvAmt+=INT16_MIN;
@@ -981,16 +992,21 @@ void synth_timerInterrupt(void)
 	switch(frc&0x03) // 4 phases, each 1Khz
 	{
 	case 0:
+		resVal=currentPreset.continuousParameters[cpResonance];
+		resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
+		resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
+		resVal=__USAT(resVal,16);
+
 		// compensate pre filter mixer level for resonance
 
-		resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,currentPreset.continuousParameters[cpResonance]-6000))/(100*256);
+		resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
 
 		// CV update
 		
 		refreshCV(-1,cvAVol,(uint32_t)currentPreset.continuousParameters[cpAVol]*resoFactor/256);
 		refreshCV(-1,cvBVol,(uint32_t)currentPreset.continuousParameters[cpBVol]*resoFactor/256);
 		refreshCV(-1,cvNoiseVol,(uint32_t)currentPreset.continuousParameters[cpNoiseVol]*resoFactor/256);
-		refreshCV(-1,cvResonance,currentPreset.continuousParameters[cpResonance]);
+		refreshCV(-1,cvResonance,resVal);
 
 		break;
 	case 1:
@@ -1000,10 +1016,6 @@ void synth_timerInterrupt(void)
 
 		break;
 	case 2:
-		// vibrato
-
-		lfo_update(&synth.vibrato);
-
 		// crossover
 
 		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)

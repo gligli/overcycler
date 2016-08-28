@@ -14,12 +14,14 @@ typedef enum
 	cpAmpAtt=16,cpAmpDec=17,cpAmpSus=18,cpAmpRel=19,
 	cpLFOFreq=20,cpLFOAmt=21,
 	cpLFOPitchAmt=22,cpLFOWModAmt=23,cpLFOFilAmt=24,cpLFOAmpAmt=25,
-	cpVibFreq=26,cpVibAmt=27,
+	cpLFO2Freq=26,cpLFO2Amt=27,
 	cpModDelay=28,cpGlide=29,
 	cpAmpVelocity=30,cpFilVelocity=31,
 	cpMasterTune=32,cpUnisonDetune=33,
 	cpMasterLeft_Legacy=34,cpMasterRight_Legacy=35,
 	cpSeqArpClock_Legacy=36,cpNoiseVol=37,
+	cpLFO2PitchAmt=38,cpLFO2WModAmt=39,cpLFO2FilAmt=40,cpLFO2AmpAmt=41,
+	cpLFOResAmt=42,cpLFO2ResAmt=43,
 
 	// /!\ this must stay last
 	cpCount
@@ -44,6 +46,8 @@ typedef enum
 	spXOvrBank=21,spXOvrWave=22,
 	spFilEnvLin=23,
 			
+	spLFO2Shape=24,spLFO2Shift=25,spLFO2Targets=26,
+
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;
