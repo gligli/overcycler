@@ -156,7 +156,7 @@ const struct uiParam_s uiParameters[8][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/* 1st row of pots */
 			{.type=ptCont,.number=cpLFOFreq,.shortName="LFrq",.longName="LFO Frequency"},
 			{.type=ptCont,.number=cpLFOAmt,.shortName="LAmt",.longName="LFO Amount (base)"},
-			{.type=ptStep,.number=spLFOShape,.shortName="LWav",.longName="LFO Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw "}},
+			{.type=ptStep,.number=spLFOShape,.shortName="LWav",.longName="LFO Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
 			{.type=ptCont,.number=cpLFOPitchAmt,.shortName="LPit",.longName="Pitch LFO Amount"},
 			{.type=ptCont,.number=cpLFOWModAmt,.shortName="LWmo",.longName="WaveMod LFO Amount"},
 			/* 2nd row of pots */

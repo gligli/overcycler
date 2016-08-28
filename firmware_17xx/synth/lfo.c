@@ -95,6 +95,8 @@ const char * lfo_shapeName(lfoShape_t shape)
 		return "noise";
 	case lsSaw:
 		return "saw";
+	case lsRevSaw:
+		return "rev-saw";
 	}
 	
 	return "";
@@ -134,6 +136,11 @@ inline void lfo_update(struct lfo_s * l)
 	case lsSaw:
 		l->rawOutput=l->phase>>9;
 		if(l->halfPeriod)
+			l->rawOutput=UINT16_MAX-l->rawOutput;
+		break;
+	case lsRevSaw:
+		l->rawOutput=l->phase>>9;
+		if(!l->halfPeriod)
 			l->rawOutput=UINT16_MAX-l->rawOutput;
 		break;
 	default:
