@@ -304,7 +304,7 @@ static const uint8_t keypadButtonCode[16]=
 	0x34,0x31
 };
 
-static EXT_RAM struct
+static struct
 {
 	uint16_t potSamples[POT_COUNT][POT_SAMPLES];
 	int16_t curPotSample;
@@ -335,7 +335,7 @@ static EXT_RAM struct
 	
 	struct hd44780_data lcd1, lcd2;
 
-} ui;
+} ui EXT_RAM;
 
 static uint16_t getPotValue(int8_t pot)
 {

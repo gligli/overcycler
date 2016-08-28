@@ -16,7 +16,7 @@ struct allocation_s
 	int8_t internalKeyboard;
 };
 
-static EXT_RAM struct
+static struct
 {
 	uint8_t noteStates[16]; // 1 bit per note, 128 notes
 	uint8_t noteVelocities[128];
@@ -26,7 +26,7 @@ static EXT_RAM struct
 	uint8_t voiceMask;
 	int8_t mono;
 	int8_t hold;
-} assigner;
+} assigner EXT_RAM;
 
 static const uint8_t bit2mask[8] = {1,2,4,8,16,32,64,128};
 static const uint8_t polyPattern[SYNTH_VOICE_COUNT]={0,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE,ASSIGNER_NO_NOTE};	

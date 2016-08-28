@@ -21,7 +21,7 @@ struct track
 	int8_t previousTranspose;
 };
 
-static EXT_RAM struct
+static struct
 {
 	struct track tracks[SEQ_TRACK_COUNT];
 
@@ -29,7 +29,7 @@ static EXT_RAM struct
 	// During note entry:
 	uint8_t addTies; // how many ties to add
 	uint8_t noteOns; // how many keys are down
-} seq;
+} seq EXT_RAM;
 
 
 static int8_t anyTrackPlaying(void)

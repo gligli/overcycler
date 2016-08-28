@@ -74,13 +74,13 @@ static const uint32_t oscChannelCommand[SYNTH_VOICE_COUNT*2] =
 	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
 };
 
-static EXT_RAM struct
+static struct
 {
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
 	uint16_t cvCommands[DACSPI_CV_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
 	uint8_t channelCPSR[DACSPI_CHANNEL_COUNT];
-} dacspi;
+} dacspi EXT_RAM;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)

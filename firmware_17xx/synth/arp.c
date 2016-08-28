@@ -16,7 +16,7 @@
 
 #define ARP_LAST_NOTE (ARP_NOTE_MEMORY-1)
 
-static EXT_RAM struct
+static struct
 {
 	uint8_t notes[ARP_NOTE_MEMORY];
 	int16_t noteIndex;
@@ -25,7 +25,7 @@ static EXT_RAM struct
 
 	int8_t hold;
 	arpMode_t mode;
-} arp;
+} arp EXT_RAM;
 
 static int8_t isEmpty(void)
 {
