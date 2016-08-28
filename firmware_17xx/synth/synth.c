@@ -719,7 +719,7 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 		v=assigner_getLatestAssigned(NULL);
 		if(v>=0)
 		{
-			xovr+=scaleU16S16(synth.filEnvs[v].output,wmodEnvAmt);
+			xovr+=scaleU16S16(synth.filEnvs[v].output,wmodEnvAmt)<<1;
 			xovr=__USAT(xovr,16);
 		}
 	}
