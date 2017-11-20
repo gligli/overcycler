@@ -19,7 +19,6 @@ static void lcd_put(struct hd44780_data *lcd, int rs, int data)
 	GPIO_ClearValue(lcd->port, 1<<lcd->pins.rw);
 	HALF_CYCLE_DELAY();
 	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	HALF_CYCLE_DELAY();
 	if(data&1)
 		GPIO_SetValue(lcd->port, 1<<lcd->pins.d4);
 	else
@@ -36,6 +35,7 @@ static void lcd_put(struct hd44780_data *lcd, int rs, int data)
 		GPIO_SetValue(lcd->port, 1<<lcd->pins.d7);
 	else
 		GPIO_ClearValue(lcd->port, 1<<lcd->pins.d7);
+	HALF_CYCLE_DELAY();
 	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
 }
 
@@ -91,6 +91,7 @@ static void lcd_cmd(struct hd44780_data *lcd, int cmd)
 		/* bits 0-6 are address, that might be useful too */
 		if ((lcd_read(lcd, 0) & 0x80) == 0)
 			break;
+		DELAY_100NS();
 	}
 	if (timeout == 0)
 		rprintf(0, "%s, timeouted at cmd %x\n", __func__, cmd);
@@ -106,6 +107,7 @@ static void lcd_data(struct hd44780_data *lcd, int cmd)
 		/* bits 0-6 are address, that might be useful too */
 		if ((lcd_read(lcd, 0) & 0x80) == 0)
 			break;
+		DELAY_100NS();
 	}
 	if (timeout == 0)
 		rprintf(0, "%s, timeouted at cmd %x\n", __func__, cmd);
