@@ -245,9 +245,11 @@ static void handleFinishedVoices(void)
 
 static void refreshAssignerSettings(void)
 {
+	static const uint8_t vc2msk[7] = {1, 3, 7, 15, 31, 63};
+	
 	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
-//no way to change this in overcycler	assigner_setVoiceMask(settings.voiceMask);
 	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
+	assigner_setVoiceMask(vc2msk[currentPreset.steppedParameters[spVoiceCount]]);
 }
 
 static void refreshEnvSettings(int8_t type)
@@ -962,13 +964,13 @@ void synth_timerInterrupt(void)
 	if(currentPreset.steppedParameters[spLFOTargets]&otA)
 		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otA)
-		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[1].output);
+		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2WModAmt],synth.lfo[1].output);
 
 	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
 	if(currentPreset.steppedParameters[spLFOTargets]&otB)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
-		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[1].output);
+		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2WModAmt],synth.lfo[1].output);
 
 	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
 	wmodEnvAmt+=INT16_MIN;

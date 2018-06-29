@@ -46,7 +46,7 @@ typedef enum
 	spXOvrBank=21,spXOvrWave=22,
 	spFilEnvLin=23,
 			
-	spLFO2Shape=24,spLFO2Shift=25,spLFO2Targets=26,
+	spLFO2Shape=24,spLFO2Shift=25,spLFO2Targets=26,spVoiceCount=27,
 
 	// /!\ this must stay last
 	spCount

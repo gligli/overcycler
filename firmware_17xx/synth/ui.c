@@ -128,7 +128,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
 			{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
 			{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
-			{.type=ptNone},
+			{.type=ptStep,.number=spVoiceCount,.shortName="VCnt",.longName="Voice count",.values={"1","2","3","4","5","6"}},
 			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 			/* 2nd row of pots */
 			{.type=ptCont,.number=cpAmpAtt,.shortName="AAtk",.longName="Amplifier Attack"},
@@ -902,7 +902,7 @@ static void readPots(void)
 				// read value back
 
 				if(i<10)
-					new|=((LPC_GPIO0->FIOPIN3&(1<<(25-24)))?1:0)<<(15-i);
+					new|=(LPC_GPIO0->FIOPIN3&(1<<(25-24)))?(1<<(15-i)):0;
 
 				// send next address
 
@@ -1058,7 +1058,7 @@ void ui_init(void)
 	hd44780_driver.init(&ui.lcd2);
 	hd44780_driver.onoff(&ui.lcd2, HD44780_ONOFF_DISPLAY_ON);
 		
-    rprintf_devopen(1,putc_lcd2); 
+	rprintf_devopen(1,putc_lcd2); 
 
 	// welcome message
 
