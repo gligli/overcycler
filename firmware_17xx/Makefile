@@ -257,12 +257,12 @@ LPC21ISP_OPTIONS = -term -control -donotstart
 
 # Define programs and commands.
 SHELL = sh
-CC = arm-none-eabi-gcc
-CPP = arm-none-eabi-g++
-OBJCOPY = arm-none-eabi-objcopy
-OBJDUMP = arm-none-eabi-objdump
-SIZE = arm-none-eabi-size
-NM = arm-none-eabi-nm
+CC = arm-eabi-gcc
+CPP = arm-eabi-g++
+OBJCOPY = arm-eabi-objcopy
+OBJDUMP = arm-eabi-objdump
+SIZE = arm-eabi-size
+NM = arm-eabi-nm
 REMOVE = rm -f
 COPY = cp
 
