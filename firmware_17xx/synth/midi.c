@@ -121,6 +121,16 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 		assigner_holdEvent(value);
 		return;
 	}
+	else if(control==120) // all sound off
+	{
+		assigner_panicOff();
+		return;
+	}
+	else if(control==123) // all notes off
+	{
+		assigner_allKeysOff();
+		return;
+	}
 	
 	if(control>=MIDI_BASE_COARSE_CC && control<MIDI_BASE_COARSE_CC+cpCount)
 	{

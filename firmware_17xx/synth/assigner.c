@@ -227,6 +227,12 @@ void assigner_allKeysOff(void)
 	assigner.hold=0;
 }
 
+void assigner_panicOff(void)
+{
+    voicesDone(1);
+    assigner_init();
+}
+
 void assigner_setPriority(assignerPriority_t prio)
 {
 	if(prio==assigner.priority)

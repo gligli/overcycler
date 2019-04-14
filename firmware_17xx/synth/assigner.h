@@ -19,8 +19,9 @@ int8_t assigner_getAnyAssigned(void);
 int8_t assigner_getLatestAssigned(uint8_t * note);
 
 void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard);
-void assigner_voiceDone(int8_t voice); // -1 -> all voices finished
+void assigner_voiceDone(int8_t voice);
 void assigner_allKeysOff(void);
+void assigner_panicOff(void);
 
 void assigner_setPattern(const uint8_t * pattern, int8_t mono);
 void assigner_getPattern(uint8_t * pattern, int8_t * mono);
