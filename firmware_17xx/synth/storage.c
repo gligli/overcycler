@@ -468,9 +468,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpLFO2Freq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
-	currentPreset.steppedParameters[spBenderRange]=1;
-	currentPreset.steppedParameters[spBenderTarget]=modPitch;
-	currentPreset.steppedParameters[spModwheelRange]=2;
+	currentPreset.steppedParameters[spBenderRange]=2; // octave
+	currentPreset.steppedParameters[spBenderTarget]=modFil;
+	currentPreset.steppedParameters[spModwheelRange]=2; // high
 	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;
 	currentPreset.steppedParameters[spLFOShape]=lsTri;

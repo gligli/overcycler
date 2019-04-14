@@ -213,7 +213,7 @@ void computeBenderCVs(void)
 		synth.partState.benderCVs[cvBPitch]=bend;
 		break;
 	case modFil:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*4,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
+		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*8,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
 		bend/=UINT16_MAX;
 		synth.partState.benderCVs[cvCutoff]=bend;
 		break;
