@@ -246,7 +246,17 @@ static void handleFinishedVoices(void)
 static void refreshAssignerSettings(void)
 {
 	static const uint8_t vc2msk[7] = {1, 3, 7, 15, 31, 63};
-	
+ 
+	if(currentPreset.steppedParameters[spUnison]!=assigner_getMono())
+	{
+		if(currentPreset.steppedParameters[spUnison])
+			assigner_latchPattern();
+		else
+			assigner_setPoly();
+		
+		assigner_getPattern(currentPreset.voicePattern,NULL);
+	}
+
 	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
 	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
 	assigner_setVoiceMask(vc2msk[currentPreset.steppedParameters[spVoiceCount]]);

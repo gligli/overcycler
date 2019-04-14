@@ -17,6 +17,7 @@ int8_t assigner_getAssignment(int8_t voice, uint8_t * note);
 int8_t assigner_getAnyPressed(void);
 int8_t assigner_getAnyAssigned(void);
 int8_t assigner_getLatestAssigned(uint8_t * note);
+int8_t assigner_getMono(void);
 
 void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard);
 void assigner_voiceDone(int8_t voice);

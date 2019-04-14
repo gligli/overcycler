@@ -304,6 +304,11 @@ int8_t assigner_getAnyAssigned(void)
 	return v!=0;
 }
 
+int8_t FORCEINLINE assigner_getMono(void)
+{
+	return assigner.mono;
+}
+
 void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard)
 {
 	uint32_t timestamp;

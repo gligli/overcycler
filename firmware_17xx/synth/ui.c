@@ -705,16 +705,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		//	special cases
 		if(change)
 		{
-			if(prm->number==spUnison)
-			{
-				// unison latch
-				if(data)
-					assigner_latchPattern();
-				else
-					assigner_setPoly();
-				assigner_getPattern( currentPreset.voicePattern,NULL);
-			}
-			else if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
+			if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
 			{
 				// waveform changes
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
