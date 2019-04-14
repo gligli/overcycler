@@ -86,7 +86,7 @@
   <confs>
     <conf name="Default" type="0">
       <toolsSet>
-        <compilerSet>GNU_ARM|MinGW_TDM</compilerSet>
+        <compilerSet>GNU_ARM|MinGW</compilerSet>
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
