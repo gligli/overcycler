@@ -6,6 +6,7 @@
 #include "wtosc.h"
 #include "dacspi.h"
 #include "ff.h"
+#include "scan.h"
 #include "ui.h"
 #include "uart_midi.h"
 #include "midi.h"
@@ -846,6 +847,7 @@ void synth_init(void)
 	// init subsystems
 	// ui_init() done in main.c
 	dacspi_init();
+	scan_init();
 	tuner_init();
 	assigner_init();
 	uartMidi_init();
@@ -909,6 +911,7 @@ void synth_update(void)
 #endif
 #endif
 	
+	scan_update();
 	ui_update();
 	
 	refreshLfoSettings();

@@ -115,7 +115,7 @@ int main(void)
 
 	SystemCoreClockUpdate();
 	init_serial0(230400);
-    rprintf_devopen(0,putc_serial0); 
+	rprintf_devopen(0,putc_serial0); 
 	
 	ui_init(); // called early to get a splash screen
 	

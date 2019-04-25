@@ -81,6 +81,7 @@ SRC+=synth/storage.c
 SRC+=synth/synth.c
 SRC+=synth/tuner.c
 SRC+=synth/uart_midi.c
+SRC+=synth/scan.c
 SRC+=synth/ui.c
 SRC+=synth/utils.c
 SRC+=synth/wtosc.c
@@ -257,12 +258,12 @@ LPC21ISP_OPTIONS = -term -control -donotstart
 
 # Define programs and commands.
 SHELL = sh
-CC = arm-eabi-gcc
-CPP = arm-eabi-g++
-OBJCOPY = arm-eabi-objcopy
-OBJDUMP = arm-eabi-objdump
-SIZE = arm-eabi-size
-NM = arm-eabi-nm
+CC = arm-none-eabi-gcc
+CPP = arm-none-eabi-g++
+OBJCOPY = arm-none-eabi-objcopy
+OBJDUMP = arm-none-eabi-objdump
+SIZE = arm-none-eabi-size
+NM = arm-none-eabi-nm
 REMOVE = rm -f
 COPY = cp
 

@@ -13,19 +13,10 @@
 #include "lpc17xx_gpio.h"
 #include "lpc17xx_pinsel.h"
 #include "clock.h"
-
-#define DEBOUNCE_THRESHOLD 5
+#include "scan.h"
 
 #define PRESET_SLOTS 20
 #define PRESET_BANKS 20
-
-#define ADC_QUANTUM 64 // 10 bit
-
-#define POT_COUNT 10
-#define POT_SAMPLES 5
-#define POT_THRESHOLD (ADC_QUANTUM*6)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*3)
-#define POT_TIMEOUT (TICKER_1S)
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
 
@@ -326,23 +317,8 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	},
 };
 
-static const uint8_t keypadButtonCode[16]=
-{
-	0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,0x32,
-	0x08,0x18,0x28,0x38,
-	0x34,0x31
-};
-
 static struct
 {
-	uint16_t potSamples[POT_COUNT][POT_SAMPLES];
-	int16_t curPotSample;
-	uint16_t potValue[POT_COUNT];
-	uint32_t potLockTimeout[POT_COUNT];
-	uint32_t potLockValue[POT_COUNT];
-	
-	int8_t keypadState[16];
-
 	enum uiPage_e activePage;
 	int8_t activeSource;
 	int8_t sourceChanges,prevSourceChanges;
@@ -365,11 +341,6 @@ static struct
 	struct hd44780_data lcd1, lcd2;
 
 } ui EXT_RAM;
-
-static uint16_t getPotValue(int8_t pot)
-{
-	return ui.potValue[pot]&~(ADC_QUANTUM-1);
-}
 
 static int sendChar(int lcd, int ch)
 {
@@ -597,7 +568,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 	return dv;
 }
 
-static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
 	int8_t potnum,change;
@@ -633,7 +604,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 
 		// cancel ongoing changes
 		ui.activeSourceTimeout=0;
-		memset(&ui.potLockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
+		scan_resetPotLocking();
 
 		ui.pendingScreenClear=1;
 		
@@ -667,8 +638,8 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 	switch(prm->type)
 	{
 	case ptCont:
-		change=currentPreset.continuousParameters[prm->number]!=getPotValue(potnum);
-		currentPreset.continuousParameters[prm->number]=getPotValue(potnum);
+		change=currentPreset.continuousParameters[prm->number]!=scan_getPotValue(potnum);
+		currentPreset.continuousParameters[prm->number]=scan_getPotValue(potnum);
 		break;
 	case ptStep:
 		valCount=0;
@@ -695,7 +666,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		}
 
 		if(source<0)
-			data=(getPotValue(potnum)*valCount)>>16;
+			data=(scan_getPotValue(potnum)*valCount)>>16;
 		else
 			data=(currentPreset.steppedParameters[prm->number]+1)%valCount;
 
@@ -724,7 +695,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				ui.presetSlot=(getPotValue(potnum)*PRESET_SLOTS)>>16;
+				ui.presetSlot=(scan_getPotValue(potnum)*PRESET_SLOTS)>>16;
 				break;
 			case 5:
 			case 6:
@@ -732,7 +703,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case 7:
-				data=((getPotValue(potnum)*17)>>16)-1;
+				data=((scan_getPotValue(potnum)*17)>>16)-1;
 				settings.midiReceiveChannel=data;
 				ui.settingsModified=1;
 				break;
@@ -741,17 +712,17 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.pendingScreenClear=1;
 				break;
 			case 9:
-				settings.tunes[potnum][ui.tunerActiveVoice]=TUNER_FIL_INIT_OFFSET+potnum*TUNER_FIL_INIT_SCALE-4096+(getPotValue(potnum)>>3);
+				settings.tunes[potnum][ui.tunerActiveVoice]=TUNER_FIL_INIT_OFFSET+potnum*TUNER_FIL_INIT_SCALE-4096+(scan_getPotValue(potnum)>>3);
 				settings_save();
 				break;
 			case 10:
 				ui.tunerActiveVoice=source-kb1;
 				break;
 			case 11:
-				ui.presetBank=(getPotValue(potnum)*PRESET_BANKS)>>16;
+				ui.presetBank=(scan_getPotValue(potnum)*PRESET_BANKS)>>16;
 				break;
 			case 12:
-				data=(getPotValue(potnum)*2)>>16;
+				data=(scan_getPotValue(potnum)*2)>>16;
 				settings.syncMode=data;
 				ui.settingsModified=1;
 				break;
@@ -785,16 +756,16 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.isTransposing=(ui.isTransposing+1)%3;
 				break;
 			case 20:
-				data=(((int32_t)97*getPotValue(potnum))>>16)-48;
+				data=(((int32_t)97*scan_getPotValue(potnum))>>16)-48;
 				ui_setTranspose(data);
 				break;
 			case 21:
-				data=((int32_t)20*getPotValue(potnum))>>16;
+				data=((int32_t)20*scan_getPotValue(potnum))>>16;
 				settings.sequencerBank=data;
 				ui.settingsModified=1;
 				break;				
 			case 22:
-				settings.seqArpClock=getPotValue(potnum);
+				settings.seqArpClock=scan_getPotValue(potnum);
 				ui.settingsModified=1;
 				break;
 			case 23:
@@ -821,7 +792,7 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 				ui.slowUpdateTimeoutNumber=0x85;
 				break;
 			case 26:
-                                assigner_panicOff();
+				assigner_panicOff();
 				break;
 		}
 		break;
@@ -834,124 +805,6 @@ static void handleUserInput(int8_t source) // source: keypad (kb0..kbSharp) / (-
 		ui.presetModified=1;
 		refreshFullState();
 	}
-}
-
-static void readKeypad(void)
-{
-	int key;
-	int row,col[4];
-	int8_t newState;
-
-	for(row=0;row<4;++row)
-	{
-		GPIO_SetValue(0,0b1111<<19);
-		GPIO_ClearValue(0,(8>>row)<<19);
-		delay_us(10);
-		col[row]=0;
-		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
-		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
-		col[row]|=((GPIO_ReadValue(4)>>28)&1)?0:4;
-		col[row]|=((GPIO_ReadValue(2)>>13)&1)?0:8;
-	}
-	
-	for(key=0;key<16;++key)
-	{
-		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
-	
-		if(newState && ui.keypadState[key])
-		{
-			ui.keypadState[key]=MIN(INT8_MAX,ui.keypadState[key]+1);
-
-			if(ui.keypadState[key]==DEBOUNCE_THRESHOLD)
-				handleUserInput(key);
-		}
-		else
-		{
-			ui.keypadState[key]=newState;
-		}
-	}
-}
-
-static void readPots(void)
-{
-	uint32_t new;
-	int i,pot,nextPot;
-	uint16_t tmp[POT_SAMPLES];
-	
-	ui.curPotSample=(ui.curPotSample+1)%POT_SAMPLES;
-	
-	GPIO_ClearValue(0,1<<24); // CS
-	delay_us(8);
-
-	for(pot=0;pot<POT_COUNT;++pot)
-	{
-		// read pot on TLV1543 ADC
-
-		new=0;
-		nextPot=(pot+1)%POT_COUNT;
-		
-		BLOCK_INT(1)
-		{
-			for(i=0;i<16;++i)
-			{
-				// read value back
-
-				if(i<10)
-					new|=(LPC_GPIO0->FIOPIN3&(1<<(25-24)))?(1<<(15-i)):0;
-
-				// send next address
-
-				if(i<4)
-				{
-					if(nextPot&(1<<(3-i)))
-						LPC_GPIO0->FIOSET3=1<<(26-24); // ADDR 
-					else
-						LPC_GPIO0->FIOCLR3=1<<(26-24); // ADDR 
-				}
-
-				// wiggle clock
-
-				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				LPC_GPIO0->FIOSET3=1<<(27-24); // CLK 
-				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-				LPC_GPIO0->FIOCLR3=1<<(27-24); // CLK 
-				DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
-			}
-		}
-
-		ui.potSamples[pot][ui.curPotSample]=new;
-		
-//		if(ui.activePage==upNone)
-//			rprintf(0,"% 8d", new>>6);
-
-		// sort values
-
-		memcpy(&tmp[0],&ui.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
-		qsort(tmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
-		
-		// median
-	
-		new=tmp[POT_SAMPLES/2];
-		
-		// ignore small changes
-
-		if(abs(new-ui.potValue[pot])>=POT_THRESHOLD || currentTick<ui.potLockTimeout[pot])
-		{
-			if(abs(new-ui.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
-			{
-				ui.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
-				ui.potLockValue[pot]=new;
-			}
-
-			ui.potValue[pot]=new;
-
-			handleUserInput(-pot-1);
-		}
-	}
-
-	GPIO_SetValue(0,1<<24); // CS
 }
 
 void ui_setPresetModified(int8_t modified)
@@ -994,37 +847,6 @@ void ui_setTranspose(int32_t transpose)
 void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
-	
-	// init TLV1543 ADC
-	
-	PINSEL_SetI2C0Pins(PINSEL_I2C_Fast_Mode, DISABLE);
-	
-	PINSEL_SetPinFunc(0,24,0); // CS
-	PINSEL_SetPinFunc(0,25,0); // OUT
-	PINSEL_SetPinFunc(0,26,0); // ADDR
-	PINSEL_SetPinFunc(0,27,0); // CLK
-	PINSEL_SetPinFunc(0,28,0); // EOC
-	
-	GPIO_SetValue(0,0b01101ul<<24);
-	GPIO_SetDir(0,0b01101ul<<24,1);
-	
-	// init keypad
-	
-	PINSEL_SetPinFunc(0,22,0); // R1
-	PINSEL_SetPinFunc(0,21,0); // R2
-	PINSEL_SetPinFunc(0,20,0); // R3
-	PINSEL_SetPinFunc(0,19,0); // R4
-	PINSEL_SetPinFunc(0,10,0); // C1
-	PINSEL_SetPinFunc(4,29,0); // C2
-	PINSEL_SetPinFunc(4,28,0); // C3
-	PINSEL_SetPinFunc(2,13,0); // C4
-	PINSEL_SetResistorMode(0,10,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(4,29,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(4,28,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(2,13,PINSEL_PINMODE_PULLUP);
-
-	GPIO_SetValue(0,0b1111ul<<19);
-	GPIO_SetDir(0,0b1111ul<<19,1);
 	
 	// init screen
 	
@@ -1089,10 +911,6 @@ void ui_update(void)
 		ui.presetBank=settings.presetNumber/PRESET_SLOTS;
 	}
 	
-	// update pot values
-
-	readPots();
-
 	// slow updates (if needed)
 	
 	if(currentTick>ui.slowUpdateTimeout)
@@ -1268,8 +1086,4 @@ void ui_update(void)
 	ui.pendingScreenClear=0;
 	ui.prevSourceChanges=ui.sourceChanges;
 	ui.sourceChanges=0;
-
-	// read keypad
-			
-	readKeypad();
 }
