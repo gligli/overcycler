@@ -36,5 +36,7 @@ uint16_t exponentialCourse(uint16_t v, float ratio, float range);
 		
 int uint16Compare(const void * a,const void * b); // for qsort
 
+void buffer_dump(void * buf, int size);
+
 #endif	/* UTILS_H */
 

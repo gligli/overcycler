@@ -95,6 +95,7 @@
         <element flagsID="0" commonFlags="-Ofast -std=gnu99"/>
       </flagsDictionary>
       <codeAssistance>
+        <includeAdditional>true</includeAdditional>
       </codeAssistance>
       <makefileType>
         <makeTool>

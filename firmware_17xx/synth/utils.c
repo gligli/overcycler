@@ -117,3 +117,17 @@ int uint16Compare(const void * a,const void * b)
 	else
 		return 1;
 }
+
+void buffer_dump(void * buf, int size){
+	int i;
+	char* cbuf=(char*) buf;
+
+	while(size>0){
+		for(i=0;i<16;++i){
+			rprintf(0,"%02x ",*cbuf);
+			++cbuf;
+		}
+		rprintf(0,"\n");
+		size-=16;
+	}
+}
