@@ -1128,39 +1128,42 @@ void synth_updateDACsEvent(int32_t start, int32_t count)
 	updateDACsVoice5(start,end);
 }
 
-void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t legato)
+void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t flags)
 {
 #ifdef DEBUG_
-	rprintf(0,"assign note %d gate %d voice %d velocity %d legato %d\n",note,gate,voice,velocity,legato);
+	rprintf(0,"assign note %d gate %d voice %d velocity %d flags %d\n",note,gate,voice,velocity,flags);
 #endif
 
 	uint16_t velAmt;
 	
 	// mod delay
-
 	refreshModulationDelay(0);
 
 	// prepare CVs
-
 	computeTunedCVs();
 
 	// set gates (don't retrigger gate, unless we're arpeggiating)
-
-	if(!legato || arp_getMode()!=amOff)
+	if(!(flags&ASSIGNER_EVENT_FLAG_LEGATO) || arp_getMode()!=amOff)
 	{
 		adsr_setGate(&synth.filEnvs[voice],gate);
 		adsr_setGate(&synth.ampEnvs[voice],gate);
 	}
 
 	if(gate)
+	// handle velocity
 	{
-		// handle velocity
-
 		velAmt=currentPreset.continuousParameters[cpFilVelocity];
 		adsr_setCVs(&synth.filEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 		velAmt=currentPreset.continuousParameters[cpAmpVelocity];
 		adsr_setCVs(&synth.ampEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 	}
+	// stolen voices must be entirely reset
+	else if(flags&ASSIGNER_EVENT_FLAG_STOLEN)
+	{
+		adsr_reset(&synth.filEnvs[voice]);
+		adsr_reset(&synth.ampEnvs[voice]);
+	}
+
 }
 
 void synth_uartEvent(uint8_t data)
