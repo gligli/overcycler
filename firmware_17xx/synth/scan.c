@@ -129,7 +129,7 @@ static void readPots(void)
 		for(i=0;i<ADC_BITS;++i)
 			new|=(((uint32_t)scan.potBits[pot][i]&(1<<POTSCAN_PIN_OUT))>>POTSCAN_PIN_OUT)<<(ADC_BITS-1-i);
 
-		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*UINT16_MAX)/999;
+		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
 		
 		// sort values
 
