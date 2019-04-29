@@ -902,9 +902,9 @@ void synth_update(void)
 #else
 	static int32_t frc=0,prevTick=0;
 	++frc;
-	if(currentTick-prevTick>2*TICKER_1S)
+	if(currentTick-prevTick>TICKER_1S)
 	{
-		rprintf(0,"%d u/s\n",frc/2);
+		rprintf(0,"%d u/s\n",frc);
 		frc=0;
 		prevTick=currentTick;
 	}
