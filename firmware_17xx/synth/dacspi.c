@@ -20,10 +20,10 @@
 #define DACSPI_CMD_SET_REF 0x7000
 
 #define DACSPI_DMACONFIG \
-			GPDMA_DMACCxConfig_E | \
-			GPDMA_DMACCxConfig_DestPeripheral(14) | \
-			GPDMA_DMACCxConfig_TransferType(1) | \
-			GPDMA_DMACCxConfig_ITC
+		GPDMA_DMACCxConfig_E | \
+		GPDMA_DMACCxConfig_DestPeripheral(14) | \
+		GPDMA_DMACCxConfig_TransferType(1) | \
+		GPDMA_DMACCxConfig_ITC
 
 #define DACSPI_BUFFER_COUNT 64
 #define DACSPI_CV_COUNT 16
@@ -213,7 +213,7 @@ void dacspi_init(void)
 	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
-	DMAREQSEL=0x40;
+	DMAREQSEL|=0x40;
 	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
 
 	TIM_TIMERCFG_Type tim;
