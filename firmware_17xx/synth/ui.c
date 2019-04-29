@@ -340,7 +340,7 @@ static struct
 	
 	struct hd44780_data lcd1, lcd2;
 
-} ui EXT_RAM;
+} ui;
 
 static int sendChar(int lcd, int ch)
 {
