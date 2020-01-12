@@ -1,34 +1,5 @@
 EESchema Schematic File Version 2
 LIBS:power
-LIBS:device
-LIBS:transistors
-LIBS:conn
-LIBS:linear
-LIBS:regul
-LIBS:74xx
-LIBS:cmos4000
-LIBS:adc-dac
-LIBS:memory
-LIBS:xilinx
-LIBS:special
-LIBS:microcontrollers
-LIBS:dsp
-LIBS:microchip
-LIBS:analog_switches
-LIBS:motorola
-LIBS:texas
-LIBS:intel
-LIBS:audio
-LIBS:interface
-LIBS:digital-audio
-LIBS:philips
-LIBS:display
-LIBS:cypress
-LIBS:siliconi
-LIBS:opto
-LIBS:atmel
-LIBS:contrib
-LIBS:valves
 LIBS:overcycler2-cache
 EELAYER 27 0
 EELAYER END
@@ -36,7 +7,7 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "27 sep 2015"
+Date "12 jan 2020"
 Rev "12"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -2140,6 +2111,195 @@ Text Label 5300 9900 2    60   ~ 0
 DAC_FC4
 Text Label 7500 9900 2    60   ~ 0
 DAC_FC5
+$Comp
+L GND #PWR060
+U 1 1 55F57FFB
+P 1150 1100
+F 0 "#PWR060" H 1150 1100 30  0001 C CNN
+F 1 "GND" H 1150 1030 30  0001 C CNN
+F 2 "" H 1150 1100 60  0000 C CNN
+F 3 "" H 1150 1100 60  0000 C CNN
+	1    1150 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R126
+U 1 1 55F57D77
+P 15200 1850
+F 0 "R126" V 15280 1850 40  0000 C CNN
+F 1 "220" V 15207 1851 40  0000 C CNN
+F 2 "~" V 15130 1850 30  0000 C CNN
+F 3 "~" H 15200 1850 30  0000 C CNN
+	1    15200 1850
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R127
+U 1 1 55F58D12
+P 15650 1100
+F 0 "R127" V 15730 1100 40  0000 C CNN
+F 1 "120" V 15657 1101 40  0000 C CNN
+F 2 "~" V 15580 1100 30  0000 C CNN
+F 3 "~" H 15650 1100 30  0000 C CNN
+	1    15650 1100
+	-1   0    0    1   
+$EndComp
+$Comp
+L LM1084IT-ADJ/NOPB U9
+U 1 1 55F5A401
+P 15200 850
+F 0 "U9" H 15400 650 40  0000 C CNN
+F 1 "LM1084IT-ADJ/NOPB" H 14900 1050 40  0000 L CNN
+F 2 "TO-220" H 15200 950 30  0000 C CIN
+F 3 "~" H 15200 850 60  0000 C CNN
+	1    15200 850 
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1 C88
+U 1 1 55F742A6
+P 2050 850
+F 0 "C88" H 2100 950 50  0000 L CNN
+F 1 "2u2" H 2100 750 50  0000 L CNN
+F 2 "~" H 2050 850 60  0000 C CNN
+F 3 "~" H 2050 850 60  0000 C CNN
+	1    2050 850 
+	1    0    0    -1  
+$EndComp
+$Comp
+L +3.3V #PWR061
+U 1 1 55F742B3
+P 950 650
+F 0 "#PWR061" H 950 610 30  0001 C CNN
+F 1 "+3.3V" H 950 760 30  0000 C CNN
+F 2 "" H 950 650 60  0000 C CNN
+F 3 "" H 950 650 60  0000 C CNN
+	1    950  650 
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R128
+U 1 1 55F742BB
+P 1250 700
+F 0 "R128" V 1330 700 40  0000 C CNN
+F 1 "10k" V 1257 701 40  0000 C CNN
+F 2 "~" V 1180 700 30  0000 C CNN
+F 3 "~" H 1250 700 30  0000 C CNN
+	1    1250 700 
+	0    -1   -1   0   
+$EndComp
+$Comp
+L GND #PWR062
+U 1 1 55F74DA6
+P 2050 1200
+F 0 "#PWR062" H 2050 1200 30  0001 C CNN
+F 1 "GND" H 2050 1130 30  0001 C CNN
+F 2 "" H 2050 1200 60  0000 C CNN
+F 3 "" H 2050 1200 60  0000 C CNN
+	1    2050 1200
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74LS138 U2
+U 1 1 55F75810
+P 5600 2950
+F 0 "U2" H 5700 3450 60  0000 C CNN
+F 1 "74HC138" H 5750 2401 60  0000 C CNN
+F 2 "~" H 5600 2950 60  0000 C CNN
+F 3 "~" H 5600 2950 60  0000 C CNN
+	1    5600 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR063
+U 1 1 55F75CB4
+P 4500 3300
+F 0 "#PWR063" H 4500 3300 30  0001 C CNN
+F 1 "GND" H 4500 3230 30  0001 C CNN
+F 2 "" H 4500 3300 60  0000 C CNN
+F 3 "" H 4500 3300 60  0000 C CNN
+	1    4500 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L +3.3V #PWR064
+U 1 1 55F75CBA
+P 4500 3000
+F 0 "#PWR064" H 4500 2960 30  0001 C CNN
+F 1 "+3.3V" H 4500 3110 30  0000 C CNN
+F 2 "" H 4500 3000 60  0000 C CNN
+F 3 "" H 4500 3000 60  0000 C CNN
+	1    4500 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R129
+U 1 1 55F93FB4
+P 7350 5950
+F 0 "R129" V 7430 5950 40  0000 C CNN
+F 1 "10k" V 7357 5951 40  0000 C CNN
+F 2 "~" V 7280 5950 30  0000 C CNN
+F 3 "~" H 7350 5950 30  0000 C CNN
+	1    7350 5950
+	1    0    0    -1  
+$EndComp
+$Comp
+L CP1 C95
+U 1 1 55F94794
+P 7150 6000
+F 0 "C95" H 7200 6100 50  0000 L CNN
+F 1 "100u" H 6950 5900 50  0000 L CNN
+F 2 "~" H 7150 6000 60  0000 C CNN
+F 3 "~" H 7150 6000 60  0000 C CNN
+	1    7150 6000
+	-1   0    0    1   
+$EndComp
+$Comp
+L GND #PWR065
+U 1 1 55F9479A
+P 7150 6350
+F 0 "#PWR065" H 7150 6350 30  0001 C CNN
+F 1 "GND" H 7150 6280 30  0001 C CNN
+F 2 "" H 7150 6350 60  0000 C CNN
+F 3 "" H 7150 6350 60  0000 C CNN
+	1    7150 6350
+	1    0    0    -1  
+$EndComp
+Text Notes 7500 6150 0    60   ~ 0
+Select Q1 for\n0.3Vpp..0.4Vpp\nof noise at U5.1\nR6 value can be \nadjusted if need be
+Text Notes 12100 6900 0    60   ~ 0
+All capacitors should be minimum 16V unless specified\nAll polarized capacitors are electrolytic\nAll unpolarised capacitors are film\nAll resistors are 5% 1/4w\nData entry potentiometers are 4.7k linear taper\nMaster volume potentiometer is 47k dual audio taper
+Text Notes 14500 5100 0    60   ~ 0
+1: left master volume to pot\n2: left master volume from pot\n3: master volume ground\n4: right master volume to pot\n5: right master volume from pot\n6: master jacks ground\n7: left master jack\n8: right master jack
+Text Notes 5800 1700 0    60   ~ 0
+Pin 1 is DIN socket pin 4\nPin 2 is DIN socket pin 5
+Text Notes 4000 600  0    60   ~ 0
+Solder a microSD to SD adapter using a pin strip\nPins are per SD specifications
+Text Notes 10400 850  0    60   ~ 0
+Use mininum 7.5VAC 1A power supply\nHigher voltage may overheat the regulators
+$Comp
+L R R130
+U 1 1 56008F98
+P 4050 4450
+F 0 "R130" V 4130 4450 40  0000 C CNN
+F 1 "1k" V 4057 4451 40  0000 C CNN
+F 2 "~" V 3980 4450 30  0000 C CNN
+F 3 "~" H 4050 4450 30  0000 C CNN
+	1    4050 4450
+	1    0    0    -1  
+$EndComp
+Text GLabel 1050 7500 2    39   Output ~ 0
+SPI_MOSI
+Text GLabel 1450 7200 2    39   Output ~ 0
+SPI_SCK
+Text GLabel 4850 4800 0    39   Input ~ 0
+SPI_SCK
+Text GLabel 4850 6000 0    39   Input ~ 0
+SPI_SCK
+Text GLabel 6350 6000 2    39   Input ~ 0
+SPI_MOSI
+Text GLabel 6350 4800 2    39   Input ~ 0
+SPI_MOSI
 Wire Wire Line
 	2600 1150 3500 1150
 Connection ~ 8450 6000
@@ -2852,32 +3012,10 @@ Wire Wire Line
 	12450 1050 12450 800 
 Wire Wire Line
 	12450 1050 12700 1050
-$Comp
-L GND #PWR060
-U 1 1 55F57FFB
-P 1150 1100
-F 0 "#PWR060" H 1150 1100 30  0001 C CNN
-F 1 "GND" H 1150 1030 30  0001 C CNN
-F 2 "" H 1150 1100 60  0000 C CNN
-F 3 "" H 1150 1100 60  0000 C CNN
-	1    1150 1100
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	1150 1100 1150 900 
 Wire Wire Line
 	1150 900  1050 900 
-$Comp
-L R R126
-U 1 1 55F57D77
-P 15200 1850
-F 0 "R126" V 15280 1850 40  0000 C CNN
-F 1 "220" V 15207 1851 40  0000 C CNN
-F 2 "~" V 15130 1850 30  0000 C CNN
-F 3 "~" H 15200 1850 30  0000 C CNN
-	1    15200 1850
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	14700 2150 15900 2150
 Wire Wire Line
@@ -2885,17 +3023,6 @@ Wire Wire Line
 Wire Wire Line
 	15200 2100 15200 2250
 Connection ~ 15200 2150
-$Comp
-L R R127
-U 1 1 55F58D12
-P 15650 1100
-F 0 "R127" V 15730 1100 40  0000 C CNN
-F 1 "120" V 15657 1101 40  0000 C CNN
-F 2 "~" V 15580 1100 30  0000 C CNN
-F 3 "~" H 15650 1100 30  0000 C CNN
-	1    15650 1100
-	-1   0    0    1   
-$EndComp
 Wire Wire Line
 	15650 850  15650 800 
 Connection ~ 15650 800 
@@ -2904,50 +3031,6 @@ Wire Wire Line
 Wire Wire Line
 	15650 1500 15200 1500
 Connection ~ 15200 1500
-$Comp
-L LM1084IT-ADJ/NOPB U9
-U 1 1 55F5A401
-P 15200 850
-F 0 "U9" H 15400 650 40  0000 C CNN
-F 1 "LM1084IT-ADJ/NOPB" H 14900 1050 40  0000 L CNN
-F 2 "TO-220" H 15200 950 30  0000 C CIN
-F 3 "~" H 15200 850 60  0000 C CNN
-	1    15200 850 
-	1    0    0    -1  
-$EndComp
-$Comp
-L CP1 C88
-U 1 1 55F742A6
-P 2050 850
-F 0 "C88" H 2100 950 50  0000 L CNN
-F 1 "2u2" H 2100 750 50  0000 L CNN
-F 2 "~" H 2050 850 60  0000 C CNN
-F 3 "~" H 2050 850 60  0000 C CNN
-	1    2050 850 
-	1    0    0    -1  
-$EndComp
-$Comp
-L +3.3V #PWR061
-U 1 1 55F742B3
-P 950 650
-F 0 "#PWR061" H 950 610 30  0001 C CNN
-F 1 "+3.3V" H 950 760 30  0000 C CNN
-F 2 "" H 950 650 60  0000 C CNN
-F 3 "" H 950 650 60  0000 C CNN
-	1    950  650 
-	1    0    0    -1  
-$EndComp
-$Comp
-L R R128
-U 1 1 55F742BB
-P 1250 700
-F 0 "R128" V 1330 700 40  0000 C CNN
-F 1 "10k" V 1257 701 40  0000 C CNN
-F 2 "~" V 1180 700 30  0000 C CNN
-F 3 "~" H 1250 700 30  0000 C CNN
-	1    1250 700 
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
 	950  650  950  700 
 Wire Wire Line
@@ -2966,17 +3049,6 @@ Connection ~ 1750 500
 Wire Wire Line
 	1550 1200 1050 1200
 Connection ~ 1550 700 
-$Comp
-L GND #PWR062
-U 1 1 55F74DA6
-P 2050 1200
-F 0 "#PWR062" H 2050 1200 30  0001 C CNN
-F 1 "GND" H 2050 1130 30  0001 C CNN
-F 2 "" H 2050 1200 60  0000 C CNN
-F 3 "" H 2050 1200 60  0000 C CNN
-	1    2050 1200
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	1750 1150 1750 1200
 Wire Wire Line
@@ -2988,41 +3060,8 @@ Wire Wire Line
 Wire Wire Line
 	2050 1050 2050 1200
 Connection ~ 2050 1150
-$Comp
-L 74LS138 U2
-U 1 1 55F75810
-P 5600 2950
-F 0 "U2" H 5700 3450 60  0000 C CNN
-F 1 "74HC138" H 5750 2401 60  0000 C CNN
-F 2 "~" H 5600 2950 60  0000 C CNN
-F 3 "~" H 5600 2950 60  0000 C CNN
-	1    5600 2950
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	5600 3400 5600 3450
-$Comp
-L GND #PWR063
-U 1 1 55F75CB4
-P 4500 3300
-F 0 "#PWR063" H 4500 3300 30  0001 C CNN
-F 1 "GND" H 4500 3230 30  0001 C CNN
-F 2 "" H 4500 3300 60  0000 C CNN
-F 3 "" H 4500 3300 60  0000 C CNN
-	1    4500 3300
-	1    0    0    -1  
-$EndComp
-$Comp
-L +3.3V #PWR064
-U 1 1 55F75CBA
-P 4500 3000
-F 0 "#PWR064" H 4500 2960 30  0001 C CNN
-F 1 "+3.3V" H 4500 3110 30  0000 C CNN
-F 2 "" H 4500 3000 60  0000 C CNN
-F 3 "" H 4500 3000 60  0000 C CNN
-	1    4500 3000
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4500 3300 4500 3200
 Wire Wire Line
@@ -3031,73 +3070,17 @@ Wire Wire Line
 	5000 3100 4500 3100
 Wire Wire Line
 	4500 3100 4500 3000
-$Comp
-L R R129
-U 1 1 55F93FB4
-P 7350 5950
-F 0 "R129" V 7430 5950 40  0000 C CNN
-F 1 "10k" V 7357 5951 40  0000 C CNN
-F 2 "~" V 7280 5950 30  0000 C CNN
-F 3 "~" H 7350 5950 30  0000 C CNN
-	1    7350 5950
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	7350 6300 7350 6200
 Wire Wire Line
 	7350 5600 7350 5700
-$Comp
-L CP1 C95
-U 1 1 55F94794
-P 7150 6000
-F 0 "C95" H 7200 6100 50  0000 L CNN
-F 1 "100u" H 6950 5900 50  0000 L CNN
-F 2 "~" H 7150 6000 60  0000 C CNN
-F 3 "~" H 7150 6000 60  0000 C CNN
-	1    7150 6000
-	-1   0    0    1   
-$EndComp
-$Comp
-L GND #PWR065
-U 1 1 55F9479A
-P 7150 6350
-F 0 "#PWR065" H 7150 6350 30  0001 C CNN
-F 1 "GND" H 7150 6280 30  0001 C CNN
-F 2 "" H 7150 6350 60  0000 C CNN
-F 3 "" H 7150 6350 60  0000 C CNN
-	1    7150 6350
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	7150 5600 7150 5800
 Connection ~ 7350 5600
 Wire Wire Line
 	7150 6200 7150 6350
-Text Notes 7500 6150 0    60   ~ 0
-Select Q1 for\n0.3Vpp..0.4Vpp\nof noise at U5.1\nR6 value can be \nadjusted if need be
-Text Notes 12100 6900 0    60   ~ 0
-All capacitors should be minimum 16V unless specified\nAll polarized capacitors are electrolytic\nAll unpolarised capacitors are film\nAll resistors are 5% 1/4w\nData entry potentiometers are 4.7k linear taper\nMaster volume potentiometer is 47k dual audio taper
-Text Notes 14500 5100 0    60   ~ 0
-1: left master volume to pot\n2: left master volume from pot\n3: master volume ground\n4: right master volume to pot\n5: right master volume from pot\n6: master jacks ground\n7: left master jack\n8: right master jack
-Text Notes 5800 1700 0    60   ~ 0
-Pin 1 is DIN socket pin 4\nPin 2 is DIN socket pin 5
-Text Notes 4000 600  0    60   ~ 0
-Solder a microSD to SD adapter using a pin strip\nPins are per SD specifications
-Text Notes 10400 850  0    60   ~ 0
-Use mininum 7.5VAC 1A power supply\nHigher voltage may overheat the regulators
 Wire Wire Line
 	3550 4750 4050 4750
-$Comp
-L R R130
-U 1 1 56008F98
-P 4050 4450
-F 0 "R130" V 4130 4450 40  0000 C CNN
-F 1 "1k" V 4057 4451 40  0000 C CNN
-F 2 "~" V 3980 4450 30  0000 C CNN
-F 3 "~" H 4050 4450 30  0000 C CNN
-	1    4050 4450
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	4050 4750 4050 4700
 Wire Wire Line
@@ -3105,18 +3088,6 @@ Wire Wire Line
 Wire Wire Line
 	4050 4150 4050 4200
 Connection ~ 3650 4150
-Text GLabel 1050 7500 2    39   Output ~ 0
-SPI_MOSI
-Text GLabel 1450 7200 2    39   Output ~ 0
-SPI_SCK
 Wire Wire Line
 	1050 7200 1450 7200
-Text GLabel 4850 4800 0    39   Input ~ 0
-SPI_SCK
-Text GLabel 4850 6000 0    39   Input ~ 0
-SPI_SCK
-Text GLabel 6350 6000 2    39   Input ~ 0
-SPI_MOSI
-Text GLabel 6350 4800 2    39   Input ~ 0
-SPI_MOSI
 $EndSCHEMATC
