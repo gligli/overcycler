@@ -1,5 +1,34 @@
 EESchema Schematic File Version 2
 LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
 LIBS:overcycler2-cache
 EELAYER 27 0
 EELAYER END
@@ -7,7 +36,7 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "12 jan 2020"
+Date "25 aug 2021"
 Rev "12"
 Comp "GliGli's DIY"
 Comment1 ""
@@ -1699,7 +1728,7 @@ L R R16
 U 1 1 55F1F9A7
 P 10350 5350
 F 0 "R16" V 10430 5350 40  0000 C CNN
-F 1 "2M2" V 10357 5351 40  0000 C CNN
+F 1 "3M3" V 10357 5351 40  0000 C CNN
 F 2 "~" V 10280 5350 30  0000 C CNN
 F 3 "~" H 10350 5350 30  0000 C CNN
 	1    10350 5350
