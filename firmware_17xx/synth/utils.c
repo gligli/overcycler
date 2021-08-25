@@ -119,15 +119,18 @@ int uint16Compare(const void * a,const void * b)
 }
 
 void buffer_dump(void * buf, int size){
-	int i;
+	int i, osize = size;
 	char* cbuf=(char*) buf;
 
 	while(size>0){
 		for(i=0;i<16;++i){
-			rprintf(0,"%02x ",*cbuf);
+			printf("%02x ",*cbuf);
 			++cbuf;
+			if ((uint32_t)cbuf - (uint32_t)buf >= osize)
+				break;
 		}
-		rprintf(0,"\n");
+		printf("\n");
 		size-=16;
 	}
 }
+
