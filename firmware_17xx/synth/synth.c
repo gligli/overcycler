@@ -83,7 +83,9 @@ static struct
 		int32_t oldCrossOver;
 	} partState;
 	
+	int8_t ready;
 	uint8_t pendingExtClock;
+	int32_t wmodAVal, wmodEnvAmt;
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -283,7 +285,7 @@ static void refreshEnvSettings(int8_t type)
 			a=&synth.ampEnvs[i];
 		}
 
-		adsr_setSpeedShift(a,(slow)?4:2);
+		adsr_setSpeedShift(a,(slow)?3:1,5);
 
 		adsr_setCVs(&synth.ampEnvs[i],
 				 currentPreset.continuousParameters[cpAmpAtt],
@@ -310,8 +312,8 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
 	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
 	
-	lfo_setSpeedShift(&synth.lfo[0],currentPreset.steppedParameters[spLFOShift]*3);
-	lfo_setSpeedShift(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shift]*3);
+	lfo_setSpeedShift(&synth.lfo[0],1+currentPreset.steppedParameters[spLFOShift]*3,5);
+	lfo_setSpeedShift(&synth.lfo[1],1+currentPreset.steppedParameters[spLFO2Shift]*3,5);
 
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
@@ -910,6 +912,7 @@ void synth_update(void)
 	}
 #endif
 #endif
+	synth.ready=1;
 	
 	scan_update();
 	ui_update();
@@ -923,12 +926,98 @@ void synth_update(void)
 // Synth interrupts
 ////////////////////////////////////////////////////////////////////////////////
 
-// 4Khz
+// @ 500Hz from system timer
 void synth_timerInterrupt(void)
 {
-	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,resVal,wmodEnvAmt,filEnvAmt,resoFactor;
+	int32_t resVal,resoFactor;
+	
+	if(!synth.ready)
+		return;
 
-	static int frc=0;
+	resVal=currentPreset.continuousParameters[cpResonance];
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
+	resVal=__USAT(resVal,16);
+
+	// compensate pre filter mixer level for resonance
+
+	resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
+
+	// CV update
+
+	refreshCV(-1,cvAVol,(uint32_t)currentPreset.continuousParameters[cpAVol]*resoFactor/256);
+	refreshCV(-1,cvBVol,(uint32_t)currentPreset.continuousParameters[cpBVol]*resoFactor/256);
+	refreshCV(-1,cvNoiseVol,(uint32_t)currentPreset.continuousParameters[cpNoiseVol]*resoFactor/256);
+	refreshCV(-1,cvResonance,resVal);
+
+	// midi
+
+	midi_update();
+
+	// crossover
+
+	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+		refreshCrossOver(synth.wmodAVal,synth.wmodEnvAmt);
+
+	// bit inputs (footswitch / tape in)
+
+	handleBitInputs();
+
+	// assigner
+
+	handleFinishedVoices();
+
+	// clocking
+
+	if(settings.syncMode==smInternal || synth.pendingExtClock)
+	{
+		if(synth.pendingExtClock)
+			--synth.pendingExtClock;
+
+		if (clock_update())
+		{
+			// sequencer
+
+			if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
+				seq_update();
+
+			// arpeggiator
+
+			if(arp_getMode()!=amOff)
+				arp_update();
+		}
+	}
+
+	// glide
+
+	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		int16_t amt=synth.partState.glideAmount;
+
+		if(synth.partState.gliding)
+		{
+			computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
+			computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
+			computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
+		}
+	}
+
+	// 500hz tick counter
+
+	++currentTick;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Synth internal events
+////////////////////////////////////////////////////////////////////////////////
+
+// @ 3Khz from dacspi CV update
+void synth_updateCVsEvent(void)
+{
+	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt;
+
+	if(!synth.ready)
+		return;
 
 	// lfos
 		
@@ -1001,104 +1090,10 @@ void synth_timerInterrupt(void)
 		
 	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
-
-	// slower updates
 	
-	switch(frc&0x03) // 4 phases, each 1Khz
-	{
-	case 0:
-		resVal=currentPreset.continuousParameters[cpResonance];
-		resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
-		resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
-		resVal=__USAT(resVal,16);
-
-		// compensate pre filter mixer level for resonance
-
-		resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
-
-		// CV update
-		
-		refreshCV(-1,cvAVol,(uint32_t)currentPreset.continuousParameters[cpAVol]*resoFactor/256);
-		refreshCV(-1,cvBVol,(uint32_t)currentPreset.continuousParameters[cpBVol]*resoFactor/256);
-		refreshCV(-1,cvNoiseVol,(uint32_t)currentPreset.continuousParameters[cpNoiseVol]*resoFactor/256);
-		refreshCV(-1,cvResonance,resVal);
-
-		break;
-	case 1:
-		// midi
-
-		midi_update();
-
-		break;
-	case 2:
-		// crossover
-
-		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
-			refreshCrossOver(wmodAVal,wmodEnvAmt);
-
-		break;
-	case 3:
-		// bit inputs (footswitch / tape in)
-	
-		handleBitInputs();
-		
-		// assigner
-		
-		handleFinishedVoices();
-		
-		if(frc&0x04)
-		{
-			// clocking
-
-			if(settings.syncMode==smInternal || synth.pendingExtClock)
-			{
-				if(synth.pendingExtClock)
-					--synth.pendingExtClock;
-
-				if (clock_update())
-				{
-					// sequencer
-
-					if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
-						seq_update();
-
-					// arpeggiator
-
-					if(arp_getMode()!=amOff)
-						arp_update();
-				}
-			}
-		}
-		else
-		{
-			// glide
-
-			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-			{
-				int16_t amt=synth.partState.glideAmount;
-
-				if(synth.partState.gliding)
-				{
-					computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
-					computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
-					computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
-				}
-			}
-
-			// 500hz tick counter
-
-			++currentTick;
-		}
-
-		break;
-	}
-
-	++frc;
+	synth.wmodAVal=wmodAVal;
+	synth.wmodEnvAmt=wmodEnvAmt;
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// Synth internal events
-////////////////////////////////////////////////////////////////////////////////
 
 #define PROC_UPDATE_DACS_VOICE(v) \
 FORCEINLINE static void updateDACsVoice##v(int32_t start, int32_t end) \

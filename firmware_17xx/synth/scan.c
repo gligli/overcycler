@@ -27,7 +27,7 @@
 #define POTSCAN_MASK ((1<<POTSCAN_PIN_CS)|(1<<POTSCAN_PIN_ADDR)|(1<<POTSCAN_PIN_CLK))
 
 #define POTSCAN_PRE_DIV 12
-#define POTSCAN_RATE 500
+#define POTSCAN_RATE 400
 
 #define POTSCAN_TICKS (16*2+10) // 32 writes, 10 reads
 #define POTSCAN_LLI_PER_POT 21
@@ -36,6 +36,8 @@
 		GPDMA_DMACCxConfig_E | \
 		GPDMA_DMACCxConfig_SrcPeripheral(12) | \
 		GPDMA_DMACCxConfig_TransferType(2)
+
+static EXT_RAM GPDMA_LLI_Type scanLLIs[POT_COUNT][POTSCAN_LLI_PER_POT];
 
 static struct
 {
@@ -52,7 +54,7 @@ static struct
 	int8_t keypadState[16];
 } scan EXT_RAM;
 
-static const uint8_t keypadButtonCode[16]=
+static uint8_t keypadButtonCode[16]=
 {
 	0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,0x32,
 	0x08,0x18,0x28,0x38,
@@ -79,13 +81,13 @@ static const uint8_t potCommandsConst[POT_COUNT][sizeof(scan.potCommands[0])]=
 #undef ONE_POT
 };
 
-static const GPDMA_LLI_Type scanLLIs[POT_COUNT][POTSCAN_LLI_PER_POT]=
+static const GPDMA_LLI_Type scanLLIsConst[POT_COUNT][POTSCAN_LLI_PER_POT]=
 {
 #define NEXTPOT(pot,tck) (((pot)*POTSCAN_LLI_PER_POT+(tck)+1)/POTSCAN_LLI_PER_POT)	
 #define ONE_LLI(src,dst,siz,pot,tck,flag) { \
 		(src), \
 		(dst), \
-		(uint32_t)&scanLLIs[NEXTPOT(pot,tck)%POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
+		(uint32_t)&scanLLIsConst[NEXTPOT(pot,tck)%POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
 		GPDMA_DMACCxControl_TransferSize(siz)|GPDMA_DMACCxControl_SI|(flag) \
 	},
 	
@@ -165,14 +167,15 @@ static void readKeypad(void)
 
 	for(row=0;row<4;++row)
 	{
-		GPIO_SetValue(0,0b1111<<19);
-		GPIO_ClearValue(0,(8>>row)<<19);
+		LPC_GPIO0->FIOSETH=0b1111<<3;
+		LPC_GPIO0->FIOCLRH=(8>>row)<<3;
 		delay_us(10);
 		col[row]=0;
-		col[row]|=((GPIO_ReadValue(0)>>10)&1)?0:1;
-		col[row]|=((GPIO_ReadValue(4)>>29)&1)?0:2;
-		col[row]|=((GPIO_ReadValue(4)>>28)&1)?0:4;
-		col[row]|=((GPIO_ReadValue(2)>>13)&1)?0:8;
+		
+		col[row]|=((LPC_GPIO0->FIOPIN1>>2)&1)?0:1;
+		col[row]|=((LPC_GPIO4->FIOPIN3>>5)&1)?0:2;
+		col[row]|=((LPC_GPIO4->FIOPIN3>>4)&1)?0:4;
+		col[row]|=((LPC_GPIO2->FIOPIN1>>5)&1)?0:8;
 	}
 	
 	for(key=0;key<16;++key)
@@ -208,6 +211,7 @@ void scan_init(void)
 	memset(&scan,0,sizeof(scan));
 	
 	memcpy(scan.potCommands,potCommandsConst,sizeof(scan.potCommands));
+	memcpy(scanLLIs,scanLLIsConst,sizeof(scanLLIsConst));
 
 	// init TLV1543 ADC
 	

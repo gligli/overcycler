@@ -19,13 +19,12 @@
 #define FIQ_MASK 0x00000040
 #define INT_MASK (IRQ_MASK | FIQ_MASK)
 
-#define SYNTH_TIMER_HZ 4000
+#define SYNTH_TIMER_HZ 500
 #define DISK_TIMER_HZ 100
 
 #define STORAGE_PATH "/STORAGE"
 
 FATFS fatFS;
-static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
@@ -39,8 +38,7 @@ __attribute__ ((used)) void SysTick_Handler(void)
 	}
 	++frc;
 	
-	if(synthReady)
-		synth_timerInterrupt();
+	synth_timerInterrupt();
 }
 
 void delay_us(uint32_t count)
@@ -125,7 +123,6 @@ int main(void)
 	
 	rprintf(0,"storage init...\n");
 
-	synthReady=0;
 	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
 	NVIC_SetPriority(SysTick_IRQn,16);
 	
@@ -148,7 +145,6 @@ int main(void)
 	BLOCK_INT(1)
 	{
 		synth_init();
-		synthReady=1;
 	}
 	
 	rprintf(0,"done\n");

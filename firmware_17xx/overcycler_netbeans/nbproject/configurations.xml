@@ -373,238 +373,66 @@
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/assigner.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/clock.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/scan.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
-          <incDir>
-            <pElem>../synth</pElem>
-            <pElem>../../../yagarto-20121222/arm-none-eabi/sys-include</pElem>
-            <pElem>../system</pElem>
-            <pElem>..</pElem>
-            <pElem>../drivers</pElem>
-          </incDir>
+        <cTool flags="0">
         </cTool>
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_sd</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">
@@ -615,13 +443,18 @@
         </cTool>
       </item>
       <item path="../system/hd44780.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
-            <pElem>../system</pElem>
-            <pElem>../../../yagarto-20121222/arm-none-eabi/sys-include</pElem>
-            <pElem>../drivers</pElem>
             <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../fat_sd</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/main.c" ex="false" tool="0" flavor2="2">
@@ -640,14 +473,18 @@
         </cTool>
       </item>
       <item path="../system/rprintf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
-            <pElem>../system</pElem>
-            <pElem>../../../yagarto-20121222/lib/gcc/arm-none-eabi/4.7.2/include</pElem>
-            <pElem>../../../yagarto-20121222/arm-none-eabi/sys-include</pElem>
             <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
             <pElem>../drivers</pElem>
+            <pElem>../fat_sd</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/serial.c" ex="false" tool="0" flavor2="2">
@@ -684,6 +521,7 @@
       <item path="../xnormidi/bytequeue/bytequeue.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
           <incDir>
+            <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../../../yagarto-20121222/arm-none-eabi/sys-include</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -693,13 +531,18 @@
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
-            <pElem>../system</pElem>
-            <pElem>../../../yagarto-20121222/arm-none-eabi/sys-include</pElem>
             <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
             <pElem>../drivers</pElem>
+            <pElem>../fat_sd</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="2">
@@ -738,11 +581,19 @@
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/xnormidi/bytequeue">
+      <folder path="0/synth">
         <cTool>
           <incDir>
-            <pElem>../xnormidi/bytequeue</pElem>
+            <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../fat_sd</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
+          </preprocessorList>
         </cTool>
       </folder>
     </conf>

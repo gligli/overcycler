@@ -82,9 +82,19 @@ static inline void updateStageVars(struct adsr_s * a, adsrStage_t s)
 
 static LOWERCODESIZE void updateIncrements(struct adsr_s * adsr)
 {
-	adsr->attackIncrement=(getPhaseInc(adsr->attackCV>>8)>>adsr->speedShift)<<4; // phase is 20 bits, from bit 4 to bit 23
-	adsr->decayIncrement=(getPhaseInc(adsr->decayCV>>8)>>adsr->speedShift)<<4;
-	adsr->releaseIncrement=(getPhaseInc(adsr->releaseCV>>8)>>adsr->speedShift)<<4;
+	uint32_t aInc, dInc, rInc;
+	
+	aInc=getPhaseInc(adsr->attackCV>>8)>>adsr->speedShift;
+	dInc=getPhaseInc(adsr->decayCV>>8)>>adsr->speedShift;
+	rInc=getPhaseInc(adsr->releaseCV>>8)>>adsr->speedShift;
+	
+	aInc-=aInc/adsr->speedDiv;
+	dInc-=dInc/adsr->speedDiv;
+	rInc-=rInc/adsr->speedDiv;
+	
+	adsr->attackIncrement=aInc<<4; // phase is 20 bits, from bit 4 to bit 23
+	adsr->decayIncrement=dInc<<4;
+	adsr->releaseIncrement=rInc<<4;
 	
 	// immediate update of env settings
 	
@@ -197,9 +207,10 @@ inline void adsr_setShape(struct adsr_s * adsr, int8_t isExp)
 	adsr->expOutput=isExp;
 }
 
-LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, uint8_t shift)
+LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift, int8_t div)
 {
 	adsr->speedShift=shift;
+	adsr->speedDiv=div;
 	
 	updateIncrements(adsr);
 }

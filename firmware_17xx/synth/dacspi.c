@@ -81,14 +81,17 @@ static struct
 	uint16_t cvCommands[DACSPI_CV_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
 	uint8_t channelCPSR[DACSPI_CHANNEL_COUNT];
-} dacspi EXT_RAM;
+} dacspi;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
+	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
+
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
-	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
+	// update synth @ 3Khz
+	synth_updateCVsEvent();
 
 	// when second half is playing, update first and vice-versa
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
@@ -206,7 +209,7 @@ void dacspi_init(void)
 
 	// interrupt triggers
 	
-	lli[1*DACSPI_CHANNEL_COUNT][0].Control|=GPDMA_DMACCxControl_I;
+	lli[(1)*DACSPI_CHANNEL_COUNT][0].Control|=GPDMA_DMACCxControl_I;
 	lli[(DACSPI_BUFFER_COUNT/2+1)*DACSPI_CHANNEL_COUNT][0].Control|=GPDMA_DMACCxControl_I;
 	
 	//

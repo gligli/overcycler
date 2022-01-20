@@ -49,8 +49,8 @@ const uint8_t steppedParametersBits[spCount] =
 	/*LFO2Targets*/2,
 };
 
-struct settings_s settings EXT_RAM;
-struct preset_s currentPreset EXT_RAM;
+struct settings_s settings;
+struct preset_s currentPreset;
 
 static struct
 {
@@ -480,9 +480,13 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
 	currentPreset.steppedParameters[spLFO2Shift]=1;
 
-	currentPreset.steppedParameters[spABank]=26; // perfectwaves (saw)
+	currentPreset.steppedParameters[spABank]=26; // perfectwaves
 	currentPreset.steppedParameters[spBBank]=26;
 	currentPreset.steppedParameters[spXOvrBank]=26;
+
+	currentPreset.steppedParameters[spAWave]=0; // sawtooth
+	currentPreset.steppedParameters[spBWave]=0;
+	currentPreset.steppedParameters[spXOvrWave]=0;
 
 	currentPreset.steppedParameters[spVoiceCount]=5;
 
