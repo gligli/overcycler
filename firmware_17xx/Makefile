@@ -247,7 +247,7 @@ LDFLAGS += -Tldscript_rom_gnu.ld
 #
 # Settings and variables:
 LPC21ISP = ./lpc21isp
-LPC21ISP_KILL = taskkill -f -im lpc21isp.exe && sleep 0.2s
+LPC21ISP_KILL = /cygdrive/c/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
 LPC21ISP_BAUD = 230400
 LPC21ISP_XTAL = 12000
