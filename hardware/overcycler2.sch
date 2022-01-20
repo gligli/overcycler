@@ -36,7 +36,7 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 7
 Title "OverCycler 2 full board"
-Date "25 aug 2021"
+Date "20 jan 2022"
 Rev "12"
 Comp "GliGli's DIY"
 Comment1 ""
