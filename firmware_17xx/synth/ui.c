@@ -282,7 +282,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*6*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune filters",.values={""}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 		},
 	},
@@ -551,6 +551,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 24:
 			case 25:
 			case 26:
+			case 27:
 				v=0;
 				break;
 			}
@@ -794,6 +795,16 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			case 26:
 				assigner_panicOff();
 				break;
+			case 27:
+				preset_loadDefault(1);
+				
+				refreshWaveNames(0);
+				refreshWaveNames(1);
+				refreshWaveforms(0);
+				refreshWaveforms(1);
+				refreshWaveforms(2);
+				refreshFullState();
+				break;
 		}
 		break;
 	default:
@@ -978,6 +989,7 @@ void ui_update(void)
 			sendString(2,"C: Amplifier       D: LFO1/LFO2         ");
 			sendString(2,"*: Miscellaneous   #: Arp/Sequencer     ");
 		}
+		delay_ms(2);
 	}
 	else if(fsDisp) // fullscreen display
 	{
