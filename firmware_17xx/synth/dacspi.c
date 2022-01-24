@@ -86,7 +86,7 @@ static struct
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat;
+	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat; // acknowledge interrupt
 
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
