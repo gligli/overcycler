@@ -16,6 +16,8 @@
 #define MIDI_BASE_COARSE_CC 16
 #define MIDI_BASE_FINE_CC 80
 
+#define MIDI_NOTE_TRANSPOSE_OFFSET -24
+
 static MidiDevice midi;
 
 uint16_t midiCombineBytes(uint8_t first, uint8_t second)
@@ -57,7 +59,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 		if(seq_getMode(0)==smRecording || seq_getMode(1)==smRecording)
 			seq_inputNote(note,velocity!=0);
 
-		intNote=note+ui_getTranspose();
+		intNote=note+MIDI_NOTE_TRANSPOSE_OFFSET+ui_getTranspose();
 		intNote=MAX(0,MIN(127,intNote));
 		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1,1);
 	}
@@ -86,7 +88,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 		if(seq_getMode(0)==smRecording || seq_getMode(1)==smRecording)
 			seq_inputNote(note,0);
 
-		intNote=note+ui_getTranspose();
+		intNote=note+MIDI_NOTE_TRANSPOSE_OFFSET+ui_getTranspose();
 		intNote=MAX(0,MIN(127,intNote));
 		assigner_assignNote(intNote,0,0,1);
 	}
