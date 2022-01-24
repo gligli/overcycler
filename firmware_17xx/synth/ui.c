@@ -58,14 +58,14 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptStep,.number=spABank,.shortName="ABnk",.longName="Osc A Bank"},
-			{.type=ptStep,.number=spAWave,.shortName="AWav",.longName="Osc A Waveform"},
+			{.type=ptStep,.number=spABank_Legacy,.shortName="ABnk",.longName="Osc A Bank"},
+			{.type=ptStep,.number=spAWave_Legacy,.shortName="AWav",.longName="Osc A Waveform"},
 			{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
 			{.type=ptCont,.number=cpBFreq,.shortName="Freq",.longName="Osc A/B Frequency"},
 			{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
 			/* 2nd row of pots */
-			{.type=ptStep,.number=spBBank,.shortName="BBnk",.longName="Osc B Bank"},
-			{.type=ptStep,.number=spBWave,.shortName="BWav",.longName="Osc B Waveform"},
+			{.type=ptStep,.number=spBBank_Legacy,.shortName="BBnk",.longName="Osc B Bank"},
+			{.type=ptStep,.number=spBWave_Legacy,.shortName="BWav",.longName="Osc B Waveform"},
 			{.type=ptCont,.number=cpBBaseWMod,.shortName="BWmo",.longName="Osc B WaveMod"},
 			{.type=ptCont,.number=cpBFineFreq,.shortName="BDet",.longName="Osc B Detune"},
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
@@ -262,8 +262,8 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 		{
 			/* 1st row of pots */
 			{.type=ptCust,.number=4,.shortName="Slot",.longName="Preset Slot"},
-			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptStep,.number=spPresetType,.shortName="PTyp",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
+			{.type=ptStep,.number=spPresetStyle,.shortName="PStl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 			{.type=ptNone},
 			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"}},
 			/* 2nd row of pots */
@@ -409,17 +409,17 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		switch(prm->number)
 		{
-			case spABank:
-				appendBankName(0,dv);
+			case spABank_Legacy:
+				strcpy(dv,currentPreset.oscBank[0]);
 				break;
-			case spBBank:
-				appendBankName(1,dv);
+			case spBBank_Legacy:
+				strcpy(dv,currentPreset.oscBank[1]);
 				break;
-			case spAWave:
-				appendWaveName(0,dv);
+			case spAWave_Legacy:
+				strcpy(dv,currentPreset.oscWave[0]);
 				break;
-			case spBWave:
-				appendWaveName(1,dv);
+			case spBWave_Legacy:
+				strcpy(dv,currentPreset.oscWave[1]);
 				break;
 			default:
 				return NULL;
@@ -544,8 +544,8 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				}
 				break;
 			case 23:
-				v=(currentPreset.steppedParameters[spXOvrBank]+1)*100;
-				v+=(currentPreset.steppedParameters[spXOvrWave]+1)%100;
+				v=(currentPreset.steppedParameters[spXOvrBank_Legacy]+1)*100;
+				v+=(currentPreset.steppedParameters[spXOvrWave_Legacy]+1)%100;
 				--v;
 				break;
 			case 24:
@@ -651,15 +651,18 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		{
 			switch(prm->number)
 			{
-				case spABank:
-				case spBBank:
+				case spABank_Legacy:
+				case spBBank_Legacy:
+					refreshBankNames(1);
 					valCount=getBankCount();
 					break;
-				case spAWave:
-					valCount=getWaveCount(0);
+				case spAWave_Legacy:
+					refreshCurWaveNames(0,1);
+					valCount=getCurWaveCount();
 					break;
-				case spBWave:
-					valCount=getWaveCount(1);
+				case spBWave_Legacy:
+					refreshCurWaveNames(1,1);
+					valCount=getCurWaveCount();
 					break;
 				default:
 					valCount=1<<steppedParametersBits[prm->number];
@@ -677,8 +680,24 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		//	special cases
 		if(change)
 		{
-			if(prm->number==spABank || prm->number==spBBank || prm->number==spAWave || prm->number==spBWave)
+			if(prm->number==spABank_Legacy || prm->number==spBBank_Legacy || prm->number==spAWave_Legacy || prm->number==spBWave_Legacy)
 			{
+				switch(prm->number)
+				{
+					case spABank_Legacy:
+						getBankName(data,currentPreset.oscBank[0]);
+						break;
+					case spBBank_Legacy:
+						getBankName(data,currentPreset.oscBank[1]);
+						break;
+					case spAWave_Legacy:
+						getWaveName(data,currentPreset.oscWave[0]);
+						break;
+					case spBWave_Legacy:
+						getWaveName(data,currentPreset.oscWave[1]);
+						break;
+				}
+				
 				// waveform changes
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number;
@@ -686,7 +705,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		}
 		break;
 	case ptCust:
-		change=1;
+		change=0;
 		switch(prm->number)
 		{
 			case 2:
@@ -770,9 +789,10 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.settingsModified=1;
 				break;
 			case 23:
-				currentPreset.steppedParameters[spXOvrBank]=currentPreset.steppedParameters[spBBank];
-				currentPreset.steppedParameters[spXOvrWave]=currentPreset.steppedParameters[spBWave];
+				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spBBank_Legacy];
+				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spBWave_Legacy];
 				refreshWaveforms(2);
+				change=1;
 				break;
 			case 24:
 			case 25:
@@ -797,13 +817,13 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				break;
 			case 27:
 				preset_loadDefault(1);
+				change=1;
 				
-				refreshWaveNames(0);
-				refreshWaveNames(1);
+				refreshCurWaveNames(0,1);
+				refreshCurWaveNames(1,1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				refreshWaveforms(2);
-				refreshFullState();
 				break;
 		}
 		break;
@@ -928,16 +948,16 @@ void ui_update(void)
 	{
 		switch(ui.slowUpdateTimeoutNumber)
 		{
-			case spABank:
-				refreshWaveNames(0);
+			case spABank_Legacy:
+				refreshCurWaveNames(0,1);
 				break;
-			case spBBank:
-				refreshWaveNames(1);
+			case spBBank_Legacy:
+				refreshCurWaveNames(1,1);
 				break;
-			case spAWave:
+			case spAWave_Legacy:
 				refreshWaveforms(0);
 				break;
-			case spBWave:
+			case spBWave_Legacy:
 				refreshWaveforms(1);
 				break;
 			case 0x80+6:
@@ -948,9 +968,10 @@ void ui_update(void)
 				settings_save();                
 				if(!preset_loadCurrent(settings.presetNumber))
 					preset_loadDefault(1);
+				ui_setPresetModified(0);	
 				
-				refreshWaveNames(0);
-				refreshWaveNames(1);
+				refreshCurWaveNames(0,1);
+				refreshCurWaveNames(1,1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				refreshWaveforms(2);
@@ -985,9 +1006,9 @@ void ui_update(void)
 		if(ui.pendingScreenClear)
 		{
 			sendString(1,"GliGli's OverCycler2                    ");
-			sendString(1,"A: Oscillators     B: Filter            ");
-			sendString(2,"C: Amplifier       D: LFO1/LFO2         ");
-			sendString(2,"*: Miscellaneous   #: Arp/Sequencer     ");
+			sendString(1,"A: Miscellaneous   B: Arp/Sequencer     ");
+			sendString(2,"C: Oscillators     D: Filter            ");
+			sendString(2,"E: Amplifier       F: LFO1/LFO2         ");
 		}
 		delay_ms(2);
 	}
@@ -1056,9 +1077,10 @@ void ui_update(void)
 		if(ui.pendingScreenClear)
 		{
 			#define DELIM(x) sendChar(x,'|'); sendChar(x,'|');
+			#define PM(x) sendChar(x,'P'); sendChar(x,'M'); // "preset modified" info
 
 			setPos(1,24,0); DELIM(1)
-			setPos(1,24,1); DELIM(1)
+			setPos(1,24,1); if(ui.presetModified) { PM(1) } else { DELIM(1) };
 			setPos(2,24,0); DELIM(2)
 			setPos(2,24,1); DELIM(2)
 		}

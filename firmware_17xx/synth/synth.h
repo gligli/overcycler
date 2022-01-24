@@ -8,6 +8,9 @@
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 120000000
 
+#define SYNTH_DEFAULT_WAVE_BANK "AKWF_bw_perfectwaves"
+#define SYNTH_DEFAULT_WAVE_NAME "AKWF_saw.wav"
+
 #define TICKER_1S 500
 
 // Some constants for 16 bit ranges */
@@ -53,12 +56,14 @@ void synth_update(void);
 
 // synth.c internal api
 void refreshFullState(void);
-void refreshWaveNames(int8_t ab);
-void refreshWaveforms(int8_t ab);
-int8_t appendBankName(int8_t ab, char * path);
-int8_t appendWaveName(int8_t ab, char * path);
+void refreshBankNames(int8_t sort);
+void refreshCurWaveNames(int8_t abx, int8_t sort);
+void refreshWaveforms(int8_t abx);
+void reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort);
 int getBankCount(void);
-int getWaveCount(int8_t ab);
+int getCurWaveCount(void);
+int8_t getBankName(int bankIndex, char * res);
+int8_t getWaveName(int waveIndex, char * res);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];

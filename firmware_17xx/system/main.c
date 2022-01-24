@@ -25,6 +25,7 @@
 #define STORAGE_PATH "/STORAGE"
 
 FATFS fatFS;
+static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
@@ -38,14 +39,15 @@ __attribute__ ((used)) void SysTick_Handler(void)
 	}
 	++frc;
 	
-	synth_timerInterrupt();
+	if(synthReady)
+		synth_timerInterrupt();
 }
 
 void delay_us(uint32_t count)
 {
-    uint32_t i;
-	
-    for (i = 0; i < count; i++)
+	uint32_t i;
+
+	for (i = 0; i < count; i++)
 	{
 		DELAY_100NS();
 		DELAY_100NS();
@@ -73,15 +75,19 @@ void storage_write(uint32_t pageIdx, uint8_t *buf)
 	
 	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
 
+#ifdef DEBUG
 	rprintf(0,"storage_write %d %s\n",pageIdx,fn);
+#endif		
 
 	if(f_open(&f,fn,FA_WRITE|FA_CREATE_ALWAYS))
 		return;
 	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
 	f_close(&f);
 
+#ifdef DEBUG
 	if(bw!=STORAGE_PAGE_SIZE)
 		rprintf(0,"storage_write %d bytes\n",bw);
+#endif		
 }
 
 void storage_read(uint32_t pageIdx, uint8_t *buf)
@@ -92,7 +98,9 @@ void storage_read(uint32_t pageIdx, uint8_t *buf)
 
 	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
 
+#ifdef DEBUG
 	rprintf(0,"storage_read %d %s\n",pageIdx,fn);
+#endif		
 
 	memset(buf,0,STORAGE_PAGE_SIZE);
 
@@ -101,8 +109,10 @@ void storage_read(uint32_t pageIdx, uint8_t *buf)
 	f_read(&f,buf,STORAGE_PAGE_SIZE,&br);
 	f_close(&f);
 
+#ifdef DEBUG
 	if(br!=STORAGE_PAGE_SIZE)
-		rprintf(0,"storage_write %d bytes\n",br);
+		rprintf(0,"storage_read %d bytes\n",br);
+#endif		
 }
 
 int main(void)
@@ -123,6 +133,7 @@ int main(void)
 	
 	rprintf(0,"storage init...\n");
 
+	synthReady=0;
 	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
 	NVIC_SetPriority(SysTick_IRQn,16);
 	
@@ -145,6 +156,7 @@ int main(void)
 	BLOCK_INT(1)
 	{
 		synth_init();
+		synthReady=1;
 	}
 	
 	rprintf(0,"done\n");

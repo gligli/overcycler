@@ -5,7 +5,6 @@
 #include "synth.h"
 #include "wtosc.h"
 #include "dacspi.h"
-#include "ff.h"
 #include "scan.h"
 #include "ui.h"
 #include "uart_midi.h"
@@ -28,9 +27,8 @@
 
 #define WAVEDATA_PATH "/WAVEDATA"
 
-#define MAX_BANKS 75
-#define MAX_BANK_WAVES 150
-#define MAX_FILENAME _MAX_LFN
+#define MAX_BANKS 100
+#define MAX_BANK_WAVES 200
 
 #define POT_DEAD_ZONE 512
 
@@ -39,10 +37,15 @@ volatile uint32_t currentTick=0; // 500hz
 static struct
 {
 	int bankCount;
+	int curWaveCount;
 	char bankNames[MAX_BANKS][MAX_FILENAME];
-	int curWaveCount[3];
-	char waveNames[2][MAX_BANK_WAVES][MAX_FILENAME];
-
+	char curWaveNames[MAX_BANK_WAVES][MAX_FILENAME];
+	
+	int8_t bankSorted;
+	int8_t curWaveSorted;
+	int8_t curWaveABX;
+	char curWaveBank[128];
+	
 	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: XOvr source, 3: XOvr mix
 	uint16_t sampleCount[4];
 
@@ -83,7 +86,6 @@ static struct
 		int32_t oldCrossOver;
 	} partState;
 	
-	int8_t ready;
 	uint8_t pendingExtClock;
 	int32_t wmodAVal, wmodEnvAmt;
 } synth;
@@ -91,6 +93,9 @@ static struct
 extern const uint16_t attackCurveLookup[]; // for modulation delay
 
 const uint16_t extClockDividers[16] = {192,168,144,128,96,72,48,36,24,18,12,9,6,4,3,2};
+
+static const uint8_t abx2bsp[3] = {spABank_Legacy, spBBank_Legacy, spXOvrBank_Legacy};
+static const uint8_t abx2wsp[3] = {spAWave_Legacy, spBWave_Legacy, spXOvrWave_Legacy};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
@@ -248,7 +253,7 @@ static void handleFinishedVoices(void)
 
 static void refreshAssignerSettings(void)
 {
-	static const uint8_t vc2msk[7] = {1, 3, 7, 15, 31, 63};
+	static const uint8_t vc2msk[7]={1,3,7,15,31,63};
  
 	if(currentPreset.steppedParameters[spUnison]!=assigner_getMono())
 	{
@@ -439,44 +444,80 @@ void refreshFullState(void)
 	computeTunedCVs();
 }
 
-int8_t appendBankName(int8_t abx, char * path)
+void reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort)
 {
-	uint8_t bankNum;
-	static const uint8_t abx2sp[3] = {spABank, spBBank, spXOvrBank};
+	int i,bankNum,waveNum,oriBankNum,oriWaveNum,newBankNum,newWaveNum;
+	char fn[MAX_FILENAME];
 
-	bankNum=currentPreset.steppedParameters[abx2sp[abx]];
-
-	if(bankNum>=waveData.bankCount)
-		return 0;
-
-	strcat(path,waveData.bankNames[bankNum]);
-	
-	return 1;
-}
-
-int8_t appendWaveName(int8_t abx, char * path)
-{
-	uint8_t waveNum;
-	static const uint8_t abx2sp[3] = {spAWave, spBWave, spXOvrWave};
-
-	waveNum=currentPreset.steppedParameters[abx2sp[abx]];
-
-	if(abx==2)
+	if(loadDefault)
 	{
-		refreshWaveNames(2);
-		if(waveNum>=waveData.curWaveCount[1])
-			return 0;
-		strcat(path,waveData.waveNames[1][waveNum]);
-		refreshWaveNames(1);
+		bankNum=-1;
+		waveNum=-1;
 	}
 	else
 	{
-		if(waveNum>=waveData.curWaveCount[abx])
-			return 0;
-		strcat(path,waveData.waveNames[abx][waveNum]);
+		bankNum=currentPreset.steppedParameters[abx2bsp[abx]];
+		waveNum=currentPreset.steppedParameters[abx2wsp[abx]];
+	}
+	
+	oriWaveNum=waveNum;
+	oriBankNum=bankNum;
+
+	refreshBankNames(sort);
+
+reload:
+	
+	newBankNum=-1;	
+	fn[0]=0;
+	if(bankNum<0 || bankNum>=waveData.bankCount)
+		strcpy(fn,SYNTH_DEFAULT_WAVE_BANK);
+	else
+		strcpy(fn,waveData.bankNames[bankNum]);
+	for(i=0;i<waveData.bankCount;++i)
+	{
+		if(!stricmp(fn,waveData.bankNames[i]))
+		{
+			newBankNum=i;
+			break;
+		}
+	}
+	if(newBankNum<0) // in case bank not found, reload default wave and bank
+	{
+		rprintf(0,"Error: abx %d bank %s not found!\n",abx,fn);
+		bankNum=-1;
+		goto reload;
 	}
 
-	return 1;
+	strcpy(currentPreset.oscBank[abx],waveData.bankNames[newBankNum]);
+
+	refreshCurWaveNames(abx,sort);
+
+	newWaveNum=-1;
+	fn[0]=0;
+	if(waveNum<0 || waveNum>=waveData.curWaveCount)
+		strcpy(fn,SYNTH_DEFAULT_WAVE_NAME);
+	else
+		strcpy(fn,waveData.curWaveNames[waveNum]);
+	for(i=0;i<waveData.curWaveCount;++i)
+	{
+		if(!stricmp(fn,waveData.curWaveNames[i]))
+		{
+			newWaveNum=i;
+			break;
+		}
+	}
+	if(newWaveNum<0) // in case wave not found, reload default wave and bank
+	{
+		rprintf(0,"Error: abx %d waveform %s not found!\n",abx,fn);
+		bankNum=-1;
+		waveNum=-1;
+		goto reload;
+	}
+
+	strcpy(currentPreset.oscWave[abx],waveData.curWaveNames[newWaveNum]);
+	
+	if (oriBankNum!=newBankNum || oriWaveNum!=newWaveNum)
+		rprintf(0,"reloadLegacyBankWaveIndexes abx %d from %d/%d to %d/%d\n",abx,oriBankNum,oriWaveNum,newBankNum,newWaveNum);
 }
 
 int getBankCount(void)
@@ -484,14 +525,41 @@ int getBankCount(void)
 	return waveData.bankCount;
 }
 
-int getWaveCount(int8_t ab)
+int getCurWaveCount(void)
 {
-	return waveData.curWaveCount[ab];
+	return waveData.curWaveCount;
 }
 
-static void refreshBankNames(void)
+int8_t getBankName(int bankIndex, char * res)
+{
+	if(bankIndex<0 || bankIndex>=waveData.bankCount)
+	{
+		res[0]=0;
+		return 0;
+	}
+	
+	strcpy(res,waveData.bankNames[bankIndex]);
+	return 1;
+}
+
+int8_t getWaveName(int waveIndex, char * res)
+{
+	if(waveIndex<0 || waveIndex>=waveData.curWaveCount)
+	{
+		res[0]=0;
+		return 0;
+	}
+	
+	strcpy(res,waveData.curWaveNames[waveIndex]);
+	return 1;
+}
+
+void refreshBankNames(int8_t sort)
 {
 	FRESULT res;
+	
+	if(waveData.bankSorted==sort) // already loaded and same state
+		return;
 	
 	waveData.bankCount=0;
 
@@ -517,21 +585,32 @@ static void refreshBankNames(void)
 			break;
 	}
 	
+	if(sort)
+		qsort(waveData.bankNames,waveData.bankCount,sizeof(waveData.bankNames[0]),stringCompare);
+	
+	waveData.bankSorted=sort;
+	
+#ifdef DEBUG
 	rprintf(0,"bankCount %d\n",waveData.bankCount);
+#endif		
 }
 
-void refreshWaveNames(int8_t abx)
+void refreshCurWaveNames(int8_t abx, int8_t sort)
 {
 	FRESULT res;
-	char fn[256];
-	int8_t ab=MIN(1,abx); // CrossMod waveNames are temporarily stored in B waveNames to save RAM
+	char fn[128];
 	
-	waveData.curWaveCount[ab]=0;
-
 	strcpy(fn,WAVEDATA_PATH "/");
-	if(!appendBankName(abx,fn)) return;
+	strcat(fn,currentPreset.oscBank[abx]);
+	
+	if(!strcmp(waveData.curWaveBank,fn) && waveData.curWaveSorted==sort && waveData.curWaveABX==abx) // already loaded and same state
+		return;
+	
+	waveData.curWaveCount=0;
 
+#ifdef DEBUG
 	rprintf(0,"loading %s\n",fn);
+#endif		
 	
 	if((res=f_opendir(&waveData.curDir,fn)))
 	{
@@ -544,18 +623,27 @@ void refreshWaveNames(int8_t abx)
 
 	while(!res)
 	{
-		if(strstr(waveData.curFile.fname,".WAV"))
+		if(strstr(waveData.curFile.fname,".WAV") || strstr(waveData.curFile.fname,".wav"))
 		{
-			strncpy(waveData.waveNames[ab][waveData.curWaveCount[ab]],waveData.curFile.lfname,waveData.curFile.lfsize);
-			++waveData.curWaveCount[ab];
+			strncpy(waveData.curWaveNames[waveData.curWaveCount],waveData.curFile.lfname,waveData.curFile.lfsize);
+			++waveData.curWaveCount;
 		}
 		
 		res=f_readdir(&waveData.curDir,&waveData.curFile);
-		if (!waveData.curFile.fname[0] || waveData.curWaveCount[ab]>=MAX_BANK_WAVES)
+		if (!waveData.curFile.fname[0] || waveData.curWaveCount>=MAX_BANK_WAVES)
 			break;
 	}
 
-	rprintf(0,"curWaveCount %d %d\n",ab,waveData.curWaveCount[ab]);
+	if(sort)
+		qsort(waveData.curWaveNames,waveData.curWaveCount,sizeof(waveData.curWaveNames[0]),stringCompare);
+
+	waveData.curWaveSorted=sort;
+	waveData.curWaveABX=abx;
+	strcpy(waveData.curWaveBank,fn);
+
+#ifdef DEBUG
+	rprintf(0,"curWaveCount %d %d\n",abx,waveData.curWaveCount);
+#endif		
 }
 
 void refreshWaveforms(int8_t abx)
@@ -569,11 +657,13 @@ void refreshWaveforms(int8_t abx)
 	int32_t smpSize = 0;
 	
 	strcpy(fn,WAVEDATA_PATH "/");
-	if(!appendBankName(abx,fn)) return;
+	strcat(fn,currentPreset.oscBank[abx]);
 	strcat(fn,"/");
-	if(!appendWaveName(abx,fn)) return;
+	strcat(fn,currentPreset.oscWave[abx]);
 
+#ifdef DEBUG
 	rprintf(0,"loading %s\n",fn);
+#endif		
 	
 	if(!f_open(&f,fn,FA_READ))
 	{
@@ -586,7 +676,9 @@ void refreshWaveforms(int8_t abx)
 		
 		smpSize=MIN(smpSize,WTOSC_MAX_SAMPLES*2);
 		
+#ifdef DEBUG
 		rprintf(0, "smpSize %d\n", smpSize);
+#endif		
 
 		if((res=f_read(&f,data,smpSize,&i)))
 			rprintf(0,"f_read res=%d\n",res);
@@ -825,6 +917,9 @@ void synth_init(void)
 	
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
+	waveData.bankSorted=-1;
+	waveData.curWaveSorted=-1;
+	waveData.curWaveABX=-1;
 
 	// init footswitch in
 
@@ -877,6 +972,13 @@ void synth_init(void)
 		tuner_tuneSynth();
 	}
 
+	__enable_irq();
+	
+	refreshBankNames(1);
+	
+	// upgrade presets from before storing bank/wave names
+	preset_upgradeBankWaveStorage();
+	
 	// load last preset & do a full refresh
 	
 	if(!preset_loadCurrent(settings.presetNumber))
@@ -884,12 +986,6 @@ void synth_init(void)
 	ui_setPresetModified(0);
 
 	refreshFullState();
-	
-	__enable_irq();
-	refreshBankNames();
-
-	refreshWaveNames(0);
-	refreshWaveNames(1);
 	refreshWaveforms(0);
 	refreshWaveforms(1);
 	refreshWaveforms(2);
@@ -898,7 +994,6 @@ void synth_init(void)
 
 void synth_update(void)
 {
-#ifdef DEBUG
 #if 0
 	putc_serial0('.');	
 #else
@@ -911,9 +1006,7 @@ void synth_update(void)
 		prevTick=currentTick;
 	}
 #endif
-#endif
-	synth.ready=1;
-	
+
 	scan_update();
 	ui_update();
 	
@@ -931,9 +1024,6 @@ void synth_timerInterrupt(void)
 {
 	int32_t resVal,resoFactor;
 	
-	if(!synth.ready)
-		return;
-
 	resVal=currentPreset.continuousParameters[cpResonance];
 	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
 	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
@@ -1015,9 +1105,6 @@ void synth_timerInterrupt(void)
 void synth_updateCVsEvent(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt;
-
-	if(!synth.ready)
-		return;
 
 	// lfos
 		

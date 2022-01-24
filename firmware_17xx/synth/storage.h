@@ -5,6 +5,8 @@
 #include "assigner.h"
 #include "tuner.h"
 
+#define PRESET_BANKWAVE_ABX_COUNT 3 // OscA / OscB /XOvr
+
 typedef enum
 {
 	cpAFreq=0,cpAVol=1,cpABaseWMod=2,
@@ -29,8 +31,8 @@ typedef enum
 
 typedef enum
 {
-	spABank=0,spAWave=1,spAWModType=2,spAWModEnvEn=3,
-	spBBank=4,spBWave=5,spBWModType=6,spBWModEnvEn=7,
+	spABank_Legacy=0,spAWave_Legacy=1,spAWModType=2,spAWModEnvEn=3,
+	spBBank_Legacy=4,spBWave_Legacy=5,spBWModType=6,spBWModEnvEn=7,
 			
 	spLFOShape=8,spLFOShift=9,spLFOTargets=10,
 
@@ -43,14 +45,26 @@ typedef enum
 			
 	spOscSync=20,
 			
-	spXOvrBank=21,spXOvrWave=22,
+	spXOvrBank_Legacy=21,spXOvrWave_Legacy=22,
 	spFilEnvLin=23,
 			
 	spLFO2Shape=24,spLFO2Shift=25,spLFO2Targets=26,spVoiceCount=27,
+		
+	spPresetType=28, spPresetStyle=29,
 
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;
+
+typedef enum
+{
+	ptOther, ptPercussive, ptBass, ptPad, ptKeys, ptStabs, ptLead, ptArpeggios
+}presetType_t;
+
+typedef enum
+{
+	psOther, psNeutral, psClean, psRealistic, psSilky, psRaw, psHeavy, psCrunchy
+}presetStyle_t;
 
 struct settings_s
 {
@@ -74,6 +88,9 @@ struct preset_s
 	uint16_t continuousParameters[cpCount];
 	
 	uint8_t voicePattern[SYNTH_VOICE_COUNT];
+	
+	char oscBank[PRESET_BANKWAVE_ABX_COUNT][MAX_FILENAME];
+	char oscWave[PRESET_BANKWAVE_ABX_COUNT][MAX_FILENAME];
 };
 
 extern struct settings_s settings;
@@ -89,6 +106,7 @@ void preset_saveCurrent(uint16_t number);
 
 void preset_loadDefault(int8_t makeSound);
 void settings_loadDefault(void);
+void preset_upgradeBankWaveStorage(void);
 
 void storage_export(uint16_t number, uint8_t * buf, int16_t * size);
 void storage_import(uint16_t number, uint8_t * buf, int16_t size);

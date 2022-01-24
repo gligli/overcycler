@@ -8,13 +8,14 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 10
+#define STORAGE_VERSION 11
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
+#define STORAGE_NAMES_OFFSET 2048
 
-#define SETTINGS_PAGE_COUNT 2
-#define SETTINGS_PAGE ((STORAGE_SIZE/STORAGE_PAGE_SIZE)-4)
+#define SETTINGS_PAGE_COUNT 1
+#define SETTINGS_PAGE (STORAGE_PAGE_COUNT-4)
 
 #define SEQUENCER_START_PAGE 65000
 
@@ -47,6 +48,9 @@ const uint8_t steppedParametersBits[spCount] =
 	/*LFO2Shape*/3,
 	/*LFO2Shift*/2,
 	/*LFO2Targets*/2,
+	/*VoiceCount*/3,
+	/*PresetType*/3,
+	/*PresetStyle*/3,
 };
 
 struct settings_s settings;
@@ -101,6 +105,12 @@ static int8_t storageReadS8(void)
 	return v;
 }
 
+static void storageReadStr(char * v)
+{
+	strcpy(v,(const char *)storage.bufPtr);
+	storage.bufPtr+=strlen(v)+1;
+}
+
 static void storageWrite32(uint32_t v)
 {
 	memcpy(storage.bufPtr,&v,sizeof(v));
@@ -133,6 +143,12 @@ static void storageWriteS8(int8_t v)
 	storage.bufPtr+=sizeof(v);
 }
 
+static void storageWriteStr(const char * v)
+{
+	strcpy((char *)storage.bufPtr,v);
+	storage.bufPtr+=strlen(v)+1;
+}
+
 static LOWERCODESIZE int8_t storageLoad(uint16_t pageIdx, uint8_t pageCount)
 {
 	uint16_t i;
@@ -148,8 +164,8 @@ static LOWERCODESIZE int8_t storageLoad(uint16_t pageIdx, uint8_t pageCount)
 	if(storageRead32()!=STORAGE_MAGIC)
 	{
 #ifdef DEBUG
-		print("Error: bad page !\n"); 
-#endif	
+		print("Warning: empty page !\n"); 
+#endif		
 		return 0;
 	}
 
@@ -172,9 +188,7 @@ static LOWERCODESIZE void storageFinishStore(uint16_t pageIdx, uint8_t pageCount
 {
 	if((storage.bufPtr-storage.buffer)>sizeof(storage.buffer))
 	{
-#ifdef DEBUG
 		print("Error: writing too much data to storage !\n"); 
-#endif	
 		return;
 	}
 	
@@ -264,9 +278,9 @@ LOWERCODESIZE void settings_save(void)
 LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 {
 	int8_t i;
-	
-	storageLoad(number,1);
 
+	storageLoad(number,1);
+	
 	preset_loadDefault(0);
 
 	if (storage.version<1)
@@ -290,7 +304,10 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	if(storage.version<3)
 		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
 
-	if (storage.version<2)
+	reloadLegacyBankWaveIndexes(0,0,0);
+	reloadLegacyBankWaveIndexes(1,0,0);
+	
+	if(storage.version<2)
 		return 1;
 
 	// v2
@@ -314,9 +331,11 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	// v8
 	
-	currentPreset.steppedParameters[spXOvrBank]=storageRead8();
-	currentPreset.steppedParameters[spXOvrWave]=storageRead8();
+	currentPreset.steppedParameters[spXOvrBank_Legacy]=storageRead8();
+	currentPreset.steppedParameters[spXOvrWave_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
+
+	reloadLegacyBankWaveIndexes(2,0,0);
 
 	if(storage.version<9)
 		return 1;
@@ -340,6 +359,20 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	// v10
 
 	currentPreset.steppedParameters[spVoiceCount]=storageRead8();
+
+	if(storage.version<11)
+		return 1;
+	
+	// v11
+	
+	for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
+	{
+		storageReadStr(currentPreset.oscBank[abx]);
+		storageReadStr(currentPreset.oscWave[abx]);
+	}
+
+	currentPreset.steppedParameters[spPresetType]=storageRead8();
+	currentPreset.steppedParameters[spPresetStyle]=storageRead8();
 
 	return 1;
 }
@@ -375,8 +408,8 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	// v8
 	
-	storageWrite8(currentPreset.steppedParameters[spXOvrBank]);
-	storageWrite8(currentPreset.steppedParameters[spXOvrWave]);
+	storageWrite8(currentPreset.steppedParameters[spXOvrBank_Legacy]);
+	storageWrite8(currentPreset.steppedParameters[spXOvrWave_Legacy]);
 	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
 	
 	// v9
@@ -396,7 +429,18 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	storageWrite8(currentPreset.steppedParameters[spVoiceCount]);
 
-	// this must stay last
+	// v11
+	
+	for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
+	{
+		storageWriteStr(currentPreset.oscBank[abx]);
+		storageWriteStr(currentPreset.oscWave[abx]);
+	}
+	
+	storageWrite8(currentPreset.steppedParameters[spPresetType]);
+	storageWrite8(currentPreset.steppedParameters[spPresetStyle]);
+		
+	// /!\ write new version before this
 	storageFinishStore(number,1);
 }
 
@@ -480,13 +524,13 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
 	currentPreset.steppedParameters[spLFO2Shift]=1;
 
-	currentPreset.steppedParameters[spABank]=26; // perfectwaves
-	currentPreset.steppedParameters[spBBank]=26;
-	currentPreset.steppedParameters[spXOvrBank]=26;
+	currentPreset.steppedParameters[spABank_Legacy]=25; // perfectwaves
+	currentPreset.steppedParameters[spBBank_Legacy]=25;
+	currentPreset.steppedParameters[spXOvrBank_Legacy]=25;
 
-	currentPreset.steppedParameters[spAWave]=0; // sawtooth
-	currentPreset.steppedParameters[spBWave]=0;
-	currentPreset.steppedParameters[spXOvrWave]=0;
+	currentPreset.steppedParameters[spAWave_Legacy]=0; // sawtooth
+	currentPreset.steppedParameters[spBWave_Legacy]=0;
+	currentPreset.steppedParameters[spXOvrWave_Legacy]=0;
 
 	currentPreset.steppedParameters[spVoiceCount]=5;
 
@@ -495,6 +539,10 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	if(makeSound)
 	{
+		// load default waveforms (perfectwaves/sawtooth)
+		for(int8_t abx=0;abx<2;++abx)
+			reloadLegacyBankWaveIndexes(abx,1,1);
+
 		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
 	}
 }
@@ -508,4 +556,37 @@ LOWERCODESIZE void settings_loadDefault(void)
 	settings.seqArpClock=6*UINT16_MAX/10+1;
 
 	tuner_init(); // use theoretical tuning
+}
+
+LOWERCODESIZE void preset_upgradeBankWaveStorage(void)
+{
+	if(settings_load() && storage.version<11)
+	{
+		rprintf(1,"Upgrading presets...");
+
+		for(uint16_t p=0;p<400;++p)
+		{
+			rprintf(0,"Upgrading preset %d ",p);
+			
+			preset_loadDefault(0);
+			if(preset_loadCurrent(p))
+			{
+				if(storage.version<11)
+				{
+					preset_saveCurrent(p);
+					rprintf(0,"Done!\n");
+				}
+				else
+				{
+					rprintf(0,"Already upgraded...\n");
+				}
+			}
+			else
+			{
+				rprintf(0,"Not found...\n",p);
+			}
+		}
+		
+		settings_save();
+	}
 }

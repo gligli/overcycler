@@ -252,7 +252,7 @@ LPC21ISP_PORT = com1
 LPC21ISP_BAUD = 230400
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
-LPC21ISP_OPTIONS = -term -control -donotstart
+LPC21ISP_OPTIONS = -term -control -donotstart -wipe
 # ---------------------------------------------------------------------------
 
 

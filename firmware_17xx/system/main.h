@@ -1,7 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define DEBUG 1
+//#define DEBUG
+//#define DEBUG_
 
 #include <stdint.h>
 #include <string.h>
@@ -26,6 +27,8 @@
 #include <lpc17xx_gpdma.h>
 #include <lpc17xx_spi.h>
 
+#include "ff.h"
+
 //AVR compatibility
 #define PROGMEM
 #define pgm_read_byte(addr) (*(uint8_t*)(addr))
@@ -38,6 +41,8 @@
 // assumes 120Mhz clock
 #define DELAY_50NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop")
 #define DELAY_100NS() {DELAY_50NS();DELAY_50NS();}
+
+#define MAX_FILENAME _MAX_LFN
 
 void delay_us(uint32_t);
 void delay_ms(uint32_t);
@@ -57,8 +62,8 @@ static inline void __restore_irq_stub(uint32_t basepri)
 #define BLOCK_INT(basepri) for(uint32_t __ctr=1,__int_block=__disable_irq_stub(basepri);__ctr;__restore_irq_stub(__int_block),__ctr=0)
 
 
-#define STORAGE_PAGE_SIZE 256
-#define STORAGE_SIZE (65536*256)
+#define STORAGE_PAGE_SIZE 512
+#define STORAGE_PAGE_COUNT 65536
 
 #define EXT_RAM  __attribute__((section(".ext_ram")))
 
