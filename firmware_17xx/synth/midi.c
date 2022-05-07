@@ -65,7 +65,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	}
 	else
 	{
-		arp_assignNote(note,velocity!=0);
+		arp_assignNote(note+MIDI_NOTE_TRANSPOSE_OFFSET,velocity!=0);
 	}
 }
 
@@ -94,7 +94,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 	}
 	else
 	{
-		arp_assignNote(note,0);
+		arp_assignNote(note+MIDI_NOTE_TRANSPOSE_OFFSET,0);
 	}
 }
 
