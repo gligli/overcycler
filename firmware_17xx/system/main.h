@@ -69,5 +69,8 @@ static inline void __restore_irq_stub(uint32_t basepri)
 
 extern void storage_write(uint32_t pageIdx, uint8_t *buf);
 extern void storage_read(uint32_t pageIdx, uint8_t *buf);
+extern void storage_delete(uint32_t pageIdx);
+extern int8_t storage_pageExists(uint32_t pageIdx);
+extern int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2);
 
 #endif

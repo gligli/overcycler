@@ -20,7 +20,6 @@
 #define INT_MASK (IRQ_MASK | FIQ_MASK)
 
 #define SYNTH_TIMER_HZ 500
-#define DISK_TIMER_HZ 100
 
 #define STORAGE_PATH "/STORAGE"
 
@@ -29,15 +28,7 @@ static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
-	static int frc=0;
-	
-	if(frc>=SYNTH_TIMER_HZ/DISK_TIMER_HZ)
-	{
-		// 100hz for disk		
-		disk_timerproc();
-		frc=0;
-	}
-	++frc;
+	disk_timerproc();
 	
 	if(synthReady)
 		synth_timerInterrupt();
@@ -113,6 +104,71 @@ void storage_read(uint32_t pageIdx, uint8_t *buf)
 	if(br!=STORAGE_PAGE_SIZE)
 		rprintf(0,"storage_read %d bytes\n",br);
 #endif		
+}
+
+void storage_delete(uint32_t pageIdx)
+{
+	char fn[_MAX_LFN];
+
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+
+#ifdef DEBUG
+	rprintf(0,"storage_delete %d %s\n",pageIdx,fn);
+#endif		
+
+	f_unlink(fn);
+}
+
+int8_t storage_pageExists(uint32_t pageIdx)
+{
+#ifdef DEBUG
+	rprintf(0,"storage_pageExists %d\n",pageIdx);
+#endif		
+	
+	FIL f;
+	char fn[_MAX_LFN];
+
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	
+	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
+		return 0;
+	
+	f_close(&f);
+	
+	return 1;
+}
+
+int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2)
+{
+	FIL f,f2;
+	char fn[_MAX_LFN];
+	uint8_t buf[64],buf2[64];
+	UINT br,br2;
+	int8_t same=1;
+
+#ifdef DEBUG
+	rprintf(0,"storage_samePage %d %d\n",pageIdx,pageIdx2);
+#endif		
+
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
+		return 0;
+	
+	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx2);
+	if(f_open(&f2,fn,FA_READ|FA_OPEN_EXISTING))
+		return 0;
+	
+	do
+	{
+		f_read(&f,buf,sizeof(buf),&br);
+		f_read(&f2,buf2,sizeof(buf2),&br2);
+		same&=memcmp(buf,buf2,sizeof(buf))==0;
+	}while(same && br == sizeof(buf) && br2 == sizeof(buf2));
+
+	f_close(&f);
+	f_close(&f2);
+	
+	return same;
 }
 
 int main(void)

@@ -310,7 +310,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*5*/ {.type=ptCust,.number=10,.shortName="Vce5",.longName="Tuner voice 5"},
 			/*6*/ {.type=ptCust,.number=10,.shortName="Vce6",.longName="Tuner voice 6"},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
+			/*8*/ {.type=ptCust,.number=28,.shortName="Pack",.longName="Pack presets and remove duplicates"},
 			/*9*/ {.type=ptNone},
 			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 		},
@@ -552,6 +552,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 			case 25:
 			case 26:
 			case 27:
+			case 28:
 				v=0;
 				break;
 			}
@@ -776,7 +777,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.isTransposing=(ui.isTransposing+1)%3;
 				break;
 			case 20:
-				data=(((int32_t)97*scan_getPotValue(potnum))>>16)-48;
+				data=(((int32_t)49*scan_getPotValue(potnum))>>16)-24;
 				ui_setTranspose(data);
 				break;
 			case 21:
@@ -825,15 +826,18 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				refreshWaveforms(1);
 				refreshWaveforms(2);
 				break;
+			case 28:
+				preset_packAndRemoveDuplicates();
+				break;
 		}
 		break;
 	default:
 		/*nothing*/;
 	}
 
-	if(change)
+	if(change || ui.settingsModified)
 	{
-		ui.presetModified=1;
+		ui.presetModified=change;
 		refreshFullState();
 	}
 }

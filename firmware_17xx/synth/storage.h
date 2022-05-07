@@ -107,6 +107,7 @@ void preset_saveCurrent(uint16_t number);
 void preset_loadDefault(int8_t makeSound);
 void settings_loadDefault(void);
 void preset_upgradeBankWaveStorage(void);
+void preset_packAndRemoveDuplicates(void);
 
 void storage_export(uint16_t number, uint8_t * buf, int16_t * size);
 void storage_import(uint16_t number, uint8_t * buf, int16_t size);

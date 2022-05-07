@@ -590,3 +590,50 @@ LOWERCODESIZE void preset_upgradeBankWaveStorage(void)
 		settings_save();
 	}
 }
+
+LOWERCODESIZE void preset_packAndRemoveDuplicates(void)
+{
+	int16_t to=0;
+	for(int16_t p=0;p<400;++p)
+	{
+		rprintf(1,"Packing pass 1 (% 3d)...\n               ", p);
+	
+		if(storage_pageExists(p))
+		{
+			if(p!=to)
+			{
+				storage_read(p, storage.buffer);
+				storage_write(to, storage.buffer);
+				storage_delete(p);
+			}
+			++to;
+		}
+	}
+
+	for(int16_t p=0;p<=to;++p)
+	{
+		rprintf(1,"Removing duplicates (% 3d)...            ", p);
+
+		if(storage_pageExists(p))
+			for(int16_t q=p+1;q<=to;++q)
+				if(storage_samePage(p, q))
+					storage_delete(q);
+	}
+
+	to=0;
+	for(int16_t p=0;p<400;++p)
+	{
+		rprintf(1,"Packing pass 2 (% 3d)...\n               ", p);
+	
+		if(storage_pageExists(p))
+		{
+			if(p!=to)
+			{
+				storage_read(p, storage.buffer);
+				storage_write(to, storage.buffer);
+				storage_delete(p);
+			}
+			++to;
+		}
+	}
+}
