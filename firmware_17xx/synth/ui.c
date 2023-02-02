@@ -792,6 +792,8 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			case 23:
 				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spBBank_Legacy];
 				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spBWave_Legacy];
+				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[1]);
+				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[1]);
 				refreshWaveforms(2);
 				change=1;
 				break;

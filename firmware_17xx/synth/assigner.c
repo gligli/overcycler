@@ -270,6 +270,7 @@ int8_t assigner_getLatestAssigned(uint8_t * note)
 	int8_t v;
 	
 	int8_t latestVoice = -1;
+	uint32_t ts = 0;
 	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
@@ -277,8 +278,11 @@ int8_t assigner_getLatestAssigned(uint8_t * note)
 			continue;
 		
 		struct allocation_s *a = &(assigner.allocation[v]);
-		if (a->assigned && a->timestamp > assigner.allocation[latestVoice].timestamp)
+		if (a->assigned && a->timestamp > ts)
+		{
 			latestVoice = v;
+			ts = assigner.allocation[latestVoice].timestamp;
+		}			
 	}
 	
 	if (latestVoice >= 0 && note) {
