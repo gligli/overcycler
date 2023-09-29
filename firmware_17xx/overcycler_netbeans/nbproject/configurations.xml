@@ -92,6 +92,7 @@
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-O2 -std=gnu99"/>
+        <element flagsID="1" commonFlags="-Ofast -std=gnu99"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -250,7 +251,7 @@
         </cTool>
       </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
+        <cTool flags="1">
         </cTool>
       </item>
       <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
@@ -274,7 +275,7 @@
         </cTool>
       </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
+        <cTool flags="1">
         </cTool>
       </item>
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
@@ -338,16 +339,39 @@
       </item>
       <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
+          <incDir>
+            <pElem>../xnormidi</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
+          <incDir>
+            <pElem>../xnormidi</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
+          <incDir>
+            <pElem>../xnormidi</pElem>
+          </incDir>
         </cTool>
       </item>
+      <folder path="0/synth">
+        <cTool>
+          <incDir>
+            <pElem>../synth</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/xnormidi/bytequeue">
+        <cTool>
+          <incDir>
+            <pElem>../xnormidi/bytequeue</pElem>
+          </incDir>
+        </cTool>
+      </folder>
     </conf>
   </confs>
 </configurationDescriptor>

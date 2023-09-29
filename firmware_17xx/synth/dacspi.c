@@ -25,12 +25,10 @@
 		GPDMA_DMACCxConfig_TransferType(1) | \
 		GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_BUFFER_COUNT 64
+#define DACSPI_BUFFER_COUNT 32
 #define DACSPI_CV_COUNT 16
 
 #define DACSPI_CV_CHANNEL 6
-#define DACSPI_CARD_CV_LDAC_MASK 0xbf
-#define DACSPI_VCA_CV_LDAC_MASK 0xef
 
 static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][4];
 static EXT_RAM volatile uint8_t marker;
@@ -81,7 +79,7 @@ static struct
 	uint16_t cvCommands[DACSPI_CV_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
 	uint8_t channelCPSR[DACSPI_CHANNEL_COUNT];
-} dacspi;
+} dacspi EXT_RAM;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
@@ -90,7 +88,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
-	// update synth @ 3Khz
+	// update synth @ 5Khz
 	synth_updateCVsEvent();
 
 	// when second half is playing, update first and vice-versa

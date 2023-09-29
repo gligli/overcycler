@@ -290,7 +290,7 @@ static void refreshEnvSettings(int8_t type)
 			a=&synth.ampEnvs[i];
 		}
 
-		adsr_setSpeedShift(a,(slow)?3:1,5);
+		adsr_setSpeedShift(a,(slow)?4:2,5);
 
 		adsr_setCVs(&synth.ampEnvs[i],
 				 currentPreset.continuousParameters[cpAmpAtt],
@@ -317,8 +317,8 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
 	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
 	
-	lfo_setSpeedShift(&synth.lfo[0],1+currentPreset.steppedParameters[spLFOShift]*3,5);
-	lfo_setSpeedShift(&synth.lfo[1],1+currentPreset.steppedParameters[spLFO2Shift]*3,5);
+	lfo_setSpeedShift(&synth.lfo[0],0+currentPreset.steppedParameters[spLFOShift]*3,5);
+	lfo_setSpeedShift(&synth.lfo[1],0+currentPreset.steppedParameters[spLFO2Shift]*3,5);
 
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
@@ -1101,7 +1101,7 @@ void synth_timerInterrupt(void)
 // Synth internal events
 ////////////////////////////////////////////////////////////////////////////////
 
-// @ 3Khz from dacspi CV update
+// @ 5Khz from dacspi CV update
 void synth_updateCVsEvent(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt;
