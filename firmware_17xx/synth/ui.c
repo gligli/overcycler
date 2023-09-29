@@ -395,46 +395,6 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 		return "    ";
 }
 
-static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
-{
-	static char dv[41];
-	const struct uiParam_s * prm;
-	int8_t potnum;
-	
-	dv[0]=0;	
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
-	
-	if(prm->type==ptStep)
-	{
-		switch(prm->number)
-		{
-			case spABank_Legacy:
-				strcpy(dv,currentPreset.oscBank[0]);
-				break;
-			case spBBank_Legacy:
-				strcpy(dv,currentPreset.oscBank[1]);
-				break;
-			case spAWave_Legacy:
-				strcpy(dv,currentPreset.oscWave[0]);
-				break;
-			case spBWave_Legacy:
-				strcpy(dv,currentPreset.oscWave[1]);
-				break;
-			default:
-				return NULL;
-		}
-
-		// always 40chars
-		for(int i=strlen(dv);i<40;++i) dv[i]=' ';
-		dv[40]=0;
-		
-		return dv;
-	}
-	
-	return NULL;
-}
-
 static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	static char dv[10]={0};
@@ -567,6 +527,57 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		;
 	}
 	
+	return dv;
+}
+
+static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+{
+	static char dv[41];
+	const struct uiParam_s * prm;
+	int8_t potnum;
+	
+	dv[0]=0;	
+	potnum=-source-1;
+	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	
+	if(prm->type==ptCont)
+		return NULL;
+
+	if (prm->type==ptStep && prm->number==spABank_Legacy)
+	{
+		strcpy(dv,currentPreset.oscBank[0]);
+	}
+	else if (prm->type==ptStep && prm->number==spBBank_Legacy)
+	{
+		strcpy(dv,currentPreset.oscBank[1]);
+	}
+	else if (prm->type==ptStep && prm->number==spAWave_Legacy)
+	{
+		strcpy(dv,currentPreset.oscWave[0]);
+	}
+	else if (prm->type==ptStep && prm->number==spBWave_Legacy)
+	{
+		strcpy(dv,currentPreset.oscWave[1]);
+	}
+	else
+	{
+		char * selected;
+		int32_t valCount;
+
+		selected = getDisplayValue(source, NULL);
+		valCount=0;
+		while(valCount<8 && prm->values[valCount]!=NULL)
+		{
+			strcat(dv, (!strcmp(selected, prm->values[valCount])) ? "\x7e"  : " ");
+			strcat(dv, prm->values[valCount]);
+			++valCount;
+		}
+	}
+
+	// always 40chars
+	for(int i=strlen(dv);i<40;++i) dv[i]=' ';
+	dv[40]=0;
+
 	return dv;
 }
 

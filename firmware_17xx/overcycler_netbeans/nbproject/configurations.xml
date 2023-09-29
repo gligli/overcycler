@@ -287,7 +287,7 @@
         </cTool>
       </item>
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
+        <cTool flags="1">
         </cTool>
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
