@@ -75,7 +75,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
 			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
-			/*5*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy B Bank/Wave"},
+			/*5*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy A Bank/Wave"},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
@@ -801,10 +801,10 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.settingsModified=1;
 				break;
 			case 23:
-				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spBBank_Legacy];
-				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spBWave_Legacy];
-				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[1]);
-				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[1]);
+				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spABank_Legacy];
+				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spAWave_Legacy];
+				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[0]);
+				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[0]);
 				refreshWaveforms(2);
 				change=1;
 				break;
