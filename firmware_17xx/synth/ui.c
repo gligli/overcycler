@@ -833,8 +833,6 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				preset_loadDefault(1);
 				change=1;
 				
-				refreshCurWaveNames(0,1);
-				refreshCurWaveNames(1,1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				refreshWaveforms(2);
@@ -987,8 +985,6 @@ void ui_update(void)
 					preset_loadDefault(1);
 				ui_setPresetModified(0);	
 				
-				refreshCurWaveNames(0,1);
-				refreshCurWaveNames(1,1);
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				refreshWaveforms(2);

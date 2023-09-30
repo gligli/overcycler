@@ -187,8 +187,13 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 		if(preset_loadCurrent(program))
 		{
 			settings.presetNumber=program;
+			
 			ui_setPresetModified(0);	
 			settings_save();		
+			
+			refreshWaveforms(0);
+			refreshWaveforms(1);
+			refreshWaveforms(2);
 			refreshFullState();
 		}
 	}
