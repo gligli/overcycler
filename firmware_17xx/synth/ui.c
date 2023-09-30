@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "storage.h"
 #include "integer.h"
+#include "assigner.h"
 #include "arp.h"
 #include "seq.h"
 #include "ffconf.h"
@@ -21,10 +22,6 @@
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
 
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/50)
-
-enum uiDigitInput_e{
-	diSynth,diLoadDecadeDigit,diStoreDecadeDigit,diLoadUnitDigit,diStoreUnitDigit
-};
 
 enum uiParamType_e
 {
@@ -1087,16 +1084,17 @@ void ui_update(void)
 		
 		// delimiter
 
-		if(ui.pendingScreenClear)
-		{
-			#define DELIM(x) sendChar(x,'|'); sendChar(x,'|');
-			#define PM(x) sendChar(x,'P'); sendChar(x,'M'); // "preset modified" info
+		char asgnChars[SYNTH_VOICE_COUNT];
 
-			setPos(1,24,0); DELIM(1)
-			setPos(1,24,1); if(ui.presetModified) { PM(1) } else { DELIM(1) };
-			setPos(2,24,0); DELIM(2)
-			setPos(2,24,1); DELIM(2)
+		for(i=0;i<SYNTH_VOICE_COUNT;++i)
+		{
+			asgnChars[i] = assigner_getAssignment(i, NULL) ? '*' : '|';
 		}
+
+		setPos(1,24,0); if(ui.presetModified) { sendChar(1,'P'); sendChar(1,'M'); } else { sendChar(1,'|'); sendChar(1,'|'); };
+		setPos(1,24,1); sendChar(1,asgnChars[0]); sendChar(1,asgnChars[1]);
+		setPos(2,24,0); sendChar(2,asgnChars[2]); sendChar(2,asgnChars[3]);
+		setPos(2,24,1); sendChar(2,asgnChars[4]); sendChar(2,asgnChars[5]);
 		
 		// pots
 
