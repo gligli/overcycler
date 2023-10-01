@@ -272,18 +272,19 @@ static void refreshAssignerSettings(void)
 
 static void refreshEnvSettings(int8_t type)
 {
-	int8_t slow;
+	int8_t slow,lin,loop;
 	int8_t i;
 	struct adsr_s * a;
 		
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
 		slow=currentPreset.steppedParameters[(type)?spFilEnvSlow:spAmpEnvSlow];
+		lin=currentPreset.steppedParameters[(type)?spFilEnvLin:spAmpEnvLin];
+		loop=currentPreset.steppedParameters[(type)?spFilEnvLoop:spAmpEnvLoop];
 
 		if(type)
 		{
 			a=&synth.filEnvs[i];
-			adsr_setShape(a,currentPreset.steppedParameters[spFilEnvLin]?0:1);
 		}
 		else
 		{
@@ -291,6 +292,7 @@ static void refreshEnvSettings(int8_t type)
 		}
 
 		adsr_setSpeedShift(a,(slow)?4:2,5);
+		adsr_setShape(a,(lin)?0:1,loop);
 
 		adsr_setCVs(&synth.ampEnvs[i],
 				 currentPreset.continuousParameters[cpAmpAtt],
@@ -956,9 +958,6 @@ void synth_init(void)
 	{
 		adsr_init(&synth.ampEnvs[i]);
 		adsr_init(&synth.filEnvs[i]);
-
-		adsr_setShape(&synth.ampEnvs[i],1);
-		adsr_setShape(&synth.filEnvs[i],1);
 	}
 
 	lfo_init(&synth.lfo[0]);

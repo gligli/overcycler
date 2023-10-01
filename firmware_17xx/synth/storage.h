@@ -52,6 +52,8 @@ typedef enum
 		
 	spPresetType=28, spPresetStyle=29,
 
+	spAmpEnvLin=30,spFilEnvLoop=31,spAmpEnvLoop=32,
+
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;

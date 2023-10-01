@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 11
+#define STORAGE_VERSION 12
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -51,6 +51,9 @@ const uint8_t steppedParametersBits[spCount] =
 	/*VoiceCount*/3,
 	/*PresetType*/3,
 	/*PresetStyle*/3,
+	/*AmpEnvLin*/1,
+	/*FilEnvLoop*/1,
+	/*AmpEnvLoop*/1,
 };
 
 struct settings_s settings;
@@ -374,6 +377,15 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spPresetType]=storageRead8();
 	currentPreset.steppedParameters[spPresetStyle]=storageRead8();
 
+	if(storage.version<12)
+		return 1;
+
+	// v12
+	
+	currentPreset.steppedParameters[spAmpEnvLin]=storageRead8();
+	currentPreset.steppedParameters[spFilEnvLoop]=storageRead8();
+	currentPreset.steppedParameters[spAmpEnvLoop]=storageRead8();
+
 	return 1;
 }
 
@@ -440,6 +452,12 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite8(currentPreset.steppedParameters[spPresetType]);
 	storageWrite8(currentPreset.steppedParameters[spPresetStyle]);
 		
+	// v12
+
+	storageWrite8(currentPreset.steppedParameters[spAmpEnvLin]);
+	storageWrite8(currentPreset.steppedParameters[spFilEnvLoop]);
+	storageWrite8(currentPreset.steppedParameters[spAmpEnvLoop]);
+
 	// /!\ write new version before this
 	storageFinishStore(number,1);
 }

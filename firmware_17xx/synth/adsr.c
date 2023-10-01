@@ -124,7 +124,16 @@ static NOINLINE void handlePhaseOverflow(struct adsr_s * a)
 		updateStageVars(a,sDecay);
 		return;
 	case sSustain:
-		updateStageVars(a,sSustain);
+		if (a->loop)
+		{
+			a->stageLevel=a->sustainCV;
+			a->stage=sAttack;
+			updateStageVars(a,sAttack);
+		}
+		else
+		{
+			updateStageVars(a,sSustain);
+		}
 		return;			
 	case sDone:
 		a->stage=sWait;
@@ -202,9 +211,17 @@ void adsr_reset(struct adsr_s * adsr)
 	updateStageVars(adsr,sWait);
 }
 
-inline void adsr_setShape(struct adsr_s * adsr, int8_t isExp)
+inline void adsr_setShape(struct adsr_s * adsr, int8_t isExp, int8_t isLoop)
 {
 	adsr->expOutput=isExp;
+	adsr->loop=isLoop;
+	
+	if (adsr->loop && adsr->stage==sSustain)
+	{
+		// go out of sustain to start looping immediately
+		adsr->stage=sDecay;
+		handlePhaseOverflow(adsr);
+	}
 }
 
 LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift, int8_t div)
