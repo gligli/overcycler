@@ -348,7 +348,7 @@ static int sendChar(int lcd, int ch)
 	return -1;
 }
 
-static int putc_lcd2 (int ch)
+static int putc_lcd2(int ch)
 {
 	return sendChar(2,ch);
 }
@@ -392,17 +392,15 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 		return "    ";
 }
 
-static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: keypad (kb0..kbSharp) / (-1..-10)
+static char * getDisplayValue(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	static char dv[10]={0};
 	const struct uiParam_s * prm;
 	int8_t potnum;
 	int32_t valCount;
-	int32_t v;
+	int32_t v=INT32_MIN;
 
 	sprintf(dv,"    ");
-	if(contValue)
-		*contValue=0;
 	
 	potnum=-source-1;
 	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
@@ -411,8 +409,6 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 	{
 	case ptCont:
 		v=currentPreset.continuousParameters[prm->number];
-		if(contValue)
-			*contValue=v;
 		sprintf(dv,"%4d",(v*1000)>>16);
 		break;
 	case ptStep:
@@ -421,7 +417,6 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 		while(valCount<8 && prm->values[valCount]!=NULL)
 			++valCount;
 
-		
 		if(prm->type==ptStep)
 		{
 			v=currentPreset.steppedParameters[prm->number];
@@ -514,7 +509,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 				break;
 			}
 		}
-		
+
 		if(v>=0 && v<valCount)
 			strcpy(dv,prm->values[v]);
 		else
@@ -523,7 +518,7 @@ static char * getDisplayValue(int8_t source, uint16_t * contValue) // source: ke
 	default:
 		;
 	}
-	
+
 	return dv;
 }
 
@@ -538,8 +533,13 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
 	
 	if(prm->type==ptCont)
-		return NULL;
-
+	{
+		int32_t v=currentPreset.continuousParameters[prm->number];
+		
+		// bargraph			
+		for(int i=0;i<40;++i)
+			dv[i]=(i<((v+UINT16_MAX/80)*40>>16)) ? '\xff' : ' ';
+	}
 	if (prm->type==ptStep && prm->number==spABank_Legacy)
 	{
 		strcpy(dv,currentPreset.oscBank[0]);
@@ -561,7 +561,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		char * selected;
 		int32_t valCount;
 
-		selected = getDisplayValue(source, NULL);
+		selected = getDisplayValue(source);
 		valCount=0;
 		while(valCount<8 && prm->values[valCount]!=NULL)
 		{
@@ -648,8 +648,9 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 	switch(prm->type)
 	{
 	case ptCont:
-		change=currentPreset.continuousParameters[prm->number]!=scan_getPotValue(potnum);
-		currentPreset.continuousParameters[prm->number]=scan_getPotValue(potnum);
+		data=scan_getPotValue(potnum);
+		change=currentPreset.continuousParameters[prm->number]!=data;
+		currentPreset.continuousParameters[prm->number]=data;
 		break;
 	case ptStep:
 		valCount=0;
@@ -939,9 +940,7 @@ void ui_init(void)
 void ui_update(void)
 {
 	int i;
-	uint16_t v;
 	static uint8_t frc=0;
-	char * s;
 	int8_t fsDisp;
 	
 	++frc;
@@ -1028,23 +1027,10 @@ void ui_update(void)
 			sendString(1,getName(ui.activeSource,1));
 
 		setPos(2,18,0);
-		sendString(2,getDisplayValue(ui.activeSource,&v));
+		sendString(2,getDisplayValue(ui.activeSource));
 		
 		setPos(2,0,1);
-		s=getDisplayFulltext(ui.activeSource);
-		if(s)
-		{
-			sendString(2,s);
-		}
-		else
-		{
-			// bargraph			
-			for(i=0;i<40;++i)
-				if(i<(((int32_t)v+UINT16_MAX/80)*40>>16))
-					sendChar(2,255);
-				else
-					sendChar(2,' ');
-		}
+		sendString(2,getDisplayFulltext(ui.activeSource));
 	}
 	else
 	{
@@ -1057,7 +1043,7 @@ void ui_update(void)
 		for(i=0;i<6;++i)
 		{
 			int lcd=(i<3)?1:2;
-			sendString(lcd,getDisplayValue(i,NULL));
+			sendString(lcd,getDisplayValue(i));
 			if(i!=5 && i!=2)
 				sendChar(lcd,' ');
 		}
@@ -1103,7 +1089,7 @@ void ui_update(void)
 		for(i=0;i<POT_COUNT;++i)
 		{
 			int lcd=(i<POT_COUNT/2)?1:2;
-			sendString(lcd,getDisplayValue(-i-1,NULL));
+			sendString(lcd,getDisplayValue(-i-1));
 			if(i!=POT_COUNT-1 && i!=POT_COUNT/2-1)
 				sendChar(lcd,' ');
 		}
