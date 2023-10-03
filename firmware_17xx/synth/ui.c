@@ -47,6 +47,7 @@ struct uiParam_s
 	const char * shortName; // 4 chars + zero termination
 	const char * longName;
 	const char * values[8]; // 4 chars + zero termination
+	int32_t custPotMul, custPotAdd;
 };
 
 const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/key num]
@@ -200,7 +201,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock",.custPotMul=UINT16_MAX+1,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
@@ -210,7 +211,7 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)"},
+			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		},
 		{
 			/*1*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
@@ -229,17 +230,17 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock"},
+			{.type=ptCust,.number=22,.shortName="Clk ",.longName="Seq/Arp Clock",.custPotMul=UINT16_MAX+1,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
 			/* 2nd row of pots */
-			{.type=ptCust,.number=21,.shortName="SBnk",.longName="Sequencer memory Bank"},
+			{.type=ptCust,.number=21,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)"},
+			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		},
 		{
 			/*1*/ {.type=ptCust,.number=13,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
@@ -258,17 +259,17 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=4,.shortName="Slot",.longName="Preset Slot"},
+			{.type=ptCust,.number=4,.shortName="Slot",.longName="Preset Slot",.custPotMul=PRESET_SLOTS,.custPotAdd=0},
 			{.type=ptStep,.number=spPresetType,.shortName="PTyp",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
 			{.type=ptStep,.number=spPresetStyle,.shortName="PStl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 			{.type=ptNone},
-			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"}},
+			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 			/* 2nd row of pots */
-			{.type=ptCust,.number=11,.shortName="Bank",.longName="Preset Bank"},
+			{.type=ptCust,.number=11,.shortName="Bank",.longName="Preset Bank",.custPotMul=PRESET_BANKS,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel"},
+			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=-1},
 		},
 		{
 			/*1*/ {.type=ptCust,.number=5,.shortName="Load",.longName="Load preset"},
@@ -287,15 +288,15 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=9,.shortName="Oct1",.longName="Tuner octave 1"},
-			{.type=ptCust,.number=9,.shortName="Oct2",.longName="Tuner octave 2"},
-			{.type=ptCust,.number=9,.shortName="Oct3",.longName="Tuner octave 3"},
-			{.type=ptCust,.number=9,.shortName="Oct4",.longName="Tuner octave 4"},
-			{.type=ptCust,.number=9,.shortName="Oct5",.longName="Tuner octave 5"},
+			{.type=ptCust,.number=9,.shortName="Oct1",.longName="Tuner octave 1",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+0*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct2",.longName="Tuner octave 2",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+1*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct3",.longName="Tuner octave 3",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+2*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct4",.longName="Tuner octave 4",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+3*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct5",.longName="Tuner octave 5",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+4*TUNER_FIL_INIT_SCALE-4096},
 			/* 2nd row of pots */
-			{.type=ptCust,.number=9,.shortName="Oct6",.longName="Tuner octave 6"},
-			{.type=ptCust,.number=9,.shortName="Oct7",.longName="Tuner octave 7"},
-			{.type=ptCust,.number=9,.shortName="Oct8",.longName="Tuner octave 8"},
+			{.type=ptCust,.number=9,.shortName="Oct6",.longName="Tuner octave 6",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+5*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct7",.longName="Tuner octave 7",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+6*TUNER_FIL_INIT_SCALE-4096},
+			{.type=ptCust,.number=9,.shortName="Oct8",.longName="Tuner octave 8",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+7*TUNER_FIL_INIT_SCALE-4096},
 			{.type=ptNone},
 			{.type=ptNone},
 		},
@@ -323,6 +324,9 @@ static struct
 	uint32_t slowUpdateTimeout;
 	int16_t slowUpdateTimeoutNumber;
 	int8_t pendingScreenClear;
+	
+	uint32_t potsAcquired;
+	int32_t potsPrevValue[SCAN_POT_COUNT];
 
 	int8_t presetBank;
 	int8_t presetSlot;
@@ -352,7 +356,6 @@ static int putc_lcd2(int ch)
 {
 	return sendChar(2,ch);
 }
-
 
 static void sendString(int lcd, const char * s)
 {
@@ -392,7 +395,7 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 		return "    ";
 }
 
-static char * getDisplayValue(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	static char dv[10]={0};
 	const struct uiParam_s * prm;
@@ -400,7 +403,9 @@ static char * getDisplayValue(int8_t source) // source: keypad (kb0..kbSharp) / 
 	int32_t valCount;
 	int32_t v=INT32_MIN;
 
-	sprintf(dv,"    ");
+	strcpy(dv,"    ");
+	if(valueOut)
+		*valueOut=v;
 	
 	potnum=-source-1;
 	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
@@ -519,6 +524,9 @@ static char * getDisplayValue(int8_t source) // source: keypad (kb0..kbSharp) / 
 		;
 	}
 
+	if(valueOut)
+		*valueOut=v;
+
 	return dv;
 }
 
@@ -561,7 +569,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		char * selected;
 		int32_t valCount;
 
-		selected = getDisplayValue(source);
+		selected = getDisplayValue(source, NULL);
 		valCount=0;
 		while(valCount<8 && prm->values[valCount]!=NULL)
 		{
@@ -581,6 +589,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
+	int32_t potSetting,potQuantum;
 	int8_t potnum,change;
 	const struct uiParam_s * prm;
 
@@ -611,6 +620,11 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		}
 
 		rprintf(0,"page %d\n",ui.activePage);
+		
+		//pots need to be reacquired
+		ui.potsAcquired=0;
+		for(int i=0;i<SCAN_POT_COUNT;++i)
+			ui.potsPrevValue[i]=INT32_MIN;
 
 		// cancel ongoing changes
 		ui.activeSourceTimeout=0;
@@ -631,6 +645,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 	potnum=-source-1;
 	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
 
+	// nothing to do -> return
 	if(ui.activePage==upNone || prm->type==ptNone)
 		return;
 
@@ -645,15 +660,10 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		ui.activeSource=source;
 	}
 	
-	switch(prm->type)
+	// get stepped parameter value count
+	valCount=0;
+	if(prm->type==ptStep)
 	{
-	case ptCont:
-		data=scan_getPotValue(potnum);
-		change=currentPreset.continuousParameters[prm->number]!=data;
-		currentPreset.continuousParameters[prm->number]=data;
-		break;
-	case ptStep:
-		valCount=0;
 		while(valCount<8 && prm->values[valCount]!=NULL)
 			++valCount;
 		
@@ -678,16 +688,66 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 					valCount=1<<steppedParametersBits[prm->number];
 			}
 		}
+	}
+	
+	// transform potentiometer value into setting value
+	potSetting=0;
+	potQuantum=0;
+	if(source<0)
+	{
+		data=scan_getPotValue(potnum);
+		switch(prm->type)
+		{
+		case ptCont:
+			potSetting=data;
+			potQuantum=SCAN_ADC_QUANTUM;
+			break;
+		case ptStep:
+			potSetting=(valCount*data)>>16;
+			break;
+		case ptCust:
+			potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
+			break;
+		default:
+			/* nothing */;
+		}
+	}
+	
+	// lock potentiometers until prev value is reacquired
+	if(source<0)
+	{
+		int32_t value,prevValue;
+		getDisplayValue(source,&value);
+		
+		prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
+		
+		if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
+			ui.potsAcquired|=1<<potnum;
+		
+		ui.potsPrevValue[potnum]=potSetting;
+		
+		if(((ui.potsAcquired>>potnum)&1)==0)
+			return;
+	}
 
+	// store new setting
+	switch(prm->type)
+	{
+	case ptCont:
+		data=potSetting;
+		change=currentPreset.continuousParameters[prm->number]!=data;
+		currentPreset.continuousParameters[prm->number]=data;
+		break;
+	case ptStep:
 		if(source<0)
-			data=(scan_getPotValue(potnum)*valCount)>>16;
+			data=potSetting;
 		else
 			data=(currentPreset.steppedParameters[prm->number]+1)%valCount;
 
 		change=currentPreset.steppedParameters[prm->number]!=data;
 		currentPreset.steppedParameters[prm->number]=data;
 		
-		//	special cases
+		// special cases
 		if(change)
 		{
 			if(prm->number==spABank_Legacy || prm->number==spBBank_Legacy || prm->number==spAWave_Legacy || prm->number==spBWave_Legacy)
@@ -725,7 +785,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				ui.presetSlot=(scan_getPotValue(potnum)*PRESET_SLOTS)>>16;
+				ui.presetSlot=potSetting;
 				break;
 			case 5:
 			case 6:
@@ -733,8 +793,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case 7:
-				data=((scan_getPotValue(potnum)*17)>>16)-1;
-				settings.midiReceiveChannel=data;
+				settings.midiReceiveChannel=potSetting;
 				ui.settingsModified=1;
 				break;
 			case 8:
@@ -742,18 +801,17 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.pendingScreenClear=1;
 				break;
 			case 9:
-				settings.tunes[potnum][ui.tunerActiveVoice]=TUNER_FIL_INIT_OFFSET+potnum*TUNER_FIL_INIT_SCALE-4096+(scan_getPotValue(potnum)>>3);
+				settings.tunes[potnum][ui.tunerActiveVoice]=potSetting;
 				settings_save();
 				break;
 			case 10:
 				ui.tunerActiveVoice=source-kb1;
 				break;
 			case 11:
-				ui.presetBank=(scan_getPotValue(potnum)*PRESET_BANKS)>>16;
+				ui.presetBank=potSetting;
 				break;
 			case 12:
-				data=(scan_getPotValue(potnum)*2)>>16;
-				settings.syncMode=data;
+				settings.syncMode=potSetting;
 				ui.settingsModified=1;
 				break;
 			case 13:
@@ -786,16 +844,14 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.isTransposing=(ui.isTransposing+1)%3;
 				break;
 			case 20:
-				data=(((int32_t)49*scan_getPotValue(potnum))>>16)-24;
-				ui_setTranspose(data);
+				ui_setTranspose(potSetting);
 				break;
 			case 21:
-				data=((int32_t)20*scan_getPotValue(potnum))>>16;
-				settings.sequencerBank=data;
+				settings.sequencerBank=potSetting;
 				ui.settingsModified=1;
 				break;				
 			case 22:
-				settings.seqArpClock=scan_getPotValue(potnum);
+				settings.seqArpClock=potSetting;
 				ui.settingsModified=1;
 				break;
 			case 23:
@@ -1023,11 +1079,23 @@ void ui_update(void)
 	}
 	else if(fsDisp) // fullscreen display
 	{
+		char * dv;
+		int32_t v;
+		int8_t noAcq,smaller,larger;
+		
 		if(ui.pendingScreenClear)
 			sendString(1,getName(ui.activeSource,1));
 
-		setPos(2,18,0);
-		sendString(2,getDisplayValue(ui.activeSource));
+		dv=getDisplayValue(ui.activeSource, &v);
+				
+		noAcq=ui.activeSource<0&&(((ui.potsAcquired>>(-ui.activeSource-1))&1)==0);
+		smaller=noAcq&&ui.potsPrevValue[-ui.activeSource-1]<v;
+		larger=noAcq&&ui.potsPrevValue[-ui.activeSource-1]>v;
+		
+		setPos(2,17,0);
+		sendChar(2,(smaller) ? '\x7e' : ' ');
+		sendString(2,dv);
+		sendChar(2,(larger) ? '\x7f' : ' ');
 		
 		setPos(2,0,1);
 		sendString(2,getDisplayFulltext(ui.activeSource));
@@ -1043,7 +1111,7 @@ void ui_update(void)
 		for(i=0;i<6;++i)
 		{
 			int lcd=(i<3)?1:2;
-			sendString(lcd,getDisplayValue(i));
+			sendString(lcd,getDisplayValue(i, NULL));
 			if(i!=5 && i!=2)
 				sendChar(lcd,' ');
 		}
@@ -1086,29 +1154,29 @@ void ui_update(void)
 
 		setPos(1,0,1);
 		hd44780_driver.home(&ui.lcd2);
-		for(i=0;i<POT_COUNT;++i)
+		for(i=0;i<SCAN_POT_COUNT;++i)
 		{
-			int lcd=(i<POT_COUNT/2)?1:2;
-			sendString(lcd,getDisplayValue(-i-1));
-			if(i!=POT_COUNT-1 && i!=POT_COUNT/2-1)
+			int lcd=(i<SCAN_POT_COUNT/2)?1:2;
+			sendString(lcd,getDisplayValue(-i-1, NULL));
+			if(i!=SCAN_POT_COUNT-1 && i!=SCAN_POT_COUNT/2-1)
 				sendChar(lcd,' ');
 		}
 
 		if(ui.pendingScreenClear)
 		{
 			hd44780_driver.home(&ui.lcd1);
-			for(i=0;i<POT_COUNT/2;++i)
+			for(i=0;i<SCAN_POT_COUNT/2;++i)
 			{
 				sendString(1,getName(-i-1,0));
-				if(i<POT_COUNT/2-1)
+				if(i<SCAN_POT_COUNT/2-1)
 					sendChar(1,' ');
 			}
 
 			setPos(2,0,1);
-			for(i=POT_COUNT/2;i<POT_COUNT;++i)
+			for(i=SCAN_POT_COUNT/2;i<SCAN_POT_COUNT;++i)
 			{
 				sendString(2,getName(-i-1,0));
-				if(i<POT_COUNT-1)
+				if(i<SCAN_POT_COUNT-1)
 					sendChar(2,' ');
 			}
 		}

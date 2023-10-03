@@ -3,7 +3,9 @@
 
 #include "synth.h"
 
-#define POT_COUNT 10
+#define SCAN_ADC_BITS 10
+#define SCAN_ADC_QUANTUM (65536 / (1<<(SCAN_ADC_BITS)))
+#define SCAN_POT_COUNT 10
 
 uint16_t scan_getPotValue(int8_t pot);
 void scan_resetPotLocking(void);

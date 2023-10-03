@@ -9,12 +9,8 @@
 #include "lpc17xx_gpdma.h"
 #include "lpc17xx_gpio.h"
 
-#define ADC_BITS 10
-#define ADC_QUANTUM (65536 / (1<<(ADC_BITS)))
-
 #define POT_SAMPLES 5
-#define POT_THRESHOLD (ADC_QUANTUM*6)
-#define POT_TIMEOUT_THRESHOLD (ADC_QUANTUM*3)
+#define POT_THRESHOLD (SCAN_ADC_QUANTUM*3)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define DEBOUNCE_THRESHOLD 5
@@ -37,19 +33,18 @@
 		GPDMA_DMACCxConfig_SrcPeripheral(12) | \
 		GPDMA_DMACCxConfig_TransferType(2)
 
-static EXT_RAM GPDMA_LLI_Type scanLLIs[POT_COUNT][POTSCAN_LLI_PER_POT];
+static EXT_RAM GPDMA_LLI_Type scanLLIs[SCAN_POT_COUNT][POTSCAN_LLI_PER_POT];
 
 static struct
 {
 	int16_t curPotSample;
 
-	uint8_t potCommands[POT_COUNT][22];
-	uint8_t potBits[POT_COUNT][ADC_BITS];
+	uint8_t potCommands[SCAN_POT_COUNT][22];
+	uint8_t potBits[SCAN_POT_COUNT][SCAN_ADC_BITS];
 	
-	uint16_t potSamples[POT_COUNT][POT_SAMPLES];
-	uint16_t potValue[POT_COUNT];
-	uint32_t potLockTimeout[POT_COUNT];
-	uint32_t potLockValue[POT_COUNT];
+	uint16_t potSamples[SCAN_POT_COUNT][POT_SAMPLES];
+	uint16_t potValue[SCAN_POT_COUNT];
+	uint32_t potLockTimeout[SCAN_POT_COUNT];
 
 	int8_t keypadState[16];
 } scan EXT_RAM;
@@ -61,7 +56,7 @@ static uint8_t keypadButtonCode[16]=
 	0x34,0x31
 };
 
-static const uint8_t potCommandsConst[POT_COUNT][sizeof(scan.potCommands[0])]=
+static const uint8_t potCommandsConst[SCAN_POT_COUNT][sizeof(scan.potCommands[0])]=
 {
 #define C0O0 0
 #define C0O1 (1<<POTSCAN_PIN_ADDR)
@@ -81,19 +76,19 @@ static const uint8_t potCommandsConst[POT_COUNT][sizeof(scan.potCommands[0])]=
 #undef ONE_POT
 };
 
-static const GPDMA_LLI_Type scanLLIsConst[POT_COUNT][POTSCAN_LLI_PER_POT]=
+static const GPDMA_LLI_Type scanLLIsConst[SCAN_POT_COUNT][POTSCAN_LLI_PER_POT]=
 {
 #define NEXTPOT(pot,tck) (((pot)*POTSCAN_LLI_PER_POT+(tck)+1)/POTSCAN_LLI_PER_POT)	
 #define ONE_LLI(src,dst,siz,pot,tck,flag) { \
 		(src), \
 		(dst), \
-		(uint32_t)&scanLLIsConst[NEXTPOT(pot,tck)%POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
+		(uint32_t)&scanLLIsConst[NEXTPOT(pot,tck)%SCAN_POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
 		GPDMA_DMACCxControl_TransferSize(siz)|GPDMA_DMACCxControl_SI|(flag) \
 	},
 	
 #define ONE_TICK(idx,wrt,siz,pot,tck) ONE_LLI( \
 		(wrt)?((uint32_t)&scan.potCommands[pot][idx]):((uint32_t)&LPC_GPIO0->FIOPIN3), \
-		(wrt)?((uint32_t)&LPC_GPIO0->FIOPIN3):((uint32_t)&scan.potBits[(pot+POT_COUNT-1)%POT_COUNT][idx]), \
+		(wrt)?((uint32_t)&LPC_GPIO0->FIOPIN3):((uint32_t)&scan.potBits[(pot+SCAN_POT_COUNT-1)%SCAN_POT_COUNT][idx]), \
 		siz, pot, tck, \
 		(wrt)?0:GPDMA_DMACCxControl_Prot3 \
 	)
@@ -120,16 +115,17 @@ static void readPots(void)
 	uint16_t new;
 	int i,pot;
 	uint16_t tmp[POT_SAMPLES];
+	int8_t isUnlockable;
 	
 	scan.curPotSample=(scan.curPotSample+1)%POT_SAMPLES;
 	
-	for(pot=0;pot<POT_COUNT;++pot)
+	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
 		// read pot from TLV1543 ADC (scanned using GPDMACH1)
 
 		new=0;
-		for(i=0;i<ADC_BITS;++i)
-			new|=(((uint32_t)scan.potBits[pot][i]&(1<<POTSCAN_PIN_OUT))>>POTSCAN_PIN_OUT)<<(ADC_BITS-1-i);
+		for(i=0;i<SCAN_ADC_BITS;++i)
+			new|=(((uint32_t)scan.potBits[pot][i]&(1<<POTSCAN_PIN_OUT))>>POTSCAN_PIN_OUT)<<(SCAN_ADC_BITS-1-i);
 
 		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
 		
@@ -144,16 +140,22 @@ static void readPots(void)
 		
 		// ignore small changes
 
-		if(abs(new-scan.potValue[pot])>=POT_THRESHOLD || currentTick<scan.potLockTimeout[pot])
+		isUnlockable=abs(new-scan.potValue[pot])>=POT_THRESHOLD;
+		
+		if(isUnlockable || currentTick<scan.potLockTimeout[pot])
 		{
-			if(abs(new-scan.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
+			if(isUnlockable)
 			{
-				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
-				scan.potLockValue[pot]=new;
-			}
+				if(new!=scan.potValue[pot] && currentTick>=scan.potLockTimeout[pot])
+				{
+					// out of lock -> current value must be taken into account
+					ui_scanEvent(-pot-1);
+				}
 
-			scan.potValue[pot]=new;
+				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
+			}
 			
+			scan.potValue[pot]=new;
 			ui_scanEvent(-pot-1);
 		}
 	}
@@ -198,12 +200,12 @@ static void readKeypad(void)
 
 uint16_t scan_getPotValue(int8_t pot)
 {
-	return scan.potValue[pot]&~(ADC_QUANTUM-1);
+	return scan.potValue[pot]&~(SCAN_ADC_QUANTUM-1);
 }
 
 void scan_resetPotLocking(void)
 {
-	memset(&scan.potLockTimeout[0],0,POT_COUNT*sizeof(uint32_t));
+	memset(&scan.potLockTimeout[0],0,SCAN_POT_COUNT*sizeof(uint32_t));
 }
 
 void scan_init(void)
@@ -268,7 +270,7 @@ void scan_init(void)
 	tm.ResetOnMatch=ENABLE;
 	tm.StopOnMatch=DISABLE;
 	tm.ExtMatchOutputType=0;
-	tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(POT_COUNT*POTSCAN_TICKS*POTSCAN_RATE);
+	tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_TICKS*POTSCAN_RATE);
 
 	TIM_ConfigMatch(LPC_TIM2,&tm);
 	
