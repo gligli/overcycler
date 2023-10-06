@@ -20,9 +20,9 @@ static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency 
 	uint32_t v;
 	
 	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
-	v=(v*20)<<8; // phase for computeShape
+	v=(v*21)<<8; // phase for computeShape
 	v=(uint32_t)computeShape(v,oscOctaveCurve,1)+32768; // octave frequency in the 12th octave
-	v=(v<<8)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 8
+	v=(v<<12)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 12
 	
 	return v;
 }
@@ -63,32 +63,32 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	
 	width=MAX(UINT16_MAX/16,width);
 	width=MIN((15*UINT16_MAX)/16,width);
-	width>>=6;
+	width>>=4;
 
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(16+(MAX(0,cv-13000)>>11)); // 1x-1.6x oversampling (high notes have more oversampling)
-	frequency=cvToFrequency(cv)<<10;
+	maxSampleRate=MAX_SAMPLERATE(16);
+	frequency=cvToFrequency(cv);
 
-	sampleRate[0]=frequency/(1024-width);
+	sampleRate[0]=frequency/(4096-width);
 	sampleRate[1]=frequency/width;
 	
 	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
 	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
 
-	increment[0]=1+((sampleRate[0]/maxSampleRate)>>8);
-	increment[1]=1+((sampleRate[1]/maxSampleRate)>>8);
+	increment[0]=1+(sampleRate[0]/maxSampleRate);
+	increment[1]=1+(sampleRate[1]/maxSampleRate);
 
 	while(o->halfSampleCount%increment[0]) ++increment[0];
 	while(o->halfSampleCount%increment[1]) ++increment[1];
 	
 	increment[0]+=aliasing;
 	increment[1]+=aliasing;
-	period[0]=VIRTUAL_CLOCK/((sampleRate[0]/increment[0])>>8);
-	period[1]=VIRTUAL_CLOCK/((sampleRate[1]/increment[1])>>8);	
+	period[0]=VIRTUAL_CLOCK/(sampleRate[0]/increment[0]);
+	period[1]=VIRTUAL_CLOCK/(sampleRate[1]/increment[1]);	
 	
 	o->pendingPeriod[0]=period[0];	
 	o->pendingPeriod[1]=period[1];	
@@ -190,7 +190,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 	if(o->pendingUpdate)
 	{
-		// ajdust phase to avoid audio glitches on increment changes
+		// adjust phase to avoid audio glitches on increment changes
 		o->phase-=o->pendingIncrement[curHalf]-o->increment[curHalf];
 		
 		o->period[0]=o->pendingPeriod[0];
