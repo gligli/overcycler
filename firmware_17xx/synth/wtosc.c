@@ -15,6 +15,9 @@
 
 #define FRAC_SHIFT 12
 
+static uint16_t incModLUT[WTOSC_MAX_SAMPLES/2];
+static uint16_t incModLUTHalfSampleCount=0;
+
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -33,7 +36,7 @@ void wtosc_init(struct wtosc_s * o, int32_t channel)
 
 	o->channel=channel;
 	
-	wtosc_setSampleData(o,NULL,-1);
+	wtosc_setSampleData(o,NULL,0);
 	wtosc_setParameters(o,69*WTOSC_CV_SEMITONE,0,HALF_RANGE);
 }
 
@@ -49,6 +52,17 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 	o->data=data;
 	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
+
+	if(incModLUTHalfSampleCount!=o->halfSampleCount)
+	{
+		for(uint16_t i=0;i<WTOSC_MAX_SAMPLES/2;++i)
+		{
+			uint16_t inc=i+1;
+			while(o->halfSampleCount%inc) ++inc;
+			incModLUT[i]=inc;
+		}
+		incModLUTHalfSampleCount=o->halfSampleCount;
+	}	
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
@@ -79,11 +93,11 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
 	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
 
-	increment[0]=1+(sampleRate[0]/maxSampleRate);
-	increment[1]=1+(sampleRate[1]/maxSampleRate);
+	increment[0]=sampleRate[0]/maxSampleRate;
+	increment[1]=sampleRate[1]/maxSampleRate;
 
-	while(o->halfSampleCount%increment[0]) ++increment[0];
-	while(o->halfSampleCount%increment[1]) ++increment[1];
+	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[increment[0]];
+	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[increment[1]];
 	
 	increment[0]+=aliasing;
 	increment[1]+=aliasing;
