@@ -36,7 +36,7 @@ static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
 static const uint8_t channelCPSRConst[DACSPI_CHANNEL_COUNT] =
 {
-	4,4,4,4,4,4,8
+	5,5,5,5,5,5,8
 };
 
 static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
