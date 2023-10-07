@@ -82,7 +82,7 @@ static const GPDMA_LLI_Type scanLLIsConst[SCAN_POT_COUNT][POTSCAN_LLI_PER_POT]=
 #define ONE_LLI(src,dst,siz,pot,tck,flag) { \
 		(src), \
 		(dst), \
-		(uint32_t)&scanLLIsConst[NEXTPOT(pot,tck)%SCAN_POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
+		(uint32_t)&scanLLIs[NEXTPOT(pot,tck)%SCAN_POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
 		GPDMA_DMACCxControl_TransferSize(siz)|GPDMA_DMACCxControl_SI|(flag) \
 	},
 	
@@ -213,7 +213,7 @@ void scan_init(void)
 	memset(&scan,0,sizeof(scan));
 	
 	memcpy(scan.potCommands,potCommandsConst,sizeof(scan.potCommands));
-	memcpy(scanLLIs,scanLLIsConst,sizeof(scanLLIsConst));
+	memcpy(scanLLIs,scanLLIsConst,sizeof(scanLLIs));
 
 	// init TLV1543 ADC
 	
