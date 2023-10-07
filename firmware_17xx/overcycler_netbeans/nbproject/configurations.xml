@@ -285,6 +285,9 @@
       </item>
       <item path="../synth/scan.c" ex="false" tool="0" flavor2="3">
         <cTool flags="1">
+          <incDir>
+            <pElem>../synth</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
@@ -336,11 +339,8 @@
           </incDir>
         </cTool>
       </item>
-      <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="2">
+      <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="1">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">

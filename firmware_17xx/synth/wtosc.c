@@ -9,10 +9,11 @@
 #define VIRTUAL_CLOCK 3600000000UL
 #define VIRTUAL_DAC_TICK_RATE (DACSPI_TICK_RATE*(VIRTUAL_CLOCK/SYNTH_MASTER_CLOCK))
 
-#define MAX_SAMPLERATE(oversampling) (VIRTUAL_CLOCK/((VIRTUAL_DAC_TICK_RATE*(oversampling))/16)) /* oversampling in 1/16th */
+#define MAX_SAMPLERATE (VIRTUAL_CLOCK/VIRTUAL_DAC_TICK_RATE)
 
 #define USE_HERMITE_INTERP
 
+#define WIDTH_MOD_BITS 9
 #define FRAC_SHIFT 12
 
 static uint16_t incModLUT[WTOSC_MAX_SAMPLES/2];
@@ -25,7 +26,7 @@ static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency 
 	v=cv%(12*WTOSC_CV_SEMITONE); // offset in the octave
 	v=(v*21)<<8; // phase for computeShape
 	v=(uint32_t)computeShape(v,oscOctaveCurve,1)+32768; // octave frequency in the 12th octave
-	v=(v<<12)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by 12
+	v=(v<<WIDTH_MOD_BITS)>>(12-(cv/(12*WTOSC_CV_SEMITONE))); // full frequency shifted by WIDTH_MOD_BITS
 	
 	return v;
 }
@@ -67,7 +68,7 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCou
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width)
 {
-	uint32_t sampleRate[2], maxSampleRate, frequency;
+	uint32_t sampleRate[2], frequency;
 	int32_t increment[2], period[2];
 	
 	if(!o->data)
@@ -77,24 +78,20 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	
 	width=MAX(UINT16_MAX/16,width);
 	width=MIN((15*UINT16_MAX)/16,width);
-	width>>=4;
+	width>>=16-WIDTH_MOD_BITS;
 
 	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
 	
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
-	maxSampleRate=MAX_SAMPLERATE(16);
-	frequency=cvToFrequency(cv);
+	frequency=cvToFrequency(cv)*o->halfSampleCount;
 
-	sampleRate[0]=frequency/(4096-width);
+	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
 	
-	sampleRate[0]=sampleRate[0]*o->halfSampleCount;
-	sampleRate[1]=sampleRate[1]*o->halfSampleCount;
-
-	increment[0]=sampleRate[0]/maxSampleRate;
-	increment[1]=sampleRate[1]/maxSampleRate;
+	increment[0]=sampleRate[0]/MAX_SAMPLERATE;
+	increment[1]=sampleRate[1]/MAX_SAMPLERATE;
 
 	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[increment[0]];
 	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[increment[1]];
