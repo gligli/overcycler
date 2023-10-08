@@ -35,10 +35,10 @@ static FORCEINLINE void updatePeriodIncrement(struct wtosc_s * o, int8_t type)
 {
 	if(o->pendingUpdate>=type)
 	{
-		o->period[0]=o->pendingPeriod[0];
-		o->period[1]=o->pendingPeriod[1];
 		o->increment[0]=o->pendingIncrement[0];
 		o->increment[1]=o->pendingIncrement[1];
+		o->period[0]=o->pendingPeriod[0];
+		o->period[1]=o->pendingPeriod[1];
 		
 		o->pendingUpdate=0;
 	}
@@ -146,14 +146,14 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	uint32_t sampleRate[2], frequency;
 	int32_t increment[2], period[2];
 	
+	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
+	
 	aliasing>>=7;
 	
 	width=MAX(UINT16_MAX/16,width);
 	width=MIN((15*UINT16_MAX)/16,width);
 	width>>=16-WIDTH_MOD_BITS;
 
-	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
-	
 	if(cv==o->cv && aliasing==o->aliasing && width==o->width)
 		return;	
 	
@@ -168,17 +168,17 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[increment[0]];
 	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[increment[1]];
 	
-	increment[0]+=aliasing;
-	increment[1]+=aliasing;
+	increment[0]=MIN(o->halfSampleCount,increment[0]+aliasing);
+	increment[1]=MIN(o->halfSampleCount,increment[1]+aliasing);
 	period[0]=CLOCK/(sampleRate[0]/increment[0]);
 	period[1]=CLOCK/(sampleRate[1]/increment[1]);	
 	
-	o->pendingPeriod[0]=period[0];	
-	o->pendingPeriod[1]=period[1];	
 	o->pendingIncrement[0]=increment[0];
 	o->pendingIncrement[1]=increment[1];
+	o->pendingPeriod[0]=period[0];	
+	o->pendingPeriod[1]=period[1];	
 
-	o->pendingUpdate=(cv==o->cv)?1:2; // CV change needs immediate update (not waiting for phase)
+	o->pendingUpdate=(cv==o->cv && aliasing==o->aliasing)?1:2; // width change needs delayed update (waiting for phase)
 	
 	o->cv=cv;
 	o->aliasing=aliasing;
