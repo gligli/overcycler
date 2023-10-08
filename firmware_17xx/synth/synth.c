@@ -477,7 +477,7 @@ reload:
 		strcpy(fn,waveData.bankNames[bankNum]);
 	for(i=0;i<waveData.bankCount;++i)
 	{
-		if(!stricmp(fn,waveData.bankNames[i]))
+		if(!strcasecmp(fn,waveData.bankNames[i]))
 		{
 			newBankNum=i;
 			break;
@@ -502,7 +502,7 @@ reload:
 		strcpy(fn,waveData.curWaveNames[waveNum]);
 	for(i=0;i<waveData.curWaveCount;++i)
 	{
-		if(!stricmp(fn,waveData.curWaveNames[i]))
+		if(!strcasecmp(fn,waveData.curWaveNames[i]))
 		{
 			newWaveNum=i;
 			break;

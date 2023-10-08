@@ -83,12 +83,12 @@
   </sourceRootList>
   <projectmakefile>../Makefile</projectmakefile>
   <confs>
-    <conf name="Default" type="0" platformSpecific="true">
+    <conf name="Default" type="0">
       <toolsSet>
-        <compilerSet>Yagarto|MinGW</compilerSet>
-        <platform>3</platform>
+        <compilerSet>default</compilerSet>
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
+        <prependToolCollectionPath>false</prependToolCollectionPath>
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-Ofast -std=gnu99"/>
@@ -235,107 +235,62 @@
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/assigner.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/clock.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/scan.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
-          <incDir>
-            <pElem>../synth</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="3">
@@ -388,11 +343,8 @@
           </incDir>
         </cTool>
       </item>
-      <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="2">
+      <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
-          <incDir>
-            <pElem>../xnormidi</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="2">
@@ -402,6 +354,13 @@
           </incDir>
         </cTool>
       </item>
+      <folder path="0/synth">
+        <cTool>
+          <incDir>
+            <pElem>../synth</pElem>
+          </incDir>
+        </cTool>
+      </folder>
       <folder path="0/xnormidi/bytequeue">
         <cTool>
           <incDir>

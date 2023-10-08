@@ -120,7 +120,7 @@ int uint16Compare(const void * a,const void * b)
 
 int stringCompare(const void * a,const void * b)
 {
-	return stricmp((const char*)a,(const char*)b);
+	return strcasecmp((const char*)a,(const char*)b);
 }
 
 void buffer_dump(void * buf, int size){
