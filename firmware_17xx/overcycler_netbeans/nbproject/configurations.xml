@@ -91,8 +91,7 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <flagsDictionary>
-        <element flagsID="0" commonFlags="-O2 -std=gnu99"/>
-        <element flagsID="1" commonFlags="-Ofast -std=gnu99"/>
+        <element flagsID="0" commonFlags="-Ofast -std=gnu99"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -235,14 +234,14 @@
         </cTool>
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
@@ -256,14 +255,14 @@
         </cTool>
       </item>
       <item path="../synth/clock.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
@@ -277,42 +276,42 @@
         </cTool>
       </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
-      <item path="../synth/scan.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+      <item path="../synth/scan.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
@@ -326,7 +325,7 @@
         </cTool>
       </item>
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
           </incDir>
@@ -340,7 +339,7 @@
         </cTool>
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
         </cTool>
       </item>
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">
