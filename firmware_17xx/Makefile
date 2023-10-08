@@ -115,7 +115,7 @@ FORMAT = ihex
 # Optimization level, can be [0, 1, 2, 3, s]. 
 # 0 = turn off optimization. s = optimize for size.
 # (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
-OPT = fast
+OPT = 4
 
 ## Using the Atmel AT91_lib produces warning with
 ## the default warning-levels. 
@@ -178,7 +178,6 @@ CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 CFLAGS += #-Wa,-adhlns=$(subst $(suffix $<),.lst,$<) 
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
-CFLAGS += -fno-unroll-loops # done by hand
 CFLAGS += -flto -fuse-linker-plugin
 CFLAGS += -O$(OPT)
 
