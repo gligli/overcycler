@@ -1184,7 +1184,7 @@ void synth_updateCVsEvent(void)
 #define PROC_UPDATE_DACS_VOICE(v) \
 FORCEINLINE static void updateDACsVoice##v(int32_t start, int32_t end) \
 { \
-	uint32_t syncResets; /* /!\ this won't work if count > 32 */ \
+	uint32_t syncResets=0; /* /!\ this won't work if count > 32 */ \
 	wtosc_update(&synth.osc[v][0],start,end,osmMaster,&syncResets); \
 	syncResets&=synth.partState.syncResetsMask; \
 	wtosc_update(&synth.osc[v][1],start,end,osmSlave,&syncResets); \

@@ -59,7 +59,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 		updatePeriodIncrement(o,1);
 	
 		// sync (master side)
-		if(syncMode==osmMaster)
+		if(!o->half && syncMode==osmMaster)
 			*syncResets|=(1<<bufIdx);
 	}
 
@@ -201,9 +201,6 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	alphaDiv=o->period[o->half];
 
-	if(syncMode==osmMaster)
-		*syncResets=0; // init
-	
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
 		// counter update
@@ -216,6 +213,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		{
 			if(*syncResets&1)
 			{
+				o->half=0;
 				o->phase=-1;
 				o->counter=-1;
 			}
