@@ -573,7 +573,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		valCount=0;
 		while(valCount<8 && prm->values[valCount]!=NULL)
 		{
-			strcat(dv, (!strcmp(selected, prm->values[valCount])) ? "\x7e"  : " ");
+			strcat(dv, (strcmp(selected, "") && !strcmp(selected, prm->values[valCount])) ? "\x7e"  : " ");
 			strcat(dv, prm->values[valCount]);
 			++valCount;
 		}
