@@ -46,20 +46,31 @@ static FORCEINLINE void updatePeriodIncrement(struct wtosc_s * o, int8_t type)
 
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
 {
-	int32_t curPeriod=o->period[o->half];
+	int32_t curPeriod,curIncrement;
 	
+	if(o->phase>=o->halfSampleCount)
+	{
+		curPeriod=o->period[1];
+		curIncrement=o->increment[1];
+	}
+	else
+	{
+		curPeriod=o->period[0];
+		curIncrement=o->increment[0];
+	}
+
 	o->counter+=curPeriod;
-	o->phase-=o->increment[o->half];
+
+	o->phase-=curIncrement;
 
 	if(o->phase<0)
 	{
-		o->phase+=o->halfSampleCount;
-		o->half=1-o->half;
+		o->phase+=o->sampleCount;
 
 		updatePeriodIncrement(o,1);
 	
 		// sync (master side)
-		if(!o->half && syncMode==osmMaster)
+		if(syncMode==osmMaster)
 			*syncResets|=(1<<bufIdx);
 	}
 
@@ -74,7 +85,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	}
 	
 	o->prevSample=o->curSample;
-	o->curSample=o->data[o->half][o->phase];
+	o->curSample=o->data[o->phase];
 	
 	return curPeriod;
 }
@@ -120,14 +131,12 @@ void wtosc_init(struct wtosc_s * o, int32_t channel)
 
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * data, uint16_t sampleCount)
 {
+	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
 
-	o->data[0]=o->data[1]=NULL;
+	o->data=NULL;
 	if(sampleCount<=WTOSC_MAX_SAMPLES)
-	{
-		o->data[0]=&data[0];
-		o->data[1]=&data[o->halfSampleCount];
-	}
+		o->data=data;
 
 	if(incModLUTHalfSampleCount!=o->halfSampleCount)
 	{
@@ -168,8 +177,8 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[increment[0]];
 	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[increment[1]];
 	
-	increment[0]=MIN(o->halfSampleCount,increment[0]+aliasing);
-	increment[1]=MIN(o->halfSampleCount,increment[1]+aliasing);
+	increment[0]=MIN(o->sampleCount,increment[0]+aliasing);
+	increment[1]=MIN(o->sampleCount,increment[1]+aliasing);
 	period[0]=CLOCK/(sampleRate[0]/increment[0]);
 	period[1]=CLOCK/(sampleRate[1]/increment[1]);	
 	
@@ -192,14 +201,15 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 {
 	uint16_t r;
 	int32_t buf;
-	int32_t alphaDiv;
+	int32_t alphaDiv,curHalf;
 	
-	if(!o->data[0] || !o->data[1])
+	if(!o->data)
 		return;
 	
 	updatePeriodIncrement(o,2);
 	
-	alphaDiv=o->period[o->half];
+	curHalf=o->phase>=o->halfSampleCount?1:0;
+	alphaDiv=o->period[curHalf];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -213,7 +223,6 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		{
 			if(*syncResets&1)
 			{
-				o->half=0;
 				o->phase=-1;
 				o->counter=-1;
 			}

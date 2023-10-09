@@ -11,13 +11,14 @@
 
 struct wtosc_s
 {
-	uint16_t * data[2];	
+	uint16_t * data;	
 
 	int32_t period[2],pendingPeriod[2]; // one per waveform half
 	int32_t increment[2],pendingIncrement[2];
 	
 	int32_t counter;
 	int32_t phase;
+	int32_t sampleCount;
 	int32_t halfSampleCount;
 
 	int32_t curSample,prevSample,prevSample2,prevSample3;
@@ -28,7 +29,6 @@ struct wtosc_s
 	
 	int32_t channel;
 	int8_t pendingUpdate;
-	int8_t half;
 };
 
 typedef enum
