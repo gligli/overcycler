@@ -328,8 +328,6 @@ static struct
 	uint32_t potsAcquired;
 	int32_t potsPrevValue[SCAN_POT_COUNT];
 
-	int8_t presetBank;
-	int8_t presetSlot;
 	int8_t presetModified;
 	int8_t settingsModified;
 	
@@ -440,11 +438,11 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				v=arp_getHold();
 				break;
 			case 4:
-				v=ui.presetSlot;
+				v=settings.presetNumber%PRESET_SLOTS;
 				break;
 			case 5:
 			case 6:
-				v=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
+				v=settings.presetNumber;
 				break;
 			case 7:
 				v=settings.midiReceiveChannel;
@@ -459,7 +457,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				v=ui.tunerActiveVoice;
 				break;
 			case 11:
-				v=ui.presetBank;
+				v=settings.presetNumber/PRESET_SLOTS;
 				break;
 			case 12:
 				v=settings.syncMode;
@@ -785,7 +783,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				ui.presetSlot=potSetting;
+				settings.presetNumber=settings.presetNumber-(settings.presetNumber%PRESET_SLOTS)+potSetting;
 				break;
 			case 5:
 			case 6:
@@ -808,7 +806,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.tunerActiveVoice=source-kb1;
 				break;
 			case 11:
-				ui.presetBank=potSetting;
+				settings.presetNumber=(settings.presetNumber%PRESET_SLOTS)+potSetting*PRESET_SLOTS;
 				break;
 			case 12:
 				settings.syncMode=potSetting;
@@ -864,18 +862,9 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				break;
 			case 24:
 			case 25:
-				ui.presetSlot = ui.presetSlot + ((prm->number == 24) ? -1 : 1);
-				if(ui.presetSlot >= PRESET_SLOTS)
-				{
-					ui.presetSlot = 0;
-					++ui.presetBank;
-				}
-				else if(ui.presetSlot < 0)
-				{
-					ui.presetSlot = PRESET_SLOTS - 1;
-					--ui.presetBank;
-				}
-				ui.presetBank = ui.presetBank % PRESET_BANKS;
+				data=settings.presetNumber+((prm->number == 24) ? -1 : 1);
+				data=(data+PRESET_SLOTS*PRESET_BANKS)%(PRESET_SLOTS*PRESET_BANKS);
+				settings.presetNumber=data;
 
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=0x85;
@@ -987,8 +976,6 @@ void ui_init(void)
 
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
-	ui.presetSlot=-1;
-	ui.presetBank=-1;
 	ui.pendingScreenClear=1;
 	ui.seqRecordingTrack=-1;
 }
@@ -1000,14 +987,6 @@ void ui_update(void)
 	int8_t fsDisp;
 	
 	++frc;
-	
-	// init preset #
-	
-	if(ui.presetSlot==-1)
-	{
-		ui.presetSlot=settings.presetNumber%PRESET_SLOTS;
-		ui.presetBank=settings.presetNumber/PRESET_SLOTS;
-	}
 	
 	// slow updates (if needed)
 	
@@ -1028,10 +1007,9 @@ void ui_update(void)
 				refreshWaveforms(1);
 				break;
 			case 0x80+6:
-				preset_saveCurrent(ui.presetSlot+ui.presetBank*PRESET_SLOTS);
+				preset_saveCurrent(settings.presetNumber);
 				/* fall through */
 			case 0x80+5:
-				settings.presetNumber=ui.presetSlot+ui.presetBank*PRESET_SLOTS;
 				settings_save();                
 				if(!preset_loadCurrent(settings.presetNumber))
 					preset_loadDefault(1);
