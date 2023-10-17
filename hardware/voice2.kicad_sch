@@ -1073,13 +1073,13 @@
     (uuid ff109e15-133c-46e6-bf95-784f0009c6e2)
   )
 
-  (text "Use film capacitors for C53..C56,\npreferably within 1% of theoretical value."
+  (text "Use film capacitors for C55..C58,\npreferably within 1% of theoretical value."
     (at 118.11 59.69 0)
     (effects (font (size 1.524 1.524)) (justify left bottom))
     (uuid 71d49fb6-80a8-4972-b8ab-e1b4b1aae425)
   )
   (text "Notes refer to voice #0, but apply to all other voices too"
-    (at 116.84 52.07 0)
+    (at 118.11 52.07 0)
     (effects (font (size 1.524 1.524)) (justify left bottom))
     (uuid fea1d863-6c6b-475f-be29-a0aa0c530b6c)
   )
@@ -1147,7 +1147,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 137.16 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4680b)
-    (property "Reference" "#PWR0125" (at 137.16 127 0)
+    (property "Reference" "#PWR0131" (at 137.16 127 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 137.16 128.778 0)
@@ -1163,22 +1163,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0125") (unit 1)
+          (reference "#PWR0131") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0109") (unit 1)
+          (reference "#PWR0115") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0173") (unit 1)
+          (reference "#PWR0179") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0157") (unit 1)
+          (reference "#PWR0163") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR093") (unit 1)
+          (reference "#PWR099") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0141") (unit 1)
+          (reference "#PWR0147") (unit 1)
         )
       )
     )
@@ -1187,7 +1187,7 @@
   (symbol (lib_id "overcycler2-rescue:+5V") (at 134.62 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4680c)
-    (property "Reference" "#PWR0126" (at 134.62 65.024 0)
+    (property "Reference" "#PWR0129" (at 134.62 65.024 0)
       (effects (font (size 0.508 0.508)) hide)
     )
     (property "Value" "+5V" (at 134.62 65.024 0)
@@ -1203,22 +1203,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0126") (unit 1)
+          (reference "#PWR0129") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0110") (unit 1)
+          (reference "#PWR0113") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0174") (unit 1)
+          (reference "#PWR0177") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0158") (unit 1)
+          (reference "#PWR0161") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR094") (unit 1)
+          (reference "#PWR097") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0142") (unit 1)
+          (reference "#PWR0145") (unit 1)
         )
       )
     )
@@ -1227,7 +1227,7 @@
   (symbol (lib_id "overcycler2-rescue:-5V") (at 134.62 125.73 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4680d)
-    (property "Reference" "#PWR0127" (at 134.62 129.286 0)
+    (property "Reference" "#PWR0130" (at 134.62 129.286 0)
       (effects (font (size 0.508 0.508)) hide)
     )
     (property "Value" "-5V" (at 134.62 128.524 0)
@@ -1243,22 +1243,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0127") (unit 1)
+          (reference "#PWR0130") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0111") (unit 1)
+          (reference "#PWR0114") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0175") (unit 1)
+          (reference "#PWR0178") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0159") (unit 1)
+          (reference "#PWR0162") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR095") (unit 1)
+          (reference "#PWR098") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0143") (unit 1)
+          (reference "#PWR0146") (unit 1)
         )
       )
     )
@@ -1267,7 +1267,7 @@
   (symbol (lib_id "overcycler2-rescue:C") (at 111.76 87.63 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4680e)
-    (property "Reference" "C76" (at 114.3 87.63 0)
+    (property "Reference" "C75" (at 114.3 87.63 0)
       (effects (font (size 1.016 1.016)) (justify left))
     )
     (property "Value" "10n" (at 109.601 87.7824 0)
@@ -1281,47 +1281,6 @@
     )
     (pin "1" (uuid c9a7c68a-bc15-4b8e-8d69-84291135380e))
     (pin "2" (uuid 51ffb941-5ef9-4ad5-9574-835309d4a363))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C76") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C66") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C106") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C96") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C56") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C86") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:C") (at 111.76 95.25 270) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f4680f)
-    (property "Reference" "C75" (at 114.3 95.25 0)
-      (effects (font (size 1.016 1.016)) (justify left))
-    )
-    (property "Value" "10n" (at 109.601 95.4024 0)
-      (effects (font (size 1.016 1.016)) (justify left))
-    )
-    (property "Footprint" "~" (at 107.95 96.2152 0)
-      (effects (font (size 0.762 0.762)))
-    )
-    (property "Datasheet" "~" (at 111.76 95.25 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid 125df48f-4be1-4b4f-b608-de65b18853a0))
-    (pin "2" (uuid 7a8f8ab4-2c1d-4e1b-80de-09bade685d02))
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
@@ -1346,10 +1305,51 @@
     )
   )
 
+  (symbol (lib_id "overcycler2-rescue:C") (at 111.76 95.25 270) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f4680f)
+    (property "Reference" "C76" (at 114.3 95.25 0)
+      (effects (font (size 1.016 1.016)) (justify left))
+    )
+    (property "Value" "10n" (at 109.601 95.4024 0)
+      (effects (font (size 1.016 1.016)) (justify left))
+    )
+    (property "Footprint" "~" (at 107.95 96.2152 0)
+      (effects (font (size 0.762 0.762)))
+    )
+    (property "Datasheet" "~" (at 111.76 95.25 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid 125df48f-4be1-4b4f-b608-de65b18853a0))
+    (pin "2" (uuid 7a8f8ab4-2c1d-4e1b-80de-09bade685d02))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "C76") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "C66") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "C106") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "C96") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "C56") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "C86") (unit 1)
+        )
+      )
+    )
+  )
+
   (symbol (lib_id "overcycler2-rescue:C") (at 111.76 102.87 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46810)
-    (property "Reference" "C74" (at 109.22 102.87 0)
+    (property "Reference" "C77" (at 109.22 102.87 0)
       (effects (font (size 1.016 1.016)) (justify left))
     )
     (property "Value" "10n" (at 113.919 102.7176 0)
@@ -1366,22 +1366,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C74") (unit 1)
+          (reference "C77") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C64") (unit 1)
+          (reference "C67") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C104") (unit 1)
+          (reference "C107") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C94") (unit 1)
+          (reference "C97") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C54") (unit 1)
+          (reference "C57") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C84") (unit 1)
+          (reference "C87") (unit 1)
         )
       )
     )
@@ -1390,7 +1390,7 @@
   (symbol (lib_id "overcycler2-rescue:C") (at 111.76 110.49 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46811)
-    (property "Reference" "C73" (at 109.22 110.49 0)
+    (property "Reference" "C78" (at 109.22 110.49 0)
       (effects (font (size 1.016 1.016)) (justify left))
     )
     (property "Value" "820p" (at 113.919 110.3376 0)
@@ -1407,22 +1407,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C73") (unit 1)
+          (reference "C78") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C63") (unit 1)
+          (reference "C68") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C103") (unit 1)
+          (reference "C108") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C93") (unit 1)
+          (reference "C98") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C53") (unit 1)
+          (reference "C58") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C83") (unit 1)
+          (reference "C88") (unit 1)
         )
       )
     )
@@ -1472,7 +1472,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 99.06 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46813)
-    (property "Reference" "#PWR0129" (at 99.06 116.84 0)
+    (property "Reference" "#PWR0127" (at 99.06 116.84 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 99.06 118.618 0)
@@ -1488,22 +1488,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0129") (unit 1)
+          (reference "#PWR0127") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0113") (unit 1)
+          (reference "#PWR0111") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0177") (unit 1)
+          (reference "#PWR0175") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0161") (unit 1)
+          (reference "#PWR0159") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR097") (unit 1)
+          (reference "#PWR095") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0145") (unit 1)
+          (reference "#PWR0143") (unit 1)
         )
       )
     )
@@ -1594,7 +1594,7 @@
   (symbol (lib_id "overcycler2-rescue:R") (at 85.09 121.92 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46816)
-    (property "Reference" "R88" (at 85.09 119.888 90)
+    (property "Reference" "R86" (at 85.09 119.888 90)
       (effects (font (size 1.016 1.016)))
     )
     (property "Value" "6k8" (at 85.0646 121.7422 90)
@@ -1611,22 +1611,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "R88") (unit 1)
+          (reference "R86") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "R71") (unit 1)
+          (reference "R69") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "R139") (unit 1)
+          (reference "R137") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "R122") (unit 1)
+          (reference "R120") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "R54") (unit 1)
+          (reference "R52") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "R105") (unit 1)
+          (reference "R103") (unit 1)
         )
       )
     )
@@ -1635,7 +1635,7 @@
   (symbol (lib_id "overcycler2-rescue:R") (at 109.22 129.54 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46817)
-    (property "Reference" "R92" (at 111.252 129.54 90)
+    (property "Reference" "R91" (at 111.252 129.54 90)
       (effects (font (size 1.016 1.016)))
     )
     (property "Value" "15k" (at 109.3978 129.5146 90)
@@ -1649,128 +1649,6 @@
     )
     (pin "1" (uuid 418a2510-60aa-4a99-82a8-d014967c4593))
     (pin "2" (uuid c5d28477-375c-489d-8f34-215aeb51a495))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "R92") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "R75") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "R143") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "R126") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "R58") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "R109") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:-5V") (at 223.52 138.43 180) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f46818)
-    (property "Reference" "#PWR0135" (at 223.52 141.986 0)
-      (effects (font (size 0.508 0.508)) hide)
-    )
-    (property "Value" "-5V" (at 223.52 141.224 0)
-      (effects (font (size 0.762 0.762)))
-    )
-    (property "Footprint" "" (at 223.52 138.43 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (property "Datasheet" "" (at 223.52 138.43 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid 694bceef-d4ce-424a-99db-d08bfc2b2e08))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0135") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0119") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0183") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0167") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR0103") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0151") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:CP1") (at 166.37 97.79 90) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f46819)
-    (property "Reference" "C78" (at 163.83 96.52 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Value" "33u" (at 168.91 96.52 0)
-      (effects (font (size 1.27 1.27)) (justify left))
-    )
-    (property "Footprint" "~" (at 166.37 97.79 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (property "Datasheet" "~" (at 166.37 97.79 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid 9a0a3d4d-1742-4df5-b857-e2d8cd0f1a1f))
-    (pin "2" (uuid ceabbf1b-5ec8-4198-bcc3-1342ddba5c7b))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C78") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C68") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C108") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C98") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C58") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C88") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:R") (at 158.75 106.68 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f4681a)
-    (property "Reference" "R91" (at 160.782 106.68 90)
-      (effects (font (size 1.016 1.016)))
-    )
-    (property "Value" "4k7" (at 158.9278 106.6546 90)
-      (effects (font (size 1.016 1.016)))
-    )
-    (property "Footprint" "~" (at 156.972 106.68 90)
-      (effects (font (size 0.762 0.762)))
-    )
-    (property "Datasheet" "~" (at 158.75 106.68 0)
-      (effects (font (size 0.762 0.762)))
-    )
-    (pin "1" (uuid a3db3e78-ed3a-4bd9-9d90-5dc47a967594))
-    (pin "2" (uuid bb659756-dab0-4a2a-937e-89a12d9e83f1))
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
@@ -1790,6 +1668,128 @@
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
           (reference "R108") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "overcycler2-rescue:-5V") (at 223.52 138.43 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f46818)
+    (property "Reference" "#PWR0136" (at 223.52 141.986 0)
+      (effects (font (size 0.508 0.508)) hide)
+    )
+    (property "Value" "-5V" (at 223.52 141.224 0)
+      (effects (font (size 0.762 0.762)))
+    )
+    (property "Footprint" "" (at 223.52 138.43 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (property "Datasheet" "" (at 223.52 138.43 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid 694bceef-d4ce-424a-99db-d08bfc2b2e08))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "#PWR0136") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "#PWR0120") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "#PWR0184") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "#PWR0168") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "#PWR0104") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "#PWR0152") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "overcycler2-rescue:CP1") (at 166.37 97.79 90) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f46819)
+    (property "Reference" "C79" (at 163.83 96.52 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "33u" (at 168.91 96.52 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "~" (at 166.37 97.79 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (property "Datasheet" "~" (at 166.37 97.79 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid 9a0a3d4d-1742-4df5-b857-e2d8cd0f1a1f))
+    (pin "2" (uuid ceabbf1b-5ec8-4198-bcc3-1342ddba5c7b))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "C79") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "C69") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "C109") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "C99") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "C59") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "C89") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "overcycler2-rescue:R") (at 158.75 106.68 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f4681a)
+    (property "Reference" "R92" (at 160.782 106.68 90)
+      (effects (font (size 1.016 1.016)))
+    )
+    (property "Value" "4k7" (at 158.9278 106.6546 90)
+      (effects (font (size 1.016 1.016)))
+    )
+    (property "Footprint" "~" (at 156.972 106.68 90)
+      (effects (font (size 0.762 0.762)))
+    )
+    (property "Datasheet" "~" (at 158.75 106.68 0)
+      (effects (font (size 0.762 0.762)))
+    )
+    (pin "1" (uuid a3db3e78-ed3a-4bd9-9d90-5dc47a967594))
+    (pin "2" (uuid bb659756-dab0-4a2a-937e-89a12d9e83f1))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "R92") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "R75") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "R143") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "R126") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "R58") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "R109") (unit 1)
         )
       )
     )
@@ -1901,7 +1901,7 @@
   (symbol (lib_id "overcycler2-rescue:CP1") (at 71.12 91.44 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46828)
-    (property "Reference" "C71" (at 68.58 90.17 0)
+    (property "Reference" "C72" (at 68.58 90.17 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "22u" (at 73.66 90.17 0)
@@ -1918,22 +1918,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C71") (unit 1)
+          (reference "C72") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C61") (unit 1)
+          (reference "C62") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C101") (unit 1)
+          (reference "C102") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C91") (unit 1)
+          (reference "C92") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C51") (unit 1)
+          (reference "C52") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C81") (unit 1)
+          (reference "C82") (unit 1)
         )
       )
     )
@@ -1942,7 +1942,7 @@
   (symbol (lib_id "overcycler2-rescue:+5V") (at 46.99 81.28 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46829)
-    (property "Reference" "#PWR0122" (at 46.99 78.994 0)
+    (property "Reference" "#PWR0123" (at 46.99 78.994 0)
       (effects (font (size 0.508 0.508)) hide)
     )
     (property "Value" "+5V" (at 46.99 78.994 0)
@@ -1955,46 +1955,6 @@
       (effects (font (size 1.524 1.524)))
     )
     (pin "1" (uuid 5084fed1-e387-4195-80c5-3d2cc15c6c28))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0122") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0106") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0170") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0154") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR090") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0138") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:GND") (at 46.99 116.84 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f4682a)
-    (property "Reference" "#PWR0123" (at 46.99 116.84 0)
-      (effects (font (size 0.762 0.762)) hide)
-    )
-    (property "Value" "GND" (at 46.99 118.618 0)
-      (effects (font (size 0.762 0.762)) hide)
-    )
-    (property "Footprint" "" (at 46.99 116.84 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (property "Datasheet" "" (at 46.99 116.84 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid 206d1841-33e5-4af1-88eb-a2cf8f043963))
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
@@ -2019,10 +1979,50 @@
     )
   )
 
+  (symbol (lib_id "overcycler2-rescue:GND") (at 46.99 116.84 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f4682a)
+    (property "Reference" "#PWR0124" (at 46.99 116.84 0)
+      (effects (font (size 0.762 0.762)) hide)
+    )
+    (property "Value" "GND" (at 46.99 118.618 0)
+      (effects (font (size 0.762 0.762)) hide)
+    )
+    (property "Footprint" "" (at 46.99 116.84 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (property "Datasheet" "" (at 46.99 116.84 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid 206d1841-33e5-4af1-88eb-a2cf8f043963))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "#PWR0124") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "#PWR0108") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "#PWR0172") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "#PWR0156") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "#PWR092") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "#PWR0140") (unit 1)
+        )
+      )
+    )
+  )
+
   (symbol (lib_id "overcycler2-rescue:CP1") (at 71.12 99.06 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4682b)
-    (property "Reference" "C72" (at 68.58 97.79 0)
+    (property "Reference" "C73" (at 68.58 97.79 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "22u" (at 73.66 97.79 0)
@@ -2039,22 +2039,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C72") (unit 1)
+          (reference "C73") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C62") (unit 1)
+          (reference "C63") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C102") (unit 1)
+          (reference "C103") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C92") (unit 1)
+          (reference "C93") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C52") (unit 1)
+          (reference "C53") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C82") (unit 1)
+          (reference "C83") (unit 1)
         )
       )
     )
@@ -2169,7 +2169,7 @@
   (symbol (lib_id "overcycler2-rescue:R") (at 93.98 107.95 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4682e)
-    (property "Reference" "R86" (at 91.44 107.95 90)
+    (property "Reference" "R88" (at 91.44 107.95 90)
       (effects (font (size 1.524 1.524)))
     )
     (property "Value" "820" (at 93.98 107.95 90)
@@ -2198,22 +2198,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "R86") (unit 1)
+          (reference "R88") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "R69") (unit 1)
+          (reference "R71") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "R137") (unit 1)
+          (reference "R139") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "R120") (unit 1)
+          (reference "R122") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "R52") (unit 1)
+          (reference "R54") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "R103") (unit 1)
+          (reference "R105") (unit 1)
         )
       )
     )
@@ -2235,21 +2235,21 @@
       (effects (font (size 1.524 1.524)))
     )
     (pin "10" (uuid 882f6dde-6ea0-422b-a864-96eca2907185))
-    (pin "11" (uuid 4ed735b0-c875-444a-a010-54a36002ad5b))
+    (pin "11" (uuid 4ed735b0-c875-444a-a010-54a36002ad5e))
     (pin "12" (uuid 04204c2c-f813-4bab-9aa8-cb86b2ae8de3))
     (pin "13" (uuid b47d151d-8f17-4c61-a457-e9bdb78c8c30))
     (pin "14" (uuid 58d99821-b715-4000-81e7-87efc2a46027))
     (pin "15" (uuid cfa32449-fc88-467f-af72-0e785306b899))
     (pin "16" (uuid 7fd03c24-e3e6-47b4-b64d-ab2ba8f02a95))
-    (pin "6" (uuid 130b81ae-1307-4f64-8305-56f26797c1af))
+    (pin "6" (uuid 130b81ae-1307-4f64-8305-56f26797c1b2))
     (pin "9" (uuid 6acfca99-1afd-4bdc-b280-ef48fabb5d21))
     (pin "1" (uuid d4199d43-fd6f-4abb-8d5c-50f65ba1868b))
-    (pin "11" (uuid 4ed735b0-c875-444a-a010-54a36002ad5b))
+    (pin "11" (uuid 4ed735b0-c875-444a-a010-54a36002ad5e))
     (pin "2" (uuid 73a5011a-fadd-4c9d-94bd-2dd471c33e0c))
     (pin "3" (uuid 6260fb74-b003-4c25-94d0-a50d9097a5aa))
     (pin "4" (uuid b2b54c3f-3c0c-4d02-b259-2a58b2725255))
     (pin "5" (uuid f0b7c015-8ebb-4019-9c54-9aa30386b58e))
-    (pin "6" (uuid 130b81ae-1307-4f64-8305-56f26797c1af))
+    (pin "6" (uuid 130b81ae-1307-4f64-8305-56f26797c1b2))
     (pin "7" (uuid 9610fa61-dc72-4c73-b2d0-267b012787d0))
     (pin "8" (uuid 59560337-dd77-4ae5-9146-036577646041))
     (instances
@@ -2361,7 +2361,7 @@
   (symbol (lib_id "overcycler2-rescue:C") (at 223.52 128.27 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46845)
-    (property "Reference" "C79" (at 223.52 130.81 0)
+    (property "Reference" "C80" (at 223.52 130.81 0)
       (effects (font (size 1.016 1.016)) (justify left))
     )
     (property "Value" "470n" (at 223.3676 126.111 0)
@@ -2378,22 +2378,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C79") (unit 1)
+          (reference "C80") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C69") (unit 1)
+          (reference "C70") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C109") (unit 1)
+          (reference "C110") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C99") (unit 1)
+          (reference "C100") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C59") (unit 1)
+          (reference "C60") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C89") (unit 1)
+          (reference "C90") (unit 1)
         )
       )
     )
@@ -2402,7 +2402,7 @@
   (symbol (lib_id "overcycler2-rescue:+5V") (at 208.28 81.28 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f46846)
-    (property "Reference" "#PWR0133" (at 208.28 78.994 0)
+    (property "Reference" "#PWR0134" (at 208.28 78.994 0)
       (effects (font (size 0.508 0.508)) hide)
     )
     (property "Value" "+5V" (at 208.28 78.994 0)
@@ -2415,46 +2415,6 @@
       (effects (font (size 1.524 1.524)))
     )
     (pin "1" (uuid 693e7ae7-30e1-4060-8916-c6ccb66f643f))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0133") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0117") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0181") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0165") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR0101") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0149") (unit 1)
-        )
-      )
-    )
-  )
-
-  (symbol (lib_id "overcycler2-rescue:-5V") (at 208.28 100.33 180) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-000055f46847)
-    (property "Reference" "#PWR0134" (at 208.28 103.886 0)
-      (effects (font (size 0.508 0.508)) hide)
-    )
-    (property "Value" "-5V" (at 208.28 103.124 0)
-      (effects (font (size 0.762 0.762)))
-    )
-    (property "Footprint" "" (at 208.28 100.33 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (property "Datasheet" "" (at 208.28 100.33 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid f991c9e3-3379-46b2-88f6-593b3ee78065))
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
@@ -2474,6 +2434,46 @@
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
           (reference "#PWR0150") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "overcycler2-rescue:-5V") (at 208.28 100.33 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-000055f46847)
+    (property "Reference" "#PWR0135" (at 208.28 103.886 0)
+      (effects (font (size 0.508 0.508)) hide)
+    )
+    (property "Value" "-5V" (at 208.28 103.124 0)
+      (effects (font (size 0.762 0.762)))
+    )
+    (property "Footprint" "" (at 208.28 100.33 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (property "Datasheet" "" (at 208.28 100.33 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid f991c9e3-3379-46b2-88f6-593b3ee78065))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "#PWR0135") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "#PWR0119") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "#PWR0183") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "#PWR0167") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "#PWR0103") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "#PWR0151") (unit 1)
         )
       )
     )
@@ -2564,7 +2564,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 187.96 85.09 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4684b)
-    (property "Reference" "#PWR0132" (at 187.96 85.09 0)
+    (property "Reference" "#PWR0133" (at 187.96 85.09 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 187.96 86.868 0)
@@ -2580,22 +2580,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0132") (unit 1)
+          (reference "#PWR0133") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0116") (unit 1)
+          (reference "#PWR0117") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0180") (unit 1)
+          (reference "#PWR0181") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0164") (unit 1)
+          (reference "#PWR0165") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR0100") (unit 1)
+          (reference "#PWR0101") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0148") (unit 1)
+          (reference "#PWR0149") (unit 1)
         )
       )
     )
@@ -2604,7 +2604,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 226.06 106.68 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4684c)
-    (property "Reference" "#PWR0136" (at 226.06 106.68 0)
+    (property "Reference" "#PWR0137" (at 226.06 106.68 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 226.06 108.458 0)
@@ -2620,22 +2620,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0136") (unit 1)
+          (reference "#PWR0137") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0120") (unit 1)
+          (reference "#PWR0121") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0184") (unit 1)
+          (reference "#PWR0185") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0168") (unit 1)
+          (reference "#PWR0169") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR0104") (unit 1)
+          (reference "#PWR0105") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0152") (unit 1)
+          (reference "#PWR0153") (unit 1)
         )
       )
     )
@@ -2644,7 +2644,7 @@
   (symbol (lib_id "overcycler2-rescue:CP1") (at 247.65 91.44 270) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4684d)
-    (property "Reference" "C80" (at 250.19 90.17 0)
+    (property "Reference" "C81" (at 250.19 90.17 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100u" (at 245.11 90.17 0)
@@ -2661,22 +2661,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C80") (unit 1)
+          (reference "C81") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C70") (unit 1)
+          (reference "C71") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C110") (unit 1)
+          (reference "C111") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C100") (unit 1)
+          (reference "C101") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C60") (unit 1)
+          (reference "C61") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C90") (unit 1)
+          (reference "C91") (unit 1)
         )
       )
     )
@@ -2726,7 +2726,7 @@
   (symbol (lib_id "overcycler2-rescue:-5V") (at 241.3 106.68 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f4684f)
-    (property "Reference" "#PWR0137" (at 241.3 110.236 0)
+    (property "Reference" "#PWR0138" (at 241.3 110.236 0)
       (effects (font (size 0.508 0.508)) hide)
     )
     (property "Value" "-5V" (at 241.3 109.474 0)
@@ -2742,22 +2742,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0137") (unit 1)
+          (reference "#PWR0138") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0121") (unit 1)
+          (reference "#PWR0122") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0185") (unit 1)
+          (reference "#PWR0186") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0169") (unit 1)
+          (reference "#PWR0170") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR0105") (unit 1)
+          (reference "#PWR0106") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0153") (unit 1)
+          (reference "#PWR0154") (unit 1)
         )
       )
     )
@@ -2766,7 +2766,7 @@
   (symbol (lib_id "overcycler2-rescue:C") (at 101.6 128.27 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-000055f73e3b)
-    (property "Reference" "C77" (at 101.6 130.81 0)
+    (property "Reference" "C74" (at 101.6 130.81 0)
       (effects (font (size 1.016 1.016)) (justify left))
     )
     (property "Value" "470n" (at 101.4476 126.111 0)
@@ -2783,22 +2783,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "C77") (unit 1)
+          (reference "C74") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "C67") (unit 1)
+          (reference "C64") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "C107") (unit 1)
+          (reference "C104") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "C97") (unit 1)
+          (reference "C94") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "C57") (unit 1)
+          (reference "C54") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "C87") (unit 1)
+          (reference "C84") (unit 1)
         )
       )
     )
@@ -2807,7 +2807,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 93.98 138.43 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-00005e1ad65b)
-    (property "Reference" "#PWR0128" (at 93.98 138.43 0)
+    (property "Reference" "#PWR0126" (at 93.98 138.43 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 93.98 140.208 0)
@@ -2820,6 +2820,46 @@
       (effects (font (size 1.524 1.524)))
     )
     (pin "1" (uuid ba19bb13-dd63-4d56-bba0-2a0f15609094))
+    (instances
+      (project "overcycler2"
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
+          (reference "#PWR0126") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+          (reference "#PWR0110") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+          (reference "#PWR0174") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
+          (reference "#PWR0158") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+          (reference "#PWR094") (unit 1)
+        )
+        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+          (reference "#PWR0142") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "overcycler2-rescue:-5V") (at 109.22 137.16 180) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid 00000000-0000-0000-0000-00005e1aece6)
+    (property "Reference" "#PWR0128" (at 109.22 140.716 0)
+      (effects (font (size 0.508 0.508)) hide)
+    )
+    (property "Value" "-5V" (at 109.22 139.954 0)
+      (effects (font (size 0.762 0.762)))
+    )
+    (property "Footprint" "" (at 109.22 137.16 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (property "Datasheet" "" (at 109.22 137.16 0)
+      (effects (font (size 1.524 1.524)))
+    )
+    (pin "1" (uuid 3ab702c4-7d12-40ff-97bb-2070284588dc))
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
@@ -2844,50 +2884,10 @@
     )
   )
 
-  (symbol (lib_id "overcycler2-rescue:-5V") (at 109.22 137.16 180) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
-    (uuid 00000000-0000-0000-0000-00005e1aece6)
-    (property "Reference" "#PWR0131" (at 109.22 140.716 0)
-      (effects (font (size 0.508 0.508)) hide)
-    )
-    (property "Value" "-5V" (at 109.22 139.954 0)
-      (effects (font (size 0.762 0.762)))
-    )
-    (property "Footprint" "" (at 109.22 137.16 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (property "Datasheet" "" (at 109.22 137.16 0)
-      (effects (font (size 1.524 1.524)))
-    )
-    (pin "1" (uuid 3ab702c4-7d12-40ff-97bb-2070284588dc))
-    (instances
-      (project "overcycler2"
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0131") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0115") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0179") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0163") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR099") (unit 1)
-        )
-        (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0147") (unit 1)
-        )
-      )
-    )
-  )
-
   (symbol (lib_id "overcycler2-rescue:GND") (at 158.75 115.57 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-00005e1af668)
-    (property "Reference" "#PWR098" (at 158.75 115.57 0)
+    (property "Reference" "#PWR0100" (at 158.75 115.57 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 158.75 117.348 0)
@@ -2903,22 +2903,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR098") (unit 1)
+          (reference "#PWR0100") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0114") (unit 1)
+          (reference "#PWR0116") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0178") (unit 1)
+          (reference "#PWR0180") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0162") (unit 1)
+          (reference "#PWR0164") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0130") (unit 1)
+          (reference "#PWR0132") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0146") (unit 1)
+          (reference "#PWR0148") (unit 1)
         )
       )
     )
@@ -2927,7 +2927,7 @@
   (symbol (lib_id "overcycler2-rescue:GND") (at 93.98 116.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 00000000-0000-0000-0000-00005e1b71de)
-    (property "Reference" "#PWR0124" (at 93.98 116.84 0)
+    (property "Reference" "#PWR0125" (at 93.98 116.84 0)
       (effects (font (size 0.762 0.762)) hide)
     )
     (property "Value" "GND" (at 93.98 118.618 0)
@@ -2943,22 +2943,22 @@
     (instances
       (project "overcycler2"
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
-          (reference "#PWR0124") (unit 1)
+          (reference "#PWR0125") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-          (reference "#PWR0108") (unit 1)
+          (reference "#PWR0109") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-          (reference "#PWR0172") (unit 1)
+          (reference "#PWR0173") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
-          (reference "#PWR0156") (unit 1)
+          (reference "#PWR0157") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-          (reference "#PWR092") (unit 1)
+          (reference "#PWR093") (unit 1)
         )
         (path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-          (reference "#PWR0140") (unit 1)
+          (reference "#PWR0141") (unit 1)
         )
       )
     )
