@@ -48,7 +48,13 @@
           "min_clearance": 0.4826
         }
       },
-      "diff_pair_dimensions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
       "drc_exclusions": [],
       "meta": {
         "filename": "board_design_settings.json",
@@ -164,8 +170,15 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
-      "via_dimensions": [],
+      "track_widths": [
+        0.0
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "layer_presets": [],
@@ -391,14 +404,14 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "overcycler2.kicad_pro",
+    "filename": "overcycler3.kicad_pro",
     "version": 1
   },
   "net_settings": {
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.3556,
+        "clearance": 0.19,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -408,43 +421,9 @@
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.635,
-        "via_diameter": 1.651,
-        "via_drill": 0.8128,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.4826,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.508,
-        "microvia_drill": 0.127,
-        "name": "pwr",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 1.524,
-        "via_diameter": 1.651,
-        "via_drill": 0.8128,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.4826,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.508,
-        "microvia_drill": 0.127,
-        "name": "pwr2",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 2.032,
-        "via_diameter": 2.286,
-        "via_drill": 0.8128,
+        "track_width": 0.3,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
         "wire_width": 6
       }
     ],
@@ -1471,31 +1450,31 @@
         "pattern": "SPI_SCK"
       },
       {
-        "netclass": "pwr",
+        "netclass": "Default",
         "pattern": "+3.3V"
       },
       {
-        "netclass": "pwr",
+        "netclass": "Default",
         "pattern": "+5V"
       },
       {
-        "netclass": "pwr",
+        "netclass": "Default",
         "pattern": "-5V"
       },
       {
-        "netclass": "pwr",
+        "netclass": "Default",
         "pattern": "GND"
       },
       {
-        "netclass": "pwr2",
+        "netclass": "Default",
         "pattern": "/AC_IN"
       },
       {
-        "netclass": "pwr2",
+        "netclass": "Default",
         "pattern": "/UNR+"
       },
       {
-        "netclass": "pwr2",
+        "netclass": "Default",
         "pattern": "/UNR-"
       }
     ]
@@ -1505,7 +1484,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "specctra_dsn": "",
+      "specctra_dsn": "overcycler3.dsn",
       "step": "",
       "vrml": ""
     },
