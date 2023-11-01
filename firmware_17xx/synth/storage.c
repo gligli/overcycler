@@ -8,11 +8,10 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 12
+#define STORAGE_VERSION 13
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
-#define STORAGE_NAMES_OFFSET 2048
 
 #define SETTINGS_PAGE_COUNT 1
 #define SETTINGS_PAGE (STORAGE_PAGE_COUNT-4)
@@ -54,6 +53,9 @@ const uint8_t steppedParametersBits[spCount] =
 	/*AmpEnvLin*/1,
 	/*FilEnvLoop*/1,
 	/*AmpEnvLoop*/1,
+	/*WModEnvSlow*/1,
+	/*WModEnvLin*/1,
+	/*WModEnvLoop*/1,
 };
 
 struct settings_s settings;
@@ -310,6 +312,18 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	reloadLegacyBankWaveIndexes(0,0,0);
 	reloadLegacyBankWaveIndexes(1,0,0);
 	
+	if(storage.version<13)
+	{
+		for(cp=cpFilAtt;cp<=cpFilRel;++cp)
+			currentPreset.continuousParameters[cp+cpWModAtt-cpFilAtt]=currentPreset.continuousParameters[cp];
+		if(currentPreset.steppedParameters[spBWModEnvEn_Legacy])
+			currentPreset.continuousParameters[cpWModBEnv]=currentPreset.continuousParameters[cpWModAEnv];
+		if(!currentPreset.steppedParameters[spAWModEnvEn_Legacy])
+			currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
+		currentPreset.continuousParameters[cpWModVelocity]=currentPreset.continuousParameters[cpFilVelocity];
+		currentPreset.steppedParameters[spWModEnvSlow]=currentPreset.steppedParameters[spFilEnvSlow];
+	}
+	
 	if(storage.version<2)
 		return 1;
 
@@ -337,6 +351,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spXOvrBank_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spXOvrWave_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
+	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
 
 	reloadLegacyBankWaveIndexes(2,0,0);
 
@@ -385,6 +400,19 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spAmpEnvLin]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLoop]=storageRead8();
 	currentPreset.steppedParameters[spAmpEnvLoop]=storageRead8();
+	currentPreset.steppedParameters[spWModEnvLoop]=currentPreset.steppedParameters[spFilEnvLoop];
+
+	if(storage.version<13)
+		return 1;
+
+	// v13
+	
+	for(cp=cpWModAtt;cp<=cpWModVelocity;++cp)
+		currentPreset.continuousParameters[cp]=storageRead16();
+
+	currentPreset.steppedParameters[spWModEnvSlow]=storageRead8();
+	currentPreset.steppedParameters[spWModEnvLin]=storageRead8();
+	currentPreset.steppedParameters[spWModEnvLoop]=storageRead8();
 
 	return 1;
 }
@@ -458,6 +486,15 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite8(currentPreset.steppedParameters[spFilEnvLoop]);
 	storageWrite8(currentPreset.steppedParameters[spAmpEnvLoop]);
 
+	// v13
+
+	for(cp=cpWModAtt;cp<=cpWModVelocity;++cp)
+		storageWrite16(currentPreset.continuousParameters[cp]);
+
+	storageWrite8(currentPreset.steppedParameters[spWModEnvSlow]);
+	storageWrite8(currentPreset.steppedParameters[spWModEnvLin]);
+	storageWrite8(currentPreset.steppedParameters[spWModEnvLoop]);
+	
 	// /!\ write new version before this
 	storageFinishStore(number,1);
 }
@@ -530,6 +567,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpLFO2Freq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
+	currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
+	currentPreset.continuousParameters[cpWModBEnv]=HALF_RANGE;
+
 	currentPreset.steppedParameters[spBenderRange]=2; // octave
 	currentPreset.steppedParameters[spBenderTarget]=modFil;
 	currentPreset.steppedParameters[spModwheelRange]=2; // high
@@ -551,14 +591,14 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spXOvrWave_Legacy]=0;
 
 	currentPreset.steppedParameters[spVoiceCount]=5;
-
+	
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 
 	if(makeSound)
 	{
 		// load default waveforms (perfectwaves/sawtooth)
-		for(int8_t abx=0;abx<2;++abx)
+		for(int8_t abx=0;abx<=2;++abx)
 			reloadLegacyBankWaveIndexes(abx,1,1);
 
 		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;

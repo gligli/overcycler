@@ -11,7 +11,7 @@ typedef enum
 {
 	cpAFreq=0,cpAVol=1,cpABaseWMod=2,
 	cpBFreq=3,cpBVol=4,cpBBaseWMod=5,cpBFineFreq=6,
-	cpCutoff=7,cpResonance=8,cpFilEnvAmt=9,cpFilKbdAmt=10,cpWModFilEnv=11,
+	cpCutoff=7,cpResonance=8,cpFilEnvAmt=9,cpFilKbdAmt=10,cpWModAEnv=11,
 	cpFilAtt=12,cpFilDec=13,cpFilSus=14,cpFilRel=15,
 	cpAmpAtt=16,cpAmpDec=17,cpAmpSus=18,cpAmpRel=19,
 	cpLFOFreq=20,cpLFOAmt=21,
@@ -24,6 +24,9 @@ typedef enum
 	cpSeqArpClock_Legacy=36,cpNoiseVol=37,
 	cpLFO2PitchAmt=38,cpLFO2WModAmt=39,cpLFO2FilAmt=40,cpLFO2AmpAmt=41,
 	cpLFOResAmt=42,cpLFO2ResAmt=43,
+	
+	cpWModAtt=44,cpWModDec=45,cpWModSus=46,cpWModRel=47,
+	cpWModBEnv=48,cpWModVelocity=49,
 
 	// /!\ this must stay last
 	cpCount
@@ -31,8 +34,8 @@ typedef enum
 
 typedef enum
 {
-	spABank_Legacy=0,spAWave_Legacy=1,spAWModType=2,spAWModEnvEn=3,
-	spBBank_Legacy=4,spBWave_Legacy=5,spBWModType=6,spBWModEnvEn=7,
+	spABank_Legacy=0,spAWave_Legacy=1,spAWModType=2,spAWModEnvEn_Legacy=3,
+	spBBank_Legacy=4,spBWave_Legacy=5,spBWModType=6,spBWModEnvEn_Legacy=7,
 			
 	spLFOShape=8,spLFOShift=9,spLFOTargets=10,
 
@@ -40,7 +43,7 @@ typedef enum
 			
 	spBenderRange=13,spBenderTarget=14,
 	spModwheelRange=15,spModwheelTarget=16,
-			
+	
 	spUnison=17,spAssignerPriority=18,spChromaticPitch=19,
 			
 	spOscSync=20,
@@ -53,6 +56,8 @@ typedef enum
 	spPresetType=28, spPresetStyle=29,
 
 	spAmpEnvLin=30,spFilEnvLoop=31,spAmpEnvLoop=32,
+			
+	spWModEnvSlow=33,spWModEnvLin=34,spWModEnvLoop=35,
 
 	// /!\ this must stay last
 	spCount

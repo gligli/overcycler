@@ -59,6 +59,7 @@ static struct
 	struct wtosc_s osc[SYNTH_VOICE_COUNT][2];
 	struct adsr_s filEnvs[SYNTH_VOICE_COUNT];
 	struct adsr_s ampEnvs[SYNTH_VOICE_COUNT];
+	struct adsr_s wmodEnvs[SYNTH_VOICE_COUNT];
 	struct lfo_s lfo[2];
 	
 	uint16_t oscANoteCV[SYNTH_VOICE_COUNT];
@@ -87,7 +88,7 @@ static struct
 	} partState;
 	
 	uint8_t pendingExtClock;
-	int32_t wmodAVal, wmodEnvAmt;
+	int32_t wmodAVal, wmodAEnvAmt;
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -247,6 +248,7 @@ static void handleFinishedVoices(void)
 		{
 			adsr_reset(&synth.ampEnvs[v]);
 			adsr_reset(&synth.filEnvs[v]);
+			adsr_reset(&synth.wmodEnvs[v]);
 		}
 	}
 }
@@ -278,19 +280,30 @@ static void refreshEnvSettings(int8_t type)
 		
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		slow=currentPreset.steppedParameters[(type)?spFilEnvSlow:spAmpEnvSlow];
-		lin=currentPreset.steppedParameters[(type)?spFilEnvLin:spAmpEnvLin];
-		loop=currentPreset.steppedParameters[(type)?spFilEnvLoop:spAmpEnvLoop];
-
-		if(type)
+		switch(type)
 		{
-			a=&synth.filEnvs[i];
-		}
-		else
-		{
+		case 0:
 			a=&synth.ampEnvs[i];
+			slow=currentPreset.steppedParameters[spAmpEnvSlow];
+			lin=currentPreset.steppedParameters[spAmpEnvLin];
+			loop=currentPreset.steppedParameters[spAmpEnvLoop];
+			break;
+		case 1:
+			a=&synth.filEnvs[i];
+			slow=currentPreset.steppedParameters[spFilEnvSlow];
+			lin=currentPreset.steppedParameters[spFilEnvLin];
+			loop=currentPreset.steppedParameters[spFilEnvLoop];
+			break;
+		case 2:
+			a=&synth.wmodEnvs[i];
+			slow=currentPreset.steppedParameters[spWModEnvSlow];
+			lin=currentPreset.steppedParameters[spWModEnvLin];
+			loop=currentPreset.steppedParameters[spWModEnvLoop];
+			break;
+		default:
+			return;
 		}
-
+		
 		adsr_setSpeedShift(a,(slow)?4:2,5);
 		adsr_setShape(a,(lin)?0:1,loop);
 
@@ -306,6 +319,13 @@ static void refreshEnvSettings(int8_t type)
 				 currentPreset.continuousParameters[cpFilDec],
 				 currentPreset.continuousParameters[cpFilSus],
 				 currentPreset.continuousParameters[cpFilRel],
+				 0,0x0f);
+
+		adsr_setCVs(&synth.wmodEnvs[i],
+				 currentPreset.continuousParameters[cpWModAtt],
+				 currentPreset.continuousParameters[cpWModDec],
+				 currentPreset.continuousParameters[cpWModSus],
+				 currentPreset.continuousParameters[cpWModRel],
 				 0,0x0f);
 	}
 }
@@ -412,8 +432,6 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=2;
 	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
 		synth.partState.wmodMask|=4;
-	if(currentPreset.steppedParameters[spAWModEnvEn])
-		synth.partState.wmodMask|=8;
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
 		synth.partState.wmodMask|=16;
@@ -421,8 +439,6 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=32;
 	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
 		synth.partState.wmodMask|=64;
-	if(currentPreset.steppedParameters[spBWModEnvEn])
-		synth.partState.wmodMask|=128;
 	
 	// waveforms
 	
@@ -441,6 +457,7 @@ void refreshFullState(void)
 	refreshLfoSettings();
 	refreshEnvSettings(0);
 	refreshEnvSettings(1);
+	refreshEnvSettings(2);
 	refreshMisc();
 	computeBenderCVs();
 	computeTunedCVs();
@@ -820,12 +837,12 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 	xovr=wmod;
 
 	// paraphonic filter envelope mod
-	if(currentPreset.steppedParameters[spAWModEnvEn])
+	if(currentPreset.continuousParameters[cpWModAEnv]!=HALF_RANGE)
 	{
 		v=assigner_getLatestAssigned(NULL);
 		if(v>=0)
 		{
-			xovr+=scaleU16S16(synth.filEnvs[v].output,wmodEnvAmt)<<1;
+			xovr+=scaleU16S16(synth.wmodEnvs[v].output,wmodEnvAmt)<<1;
 			xovr=__USAT(xovr,16);
 		}
 	}
@@ -848,40 +865,32 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 	synth.partState.oldCrossOver=xovr;
 }
 
-static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
+static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
 {
-	int32_t vpa,vpb,vma,vmb,vf,vamp,envVal,envValScale;
+	int32_t vpa,vpb,vma,vmb,vf,vamp;
 
 	// envs
 
 	adsr_update(&synth.ampEnvs[v]);
 	adsr_update(&synth.filEnvs[v]);
-	envVal=synth.filEnvs[v].output;
+	adsr_update(&synth.wmodEnvs[v]);
 
 	// filter
 
 	vf=filterVal;
-	vf+=scaleU16S16(envVal,filEnvAmt);
+	vf+=scaleU16S16(synth.filEnvs[v].output,filEnvAmt);
 	vf+=synth.filterNoteCV[v];
 	refreshCV(v,cvCutoff,vf);
 
 	// oscs
 	
-	envValScale=scaleU16S16(envVal,wmodEnvAmt);
-
 	vma=wmodAVal;
-	if(wmodMask&8)
-	{
-		vma+=envValScale;
-		vma=__USAT(vma,16);
-	}
+	vma+=scaleU16S16(synth.wmodEnvs[v].output,wmodAEnvAmt);
+	vma=__USAT(vma,16);
 
 	vmb=wmodBVal;
-	if(wmodMask&128)
-	{
-		vmb+=envValScale;
-		vmb=__USAT(vmb,16);
-	}
+	vmb+=scaleU16S16(synth.wmodEnvs[v].output,wmodBEnvAmt);
+	vmb=__USAT(vmb,16);
 
 	vpa=pitchAVal;
 	if(wmodMask&4)
@@ -958,6 +967,7 @@ void synth_init(void)
 	{
 		adsr_init(&synth.ampEnvs[i]);
 		adsr_init(&synth.filEnvs[i]);
+		adsr_init(&synth.wmodEnvs[i]);
 	}
 
 	lfo_init(&synth.lfo[0]);
@@ -1046,7 +1056,7 @@ void synth_timerInterrupt(void)
 	// crossover
 
 	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
-		refreshCrossOver(synth.wmodAVal,synth.wmodEnvAmt);
+		refreshCrossOver(synth.wmodAVal,synth.wmodAEnvAmt);
 
 	// bit inputs (footswitch / tape in)
 
@@ -1103,7 +1113,7 @@ void synth_timerInterrupt(void)
 // @ 5Khz from dacspi CV update
 void synth_updateCVsEvent(void)
 {
-	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodEnvAmt,filEnvAmt;
+	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
 
 	// lfos
 		
@@ -1160,8 +1170,10 @@ void synth_updateCVsEvent(void)
 	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2WModAmt],synth.lfo[1].output);
 
-	wmodEnvAmt=currentPreset.continuousParameters[cpWModFilEnv];
-	wmodEnvAmt+=INT16_MIN;
+	wmodAEnvAmt=currentPreset.continuousParameters[cpWModAEnv];
+	wmodBEnvAmt=currentPreset.continuousParameters[cpWModBEnv];
+	wmodAEnvAmt+=INT16_MIN;
+	wmodBEnvAmt+=INT16_MIN;
 
 		// restrict range
 
@@ -1175,10 +1187,10 @@ void synth_updateCVsEvent(void)
 	// voices computations
 		
 	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-		refreshVoice(v,wmodEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
+		refreshVoice(v,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
 	
 	synth.wmodAVal=wmodAVal;
-	synth.wmodEnvAmt=wmodEnvAmt;
+	synth.wmodAEnvAmt=wmodAEnvAmt;
 }
 
 #define PROC_UPDATE_DACS_VOICE(v) \
@@ -1226,6 +1238,7 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	// set gates (don't retrigger gate, unless we're arpeggiating)
 	if(!(flags&ASSIGNER_EVENT_FLAG_LEGATO) || arp_getMode()!=amOff)
 	{
+		adsr_setGate(&synth.wmodEnvs[voice],gate);
 		adsr_setGate(&synth.filEnvs[voice],gate);
 		adsr_setGate(&synth.ampEnvs[voice],gate);
 	}
@@ -1233,6 +1246,8 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	if(gate)
 	// handle velocity
 	{
+		velAmt=currentPreset.continuousParameters[cpWModVelocity];
+		adsr_setCVs(&synth.wmodEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 		velAmt=currentPreset.continuousParameters[cpFilVelocity];
 		adsr_setCVs(&synth.filEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 		velAmt=currentPreset.continuousParameters[cpAmpVelocity];
@@ -1241,6 +1256,7 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	// stolen voices must be entirely reset
 	else if(flags&ASSIGNER_EVENT_FLAG_STOLEN)
 	{
+		adsr_reset(&synth.wmodEnvs[voice]);
 		adsr_reset(&synth.filEnvs[voice]);
 		adsr_reset(&synth.ampEnvs[voice]);
 	}

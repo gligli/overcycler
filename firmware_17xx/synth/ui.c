@@ -37,7 +37,7 @@ enum uiKeypadButton_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upFil=1,upAmp=2,upLFO1=3,upLFO2=4,upArp=5,upSeq=6,upMisc=7,upTuner=8
+	upNone=-1,upOscs=0,upWMod=1,upFil=2,upAmp=3,upLFO1=4,upLFO2=5,upArp=6,upSeq=7,upMisc=8,upTuner=9
 };
 
 struct uiParam_s
@@ -50,7 +50,7 @@ struct uiParam_s
 	int32_t custPotMul, custPotAdd;
 };
 
-const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/key num]
 {
 	/* Oscillators page (A) */
 	{
@@ -81,15 +81,44 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 		},
 	},
+	/* WaveMod page (A) */
+	{
+		{
+			/* 1st row of pots */
+			{.type=ptStep,.number=spXOvrBank_Legacy,.shortName="WBnk",.longName="Crossover Bank"},
+			{.type=ptStep,.number=spXOvrWave_Legacy,.shortName="WWav",.longName="Crossover Waveform"},
+			{.type=ptCont,.number=cpWModAEnv,.shortName="AWEA",.longName="Osc A WaveMod Envelope amount"},
+			{.type=ptCont,.number=cpWModBEnv,.shortName="BWEA",.longName="Osc B WaveMod Envelope amount"},
+			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
+			/* 2nd row of pots */
+			{.type=ptCont,.number=cpWModAtt,.shortName="WAtk",.longName="WaveMod Attack"},
+			{.type=ptCont,.number=cpWModDec,.shortName="WDec",.longName="WaveMod Decay"},
+			{.type=ptCont,.number=cpWModSus,.shortName="WSus",.longName="WaveMod Sustain"},
+			{.type=ptCont,.number=cpWModRel,.shortName="WRel",.longName="WaveMod Release"},
+			{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
+		},
+		{
+			/*1*/ {.type=ptNone},
+			/*2*/ {.type=ptNone},
+			/*3*/ {.type=ptNone},
+			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
+			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
+			/*6*/ {.type=ptStep,.number=spWModEnvLin,.shortName="WEnS",.longName="WaveMod Envelope Shape",.values={"Exp ","Lin "}},
+			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+			/*8*/ {.type=ptNone},
+			/*9*/ {.type=ptNone},
+			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+		},
+	},
 	/* Filter page (B) */
 	{
 		{
 			/* 1st row of pots */
 			{.type=ptCont,.number=cpCutoff,.shortName="FCut",.longName="Filter Cutoff freqency"},
 			{.type=ptCont,.number=cpResonance,.shortName="FRes",.longName="Filter Resonance"},
+			{.type=ptNone},
 			{.type=ptCont,.number=cpFilKbdAmt,.shortName="FKbd",.longName="Filter Keyboard tracking"},
 			{.type=ptCont,.number=cpFilEnvAmt,.shortName="FEnv",.longName="Filter Envelope amount"},
-			{.type=ptCont,.number=cpWModFilEnv,.shortName="WEnv",.longName="WaveMod Envelope amount"},
 			/* 2nd row of pots */
 			{.type=ptCont,.number=cpFilAtt,.shortName="FAtk",.longName="Filter Attack"},
 			{.type=ptCont,.number=cpFilDec,.shortName="FDec",.longName="Filter Decay"},
@@ -98,8 +127,8 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 			{.type=ptCont,.number=cpFilVelocity,.shortName="FVel",.longName="Filter Velocity"},
 		},
 		{
-			/*1*/ {.type=ptStep,.number=spAWModEnvEn,.shortName="AWmE",.longName="Osc A WaveMod Envelope",.values={"Off ","On  "}},
-			/*2*/ {.type=ptStep,.number=spBWModEnvEn,.shortName="BWmE",.longName="Osc B WaveMod Envelope",.values={"Off ","On  "}},
+			/*1*/ {.type=ptNone},
+			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptStep,.number=spFilEnvSlow,.shortName="FEnT",.longName="Filter Envelope Type",.values={"Fast","Slow"}},
 			/*5*/ {.type=ptStep,.number=spFilEnvLoop,.shortName="FEnL",.longName="Filter Envelope Loop",.values={"Norm","Loop"}},
@@ -115,10 +144,10 @@ const struct uiParam_s uiParameters[9][2][10] = // [pages][0=pots/1=keys][pot/ke
 		{
 			/* 1st row of pots */
 			{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
+			{.type=ptNone},
 			{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
 			{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
 			{.type=ptStep,.number=spVoiceCount,.shortName="VCnt",.longName="Voice count",.values={"   1","   2","   3","   4","   5","   6"}},
-			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 			/* 2nd row of pots */
 			{.type=ptCont,.number=cpAmpAtt,.shortName="AAtk",.longName="Amplifier Attack"},
 			{.type=ptCont,.number=cpAmpDec,.shortName="ADec",.longName="Amplifier Decay"},
@@ -554,6 +583,10 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		strcpy(dv,currentPreset.oscBank[1]);
 	}
+	else if (prm->type==ptStep && prm->number==spXOvrBank_Legacy)
+	{
+		strcpy(dv,currentPreset.oscBank[2]);
+	}
 	else if (prm->type==ptStep && prm->number==spAWave_Legacy)
 	{
 		strcpy(dv,currentPreset.oscWave[0]);
@@ -561,6 +594,10 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	else if (prm->type==ptStep && prm->number==spBWave_Legacy)
 	{
 		strcpy(dv,currentPreset.oscWave[1]);
+	}
+	else if (prm->type==ptStep && prm->number==spXOvrWave_Legacy)
+	{
+		strcpy(dv,currentPreset.oscWave[2]);
 	}
 	else
 	{
@@ -598,7 +635,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		switch(source)
 		{
 			case kbA: 
-				ui.activePage=upOscs;
+				ui.activePage=(ui.activePage==upOscs)?upWMod:upOscs;
 				break;
 			case kbB: 
 				ui.activePage=upFil;
@@ -671,6 +708,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			{
 				case spABank_Legacy:
 				case spBBank_Legacy:
+				case spXOvrBank_Legacy:
 					refreshBankNames(1);
 					valCount=getBankCount();
 					break;
@@ -680,6 +718,10 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 					break;
 				case spBWave_Legacy:
 					refreshCurWaveNames(1,1);
+					valCount=getCurWaveCount();
+					break;
+				case spXOvrWave_Legacy:
+					refreshCurWaveNames(2,1);
 					valCount=getCurWaveCount();
 					break;
 				default:
@@ -748,7 +790,8 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		// special cases
 		if(change)
 		{
-			if(prm->number==spABank_Legacy || prm->number==spBBank_Legacy || prm->number==spAWave_Legacy || prm->number==spBWave_Legacy)
+			if(prm->number==spABank_Legacy || prm->number==spBBank_Legacy || prm->number==spXOvrBank_Legacy ||
+					prm->number==spAWave_Legacy || prm->number==spBWave_Legacy || prm->number==spXOvrWave_Legacy)
 			{
 				switch(prm->number)
 				{
@@ -758,11 +801,17 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 					case spBBank_Legacy:
 						getBankName(data,currentPreset.oscBank[1]);
 						break;
+					case spXOvrBank_Legacy:
+						getBankName(data,currentPreset.oscBank[2]);
+						break;
 					case spAWave_Legacy:
 						getWaveName(data,currentPreset.oscWave[0]);
 						break;
 					case spBWave_Legacy:
 						getWaveName(data,currentPreset.oscWave[1]);
+						break;
+					case spXOvrWave_Legacy:
+						getWaveName(data,currentPreset.oscWave[2]);
 						break;
 				}
 				
@@ -1000,11 +1049,17 @@ void ui_update(void)
 			case spBBank_Legacy:
 				refreshCurWaveNames(1,1);
 				break;
+			case spXOvrBank_Legacy:
+				refreshCurWaveNames(2,1);
+				break;
 			case spAWave_Legacy:
 				refreshWaveforms(0);
 				break;
 			case spBWave_Legacy:
 				refreshWaveforms(1);
+				break;
+			case spXOvrWave_Legacy:
+				refreshWaveforms(2);
 				break;
 			case 0x80+6:
 				preset_saveCurrent(settings.presetNumber);
@@ -1050,7 +1105,7 @@ void ui_update(void)
 		{
 			sendString(1,"GliGli's OverCycler2                    ");
 			sendString(1,"A: Miscellaneous   B: Arp/Sequencer     ");
-			sendString(2,"C: Oscillators     D: Filter            ");
+			sendString(2,"C: Oscs/WaveMod    D: Filter            ");
 			sendString(2,"E: Amplifier       F: LFO1/LFO2         ");
 		}
 		delay_ms(2);
