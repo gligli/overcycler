@@ -920,6 +920,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				break;
 			case 26:
 				assigner_panicOff();
+				refreshFullState();
 				break;
 			case 27:
 				preset_loadDefault(1);
