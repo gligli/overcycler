@@ -58,22 +58,22 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/* 1st row of pots */
 			{.type=ptStep,.number=spABank_Legacy,.shortName="ABnk",.longName="Osc A Bank"},
 			{.type=ptStep,.number=spAWave_Legacy,.shortName="AWav",.longName="Osc A Waveform"},
-			{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
-			{.type=ptCont,.number=cpBFreq,.shortName="Freq",.longName="Osc A/B Frequency"},
+			{.type=ptCont,.number=cpAFreq,.shortName="AFrq",.longName="Osc A Frequency"},
+			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 			{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
 			/* 2nd row of pots */
 			{.type=ptStep,.number=spBBank_Legacy,.shortName="BBnk",.longName="Osc B Bank"},
 			{.type=ptStep,.number=spBWave_Legacy,.shortName="BWav",.longName="Osc B Waveform"},
-			{.type=ptCont,.number=cpBBaseWMod,.shortName="BWmo",.longName="Osc B WaveMod"},
+			{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
 			{.type=ptCont,.number=cpBFineFreq,.shortName="BDet",.longName="Osc B Detune"},
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		},
 		{
-			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq","XOvr"}},
-			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
+			/*1*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
+			/*2*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy A Bank/Wave"},
 			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
-			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
-			/*5*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy A Bank/Wave"},
+			/*4*/ {.type=ptNone},
+			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptNone},
@@ -85,11 +85,11 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptStep,.number=spXOvrBank_Legacy,.shortName="WBnk",.longName="Crossover Bank"},
-			{.type=ptStep,.number=spXOvrWave_Legacy,.shortName="WWav",.longName="Crossover Waveform"},
+			{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
+			{.type=ptCont,.number=cpBBaseWMod,.shortName="BWmo",.longName="Osc B WaveMod"},
+			{.type=ptNone},
 			{.type=ptCont,.number=cpWModAEnv,.shortName="AWEA",.longName="Osc A WaveMod Envelope amount"},
 			{.type=ptCont,.number=cpWModBEnv,.shortName="BWEA",.longName="Osc B WaveMod Envelope amount"},
-			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 			/* 2nd row of pots */
 			{.type=ptCont,.number=cpWModAtt,.shortName="WAtk",.longName="WaveMod Attack"},
 			{.type=ptCont,.number=cpWModDec,.shortName="WDec",.longName="WaveMod Decay"},
@@ -98,8 +98,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
 		},
 		{
-			/*1*/ {.type=ptNone},
-			/*2*/ {.type=ptNone},
+			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq","XOvr"}},
+			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
 			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},

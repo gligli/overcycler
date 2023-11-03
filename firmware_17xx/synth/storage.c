@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 13
+#define STORAGE_VERSION 14
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -307,10 +307,15 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 		currentPreset.voicePattern[i]=storageRead8();
 	
 	if(storage.version<3)
+	{
 		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
+	}
 
-	reloadLegacyBankWaveIndexes(0,0,0);
-	reloadLegacyBankWaveIndexes(1,0,0);
+	if(storage.version<11)
+	{
+		reloadLegacyBankWaveIndexes(0,0,0);
+		reloadLegacyBankWaveIndexes(1,0,0);
+	}
 	
 	if(storage.version<13)
 	{
@@ -322,6 +327,20 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 			currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
 		currentPreset.continuousParameters[cpWModVelocity]=currentPreset.continuousParameters[cpFilVelocity];
 		currentPreset.steppedParameters[spWModEnvSlow]=currentPreset.steppedParameters[spFilEnvSlow];
+	}
+		
+	if(storage.version<14)
+	{
+		if(currentPreset.continuousParameters[cpBFreq]>=HALF_RANGE)
+		{
+			currentPreset.continuousParameters[cpAFreq]=0;
+			currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]-HALF_RANGE)<<1;
+		}
+		else
+		{
+			currentPreset.continuousParameters[cpAFreq]=(HALF_RANGE-currentPreset.continuousParameters[cpBFreq])<<1;
+			currentPreset.continuousParameters[cpBFreq]=0;
+		}
 	}
 	
 	if(storage.version<2)
@@ -555,7 +574,6 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpUnisonDetune]=512;
 	currentPreset.continuousParameters[cpMasterTune]=HALF_RANGE;
 
-	currentPreset.continuousParameters[cpBFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpBFineFreq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE;
 	currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE;
