@@ -45,7 +45,7 @@
         "silk_text_thickness": 0.15,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.35
+          "min_clearance": 0.0
         }
       },
       "diff_pair_dimensions": [
@@ -124,7 +124,7 @@
         "min_text_height": 0.7999999999999999,
         "min_text_thickness": 0.08,
         "min_through_hole_diameter": 0.762,
-        "min_track_width": 0.3,
+        "min_track_width": 0.19999999999999998,
         "min_via_annular_width": 0.09999999999999999,
         "min_via_diameter": 1.651,
         "solder_mask_to_copper_clearance": 0.0,
@@ -442,6 +442,23 @@
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.25,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.508,
+        "microvia_drill": 0.127,
+        "name": "USB",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "via_diameter": 0.5,
+        "via_drill": 0.25,
+        "wire_width": 6
       }
     ],
     "meta": {
@@ -477,6 +494,22 @@
       {
         "netclass": "Power",
         "pattern": "GND"
+      },
+      {
+        "netclass": "USB",
+        "pattern": "USB_D-"
+      },
+      {
+        "netclass": "USB",
+        "pattern": "USB_D+"
+      },
+      {
+        "netclass": "USB",
+        "pattern": "D-"
+      },
+      {
+        "netclass": "USB",
+        "pattern": "D+"
       }
     ]
   },
