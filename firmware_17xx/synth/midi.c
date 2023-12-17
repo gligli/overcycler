@@ -181,12 +181,14 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 {
 	if(!midiFilterChannel(channel))
 		return;
+	
+	uint16_t newPresetNumber=(((settings.presetNumber/100)%10)*100)+program;
 
-	if(program<100  && program!=settings.presetNumber)
+	if(program<100 && newPresetNumber!=settings.presetNumber)
 	{
-		if(preset_loadCurrent(program))
+		if(preset_loadCurrent(newPresetNumber))
 		{
-			settings.presetNumber=program;
+			settings.presetNumber=newPresetNumber;
 			
 			ui_setPresetModified(0);	
 			settings_save();		

@@ -16,9 +16,6 @@
 #include "clock.h"
 #include "scan.h"
 
-#define PRESET_SLOTS 20
-#define PRESET_BANKS 20
-
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
 
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/50)
@@ -288,17 +285,17 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=4,.shortName="Slot",.longName="Preset Slot",.custPotMul=PRESET_SLOTS,.custPotAdd=0},
-			{.type=ptStep,.number=spPresetType,.shortName="PTyp",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
-			{.type=ptStep,.number=spPresetStyle,.shortName="PStl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
+			{.type=ptCust,.number=29,.shortName="PrHu",.longName="Preset number hundreds",.custPotMul=10,.custPotAdd=0},
+			{.type=ptCust,.number=11,.shortName="PrTe",.longName="Preset number tens",.custPotMul=10,.custPotAdd=0},
+			{.type=ptCust,.number=4,.shortName="PrUn",.longName="Preset number units",.custPotMul=10,.custPotAdd=0},
+			{.type=ptStep,.number=spPresetType,.shortName="PrTy",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
+			{.type=ptStep,.number=spPresetStyle,.shortName="PrSt",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
+			/* 2nd row of pots */
+			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=-1},
+			{.type=ptNone},
+			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
-			/* 2nd row of pots */
-			{.type=ptCust,.number=11,.shortName="Bank",.longName="Preset Bank",.custPotMul=PRESET_BANKS,.custPotAdd=0},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=-1},
 		},
 		{
 			/*1*/ {.type=ptCust,.number=5,.shortName="Load",.longName="Load preset"},
@@ -467,14 +464,14 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				v=arp_getHold();
 				break;
 			case 4:
-				v=settings.presetNumber%PRESET_SLOTS;
+				v=(settings.presetNumber+1000)%10;
 				break;
 			case 5:
 			case 6:
 				v=settings.presetNumber;
 				break;
 			case 7:
-				v=settings.midiReceiveChannel;
+				v=settings.midiReceiveChannel+1;
 				break;
 			case 8:
 				v=0;
@@ -483,10 +480,10 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				v=settings.tunes[potnum][ui.tunerActiveVoice]>>3;
 				break;
 			case 10:
-				v=ui.tunerActiveVoice;
+				v=ui.tunerActiveVoice+1;
 				break;
 			case 11:
-				v=settings.presetNumber/PRESET_SLOTS;
+				v=((settings.presetNumber+1000)/10)%10;
 				break;
 			case 12:
 				v=settings.syncMode;
@@ -501,15 +498,15 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 			case 16:
 			case 17:
 			case 18:
-				v=-1;
+				v=0;
 				if(ui.seqRecordingTrack>=0)
-					v=seq_getStepCount(ui.seqRecordingTrack)-1;
+					v=seq_getStepCount(ui.seqRecordingTrack);
 				break;
 			case 19:
 				v=ui.isTransposing;
 				break;
 			case 20:
-				v=ui.transpose-1;
+				v=ui.transpose;
 				break;
 			case 21:
 				v=settings.sequencerBank;
@@ -520,17 +517,15 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					v=clock_getSpeed();
 					if(v==UINT16_MAX)
 						v=0;
-					--v;
 				}
 				else
 				{
-					v=(((int)settings.seqArpClock*1000)>>16)-1;
+					v=((int)settings.seqArpClock*1000)>>16;
 				}
 				break;
 			case 23:
-				v=(currentPreset.steppedParameters[spXOvrBank_Legacy]+1)*100;
-				v+=(currentPreset.steppedParameters[spXOvrWave_Legacy]+1)%100;
-				--v;
+				v=currentPreset.steppedParameters[spXOvrBank_Legacy]*100;
+				v+=currentPreset.steppedParameters[spXOvrWave_Legacy]%100;
 				break;
 			case 24:
 			case 25:
@@ -539,13 +534,16 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 			case 28:
 				v=0;
 				break;
+			case 29:
+				v=((settings.presetNumber+1000)/100)%10;
+				break;
 			}
 		}
 
 		if(v>=0 && v<valCount)
 			strcpy(dv,prm->values[v]);
 		else
-			sprintf(dv,"%4d",v+1);
+			sprintf(dv,"%4d",v);
 		break;
 	default:
 		;
@@ -832,7 +830,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
 			case 4:
-				settings.presetNumber=settings.presetNumber-(settings.presetNumber%PRESET_SLOTS)+potSetting;
+				settings.presetNumber=settings.presetNumber-(settings.presetNumber%10)+potSetting;
 				break;
 			case 5:
 			case 6:
@@ -855,7 +853,7 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				ui.tunerActiveVoice=source-kb1;
 				break;
 			case 11:
-				settings.presetNumber=(settings.presetNumber%PRESET_SLOTS)+potSetting*PRESET_SLOTS;
+				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/10)%10)*10)+potSetting*10;
 				break;
 			case 12:
 				settings.syncMode=potSetting;
@@ -912,10 +910,10 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			case 24:
 			case 25:
 				data=settings.presetNumber+((prm->number == 24) ? -1 : 1);
-				data=(data+PRESET_SLOTS*PRESET_BANKS)%(PRESET_SLOTS*PRESET_BANKS);
+				data=(data+1000)%1000;
 				settings.presetNumber=data;
 
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeout=0;
 				ui.slowUpdateTimeoutNumber=0x85;
 				break;
 			case 26:
@@ -924,14 +922,16 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 				break;
 			case 27:
 				preset_loadDefault(1);
-				change=1;
-				
 				refreshWaveforms(0);
 				refreshWaveforms(1);
 				refreshWaveforms(2);
+				change=1;
 				break;
 			case 28:
 				preset_packAndRemoveDuplicates();
+				break;
+			case 29:
+				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/100)%10)*100)+potSetting*100;
 				break;
 		}
 		break;
