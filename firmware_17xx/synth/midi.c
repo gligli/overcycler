@@ -186,18 +186,17 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 
 	if(program<100 && newPresetNumber!=settings.presetNumber)
 	{
-		if(preset_loadCurrent(newPresetNumber))
-		{
-			settings.presetNumber=newPresetNumber;
-			
-			ui_setPresetModified(0);	
-			settings_save();		
-			
-			refreshWaveforms(0);
-			refreshWaveforms(1);
-			refreshWaveforms(2);
-			refreshFullState();
-		}
+		settings.presetNumber=newPresetNumber;
+		settings_save();		
+		
+		if(!preset_loadCurrent(newPresetNumber))
+			preset_loadDefault(1);
+		ui_setPresetModified(0);	
+
+		refreshWaveforms(0);
+		refreshWaveforms(1);
+		refreshWaveforms(2);
+		refreshFullState();
 	}
 }
 
