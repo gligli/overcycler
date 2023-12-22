@@ -72,7 +72,7 @@ static struct
 
 	struct
 	{
-		int16_t benderCVs[cvAmp-cvAVol+1];
+		int16_t benderCVs[cvCount];
 
 		int16_t benderAmount;
 		uint16_t modwheelAmount;
@@ -88,7 +88,8 @@ static struct
 	} partState;
 	
 	uint8_t pendingExtClock;
-	int32_t wmodAVal, wmodAEnvAmt;
+	uint16_t wmodAVal;
+	int16_t wmodAEnvAmt;
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -200,10 +201,35 @@ void computeBenderCVs(void)
 	static const int8_t br[]={3,5,12,0};
 	
 	int32_t bend;
-
+	uint8_t tgt;
+	
 	bend=synth.partState.benderAmount;
-
-	switch(currentPreset.steppedParameters[spBenderTarget])
+	tgt=currentPreset.steppedParameters[spBenderTarget];
+	
+	if(tgt!=modPitch)
+	{
+		synth.partState.benderCVs[cvAPitch]=0;
+		synth.partState.benderCVs[cvBPitch]=0;
+	}
+	
+	if(tgt!=modFilter)
+	{
+		synth.partState.benderCVs[cvCutoff]=0;
+	}
+	
+	if(tgt!=modVolume)
+	{
+		synth.partState.benderCVs[cvAVol]=0;
+		synth.partState.benderCVs[cvBVol]=0;
+		synth.partState.benderCVs[cvNoiseVol]=0;
+	}
+	
+	if(tgt!=modCrossOver)
+	{
+		synth.partState.benderCVs[cvACrossOver]=0;
+	}
+	
+	switch(tgt)
 	{
 	case modPitch:
 		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*2,0,cvAPitch)-tuner_computeCVFromNote(0,0,0,cvAPitch);
@@ -211,14 +237,20 @@ void computeBenderCVs(void)
 		synth.partState.benderCVs[cvAPitch]=bend;
 		synth.partState.benderCVs[cvBPitch]=bend;
 		break;
-	case modFil:
+	case modFilter:
 		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*8,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
 		bend/=UINT16_MAX;
 		synth.partState.benderCVs[cvCutoff]=bend;
 		break;
-	case modAmp:
+	case modVolume:
 		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
-		synth.partState.benderCVs[cvAmp]=bend;
+		synth.partState.benderCVs[cvAVol]=bend;
+		synth.partState.benderCVs[cvBVol]=bend;
+		synth.partState.benderCVs[cvNoiseVol]=bend;
+		break;
+	case modCrossOver:
+		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
+		synth.partState.benderCVs[cvACrossOver]=bend;
 		break;
 	}
 }
@@ -434,7 +466,7 @@ static void refreshMisc(void)
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		int p=currentPreset.steppedParameters[spAWModType]==wmCrossOver?3:0;
+		int p=(currentPreset.steppedParameters[spAWModType]==wmCrossOver || currentPreset.steppedParameters[spBenderTarget]==modCrossOver)?3:0;
 		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],waveData.sampleCount[p]);
 		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleCount[1]);
 	}
@@ -817,12 +849,12 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	dacspi_setCVValue(channel,value);
 }
 
-static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
+static void refreshCrossOver(uint16_t wmod, int16_t wmodEnvAmt)
 {
 	int i;
 	int8_t v;
 	uint32_t xovr;
-	uint16_t *p0,*p2,*p3;
+	uint16_t *p0,*p2,*p3,xovr16;
 	
 	xovr=wmod;
 
@@ -843,13 +875,14 @@ static void refreshCrossOver(int32_t wmod, int32_t wmodEnvAmt)
 	p0=waveData.sampleData[0];
 	p2=waveData.sampleData[2];
 	p3=waveData.sampleData[3];
+	xovr16=xovr;
 	
 	for(i=0;i<WTOSC_MAX_SAMPLES/4;++i)
 	{
-		*p3++=lerp16(*p0++,*p2++,xovr);
-		*p3++=lerp16(*p0++,*p2++,xovr);
-		*p3++=lerp16(*p0++,*p2++,xovr);
-		*p3++=lerp16(*p0++,*p2++,xovr);
+		*p3++=lerp16(*p0++,*p2++,xovr16);
+		*p3++=lerp16(*p0++,*p2++,xovr16);
+		*p3++=lerp16(*p0++,*p2++,xovr16);
+		*p3++=lerp16(*p0++,*p2++,xovr16);
 	}
 	
 	synth.partState.oldCrossOver=xovr;
@@ -1034,9 +1067,9 @@ void synth_timerInterrupt(void)
 
 	// CV update
 
-	refreshCV(-1,cvAVol,(uint32_t)currentPreset.continuousParameters[cpAVol]*resoFactor/256);
-	refreshCV(-1,cvBVol,(uint32_t)currentPreset.continuousParameters[cpBVol]*resoFactor/256);
-	refreshCV(-1,cvNoiseVol,(uint32_t)currentPreset.continuousParameters[cpNoiseVol]*resoFactor/256);
+	refreshCV(-1,cvAVol,(((uint32_t)currentPreset.continuousParameters[cpAVol]*(synth.partState.benderCVs[cvAVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	refreshCV(-1,cvBVol,(((uint32_t)currentPreset.continuousParameters[cpBVol]*(synth.partState.benderCVs[cvBVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	refreshCV(-1,cvNoiseVol,(((uint32_t)currentPreset.continuousParameters[cpNoiseVol]*(synth.partState.benderCVs[cvNoiseVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
 	refreshCV(-1,cvResonance,resVal);
 
 	// midi
@@ -1045,8 +1078,16 @@ void synth_timerInterrupt(void)
 
 	// crossover
 
-	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
-		refreshCrossOver(synth.wmodAVal,synth.wmodAEnvAmt);
+	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver || currentPreset.steppedParameters[spBenderTarget]==modCrossOver)
+	{
+		int32_t wmod;
+		
+		wmod=synth.wmodAVal;
+		wmod+=synth.partState.benderCVs[cvACrossOver];
+		wmod=__USAT(wmod,16);
+				
+		refreshCrossOver(wmod,synth.wmodAEnvAmt);
+	}
 
 	// bit inputs (footswitch / tape in)
 
@@ -1135,7 +1176,7 @@ void synth_updateCVsEvent(void)
 	
 		// amplifier
 
-	ampVal=synth.partState.benderCVs[cvAmp]+UINT16_MAX;
+	ampVal=UINT16_MAX;
 
 	ampVal-=scaleU16U16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo[0].levelCV>>1);
 	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOAmpAmt],synth.lfo[0].output);

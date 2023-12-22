@@ -589,7 +589,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpWModBEnv]=HALF_RANGE;
 
 	currentPreset.steppedParameters[spBenderRange]=2; // octave
-	currentPreset.steppedParameters[spBenderTarget]=modFil;
+	currentPreset.steppedParameters[spBenderTarget]=modFilter;
 	currentPreset.steppedParameters[spModwheelRange]=2; // high
 	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;

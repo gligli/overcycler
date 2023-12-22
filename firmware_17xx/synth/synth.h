@@ -20,11 +20,16 @@
 
 #define SCANNER_BASE_NOTE 12
 
-typedef enum {cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvAmp=6,cvNoiseVol=7} cv_t; 
+typedef enum {
+	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvACrossOver=6,cvAmp=7,cvNoiseVol=8,
+			
+	// /!\ this must stay last
+	cvCount
+} cv_t; 
 
 typedef enum
 {
-	modOff=0,modPitch=1,modFil=2,modAmp=3
+	modOff=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4
 } modulationTarget_t;
 
 typedef enum
