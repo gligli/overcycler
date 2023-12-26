@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Potnetiometers / keypad scanner
+// Potentiometers / keypad scanner
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "scan.h"
@@ -51,7 +51,7 @@ static struct
 
 static uint8_t keypadButtonCode[16]=
 {
-	0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,0x32,
+	0x32,0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,
 	0x08,0x18,0x28,0x38,
 	0x34,0x31
 };
@@ -149,14 +149,14 @@ static void readPots(void)
 				if(new!=scan.potValue[pot] && currentTick>=scan.potLockTimeout[pot])
 				{
 					// out of lock -> current value must be taken into account
-					ui_scanEvent(-pot-1);
+					ui_scanEvent(-pot-1,NULL);
 				}
 
 				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
 			}
 			
 			scan.potValue[pot]=new;
-			ui_scanEvent(-pot-1);
+			ui_scanEvent(-pot-1,NULL);
 		}
 	}
 }
@@ -189,7 +189,7 @@ static void readKeypad(void)
 			scan.keypadState[key]=MIN(INT8_MAX,scan.keypadState[key]+1);
 
 			if(scan.keypadState[key]==DEBOUNCE_THRESHOLD)
-				ui_scanEvent(key);
+				ui_scanEvent(key,NULL);
 		}
 		else
 		{

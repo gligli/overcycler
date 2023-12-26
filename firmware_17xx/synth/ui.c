@@ -27,7 +27,7 @@ enum uiParamType_e
 
 enum uiKeypadButton_e
 {
-	kb1=0,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,kb0,
+	kb0=0,kb1,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,
 	kbA,kbB,kbC,kbD,
 	kbSharp,kbAsterisk,
 };
@@ -66,6 +66,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
 			/*2*/ {.type=ptCust,.number=23,.shortName="XoCp",.longName="Crossover WaveMod Copy A Bank/Wave"},
 			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
@@ -73,9 +74,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* WaveMod page (A) */
@@ -95,6 +95,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq","XOvr"}},
 			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
 			/*3*/ {.type=ptNone},
@@ -102,9 +103,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
 			/*6*/ {.type=ptStep,.number=spWModEnvLin,.shortName="WEnS",.longName="WaveMod Envelope Shape",.values={"Exp ","Lin "}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* Filter page (B) */
@@ -124,6 +124,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpFilVelocity,.shortName="FVel",.longName="Filter Velocity"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptNone},
 			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptNone},
@@ -131,9 +132,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptStep,.number=spFilEnvLoop,.shortName="FEnL",.longName="Filter Envelope Loop",.values={"Norm","Loop"}},
 			/*6*/ {.type=ptStep,.number=spFilEnvLin,.shortName="FEnS",.longName="Filter Envelope Shape",.values={"Exp ","Lin "}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* Amplifier page (C) */
@@ -153,6 +153,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpAmpVelocity,.shortName="AVel",.longName="Amplifier Velocity"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spUnison,.shortName="Unis",.longName="Unison",.values={"Off ","On  "}},
 			/*2*/ {.type=ptStep,.number=spAssignerPriority,.shortName="Prio",.longName="Assigner Priority",.values={"Last","Low ","High"}},
 			/*3*/ {.type=ptNone},
@@ -160,9 +161,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptStep,.number=spAmpEnvLoop,.shortName="AEnL",.longName="Amplifier Envelope Loop",.values={"Norm","Loop"}},
 			/*6*/ {.type=ptStep,.number=spAmpEnvLin,.shortName="AEnS",.longName="Amplifier Envelope Shape",.values={"Exp ","Lin "}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* LFO1 page (D) */
@@ -182,6 +182,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpLFOAmpAmt,.shortName="1Amp",.longName="Amplifier LFO1 Amount"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spLFOShift,.shortName="1Rng",.longName="LFO1 Range",.values={"Slow","Fast"}},
 			/*2*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
 			/*3*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
@@ -189,9 +190,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
 			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"Off ","Pit ","Fil ","Vol ","XOvr"}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* LFO2 page (D) */
@@ -211,6 +211,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCont,.number=cpLFO2AmpAmt,.shortName="2Amp",.longName="Amplifier LFO2 Amount"},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spLFO2Shift,.shortName="2Rng",.longName="LFO2 Range",.values={"Slow","Fast"}},
 			/*2*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
 			/*3*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
@@ -218,9 +219,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
 			/*6*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"Off ","Pit ","Fil ","Vol ","XOvr"}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* Arpeggiator page (#) */
@@ -240,6 +240,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
 			/*2*/ {.type=ptCust,.number=3,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
 			/*3*/ {.type=ptNone},
@@ -247,9 +248,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* Sequencer page (#) */
@@ -269,6 +269,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=20,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptCust,.number=13,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
 			/*2*/ {.type=ptCust,.number=14,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "}},
 			/*3*/ {.type=ptCust,.number=15,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
@@ -276,9 +277,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptCust,.number=16,.shortName="Back",.longName="Back one step"},
 			/*6*/ {.type=ptCust,.number=18,.shortName="Clr ",.longName="Clear sequence"},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		},
 	},
 	/* Miscellaneous page (*) */
@@ -298,6 +298,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=30,.shortName="NPrs",.longName="Numerically set preset number"},
 			/*1*/ {.type=ptCust,.number=5,.shortName="Load",.longName="Load preset"},
 			/*2*/ {.type=ptNone},
 			/*3*/ {.type=ptCust,.number=6,.shortName="Save",.longName="Save preset"},
@@ -305,9 +306,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptCust,.number=25,.shortName="LNxt",.longName="Load next preset",.values={""}},
 			/*6*/ {.type=ptCust,.number=8,.shortName="Tune",.longName="Tune filters",.values={""}},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptNone},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 			/*9*/ {.type=ptCust,.number=27,.shortName="LBas",.longName="Load basic preset",.values={""}},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 		},
 	},
 	/* Tuner page */
@@ -327,6 +327,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptNone},
 		},
 		{
+			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptCust,.number=10,.shortName="Vce1",.longName="Tuner voice 1"},
 			/*2*/ {.type=ptCust,.number=10,.shortName="Vce2",.longName="Tuner voice 2"},
 			/*3*/ {.type=ptCust,.number=10,.shortName="Vce3",.longName="Tuner voice 3"},
@@ -334,9 +335,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*5*/ {.type=ptCust,.number=10,.shortName="Vce5",.longName="Tuner voice 5"},
 			/*6*/ {.type=ptCust,.number=10,.shortName="Vce6",.longName="Tuner voice 6"},
 			/*7*/ {.type=ptCust,.number=19,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=28,.shortName="Pack",.longName="Pack presets and remove duplicates"},
-			/*9*/ {.type=ptNone},
-			/*0*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*8*/ {.type=ptCust,.number=26,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+			/*9*/ {.type=ptCust,.number=28,.shortName="Pack",.longName="Pack presets and remove duplicates"},
 		},
 	},
 };
@@ -350,6 +350,10 @@ static struct
 	uint32_t slowUpdateTimeout;
 	int16_t slowUpdateTimeoutNumber;
 	int8_t pendingScreenClear;
+	int8_t lastInputPot;
+	
+	int8_t kpInputDecade,kpInputPot;
+	uint16_t kpInputValue;
 	
 	uint32_t potsAcquired;
 	int32_t potsPrevValue[SCAN_POT_COUNT];
@@ -427,7 +431,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 	int32_t valCount;
 	int32_t v=INT32_MIN;
 
-	strcpy(dv,"    ");
+	dv[0]=0;
 	if(valueOut)
 		*valueOut=v;
 	
@@ -436,117 +440,128 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 	
 	switch(prm->type)
 	{
-	case ptCont:
-		v=currentPreset.continuousParameters[prm->number];
-		sprintf(dv,"%4d",(v*1000)>>16);
-		break;
-	case ptStep:
-	case ptCust:
-		valCount=0;
-		while(valCount<8 && prm->values[valCount]!=NULL)
-			++valCount;
+		case ptCont:
+			v=currentPreset.continuousParameters[prm->number];
+			sprintf(dv,"%4d",(v*1000)>>16);
+			break;
+		case ptStep:
+		case ptCust:
+			valCount=0;
+			while(valCount<8 && prm->values[valCount]!=NULL)
+				++valCount;
 
-		if(prm->type==ptStep)
-		{
-			v=currentPreset.steppedParameters[prm->number];
-		}
-		else
-		{
-			switch(prm->number)
+			if(prm->type==ptStep)
 			{
-			case 0:
-				v=0;
-				break;
-			case 2:
-				v=arp_getMode();
-				break;
-			case 3:
-				v=arp_getHold();
-				break;
-			case 4:
-				v=(settings.presetNumber+1000)%10;
-				break;
-			case 5:
-			case 6:
-				v=settings.presetNumber;
-				break;
-			case 7:
-				v=settings.midiReceiveChannel+1;
-				break;
-			case 8:
-				v=0;
-				break;
-			case 9:
-				v=settings.tunes[potnum][ui.tunerActiveVoice]>>3;
-				break;
-			case 10:
-				v=ui.tunerActiveVoice+1;
-				break;
-			case 11:
-				v=((settings.presetNumber+1000)/10)%10;
-				break;
-			case 12:
-				v=settings.syncMode;
-				break;
-			case 13:
-			case 14:
-				v=seq_getMode(prm->number-13);
-				break;
-			case 15:
-				v=ui.seqRecordingTrack+1;
-				break;
-			case 16:
-			case 17:
-			case 18:
-				v=0;
-				if(ui.seqRecordingTrack>=0)
-					v=seq_getStepCount(ui.seqRecordingTrack);
-				break;
-			case 19:
-				v=ui.isTransposing;
-				break;
-			case 20:
-				v=ui.transpose;
-				break;
-			case 21:
-				v=settings.sequencerBank;
-				break;
-			case 22:
-				if(settings.syncMode==smMIDI)
-				{
-					v=clock_getSpeed();
-					if(v==UINT16_MAX)
-						v=0;
-				}
-				else
-				{
-					v=((int)settings.seqArpClock*1000)>>16;
-				}
-				break;
-			case 23:
-				v=currentPreset.steppedParameters[spXOvrBank_Legacy]*100;
-				v+=currentPreset.steppedParameters[spXOvrWave_Legacy]%100;
-				break;
-			case 24:
-			case 25:
-			case 26:
-			case 27:
-			case 28:
-				v=0;
-				break;
-			case 29:
-				v=((settings.presetNumber+1000)/100)%10;
-				break;
+				v=currentPreset.steppedParameters[prm->number];
 			}
-		}
+			else
+			{
+				switch(prm->number)
+				{
+				case 0:
+					v=0;
+					break;
+				case 2:
+					v=arp_getMode();
+					break;
+				case 3:
+					v=arp_getHold();
+					break;
+				case 4:
+					v=(settings.presetNumber+1000)%10;
+					break;
+				case 5:
+				case 6:
+					v=settings.presetNumber;
+					break;
+				case 7:
+					v=settings.midiReceiveChannel+1;
+					break;
+				case 8:
+					v=0;
+					break;
+				case 9:
+					v=settings.tunes[potnum][ui.tunerActiveVoice]>>3;
+					break;
+				case 10:
+					v=ui.tunerActiveVoice+1;
+					break;
+				case 11:
+					v=((settings.presetNumber+1000)/10)%10;
+					break;
+				case 12:
+					v=settings.syncMode;
+					break;
+				case 13:
+				case 14:
+					v=seq_getMode(prm->number-13);
+					break;
+				case 15:
+					v=ui.seqRecordingTrack+1;
+					break;
+				case 16:
+				case 17:
+				case 18:
+					v=0;
+					if(ui.seqRecordingTrack>=0)
+						v=seq_getStepCount(ui.seqRecordingTrack);
+					break;
+				case 19:
+					v=ui.isTransposing;
+					break;
+				case 20:
+					v=ui.transpose;
+					break;
+				case 21:
+					v=settings.sequencerBank;
+					break;
+				case 22:
+					if(settings.syncMode==smMIDI)
+					{
+						v=clock_getSpeed();
+						if(v==UINT16_MAX)
+							v=0;
+					}
+					else
+					{
+						v=((int)settings.seqArpClock*1000)>>16;
+					}
+					break;
+				case 23:
+					v=currentPreset.steppedParameters[spXOvrBank_Legacy]*100;
+					v+=currentPreset.steppedParameters[spXOvrWave_Legacy]%100;
+					sprintf(dv,"%04d",v);
+					break;
+				case 24:
+				case 25:
+				case 26:
+				case 27:
+				case 28:
+					v=0;
+					break;
+				case 29:
+					v=((settings.presetNumber+1000)/100)%10;
+					break;
+				case 30:
+				case 31:
+					v=ui.kpInputValue;
+					sprintf(dv,"%03d ",v);
+					for(int i=0;i<=ui.kpInputDecade;++i)
+						dv[2-i]='_';				
+					break;
+				}
+			}
 
-		if(v>=0 && v<valCount)
-			strcpy(dv,prm->values[v]);
-		else
-			sprintf(dv,"%4d",v);
-		break;
-	default:
-		;
+			if(!dv[0])
+			{
+				if(v>=0 && v<valCount)
+					strcpy(dv,prm->values[v]);
+				else
+					sprintf(dv,"%4d",v);
+			}
+			break;
+		default:
+			strcpy(dv,"    ");
 	}
 
 	if(valueOut)
@@ -597,6 +612,11 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		strcpy(dv,currentPreset.oscWave[2]);
 	}
+	else if (prm->type==ptCust && prm->number==31)
+	{
+		if(ui.kpInputPot>=0)
+			strcpy(dv,uiParameters[ui.activePage][0][ui.kpInputPot].longName);
+	}
 	else
 	{
 		char * selected;
@@ -619,10 +639,10 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	return dv;
 }
 
-void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
-	int32_t potSetting,potQuantum;
+	int32_t potSetting;
 	int8_t potnum,change;
 	const struct uiParam_s * prm;
 
@@ -660,6 +680,8 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			ui.potsPrevValue[i]=INT32_MIN;
 
 		// cancel ongoing changes
+		ui.lastInputPot=-1;
+		ui.kpInputDecade=-1;
 		ui.activeSourceTimeout=0;
 		scan_resetPotLocking();
 
@@ -675,13 +697,48 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		return;
 	}
 	
+	// keypad value input mode	
+	if (ui.kpInputDecade>=0)
+	{
+		uint16_t decade=1;
+		for(int i=0;i<ui.kpInputDecade;++i)
+			decade*=10;
+		
+		if (source>=kb0 && source<=kb9)
+			ui.kpInputValue+=(source-kb0)*decade;
+		
+		--ui.kpInputDecade;
+		
+		if(ui.kpInputDecade<0) // end of input?
+		{
+			// back to regular page display
+			ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+			ui.pendingScreenClear=1;
+			
+			if(ui.kpInputPot>=0)
+			{
+				ui_scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
+			}
+			else
+			{
+				// preset number
+				settings.presetNumber=ui.kpInputValue;
+			}
+		}
+
+		return;
+	}
+
 	potnum=-source-1;
 	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	
+	if(source<0)
+		ui.lastInputPot=potnum;
 
 	// nothing to do -> return
 	if(ui.activePage==upNone || prm->type==ptNone)
 		return;
-
+	
 	// fullscreen display
 	++ui.sourceChanges;
 	ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
@@ -728,44 +785,66 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 		}
 	}
 	
-	// transform potentiometer value into setting value
-	potSetting=0;
-	potQuantum=0;
-	if(source<0)
+	if(forcedValue)
 	{
-		data=scan_getPotValue(potnum);
 		switch(prm->type)
 		{
-		case ptCont:
-			potSetting=data;
-			potQuantum=SCAN_ADC_QUANTUM;
-			break;
-		case ptStep:
-			potSetting=(valCount*data)>>16;
-			break;
-		case ptCust:
-			potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
-			break;
-		default:
-			/* nothing */;
+			case ptCont:
+				potSetting=((*forcedValue)*UINT16_MAX)/999;
+				break;
+			case ptStep:
+				potSetting=MIN(*forcedValue,valCount-1);
+				break;
+			case ptCust:
+				potSetting=MIN(((*forcedValue)*UINT16_MAX)/999,prm->custPotMul+prm->custPotAdd-1);
+				break;
+			default:
+				/* nothing */;
 		}
 	}
-	
-	// lock potentiometers until prev value is reacquired
-	if(source<0)
+	else
 	{
-		int32_t value,prevValue;
-		getDisplayValue(source,&value);
+		int32_t potQuantum;
 		
-		prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
-		
-		if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
-			ui.potsAcquired|=1<<potnum;
-		
-		ui.potsPrevValue[potnum]=potSetting;
-		
-		if(((ui.potsAcquired>>potnum)&1)==0)
-			return;
+		// transform potentiometer value into setting value
+		potSetting=0;
+		potQuantum=0;
+		if(source<0)
+		{
+			data=scan_getPotValue(potnum);
+			switch(prm->type)
+			{
+				case ptCont:
+					potSetting=data;
+					potQuantum=SCAN_ADC_QUANTUM;
+					break;
+				case ptStep:
+					potSetting=(valCount*data)>>16;
+					break;
+				case ptCust:
+					potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
+					break;
+				default:
+					/* nothing */;
+			}
+		}
+
+		// lock potentiometers until prev value is reacquired
+		if(source<0)
+		{
+			int32_t value,prevValue;
+			getDisplayValue(source,&value);
+
+			prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
+
+			if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
+				ui.potsAcquired|=1<<potnum;
+
+			ui.potsPrevValue[potnum]=potSetting;
+
+			if(((ui.potsAcquired>>potnum)&1)==0)
+				return;
+		}
 	}
 
 	// store new setting
@@ -933,6 +1012,21 @@ void ui_scanEvent(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 			case 29:
 				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/100)%10)*100)+potSetting*100;
 				break;
+			case 30:
+				ui.kpInputValue=0;
+				ui.kpInputPot=-1;
+				ui.kpInputDecade=2;
+				ui.activeSourceTimeout=UINT32_MAX;
+				break;
+			case 31:
+				ui.kpInputValue=0;
+				if(ui.lastInputPot>=0)
+				{
+					ui.kpInputPot=ui.lastInputPot;
+					ui.kpInputDecade=2;
+					ui.activeSourceTimeout=UINT32_MAX;
+				}
+				break;
 		}
 		break;
 	default:
@@ -1028,6 +1122,9 @@ void ui_init(void)
 	ui.activeSource=INT8_MAX;
 	ui.pendingScreenClear=1;
 	ui.seqRecordingTrack=-1;
+	ui.lastInputPot=-1;
+	ui.kpInputDecade=-1;
+	ui.kpInputPot=-1;
 }
 
 void ui_update(void)
@@ -1142,11 +1239,11 @@ void ui_update(void)
 		
 		setPos(1,26,1);
 		setPos(2,26,0);
-		for(i=0;i<6;++i)
+		for(i=kb1;i<=kb6;++i)
 		{
-			int lcd=(i<3)?1:2;
+			int lcd=(i<=kb3)?1:2;
 			sendString(lcd,getDisplayValue(i, NULL));
-			if(i!=5 && i!=2)
+			if(i!=kb6 && i!=kb3)
 				sendChar(lcd,' ');
 		}
 	
@@ -1154,18 +1251,18 @@ void ui_update(void)
 		{
 			setPos(1,26,0);
 			
-			for(i=0;i<3;++i)
+			for(i=kb1;i<=kb3;++i)
 			{
 				sendString(1,getName(i,0));
-				if(i<2)
+				if(i<kb3)
 					sendChar(1,' ');
 			}
 
 			setPos(2,26,1);
-			for(i=3;i<6;++i)
+			for(i=kb4;i<=kb6;++i)
 			{
 				sendString(2,getName(i,0));
-				if(i<5)
+				if(i<kb6)
 					sendChar(2,' ');
 			}
 		}

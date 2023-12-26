@@ -11,7 +11,7 @@ int8_t ui_isTransposing(void);
 int32_t ui_getTranspose(void);
 void ui_setTranspose(int32_t transpose);
 
-void ui_scanEvent(int8_t source); // source: keypad (kb0..kbSharp) / (-1..-10)
+void ui_scanEvent(int8_t source, uint16_t * forcedValue); // source: keypad (kb0..kbSharp) / (-1..-10)
 
 #endif	/* UI_H */
 
