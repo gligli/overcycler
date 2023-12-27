@@ -648,6 +648,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 
 //	rprintf(0,"handleUserInput %d\n",source);
 	
+	// page change
 	if(source>=kbA)
 	{
 		switch(source)
@@ -681,6 +682,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 
 		// cancel ongoing changes
 		ui.lastInputPot=-1;
+		ui.kpInputPot=-1;
 		ui.kpInputDecade=-1;
 		ui.activeSourceTimeout=0;
 		scan_resetPotLocking();
@@ -700,29 +702,30 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 	// keypad value input mode	
 	if (ui.kpInputDecade>=0)
 	{
-		uint16_t decade=1;
-		for(int i=0;i<ui.kpInputDecade;++i)
-			decade*=10;
-		
-		if (source>=kb0 && source<=kb9)
-			ui.kpInputValue+=(source-kb0)*decade;
-		
-		--ui.kpInputDecade;
-		
-		if(ui.kpInputDecade<0) // end of input?
+		if(source>=kb0 && source<=kb9)
 		{
-			// back to regular page display
-			ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
-			ui.pendingScreenClear=1;
-			
-			if(ui.kpInputPot>=0)
+			uint16_t decade=1;
+			for(int i=0;i<ui.kpInputDecade;++i)
+				decade*=10;
+
+			ui.kpInputValue+=(source-kb0)*decade;
+			--ui.kpInputDecade;
+
+			if(ui.kpInputDecade<0) // end of input?
 			{
-				ui_scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
-			}
-			else
-			{
-				// preset number
-				settings.presetNumber=ui.kpInputValue;
+				// back to regular page display
+				ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+				ui.pendingScreenClear=1;
+
+				if(ui.kpInputPot>=0)
+				{
+					ui_scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
+				}
+				else
+				{
+					// preset number
+					settings.presetNumber=ui.kpInputValue;
+				}
 			}
 		}
 
@@ -1020,7 +1023,8 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case 31:
 				ui.kpInputValue=0;
-				if(ui.lastInputPot>=0)
+				ui.kpInputDecade=-1;
+				if(ui.lastInputPot>=0 && uiParameters[ui.activePage][0][ui.lastInputPot].type!=ptNone)
 				{
 					ui.kpInputPot=ui.lastInputPot;
 					ui.kpInputDecade=2;
