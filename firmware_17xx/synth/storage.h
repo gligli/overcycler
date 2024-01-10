@@ -103,6 +103,7 @@ struct preset_s
 extern struct settings_s settings;
 extern struct preset_s currentPreset;
 
+extern const int8_t continuousParametersZeroCentered[cpCount];
 extern const uint8_t steppedParametersBits[spCount];
 
 int8_t settings_load(void);

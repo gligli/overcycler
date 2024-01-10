@@ -20,6 +20,8 @@
 
 #define SLOW_UPDATE_TIMEOUT (TICKER_1S/50)
 
+#define PANEL_DEADBAND 2048
+
 enum uiParamType_e
 {
 	ptNone=0,ptCont,ptStep,ptCust
@@ -368,8 +370,63 @@ static struct
 	int32_t transpose;
 	
 	struct hd44780_data lcd1, lcd2;
-
 } ui;
+
+struct deadband_s {
+	uint16_t middle;
+	uint16_t guard;
+	uint16_t deadband;
+	uint32_t precalcLow;
+	uint32_t precalcHigh;
+};
+
+struct deadband_s panelDeadband = { HALF_RANGE, SCAN_ADC_QUANTUM, PANEL_DEADBAND };
+
+// Precalculate factor for dead band scaling to avoid time consuming
+// division operation.
+// so instead of doing foo*=32768; foo/=factor; we precalculate
+// precalc=32768<<16/factor, and do foo*=precalc; foo>>=16; runtime.
+static void precalcDeadband(struct deadband_s *d)
+{
+	uint16_t middleLow=d->middle-d->deadband;
+	uint16_t middleHigh=d->middle+d->deadband;
+
+	d->precalcLow=HALF_RANGE_L/(middleLow-d->guard);
+	d->precalcHigh=HALF_RANGE_L/(FULL_RANGE-d->guard-middleHigh);
+}
+
+static inline uint16_t addDeadband(uint16_t value, struct deadband_s *d)
+{
+	uint16_t middleLow=d->middle-d->deadband;
+	uint16_t middleHigh=d->middle+d->deadband;
+	uint32_t amt;
+
+	if(value>FULL_RANGE-d->guard)
+		return FULL_RANGE;
+	if(value<d->guard)
+		return 0;
+
+	amt=value;
+
+	if(value<middleLow)
+	{
+		amt-=d->guard;
+		amt*=d->precalcLow; // result is 65536 too big now
+	}
+	else if(value>middleHigh)
+	{
+		amt-=middleHigh;
+		amt*=d->precalcHigh; // result is 65536 too big now
+		amt+=HALF_RANGE_L;
+	}
+	else // in deadband
+	{
+		return HALF_RANGE;
+	}
+	
+	// result of our calculations will be 0..UINT16_MAX<<16
+	return amt>>16;
+}
 
 static int sendChar(int lcd, int ch)
 {
@@ -442,7 +499,15 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 	{
 		case ptCont:
 			v=currentPreset.continuousParameters[prm->number];
-			sprintf(dv,"%4d",(v*1000)>>16);
+			
+			if(continuousParametersZeroCentered[prm->number])
+			{
+				sprintf(dv,"%4d",((v+INT16_MIN)*1000)>>16);
+			}
+			else
+			{
+				sprintf(dv,"%4d",(v*1000)>>16);
+			}
 			break;
 		case ptStep:
 		case ptCust:
@@ -584,9 +649,45 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		int32_t v=currentPreset.continuousParameters[prm->number];
 		
-		// bargraph			
-		for(int i=0;i<40;++i)
-			dv[i]=(i<((v+UINT16_MAX/80)*40>>16)) ? '\xff' : ' ';
+		if(continuousParametersZeroCentered[prm->number])
+		{
+			v+=INT16_MIN;
+
+			// nicer sampling
+			if (v>=0)
+				v+=UINT16_MAX/80;
+			else if (v<0)
+				v-=UINT16_MAX/80;
+			
+			// scale
+			v=v*40>>16;
+
+			// zero centered bargraph			
+			for(int i=0;i<40;++i)
+				if (v>=0)
+				{
+					dv[i]=((i>=20) && (i-20)<v) ? '\xff' : ' ';
+				}
+				else
+				{
+					dv[i]=((i<=20) && (i-20)>v) ? '\xff' : ' ';
+				}
+			
+			// center
+			dv[20]='|';
+		}
+		else
+		{
+			// nicer sampling
+			v+=UINT16_MAX/80;
+			
+			// scale
+			v=v*40>>16;
+
+			// regular bargraph			
+			for(int i=0;i<40;++i)
+				dv[i]=(i<v) ? '\xff' : ' ';
+		}
 	}
 	if (prm->type==ptStep && prm->number==spABank_Legacy)
 	{
@@ -819,6 +920,10 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 			{
 				case ptCont:
 					potSetting=data;
+
+					if(continuousParametersZeroCentered[prm->number])
+						potSetting=addDeadband(potSetting, &panelDeadband);
+
 					potQuantum=SCAN_ADC_QUANTUM;
 					break;
 				case ptStep:
@@ -1129,6 +1234,8 @@ void ui_init(void)
 	ui.lastInputPot=-1;
 	ui.kpInputDecade=-1;
 	ui.kpInputPot=-1;
+	
+	precalcDeadband(&panelDeadband);
 }
 
 void ui_update(void)
@@ -1321,3 +1428,4 @@ void ui_update(void)
 	ui.prevSourceChanges=ui.sourceChanges;
 	ui.sourceChanges=0;
 }
+
