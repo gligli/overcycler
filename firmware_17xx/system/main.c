@@ -20,6 +20,7 @@
 #define INT_MASK (IRQ_MASK | FIQ_MASK)
 
 #define SYNTH_TIMER_HZ 500
+#define DISK_TIMER_HZ 100
 
 #define STORAGE_PATH "/STORAGE"
 
@@ -28,8 +29,16 @@ static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
-	disk_timerproc();
+	static int frc=0;
 	
+	if(frc>=SYNTH_TIMER_HZ/DISK_TIMER_HZ)
+	{
+		// 100hz for disk		
+		disk_timerproc();
+		frc=0;
+	}
+	++frc;
+
 	if(synthReady)
 		synth_timerInterrupt();
 }
