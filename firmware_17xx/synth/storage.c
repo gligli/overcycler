@@ -648,7 +648,6 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
 	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
-	currentPreset.continuousParameters[cpLFO2PitchAmt]=UINT16_MAX/8;
 	currentPreset.continuousParameters[cpLFO2Freq]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
@@ -666,14 +665,6 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spLFO2Shape]=lsTri;
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
 	currentPreset.steppedParameters[spLFO2Shift]=1;
-
-	currentPreset.steppedParameters[spABank_Legacy]=25; // perfectwaves
-	currentPreset.steppedParameters[spBBank_Legacy]=25;
-	currentPreset.steppedParameters[spXOvrBank_Legacy]=25;
-
-	currentPreset.steppedParameters[spAWave_Legacy]=0; // sawtooth
-	currentPreset.steppedParameters[spBWave_Legacy]=0;
-	currentPreset.steppedParameters[spXOvrWave_Legacy]=0;
 
 	currentPreset.steppedParameters[spVoiceCount]=5;
 	
