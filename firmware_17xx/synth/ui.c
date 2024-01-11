@@ -293,7 +293,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptStep,.number=spPresetType,.shortName="PrTy",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
 			{.type=ptStep,.number=spPresetStyle,.shortName="PrSt",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 			/* 2nd row of pots */
-			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=-1},
+			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
@@ -541,6 +541,8 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					break;
 				case 7:
 					v=settings.midiReceiveChannel+1;
+					if(!v)
+						strcpy(dv,"Omni");
 					break;
 				case 8:
 					v=0;
@@ -1025,7 +1027,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case 7:
-				settings.midiReceiveChannel=potSetting;
+				settings.midiReceiveChannel=potSetting-1;
 				ui.settingsModified=1;
 				break;
 			case 8:
