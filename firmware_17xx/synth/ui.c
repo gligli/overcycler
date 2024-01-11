@@ -98,8 +98,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 		},
 		{
 			/*0*/ {.type=ptCust,.number=31,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Alia","Wdth","Freq","XOvr"}},
-			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Alia","Wdth","Freq"}},
+			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Grit","Wdth","Freq","XOvr"}},
+			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Grit","Wdth","Freq"}},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
 			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},

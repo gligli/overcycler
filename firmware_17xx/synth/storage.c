@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 14
+#define STORAGE_VERSION 15
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -360,9 +360,11 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=storageRead8();
 	
+	// v1 - bw compat adjustments
+	
 	if(storage.version<3)
 	{
-		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]/2)+HALF_RANGE;
+		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]>>1)+HALF_RANGE;
 	}
 
 	if(storage.version<11)
@@ -396,6 +398,15 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 			currentPreset.continuousParameters[cpBFreq]=0;
 		}
 	}
+		
+	if(storage.version<15)
+	{
+		if(currentPreset.steppedParameters[spAWModType]==wmAliasing)
+			currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE-(currentPreset.continuousParameters[cpABaseWMod]>>1);
+		
+		if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
+			currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE-(currentPreset.continuousParameters[cpBBaseWMod]>>1);
+	}
 	
 	if(storage.version<2)
 		return 1;
@@ -426,6 +437,8 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
 	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
 
+	// v8 - bw compat adjustments
+	
 	reloadLegacyBankWaveIndexes(2,0,0);
 
 	if(storage.version<9)

@@ -25,7 +25,7 @@ struct wtosc_s
 	
 	uint32_t cv;
 	uint32_t width;
-	uint32_t aliasing;
+	int32_t aliasing;
 	
 	int32_t channel;
 	int8_t pendingUpdate;
