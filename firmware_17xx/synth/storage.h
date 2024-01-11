@@ -10,7 +10,7 @@
 typedef enum
 {
 	cpAFreq=0,cpAVol=1,cpABaseWMod=2,
-	cpBFreq=3,cpBVol=4,cpBBaseWMod=5,cpBFineFreq=6,
+	cpBFreq=3,cpBVol=4,cpBBaseWMod=5,cpDetune=6,
 	cpCutoff=7,cpResonance=8,cpFilEnvAmt=9,cpFilKbdAmt=10,cpWModAEnv=11,
 	cpFilAtt=12,cpFilDec=13,cpFilSus=14,cpFilRel=15,
 	cpAmpAtt=16,cpAmpDec=17,cpAmpSus=18,cpAmpRel=19,

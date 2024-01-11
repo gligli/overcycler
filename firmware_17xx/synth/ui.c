@@ -64,7 +64,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptStep,.number=spBBank_Legacy,.shortName="BBnk",.longName="Osc B Bank"},
 			{.type=ptStep,.number=spBWave_Legacy,.shortName="BWav",.longName="Osc B Waveform"},
 			{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
-			{.type=ptCont,.number=cpBFineFreq,.shortName="BDet",.longName="Osc B Detune"},
+			{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		},
 		{

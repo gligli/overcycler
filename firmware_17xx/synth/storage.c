@@ -26,7 +26,7 @@ const int8_t continuousParametersZeroCentered[cpCount] =
 	/*cpBFreq*/0,
 	/*cpBVol*/0,
 	/*cpBBaseWMod*/1,
-	/*cpBFineFreq*/1,
+	/*cpDetune*/1,
 	/*cpCutoff*/0,
 	/*cpResonance*/0,
 	/*cpFilEnvAmt*/1,
@@ -641,7 +641,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpUnisonDetune]=512;
 	currentPreset.continuousParameters[cpMasterTune]=HALF_RANGE;
 
-	currentPreset.continuousParameters[cpBFineFreq]=HALF_RANGE;
+	currentPreset.continuousParameters[cpDetune]=HALF_RANGE;
 	currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE;
 	currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE;
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;

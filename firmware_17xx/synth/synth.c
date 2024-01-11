@@ -110,9 +110,9 @@ static void computeTunedCVs(void)
 	int8_t v;
 
 	uint16_t baseAPitch,baseBPitch,baseCutoff;
-	int16_t mTune,fineBFreq,detune;
+	int16_t mTune,detune,unisonDetune;
 
-	uint16_t baseCutoffRaw,mTuneRaw,fineBFreqRaw,detuneRaw,trackRaw;
+	uint16_t baseCutoffRaw,mTuneRaw,detuneRaw,unisonDetuneRaw,trackRaw;
 	uint8_t chrom;
 	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
@@ -123,18 +123,18 @@ static void computeTunedCVs(void)
 		// get raw values
 
 		mTuneRaw=currentPreset.continuousParameters[cpMasterTune];
-		fineBFreqRaw=currentPreset.continuousParameters[cpBFineFreq];
+		detuneRaw=currentPreset.continuousParameters[cpDetune];
 		baseCutoffRaw=currentPreset.continuousParameters[cpCutoff];
 		baseAPitch=currentPreset.continuousParameters[cpAFreq]>>2;
 		baseBPitch=currentPreset.continuousParameters[cpBFreq]>>2;
-		detuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
+		unisonDetuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
 		trackRaw=currentPreset.continuousParameters[cpFilKbdAmt];
 		chrom=currentPreset.steppedParameters[spChromaticPitch];
 
 		// compute for oscs & filters
 
 		mTune=(mTuneRaw>>7)+INT8_MIN*2;
-		fineBFreq=(fineBFreqRaw>>8)+INT8_MIN;
+		detune=(detuneRaw>>8)+INT8_MIN;
 		baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
 
 		baseCutoffNote=baseCutoff>>8;
@@ -162,12 +162,12 @@ static void computeTunedCVs(void)
 
 		// oscs
 		
-		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.partState.benderCVs[cvAPitch]+mTune);
-		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.partState.benderCVs[cvBPitch]+mTune+fineBFreq);
+		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.partState.benderCVs[cvAPitch]+mTune-(detune>>1));
+		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.partState.benderCVs[cvBPitch]+mTune+(detune>>1));
 		
-		detune=(1+(v>>1))*(v&1?-1:1)*(detuneRaw>>9);
-		cva=satAddU16S16(cva,detune);
-		cvb=satAddU16S16(cvb,detune);
+		unisonDetune=(1+(v>>1))*(v&1?-1:1)*(unisonDetuneRaw>>9);
+		cva=satAddU16S16(cva,unisonDetune);
+		cvb=satAddU16S16(cvb,unisonDetune);
 		
 		// filter
 		
