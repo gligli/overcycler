@@ -206,12 +206,14 @@ int main(void)
 	{
 		rprintf(0,"disk_initialize res=%d\n",res);
 		rprintf(1,"Error: disk_initialize res=%d",res);
+		for(;;);
 	}
 	
 	if((res=f_mount(0,&fatFS)))
 	{
 		rprintf(0,"f_mount res=%d\n",res);
 		rprintf(1,"Error: f_mount res=%d",res);
+		for(;;);
 	}
 
 	f_mkdir(STORAGE_PATH);
