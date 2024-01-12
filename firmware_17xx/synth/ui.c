@@ -464,6 +464,91 @@ static void setPos(int lcd, int col, int row)
 		hd44780_driver.set_position(&ui.lcd1,col+row*HD44780_LINE_OFFSET);	
 }
 
+
+static void drawPresetModified(int lcd)
+{
+	int8_t i;
+	static int8_t old_pm=INT8_MIN;
+
+	if(ui.presetModified!=old_pm)
+	{
+		if(ui.presetModified)
+		{
+			sendChar(lcd, 0b00000);
+			sendChar(lcd, 0b00110);
+			sendChar(lcd, 0b00101);
+			sendChar(lcd, 0b00101);
+			sendChar(lcd, 0b00110);
+			sendChar(lcd, 0b00100);
+			sendChar(lcd, 0b00100);
+			sendChar(lcd, 0b00000);
+
+			sendChar(lcd, 0b00000);
+			sendChar(lcd, 0b10100);
+			sendChar(lcd, 0b11100);
+			sendChar(lcd, 0b10100);
+			sendChar(lcd, 0b10100);
+			sendChar(lcd, 0b10100);
+			sendChar(lcd, 0b10100);
+			sendChar(lcd, 0b00000);
+		}
+		else
+		{
+			for(i=0;i<8;++i)
+				sendChar(lcd, 0b00001);
+
+			for(i=0;i<8;++i)
+				sendChar(lcd, 0b10000);
+		}
+	
+		old_pm=ui.presetModified;
+	}
+}
+
+static void drawVisualEnv(int lcd, int8_t voicePair)
+{
+	int8_t i,ve,ve2;
+	uint32_t veb;
+	static int8_t old_ve[SYNTH_VOICE_COUNT]={INT8_MIN,INT8_MIN,INT8_MIN,INT8_MIN,INT8_MIN,INT8_MIN};
+	
+	ve=synth_getVisualEnvelope(voicePair)>>11;
+	ve2=synth_getVisualEnvelope(voicePair+1)>>11;
+	if(ve!=old_ve[voicePair] || ve2!=old_ve[voicePair+1])
+	{
+		veb=0;
+		for(i=0;i<32;++i)
+			if(ve>=i)
+				veb|=(1<<i);
+
+		sendChar(lcd, 0b00001 | ((veb>>27) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>23) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>16) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>15) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>11) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>7) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb>>3) & 0x1e));
+		sendChar(lcd, 0b00001 | ((veb<<1) & 0x1e));
+
+		veb=0;
+		for(i=0;i<32;++i)
+			if(ve2>=i)
+				veb|=(1<<i);
+
+		sendChar(lcd, 0b10000 | ((veb>>28) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>24) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>20) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>16) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>12) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>8) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb>>4) & 0xf));
+		sendChar(lcd, 0b10000 | ((veb) & 0xf));
+		
+		old_ve[voicePair]=ve;
+		old_ve[voicePair+1]=ve2;
+	}
+}
+
+
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	const struct uiParam_s * prm;
@@ -870,20 +955,20 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				case spABank_Legacy:
 				case spBBank_Legacy:
 				case spXOvrBank_Legacy:
-					refreshBankNames(1);
-					valCount=getBankCount();
+					synth_refreshBankNames(1);
+					valCount=synth_getBankCount();
 					break;
 				case spAWave_Legacy:
-					refreshCurWaveNames(0,1);
-					valCount=getCurWaveCount();
+					synth_refreshCurWaveNames(0,1);
+					valCount=synth_getCurWaveCount();
 					break;
 				case spBWave_Legacy:
-					refreshCurWaveNames(1,1);
-					valCount=getCurWaveCount();
+					synth_refreshCurWaveNames(1,1);
+					valCount=synth_getCurWaveCount();
 					break;
 				case spXOvrWave_Legacy:
-					refreshCurWaveNames(2,1);
-					valCount=getCurWaveCount();
+					synth_refreshCurWaveNames(2,1);
+					valCount=synth_getCurWaveCount();
 					break;
 				default:
 					valCount=1<<steppedParametersBits[prm->number];
@@ -983,22 +1068,22 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				switch(prm->number)
 				{
 					case spABank_Legacy:
-						getBankName(data,currentPreset.oscBank[0]);
+						synth_getBankName(data,currentPreset.oscBank[0]);
 						break;
 					case spBBank_Legacy:
-						getBankName(data,currentPreset.oscBank[1]);
+						synth_getBankName(data,currentPreset.oscBank[1]);
 						break;
 					case spXOvrBank_Legacy:
-						getBankName(data,currentPreset.oscBank[2]);
+						synth_getBankName(data,currentPreset.oscBank[2]);
 						break;
 					case spAWave_Legacy:
-						getWaveName(data,currentPreset.oscWave[0]);
+						synth_getWaveName(data,currentPreset.oscWave[0]);
 						break;
 					case spBWave_Legacy:
-						getWaveName(data,currentPreset.oscWave[1]);
+						synth_getWaveName(data,currentPreset.oscWave[1]);
 						break;
 					case spXOvrWave_Legacy:
-						getWaveName(data,currentPreset.oscWave[2]);
+						synth_getWaveName(data,currentPreset.oscWave[2]);
 						break;
 				}
 				
@@ -1093,7 +1178,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spAWave_Legacy];
 				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[0]);
 				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[0]);
-				refreshWaveforms(2);
+				synth_refreshWaveforms(2);
 				change=1;
 				break;
 			case 24:
@@ -1107,13 +1192,13 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case 26:
 				assigner_panicOff();
-				refreshFullState();
+				synth_refreshFullState();
 				break;
 			case 27:
 				preset_loadDefault(1);
-				refreshWaveforms(0);
-				refreshWaveforms(1);
-				refreshWaveforms(2);
+				synth_refreshWaveforms(0);
+				synth_refreshWaveforms(1);
+				synth_refreshWaveforms(2);
 				change=1;
 				break;
 			case 28:
@@ -1147,7 +1232,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 	if(change || ui.settingsModified)
 	{
 		ui.presetModified=change;
-		refreshFullState();
+		synth_refreshFullState();
 	}
 }
 
@@ -1255,22 +1340,22 @@ void ui_update(void)
 		switch(ui.slowUpdateTimeoutNumber)
 		{
 			case spABank_Legacy:
-				refreshCurWaveNames(0,1);
+				synth_refreshCurWaveNames(0,1);
 				break;
 			case spBBank_Legacy:
-				refreshCurWaveNames(1,1);
+				synth_refreshCurWaveNames(1,1);
 				break;
 			case spXOvrBank_Legacy:
-				refreshCurWaveNames(2,1);
+				synth_refreshCurWaveNames(2,1);
 				break;
 			case spAWave_Legacy:
-				refreshWaveforms(0);
+				synth_refreshWaveforms(0);
 				break;
 			case spBWave_Legacy:
-				refreshWaveforms(1);
+				synth_refreshWaveforms(1);
 				break;
 			case spXOvrWave_Legacy:
-				refreshWaveforms(2);
+				synth_refreshWaveforms(2);
 				break;
 			case 0x80+6:
 				preset_saveCurrent(settings.presetNumber);
@@ -1281,10 +1366,10 @@ void ui_update(void)
 					preset_loadDefault(1);
 				ui_setPresetModified(0);	
 				
-				refreshWaveforms(0);
-				refreshWaveforms(1);
-				refreshWaveforms(2);
-				refreshFullState();
+				synth_refreshWaveforms(0);
+				synth_refreshWaveforms(1);
+				synth_refreshWaveforms(2);
+				synth_refreshFullState();
 				break;
 		}
 		
@@ -1382,17 +1467,27 @@ void ui_update(void)
 		
 		// delimiter
 
-		char asgnChars[SYNTH_VOICE_COUNT];
+			// CGRAM update ("preset modified", visual envelopes)
+		
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
+		drawPresetModified(1);
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16);
+		drawVisualEnv(1,0);
+		
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
+		drawVisualEnv(2,2);
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16);
+		drawVisualEnv(2,4);
 
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
+			// actual "text"
+		
+		if(ui.pendingScreenClear)
 		{
-			asgnChars[i] = assigner_getAssignment(i, NULL) ? '*' : '|';
+			setPos(1,24,0); sendChar(1,'\x08'); sendChar(1,'\x09');
+			setPos(1,24,1); sendChar(1,'\x0a'); sendChar(1,'\x0b');
+			setPos(2,24,0); sendChar(2,'\x08'); sendChar(2,'\x09');
+			setPos(2,24,1); sendChar(2,'\x0a'); sendChar(2,'\x0b');
 		}
-
-		setPos(1,24,0); if(ui.presetModified) { sendChar(1,'P'); sendChar(1,'M'); } else { sendChar(1,'|'); sendChar(1,'|'); };
-		setPos(1,24,1); sendChar(1,asgnChars[0]); sendChar(1,asgnChars[1]);
-		setPos(2,24,0); sendChar(2,asgnChars[2]); sendChar(2,asgnChars[3]);
-		setPos(2,24,1); sendChar(2,asgnChars[4]); sendChar(2,asgnChars[5]);
 		
 		// pots
 

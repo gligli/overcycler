@@ -369,8 +369,8 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 
 	if(storage.version<11)
 	{
-		reloadLegacyBankWaveIndexes(0,0,0);
-		reloadLegacyBankWaveIndexes(1,0,0);
+		synth_reloadLegacyBankWaveIndexes(0,0,0);
+		synth_reloadLegacyBankWaveIndexes(1,0,0);
 	}
 	
 	if(storage.version<13)
@@ -446,7 +446,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	// v8 - bw compat adjustments
 	
 	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
-	reloadLegacyBankWaveIndexes(2,0,0);
+	synth_reloadLegacyBankWaveIndexes(2,0,0);
 
 	if(storage.version<9)
 		return 1;
@@ -685,7 +685,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	{
 		// load default waveforms (perfectwaves/sawtooth)
 		for(int8_t abx=0;abx<=2;++abx)
-			reloadLegacyBankWaveIndexes(abx,1,1);
+			synth_reloadLegacyBankWaveIndexes(abx,1,1);
 
 		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
 	}

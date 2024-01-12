@@ -61,15 +61,16 @@ void synth_init(void);
 void synth_update(void);
 
 // synth.c internal api
-void refreshFullState(void);
-void refreshBankNames(int8_t sort);
-void refreshCurWaveNames(int8_t abx, int8_t sort);
-void refreshWaveforms(int8_t abx);
-void reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort);
-int getBankCount(void);
-int getCurWaveCount(void);
-int8_t getBankName(int bankIndex, char * res);
-int8_t getWaveName(int waveIndex, char * res);
+void synth_refreshFullState(void);
+void synth_refreshBankNames(int8_t sort);
+void synth_refreshCurWaveNames(int8_t abx, int8_t sort);
+void synth_refreshWaveforms(int8_t abx);
+void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort);
+int synth_getBankCount(void);
+int synth_getCurWaveCount(void);
+int8_t synth_getBankName(int bankIndex, char * res);
+int8_t synth_getWaveName(int waveIndex, char * res);
+int32_t synth_getVisualEnvelope(int8_t voice);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];

@@ -472,7 +472,7 @@ static void refreshMisc(void)
 	}
 }
 
-void refreshFullState(void)
+void synth_refreshFullState(void)
 {
 	refreshModulationDelay(1);
 	refreshAssignerSettings();
@@ -485,7 +485,15 @@ void refreshFullState(void)
 	computeTunedCVs();
 }
 
-void reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort)
+int32_t synth_getVisualEnvelope(int8_t voice)
+{
+	if(assigner_getAssignment(voice,NULL))
+		return synth.ampEnvs[voice].output;
+	else
+		return -1;
+}
+
+void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort)
 {
 	int i,bankNum,waveNum,oriBankNum,oriWaveNum,newBankNum,newWaveNum;
 	char fn[MAX_FILENAME];
@@ -504,7 +512,7 @@ void reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort)
 	oriWaveNum=waveNum;
 	oriBankNum=bankNum;
 
-	refreshBankNames(sort);
+	synth_refreshBankNames(sort);
 
 reload:
 	
@@ -531,7 +539,7 @@ reload:
 
 	strcpy(currentPreset.oscBank[abx],waveData.bankNames[newBankNum]);
 
-	refreshCurWaveNames(abx,sort);
+	synth_refreshCurWaveNames(abx,sort);
 
 	newWaveNum=-1;
 	fn[0]=0;
@@ -565,17 +573,17 @@ reload:
 	}
 }
 
-int getBankCount(void)
+int synth_getBankCount(void)
 {
 	return waveData.bankCount;
 }
 
-int getCurWaveCount(void)
+int synth_getCurWaveCount(void)
 {
 	return waveData.curWaveCount;
 }
 
-int8_t getBankName(int bankIndex, char * res)
+int8_t synth_getBankName(int bankIndex, char * res)
 {
 	if(bankIndex<0 || bankIndex>=waveData.bankCount)
 	{
@@ -587,7 +595,7 @@ int8_t getBankName(int bankIndex, char * res)
 	return 1;
 }
 
-int8_t getWaveName(int waveIndex, char * res)
+int8_t synth_getWaveName(int waveIndex, char * res)
 {
 	if(waveIndex<0 || waveIndex>=waveData.curWaveCount)
 	{
@@ -599,7 +607,7 @@ int8_t getWaveName(int waveIndex, char * res)
 	return 1;
 }
 
-void refreshBankNames(int8_t sort)
+void synth_refreshBankNames(int8_t sort)
 {
 	FRESULT res;
 	
@@ -640,7 +648,7 @@ void refreshBankNames(int8_t sort)
 #endif		
 }
 
-void refreshCurWaveNames(int8_t abx, int8_t sort)
+void synth_refreshCurWaveNames(int8_t abx, int8_t sort)
 {
 	FRESULT res;
 	char fn[128];
@@ -691,7 +699,7 @@ void refreshCurWaveNames(int8_t abx, int8_t sort)
 #endif		
 }
 
-void refreshWaveforms(int8_t abx)
+void synth_refreshWaveforms(int8_t abx)
 {
 	int i;
 	FIL f;
@@ -1010,7 +1018,7 @@ void synth_init(void)
 
 	__enable_irq();
 	
-	refreshBankNames(1);
+	synth_refreshBankNames(1);
 	
 	// upgrade presets from before storing bank/wave names
 	preset_upgradeBankWaveStorage();
@@ -1021,10 +1029,10 @@ void synth_init(void)
 		preset_loadDefault(1);
 	ui_setPresetModified(0);
 
-	refreshFullState();
-	refreshWaveforms(0);
-	refreshWaveforms(1);
-	refreshWaveforms(2);
+	synth_refreshFullState();
+	synth_refreshWaveforms(0);
+	synth_refreshWaveforms(1);
+	synth_refreshWaveforms(2);
 }
 
 
