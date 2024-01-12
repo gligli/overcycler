@@ -171,7 +171,7 @@ static void computeTunedCVs(void)
 		
 		// filter
 		
-		trackingNote=baseCutoffNote+((note*(trackRaw>>8))>>8);
+		trackingNote=MAX(0,baseCutoffNote+((((int8_t)note-MIDDLE_C_NOTE)*(trackRaw>>8))>>8));
 			
 		cvf=satAddU16S16(tuner_computeCVFromNote(v,trackingNote,baseCutoff,cvCutoff),synth.partState.benderCVs[cvCutoff]);
 		

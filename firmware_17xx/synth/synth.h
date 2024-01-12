@@ -19,6 +19,7 @@
 #define HALF_RANGE_L (65536UL*HALF_RANGE) // i.e. HALF_RANGE<<16, as uint32_t
 
 #define SCANNER_BASE_NOTE 12
+#define MIDDLE_C_NOTE 60
 
 typedef enum {
 	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvACrossOver=6,cvAmp=7,cvNoiseVol=8,

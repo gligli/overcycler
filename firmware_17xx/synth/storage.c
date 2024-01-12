@@ -8,7 +8,7 @@
 #include "seq.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 15
+#define STORAGE_VERSION 16
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -408,6 +408,13 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 			currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE-(currentPreset.continuousParameters[cpBBaseWMod]>>1);
 	}
 	
+	if(storage.version<16)
+	{
+		// adjust cutoff for base filter tracking note changed to C4
+		currentPreset.continuousParameters[cpCutoff]+=scaleU16U16(MIDDLE_C_NOTE<<8,currentPreset.continuousParameters[cpFilKbdAmt]);
+	}
+
+	
 	if(storage.version<2)
 		return 1;
 
@@ -435,10 +442,10 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spXOvrBank_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spXOvrWave_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
-	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
 
 	// v8 - bw compat adjustments
 	
+	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
 	reloadLegacyBankWaveIndexes(2,0,0);
 
 	if(storage.version<9)
@@ -486,6 +493,9 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spAmpEnvLin]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLoop]=storageRead8();
 	currentPreset.steppedParameters[spAmpEnvLoop]=storageRead8();
+
+	// v12 - bw compat adjustments
+	
 	currentPreset.steppedParameters[spWModEnvLoop]=currentPreset.steppedParameters[spFilEnvLoop];
 
 	if(storage.version<13)

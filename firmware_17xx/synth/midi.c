@@ -51,7 +51,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	
 	if(ui_isTransposing())
 	{
-		ui_setTranspose(note-60); // C4
+		ui_setTranspose(note-MIDDLE_C_NOTE);
 		return;
 	}
 	
