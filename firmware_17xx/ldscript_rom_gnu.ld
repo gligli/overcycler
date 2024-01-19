@@ -23,9 +23,9 @@ SEARCH_DIR(.)
 MEMORY
 {
   rom (rx)  : ORIGIN = 0x00000000, LENGTH = 512K
-  ram (rwx) : ORIGIN = 0x10000000, LENGTH =  32K
+  ram (rwx) : ORIGIN = 0x10000000, LENGTH =  64K
   
-  extram(rwx) : ORIGIN = 0x2007C000, LENGTH = 32k
+  extram(rwx) : ORIGIN = 0x20000000, LENGTH = 32k
 }
 
 /* These force the linker to search for particular symbols from

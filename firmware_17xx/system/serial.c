@@ -8,24 +8,35 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "LPC17xx.h"
-#include "lpc17xx_uart.h"
+#include "LPC177x_8x.h"
+#include "lpc177x_8x_uart.h"
+#include "lpc177x_8x_pinsel.h"
 #include "serial.h"
-#include "system_LPC17xx.h"
-
-#define CR     0x0D
 
 /* Initialize Serial Interface UART0 */
 void init_serial0 ( unsigned long baudrate )
 {
-    unsigned long Fdiv;
+	// Initialize UART0 pin connect
+	PINSEL_ConfigPin(0, 2, 1);
+	PINSEL_ConfigPin(0, 3, 1);
+	
+	// UART Configuration structure variable
+	UART_CFG_Type UARTConfigStruct;
+		
+	/* Initialize UART Configuration parameter structure to default state:
+	* Baudrate = 115200 bps
+	* 8 data bit
+	* 1 Stop bit
+	* None parity
+	*/
+	UART_ConfigStructInit(&UARTConfigStruct);
+	//Configure baud rate
+	UARTConfigStruct.Baud_rate = baudrate;
+	// Initialize UART0 & UART3 peripheral with given to corresponding parameter
+	UART_Init(UART_0, &UARTConfigStruct);
 
-    LPC_PINCON->PINSEL0 |= 0x00000050;                  /* Enable RxD0 and TxD0              */
-    LPC_UART0->LCR = 0x83;                          /* 8 bits, no Parity, 1 Stop bit     */
-    Fdiv = ( SystemCoreClock / 16 ) / baudrate ;     /* baud rate                        */
-    LPC_UART0->DLM = Fdiv / 256;
-    LPC_UART0->DLL = Fdiv % 256;
-    LPC_UART0->LCR = 0x03;                           /* DLAB = 0                         */
+	// Enable UART Transmit
+	UART_TxCmd(UART_0, ENABLE);
 }
 
 /* Write character to Serial Port 0 with \n -> \r\n  */
@@ -33,18 +44,20 @@ int putchar_serial0 (int ch)
 {
     if (ch == '\n')
     {
-        while (!(LPC_UART0->LSR & 0x20));
-        LPC_UART0->THR = CR;                  /* output CR */
+		putc_serial0('\r');
     }
-    while (!(LPC_UART0->LSR & 0x20));
-    return (LPC_UART0->THR = ch);
+
+    return putc_serial0(ch);
 }
 
 /* Write character to Serial Port 0 without \n -> \r\n  */
 int putc_serial0 (int ch)
 {
-    while (!(LPC_UART0->LSR & 0x20));
-    return (LPC_UART0->THR = ch);
+    while (UART_CheckBusy(UART_0) == SET);
+
+	UART_SendByte(UART_0, ch);
+
+    return ch;
 }
 
 void putstring_serial0 (const char *string)
@@ -56,25 +69,4 @@ void putstring_serial0 (const char *string)
         putchar_serial0(ch);
         string++;
     }
-}
-
-
-/* Read character from Serial Port   */
-int getkey_serial0 (void)
-{
-	if (LPC_UART0->LSR & 0x01)
-    {
-        return (LPC_UART0->RBR);
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-/* Read character from Serial Port   */
-int getc_serial0 (void)
-{
-	while ( (LPC_UART0->LSR & 0x01) == 0 ); //Wait for character
-	return LPC_UART0->RBR;
 }

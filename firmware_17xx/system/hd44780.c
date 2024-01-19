@@ -4,7 +4,7 @@
 #include <system/hd44780.h>
 #include <system/rprintf.h>
 #include <system/main.h>
-#include <drivers/lpc17xx_gpio.h>
+#include <drivers/lpc177x_8x_gpio.h>
 
 #define HALF_CYCLE_DELAY() DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 

@@ -31,19 +31,12 @@
 #ifndef __CORE_CM3_H_GENERIC
 #define __CORE_CM3_H_GENERIC
 
-/** @addtogroup CMSIS_core_LintCinfiguration CMSIS Core Lint Configuration
-  List of Lint messages which will be suppressed and not shown:
-    - not yet checked
-  .
-  Note:  To re-enable a Message, insert a space before 'lint' *
-
- */
-
 
 /*******************************************************************************
  *                 CMSIS definitions
  ******************************************************************************/
-/** @addtogroup CMSIS_core_definitions CMSIS Core Definitions
+/** @ingroup  CMSIS
+ * @addtogroup CMSIS_core_definitions CMSIS Core Definitions
   This file defines all structures and symbols for CMSIS core:
    - CMSIS version number
    - Cortex-M core
@@ -62,7 +55,7 @@
 #if defined ( __CC_ARM   )
   #define __ASM            __asm                                      /*!< asm keyword for ARM Compiler          */
   #define __INLINE         __inline                                   /*!< inline keyword for ARM Compiler       */
-
+  
 #elif defined ( __ICCARM__ )
   #define __ASM           __asm                                       /*!< asm keyword for IAR Compiler          */
   #define __INLINE        inline                                      /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
@@ -70,7 +63,7 @@
 #elif defined   (  __GNUC__  )
   #define __ASM            __asm                                      /*!< asm keyword for GNU Compiler          */
   #define __INLINE         inline                                     /*!< inline keyword for GNU Compiler       */
-
+  
 #elif defined   (  __TASKING__  )
   #define __ASM            __asm                                      /*!< asm keyword for TASKING Compiler      */
   #define __INLINE         inline                                     /*!< inline keyword for TASKING Compiler   */
@@ -105,7 +98,9 @@
 /*******************************************************************************
  *                 Register Abstraction
  ******************************************************************************/
-/** @addtogroup CMSIS_core_register CMSIS Core Register
+
+/** @ingroup  CMSIS
+ * @addtogroup CMSIS_core_register CMSIS Core Register
   Core Register contain:
   - Core Register
   - Core NVIC Register
@@ -851,7 +846,8 @@ typedef struct
 /*******************************************************************************
  *                Hardware Abstraction Layer
  ******************************************************************************/
-/** \addtogroup CMSIS_Core_FunctionInterface CMSIS Core Function Interface
+/** \ingroup  CMSIS
+  \addtogroup CMSIS_Core_FunctionInterface CMSIS Core Function Interface
   Core Function Interface contains:
   - Core NVIC Functions
   - Core SysTick Functions
@@ -1143,6 +1139,9 @@ static __INLINE uint32_t SysTick_Config(uint32_t ticks)
 
 /*@} end of CMSIS_Core_SysTickFunctions */
 
+/**
+ * @}
+ */
 
 
 /* ##################################### Debug In/Output function ########################################### */

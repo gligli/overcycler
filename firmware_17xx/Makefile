@@ -1,6 +1,6 @@
 # MCU name and submodel
 MCU      = cortex-m3
-SUBMDL   = LPC1768
+SUBMDL   = LPC1778
 THUMB    = -mthumb
 
 #This is needed to run IAP function call stuff
@@ -33,40 +33,44 @@ XNORMIDISRC+=xnormidi/bytequeue/interrupt_setting.c
 SRC=$(XNORMIDISRC)
 
 SRC+=system/core_cm3.c
-SRC+=system/system_LPC17xx.c
+SRC+=system/system_LPC177x_8x.c
 SRC+=system/rprintf.c
 SRC+=system/serial.c
 SRC+=system/syscalls.c
 SRC+=system/main.c
 SRC+=system/hd44780.c
+SRC+=system/xt26g.c
 
-SRC+=drivers/lpc17xx_adc.c
-SRC+=drivers/lpc17xx_can.c
-SRC+=drivers/lpc17xx_clkpwr.c
-SRC+=drivers/lpc17xx_dac.c
-SRC+=drivers/lpc17xx_emac.c
-SRC+=drivers/lpc17xx_gpdma.c
-SRC+=drivers/lpc17xx_gpio.c
-SRC+=drivers/lpc17xx_i2c.c
-SRC+=drivers/lpc17xx_i2s.c
-SRC+=drivers/lpc17xx_libcfg_default.c
-SRC+=drivers/lpc17xx_mcpwm.c
-SRC+=drivers/lpc17xx_nvic.c
-SRC+=drivers/lpc17xx_pinsel.c
-SRC+=drivers/lpc17xx_pwm.c
-SRC+=drivers/lpc17xx_qei.c
-SRC+=drivers/lpc17xx_rit.c
-SRC+=drivers/lpc17xx_rtc.c
-SRC+=drivers/lpc17xx_spi.c
-SRC+=drivers/lpc17xx_ssp.c
-SRC+=drivers/lpc17xx_timer.c
-SRC+=drivers/lpc17xx_uart.c
-SRC+=drivers/lpc17xx_wdt.c
+SRC+=drivers/lpc177x_8x_adc.c
+SRC+=drivers/lpc177x_8x_bod.c
+SRC+=drivers/lpc177x_8x_can.c
+SRC+=drivers/lpc177x_8x_clkpwr.c
+SRC+=drivers/lpc177x_8x_dac.c
+SRC+=drivers/lpc177x_8x_eeprom.c
+SRC+=drivers/lpc177x_8x_emac.c
+SRC+=drivers/lpc177x_8x_emc.c
+SRC+=drivers/lpc177x_8x_exti.c
+SRC+=drivers/lpc177x_8x_gpdma.c
+SRC+=drivers/lpc177x_8x_gpio.c
+SRC+=drivers/lpc177x_8x_i2c.c
+SRC+=drivers/lpc177x_8x_i2s.c
+SRC+=drivers/lpc177x_8x_iap.c
+SRC+=drivers/lpc177x_8x_lcd.c
+SRC+=drivers/lpc177x_8x_mcpwm.c
+SRC+=drivers/lpc177x_8x_nvic.c
+SRC+=drivers/lpc177x_8x_pinsel.c
+SRC+=drivers/lpc177x_8x_pwm.c
+SRC+=drivers/lpc177x_8x_qei.c
+SRC+=drivers/lpc177x_8x_rtc.c
+SRC+=drivers/lpc177x_8x_ssp.c
+SRC+=drivers/lpc177x_8x_systick.c
+SRC+=drivers/lpc177x_8x_timer.c
+SRC+=drivers/lpc177x_8x_uart.c
+SRC+=drivers/lpc177x_8x_wwdt.c
 
 SRC+=fat_sd/diskio.c
 SRC+=fat_sd/fattime.c
 SRC+=fat_sd/ff.c
-SRC+=fat_sd/spi_sd_lpc17xx.c
 SRC+=fat_sd/ccsbcs.c
 
 SRC+=synth/adsr.c
@@ -145,7 +149,7 @@ EXTRA_LIBDIRS =
 CSTANDARD = -std=gnu99
 
 # Place -D or -U options for C here
-CDEFS =  -D$(RUN_MODE) 
+CDEFS =  -D$(RUN_MODE) -D__LPC177X_8X__ -DUSB_DEVICE_ONLY -D__USE_CMSIS
 
 # Place -I options here
 CINCS = -I $(LIBPATH)
@@ -248,10 +252,10 @@ LDFLAGS += -Tldscript_rom_gnu.ld
 LPC21ISP = ./lpc21isp
 LPC21ISP_KILL = /cygdrive/c/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
-LPC21ISP_BAUD = 230400
+LPC21ISP_BAUD = 38400
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
-LPC21ISP_OPTIONS = -term -control -donotstart -wipe
+LPC21ISP_OPTIONS = -term -control -donotstart -wipe -verify
 # ---------------------------------------------------------------------------
 
 

@@ -4,9 +4,9 @@
 
 #include "dacspi.h"
 
-#include "LPC17xx.h"
-#include "lpc17xx_gpdma.h"
-#include "lpc17xx_gpio.h"
+#include "LPC177x_8x.h"
+#include "lpc177x_8x_gpdma.h"
+#include "lpc177x_8x_gpio.h"
 
 #define SPIMUX_PORT_ABC 0
 #define SPIMUX_PIN_A 15
@@ -84,7 +84,7 @@ static struct
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat; // acknowledge interrupt
+//oc3	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat; // acknowledge interrupt
 
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
@@ -171,7 +171,7 @@ void dacspi_init(void)
 	
 	// SSP
 
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
+//oc3	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
 
 	LPC_SSP0->CPSR=8; // SYNTH_MASTER_CLOCK / n
@@ -181,9 +181,9 @@ void dacspi_init(void)
 
 	// SSP pins
 
-	PINSEL_SetPinFunc(1,20,3);
-	PINSEL_SetPinFunc(1,21,3);
-	PINSEL_SetPinFunc(1,24,3);
+//oc3	PINSEL_SetPinFunc(1,20,3);
+//oc3	PINSEL_SetPinFunc(1,21,3);
+//oc3	PINSEL_SetPinFunc(1,24,3);
 	
 	LPC_GPIO1->FIODIR2|=0x20;
 	LPC_GPIO1->FIOMASK2&=~0x20;
@@ -214,8 +214,8 @@ void dacspi_init(void)
 	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
-	DMAREQSEL|=0x40;
-	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
+//oc3	DMAREQSEL|=0x40;
+//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
 
 	TIM_TIMERCFG_Type tim;
 	
@@ -224,7 +224,7 @@ void dacspi_init(void)
 	
 	TIM_Init(LPC_TIM3,TIM_TIMER_MODE,&tim);
 	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_1);
+//oc3	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	
 	TIM_MATCHCFG_Type tm;
 	
@@ -244,12 +244,12 @@ void dacspi_init(void)
 	
 	TIM_Cmd(LPC_TIM3,ENABLE);
 	
-	LPC_GPDMACH0->DMACCSrcAddr=lli[0][0].SrcAddr;
-	LPC_GPDMACH0->DMACCDestAddr=lli[0][0].DstAddr;
-	LPC_GPDMACH0->DMACCLLI=lli[0][0].NextLLI;
-	LPC_GPDMACH0->DMACCControl=lli[0][0].Control;
+//oc3	LPC_GPDMACH0->DMACCSrcAddr=lli[0][0].SrcAddr;
+//oc3	LPC_GPDMACH0->DMACCDestAddr=lli[0][0].DstAddr;
+//oc3	LPC_GPDMACH0->DMACCLLI=lli[0][0].NextLLI;
+//oc3	LPC_GPDMACH0->DMACCControl=lli[0][0].Control;
 
-	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
+//oc3	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
 	
 	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 }

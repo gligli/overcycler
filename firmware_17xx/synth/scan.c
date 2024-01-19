@@ -5,9 +5,9 @@
 #include "scan.h"
 
 #include "ui.h"
-#include "LPC17xx.h"
-#include "lpc17xx_gpdma.h"
-#include "lpc17xx_gpio.h"
+#include "LPC177x_8x.h"
+#include "lpc177x_8x_gpdma.h"
+#include "lpc177x_8x_gpio.h"
 
 #define POT_SAMPLES 5
 #define POT_THRESHOLD (SCAN_ADC_QUANTUM*3)
@@ -214,7 +214,7 @@ void scan_init(void)
 	
 	memcpy(scan.potCommands,potCommandsConst,sizeof(scan.potCommands));
 	memcpy(scanLLIs,scanLLIsConst,sizeof(scanLLIs));
-
+/*oc3
 	// init TLV1543 ADC
 	
 	PINSEL_SetI2C0Pins(PINSEL_I2C_Fast_Mode, DISABLE);
@@ -252,7 +252,7 @@ void scan_init(void)
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
 	DMAREQSEL|=0x10;
-	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
+//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
 
 	TIM_TIMERCFG_Type tim;
 	
@@ -288,6 +288,7 @@ void scan_init(void)
 	LPC_GPDMACH1->DMACCConfig=POTSCAN_DMACONFIG;
 
 	rprintf(0,"pots scan at %d Hz, tick rate %d Hz\n",POTSCAN_RATE,SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/tm.MatchValue);
+ */
 }
 
 void scan_update(void)

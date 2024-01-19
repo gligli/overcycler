@@ -9,23 +9,22 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <LPC17xx.h>
-#include <system_LPC17xx.h>
+#include <LPC177x_8x.h>
+#include <system_LPC177x_8x.h>
 #include <core_cm3.h>
 #include <core_cmFunc.h>
 #include <core_cmInstr.h>
 #include <serial.h>
 #include <rprintf.h>
 
-#include <lpc17xx_clkpwr.h>
-#include <lpc17xx_pinsel.h>
-#include <lpc17xx_gpio.h>
-#include <lpc17xx_timer.h>
-#include <lpc17xx_ssp.h>
-#include <lpc17xx_adc.h>
-#include <lpc17xx_uart.h>
-#include <lpc17xx_gpdma.h>
-#include <lpc17xx_spi.h>
+#include <lpc177x_8x_clkpwr.h>
+#include <lpc177x_8x_pinsel.h>
+#include <lpc177x_8x_gpio.h>
+#include <lpc177x_8x_timer.h>
+#include <lpc177x_8x_ssp.h>
+#include <lpc177x_8x_adc.h>
+#include <lpc177x_8x_uart.h>
+#include <lpc177x_8x_gpdma.h>
 
 #include "ff.h"
 

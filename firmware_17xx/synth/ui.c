@@ -11,8 +11,8 @@
 #include "ffconf.h"
 #include "dacspi.h"
 #include "hd44780.h"
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_pinsel.h"
+#include "lpc177x_8x_gpio.h"
+#include "lpc177x_8x_pinsel.h"
 #include "clock.h"
 #include "scan.h"
 

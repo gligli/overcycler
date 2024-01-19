@@ -20,8 +20,8 @@
 #include "vca_curves.h"
 #include "vcnoise_curves.h"
 #include "../xnormidi/midi.h"
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_pinsel.h"
+#include "lpc177x_8x_gpio.h"
+#include "lpc177x_8x_pinsel.h"
 
 #define BIT_INPUT_FOOTSWITCH (1<<26)
 
@@ -970,8 +970,8 @@ void synth_init(void)
 	// init footswitch in
 
 	GPIO_SetDir(3,1<<26,0);
-	PINSEL_SetResistorMode(3,26,PINSEL_PINMODE_TRISTATE);
-	PINSEL_SetOpenDrainMode(3,26,PINSEL_PINMODE_NORMAL);
+//oc3	PINSEL_SetResistorMode(3,26,PINSEL_PINMODE_TRISTATE);
+//oc3	PINSEL_SetOpenDrainMode(3,26,PINSEL_PINMODE_NORMAL);
 	
 	// init wavetable oscs
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)

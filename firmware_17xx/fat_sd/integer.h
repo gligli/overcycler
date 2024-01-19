@@ -12,14 +12,12 @@
 
 #else			/* Embedded platform */
 
-#include "lpc_types.h"
-
 /* These types must be 16-bit, 32-bit or larger integer */
 typedef int				INT;
 typedef unsigned int	UINT;
 
 /* These types must be 8-bit integer */
-// see lpc_types.h typedef char			CHAR;
+// typedef char			CHAR;
 typedef unsigned char	UCHAR;
 typedef unsigned char	BYTE;
 

@@ -1,41 +1,51 @@
-/***********************************************************************//**
- * @file	: lpc_types.h
- * @brief	:
- *     Contains the NXP ABL typedefs for C standard types.
- *     It is intended to be used in ISO C conforming development
- *     environments and checks for this insofar as it is possible
- *     to do so.
- * @version	: 1.0
- * @date	: 27 Jul. 2008
- * @author	: wellsk
- **************************************************************************
- * Software that is described herein is for illustrative purposes only
- * which provides customers with programming information regarding the
- * products. This software is supplied "AS IS" without any warranties.
- * NXP Semiconductors assumes no responsibility or liability for the
- * use of the software, conveys no license or title under any patent,
- * copyright, or mask work right to the product. NXP Semiconductors
- * reserves the right to make changes in the software without
- * notification. NXP Semiconductors also make no representation or
- * warranty that such application will be suitable for the specified
- * use without further testing or modification.
- **************************************************************************/
+/**********************************************************************
+* $Id$		lpc_types.h			2011-06-02
+*//**
+* @file		lpc_types.h
+* @brief	Contains the NXP ABL typedefs for C standard types.
+*			It is intended to be used in ISO C conforming development
+*			environments and checks for this insofar as it is possible
+*			to do so.
+* @version	1.0
+* @date		02. June. 2011
+* @author	NXP MCU SW Application Team
+* 
+* Copyright(C) 2011, NXP Semiconductor
+* All rights reserved.
+*
+***********************************************************************
+* Software that is described herein is for illustrative purposes only
+* which provides customers with programming information regarding the
+* products. This software is supplied "AS IS" without any warranties.
+* NXP Semiconductors assumes no responsibility or liability for the
+* use of the software, conveys no license or title under any patent,
+* copyright, or mask work right to the product. NXP Semiconductors
+* reserves the right to make changes in the software without
+* notification. NXP Semiconductors also make no representation or
+* warranty that such application will be suitable for the specified
+* use without further testing or modification.
+* Permission to use, copy, modify, and distribute this software and its
+* documentation is hereby granted, under NXP Semiconductors'
+* relevant copyright in the software, without fee, provided that it
+* is used in conjunction with NXP Semiconductors microcontrollers.  This
+* copyright, permission, and disclaimer notice must appear in all copies of
+* this code.
+**********************************************************************/
 
 /* Type group ----------------------------------------------------------- */
-/** @defgroup LPC_Types
- * @ingroup LPC1700CMSIS_FwLib_Drivers
- * @{
- */
-
-#ifndef LPC_TYPES_H
-#define LPC_TYPES_H
+#ifndef __LPC_TYPES_H
+#define __LPC_TYPES_H
 
 /* Includes ------------------------------------------------------------------- */
 #include <stdint.h>
 
-
+/** @defgroup LPC_Type_Def Data Types Definitions
+ * @ingroup LPC177x_8xCMSIS_FwLib_Drivers
+ * @{
+ */
+ 
 /* Public Types --------------------------------------------------------------- */
-/** @defgroup LPC_Types_Public_Types
+/** @defgroup LPC_Types_Public_Types Basic Public Data Types
  * @{
  */
 
@@ -84,19 +94,19 @@ typedef int32_t(*PFI)();
 
 
 /* Public Macros -------------------------------------------------------------- */
-/** @defgroup LPC_Types_Public_Macros
+/** @defgroup LPC_Types_Public_Macros  Basic Public Macros
  * @{
  */
 
-/* _BIT(n) sets the bit at position "n"
+/** _BIT(n) sets the bit at position "n"
  * _BIT(n) is intended to be used in "OR" and "AND" expressions:
  * e.g., "(_BIT(3) | _BIT(7))".
  */
 #undef _BIT
-/* Set bit macro */
+/** Set bit macro */
 #define _BIT(n)	(1<<n)
 
-/* _SBF(f,v) sets the bit field starting at position "f" to value "v".
+/** _SBF(f,v) sets the bit field starting at position "f" to value "v".
  * _SBF(f,v) is intended to be used in "OR" and "AND" expressions:
  * e.g., "((_SBF(5,7) | _SBF(12,0xF)) & 0xFFFF)"
  */
@@ -134,8 +144,12 @@ typedef int32_t(*PFI)();
 /* External data/function define */
 #define EXTERN extern
 
+#if !defined(MAX)
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+#if !defined(MIN)
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 /**
  * @}
@@ -143,7 +157,7 @@ typedef int32_t(*PFI)();
 
 
 /* Old Type Definition compatibility ------------------------------------------ */
-/** @addtogroup LPC_Types_Public_Types
+/** @addtogroup LPC_Types_Public_Types LPC_Types Public Types
  * @{
  */
 
@@ -188,7 +202,7 @@ typedef Bool BOOL_8;
  */
 
 
-#endif /* LPC_TYPES_H */
+#endif /* __LPC_TYPES_H */
 
 /**
  * @}

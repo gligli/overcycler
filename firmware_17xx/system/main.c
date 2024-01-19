@@ -6,7 +6,7 @@
 
 #include "main.h"
 
-#include "LPC17xx.h"
+#include "LPC177x_8x.h"
 #include "rprintf.h"
 #include "serial.h"
 #include "diskio.h"
@@ -14,6 +14,7 @@
 
 #include "synth/synth.h"
 #include "synth/ui.h"
+#include "lpc177x_8x_dac.h"
 
 #define IRQ_MASK 0x00000080
 #define FIQ_MASK 0x00000040
@@ -34,7 +35,7 @@ __attribute__ ((used)) void SysTick_Handler(void)
 	if(frc>=SYNTH_TIMER_HZ/DISK_TIMER_HZ)
 	{
 		// 100hz for disk		
-		disk_timerproc();
+//oc3		disk_timerproc();
 		frc=0;
 	}
 	++frc;
@@ -187,9 +188,13 @@ int main(void)
 	delay_ms(250);
 
 	SystemCoreClockUpdate();
-	init_serial0(230400);
+	init_serial0(38400);
 	rprintf_devopen(0,putc_serial0); 
 	
+	DAC_Init(0);
+	DAC_UpdateValue(0,50);
+	PINSEL_SetPinMode(0,26,2);
+		
 	ui_init(); // called early to get a splash screen
 	
 	delay_ms(500);
@@ -222,15 +227,15 @@ int main(void)
 
 	BLOCK_INT(1)
 	{
-		synth_init();
-		synthReady=1;
+//oc3		synth_init();
+//oc3		synthReady=1;
 	}
 	
 	rprintf(0,"done\n");
 	
 	for(;;)
 	{
-		synth_update();
+//oc3		synth_update();
 	}
 }
 

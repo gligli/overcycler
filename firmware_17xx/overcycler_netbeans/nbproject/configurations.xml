@@ -31,7 +31,6 @@
         <in>diskio.c</in>
         <in>fattime.c</in>
         <in>ff.c</in>
-        <in>spi_sd_lpc17xx.c</in>
       </df>
       <df name="synth">
         <in>adsr.c</in>
@@ -58,7 +57,6 @@
         <in>rprintf.c</in>
         <in>serial.c</in>
         <in>syscalls.c</in>
-        <in>system_LPC17xx.c</in>
       </df>
       <df name="xnormidi">
         <df name="bytequeue">
@@ -114,6 +112,7 @@
             <preprocessorList>
               <Elem>ROM_RUN</Elem>
               <Elem>VECTORS_IN_ROM</Elem>
+              <Elem>__LPC177X_8X__</Elem>
             </preprocessorList>
           </cTool>
         </makeTool>
@@ -229,10 +228,6 @@
         <cTool flags="0">
         </cTool>
       </item>
-      <item path="../fat_sd/spi_sd_lpc17xx.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
         </cTool>
@@ -318,10 +313,6 @@
         </cTool>
       </item>
       <item path="../system/syscalls.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../system/system_LPC17xx.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
         </cTool>
       </item>
