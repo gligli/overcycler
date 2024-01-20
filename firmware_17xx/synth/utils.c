@@ -129,12 +129,12 @@ void buffer_dump(void * buf, int size){
 
 	while(size>0){
 		for(i=0;i<16;++i){
-			printf("%02x ",*cbuf);
+			rprintf(0, "%02x ",*cbuf);
 			++cbuf;
 			if ((uint32_t)cbuf - (uint32_t)buf >= osize)
 				break;
 		}
-		printf("\n");
+		rprintf(0, "\n");
 		size-=16;
 	}
 }
