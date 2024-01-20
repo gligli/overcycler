@@ -7,14 +7,16 @@
 #include "main.h"
 
 #include "LPC177x_8x.h"
+#include "lpc177x_8x_dac.h"
 #include "rprintf.h"
 #include "serial.h"
 #include "diskio.h"
 #include "ff.h"
+#include "xt26g.h"
 
 #include "synth/synth.h"
 #include "synth/ui.h"
-#include "lpc177x_8x_dac.h"
+#include "synth/utils.h"
 
 #define IRQ_MASK 0x00000080
 #define FIQ_MASK 0x00000040
@@ -191,9 +193,10 @@ int main(void)
 	init_serial0(38400);
 	rprintf_devopen(0,putc_serial0); 
 	
-	DAC_Init(0);
-	DAC_UpdateValue(0,50);
 	PINSEL_SetPinMode(0,26,2);
+	PINSEL_DacEnable(0,26,ENABLE);
+	DAC_Init(0);
+	DAC_UpdateValue(0,0);
 		
 	ui_init(); // called early to get a splash screen
 	
@@ -202,7 +205,9 @@ int main(void)
 	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
 	
 	rprintf(0,"storage init...\n");
-
+	
+	XT26G_init();
+	
 	synthReady=0;
 	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
 	NVIC_SetPriority(SysTick_IRQn,16);

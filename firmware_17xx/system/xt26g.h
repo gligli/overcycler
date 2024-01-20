@@ -3,6 +3,19 @@
 
 #include "lpc_types.h"
 
-void XT26G_Init(void);
+#define XT26G_PAGE_BITS 11
+#define XT26G_PAGE_SIZE (1<<XT26G_PAGE_BITS)
+#define XT26G_PAGE_MASK (XT26G_PAGE_SIZE-1)
+
+#define XT26G_BLOCK_BITS (XT26G_PAGE_BITS+6)
+#define XT26G_BLOCK_SIZE (1<<XT26G_BLOCK_BITS)
+#define XT26G_BLOCK_MASK (XT26G_BLOCK_SIZE-1)
+
+void XT26G_readPage(uint32_t address, uint16_t size, int8_t is_spare, uint8_t * buffer);
+void XT26G_writePage(uint32_t address, uint16_t size, uint8_t * buffer);
+void XT26G_eraseBlock(uint32_t address);
+void XT26G_movePage(uint32_t address, uint32_t newAddress, uint16_t size, uint8_t * buffer);
+
+int8_t XT26G_init(void);
 
 #endif
