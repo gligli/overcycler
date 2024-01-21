@@ -11,6 +11,9 @@
 #define XT26G_BLOCK_SIZE (1<<XT26G_BLOCK_BITS)
 #define XT26G_BLOCK_MASK (XT26G_BLOCK_SIZE-1)
 
+#define XT26G_TOTAL_BLOCK_COUNT 2048 // 256MB
+#define XT26G_USABLE_BLOCK_COUNT 2000
+
 void XT26G_readPage(uint32_t address, uint16_t size, int8_t is_spare, uint8_t * buffer);
 void XT26G_writePage(uint32_t address, uint16_t size, uint8_t * buffer);
 void XT26G_eraseBlock(uint32_t address);

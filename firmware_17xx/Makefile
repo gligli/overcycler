@@ -68,6 +68,7 @@ SRC+=drivers/lpc177x_8x_timer.c
 SRC+=drivers/lpc177x_8x_uart.c
 SRC+=drivers/lpc177x_8x_wwdt.c
 
+SRC+=fat_sd/nand.c
 SRC+=fat_sd/diskio.c
 SRC+=fat_sd/fattime.c
 SRC+=fat_sd/ff.c

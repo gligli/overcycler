@@ -10,9 +10,9 @@
 #include "lpc177x_8x_dac.h"
 #include "rprintf.h"
 #include "serial.h"
+#include "nand.h"
 #include "diskio.h"
 #include "ff.h"
-#include "xt26g.h"
 
 #include "synth/synth.h"
 #include "synth/ui.h"
@@ -23,7 +23,6 @@
 #define INT_MASK (IRQ_MASK | FIQ_MASK)
 
 #define SYNTH_TIMER_HZ 500
-#define DISK_TIMER_HZ 100
 
 #define STORAGE_PATH "/STORAGE"
 
@@ -32,18 +31,8 @@ static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
-	static int frc=0;
-	
-	if(frc>=SYNTH_TIMER_HZ/DISK_TIMER_HZ)
-	{
-		// 100hz for disk		
-//oc3		disk_timerproc();
-		frc=0;
-	}
-	++frc;
-
-	if(synthReady)
-		synth_timerInterrupt();
+//	if(synthReady)
+//		synth_timerInterrupt();
 }
 
 void delay_us(uint32_t count)
@@ -187,7 +176,7 @@ int main(void)
 {
 	FRESULT res;
 	
-	delay_ms(250);
+	delay_ms(500);
 
 	SystemCoreClockUpdate();
 	init_serial0(38400);
@@ -206,8 +195,6 @@ int main(void)
 	
 	rprintf(0,"storage init...\n");
 	
-	XT26G_init();
-	
 	synthReady=0;
 	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
 	NVIC_SetPriority(SysTick_IRQn,16);
@@ -218,7 +205,7 @@ int main(void)
 		rprintf(1,"Error: disk_initialize res=%d",res);
 		for(;;);
 	}
-	
+
 	if((res=f_mount(0,&fatFS)))
 	{
 		rprintf(0,"f_mount res=%d\n",res);
@@ -226,21 +213,56 @@ int main(void)
 		for(;;);
 	}
 
-	f_mkdir(STORAGE_PATH);
+	if((res=f_mkdir(STORAGE_PATH)))
+	{
+		if(res==FR_NO_FILESYSTEM)
+		{
+			rprintf(0,"Formatting disk...",res);
+			rprintf(1,"Formatting disk...",res);
+			if((res=f_mkfs(0,0,0)))
+			{
+				rprintf(0,"f_mkfs res=%d\n",res);
+				rprintf(1,"Error: f_mkfs res=%d",res);
+				for(;;);
+			}
+		}
+	}
+	
+	FIL f;
+	UINT bw;
+	char buf[STORAGE_PAGE_SIZE];
+
+	strcpy(buf, "Test 1234 Although NAND Flash memory devices may contain bad blocks, they can be used reliably in systems that provide bad-block management and error-correction algorithms. This ensures data integrity.");
+	if((res=f_open(&f,"/test.bin",FA_WRITE|FA_CREATE_ALWAYS)))
+	{
+		rprintf(0,"f_open %d\n",res);
+		for(;;);
+	}
+	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
+
+	if((res=f_open(&f,"/test.bin",FA_READ|FA_OPEN_EXISTING)))
+	{
+		rprintf(0,"f_open %d\n",res);
+		for(;;);
+	}
+	f_read(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
+	rprintf(0,"%s\n",buf);
 	
 	rprintf(0,"synth init...\n");
 
 	BLOCK_INT(1)
 	{
-//oc3		synth_init();
-//oc3		synthReady=1;
+//		synth_init();
+		synthReady=1;
 	}
 	
 	rprintf(0,"done\n");
 	
 	for(;;)
 	{
-//oc3		synth_update();
+//		synth_update();
 	}
 }
 

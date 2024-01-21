@@ -8,6 +8,7 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"
+#include "nand.h"
 
 // in makefile #define WITH_USB_MS   1
 
@@ -24,7 +25,7 @@ DSTATUS usb_status = STA_NOINIT;
 /* Correspondence between physical drive number and physical drive.      */
 /*-----------------------------------------------------------------------*/
 
-#define MMC		0
+#define NAND	0
 #define USB		1
 #define ATA		2
 
@@ -57,9 +58,8 @@ DSTATUS disk_initialize(BYTE drv /* Physical drive nmuber (0..) */
 		// translate the result code here
 		return stat;
 
-	case MMC:
-//		stat = MMC_disk_initialize();
-		stat = STA_NOINIT;
+	case NAND:
+		stat = nand_disk_initialize();
 		return stat;
 
 	case USB:
@@ -108,9 +108,8 @@ DSTATUS disk_status(BYTE drv /* Physical drive number (0..) */
 
 		return stat;
 
-	case MMC:
-//		stat = MMC_disk_status();
-		stat = STA_NOINIT;
+	case NAND:
+		stat = nand_disk_status();
 		return stat;
 
 	case USB:
@@ -148,9 +147,8 @@ DRESULT disk_read(BYTE drv, /* Physical drive number (0..) */
 		// translate the result code here
 		return res;
 
-	case MMC:
-//		res = MMC_disk_read(buff, sector, count);
-		res = RES_PARERR;
+	case NAND:
+		res = nand_disk_read(buff, sector, count);
 		return res;
 
 	case USB:
@@ -202,9 +200,8 @@ DRESULT disk_write(BYTE drv, /* Physical drive number (0..) */
 		// translate the result code here
 		return res;
 
-	case MMC:
-//		res = MMC_disk_write(buff, sector, count);
-		res = RES_PARERR;
+	case NAND:
+		res = nand_disk_write(buff, sector, count);
 		return res;
 
 	case USB:
@@ -248,9 +245,8 @@ void *buff /* Buffer to send/receive control data */
 		// post-process here
 		return res;
 
-	case MMC:
-//		res = MMC_disk_ioctl(ctrl, buff);
-		res = RES_PARERR;
+	case NAND:
+		res = nand_disk_ioctl(ctrl, buff);
 		return res;
 
 	case USB:

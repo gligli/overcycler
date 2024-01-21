@@ -1,6 +1,6 @@
-#include "main.h"
-
 #include "xt26g.h"
+
+#include "main.h"
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_ssp.h"
 #include "lpc177x_8x_pinsel.h"
@@ -121,7 +121,7 @@ void XT26G_readPage(uint32_t address, uint16_t size, int8_t is_spare, uint8_t * 
 	HANDLE_CS
 	{
 		sendRead8(CMD_READ_FROM_CACHE);
-		send16((address&XT26G_PAGE_MASK) | (is_spare)?(1<<XT26G_PAGE_BITS):0);
+		send16((address&XT26G_PAGE_MASK) | ((is_spare)?(1<<XT26G_PAGE_BITS):0));
 		sendRead8(0x00); // dummy byte
 		
 		for(;size;--size)
@@ -241,7 +241,7 @@ int8_t XT26G_init(void)
 		did=sendRead8(0x00);
 	}
 	
-	rprintf(0, "XT26G_Init mid %02x did %02x\n", mid, did);
+	rprintf(0, "XT26G: mid %02x did %02x\n", mid, did);
 	
 	if(mid!=0x0b || did!=0x12)
 		return 1;

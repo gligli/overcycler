@@ -970,8 +970,8 @@ void synth_init(void)
 	// init footswitch in
 
 	GPIO_SetDir(3,1<<26,0);
-//oc3	PINSEL_SetResistorMode(3,26,PINSEL_PINMODE_TRISTATE);
-//oc3	PINSEL_SetOpenDrainMode(3,26,PINSEL_PINMODE_NORMAL);
+	PINSEL_SetPinMode(3,26,PINSEL_BASICMODE_PLAINOUT);
+	PINSEL_SetOpenDrainMode(3,26,DISABLE);
 	
 	// init wavetable oscs
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
