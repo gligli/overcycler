@@ -254,65 +254,6 @@ extern "C"
 #define RTC_CALIB_DIR_FORWARD			((uint8_t)(0))
 #define RTC_CALIB_DIR_BACKWARD			((uint8_t)(1))
 
-/**********************************************************************
-* Event Monitor/Recorder Control register
-**********************************************************************/
-#define RTC_ERCTRL_EV0_INTWAKE_ENABLE		(1<<0)
-#define RTC_ERCTRL_EV0_GPCLEAR_ENABLE		(1<<1)
-#define RTC_ERCTRL_EV0_POS_EDGE				(1<<2)
-#define RTC_ERCTRL_EV0_NEG_EDGE				(0<<2)
-#define RTC_ERCTRL_EV0_INPUT_ENABLE			(1<<3)
-
-#define RTC_ERCTRL_EV1_INTWAKE_ENABLE		(1<<10)
-#define RTC_ERCTRL_EV1_GPCLEAR_ENABLE		(1<<11)
-#define RTC_ERCTRL_EV1_POS_EDGE				(1<<12)
-#define RTC_ERCTRL_EV1_NEG_EDGE				(0<<12)
-#define RTC_ERCTRL_EV1_INPUT_ENABLE			(1<<13)
-
-
-#define RTC_ERCTRL_EV2_INTWAKE_ENABLE		(1<<20)
-#define RTC_ERCTRL_EV2_GPCLEAR_ENABLE		(1<<21)
-#define RTC_ERCTRL_EV2_POS_EDGE				(1<<22)
-#define RTC_ERCTRL_EV2_NEG_EDGE				(0<<22)
-#define RTC_ERCTRL_EV2_INPUT_ENABLE			(1<<23)
-
-#define RTC_ERCTRL_MODE_MASK				(((uint32_t)3)<<30)
-#define RTC_ERCTRL_MODE_CLK_DISABLE			(((uint32_t)0)<<30)
-#define RTC_ERCTRL_MODE_16HZ				(((uint32_t)1)<<30)
-#define RTC_ERCTRL_MODE_64HZ				(((uint32_t)2)<<30)
-#define RTC_ERCTRL_MODE_1KHZ				(((uint32_t)3)<<30)
-
-#define RTC_ER_INPUT_CHANNEL_NUM			(3)
-
-/**********************************************************************
-* Event Monitor/Recorder Status register
-**********************************************************************/
-#define RTC_ER_STATUS_EV0_BIT				(0)
-#define RTC_ER_STATUS_EV1_BIT				(1)
-#define RTC_ER_STATUS_EV2_BIT				(2)
-#define RTC_ER_STATUS_GPCLEARED_BIT			(3)
-#define RTC_ER_STATUS_WAKEUP_BIT			(31)
-
-#define RTC_ER_EVENTS_ON_EV0_FLG            (1<<RTC_ER_STATUS_EV0_BIT)
-#define RTC_ER_EVENTS_ON_EV1_FLG            (1<<RTC_ER_STATUS_EV1_BIT)
-#define RTC_ER_EVENTS_ON_EV2_FLG            (1<<RTC_ER_STATUS_EV2_BIT)
-#define RTC_ER_STATUS_GP_CLEARED_FLG        (1<<RTC_ER_STATUS_GPCLEARED_BIT)
-#define RTC_ER_STATUS_WAKEUP_REQ_PENDING    (((uint32_t)1)<<RTC_ER_STATUS_WAKEUP_BIT)
-/**********************************************************************
-* Event Monitor/Recorder Counter register
-**********************************************************************/
-#define RTC_ER_EV0_COUNTER(n)				(n&0x07)
-#define RTC_ER_EV1_COUNTER(n)				((n>>8)&0x07)
-#define RTC_ER_EV2_COUNTER(n)				((n>>16)&0x07)
-
-/**********************************************************************
-* Event Monitor/Recorder TimeStamp register
-**********************************************************************/
-#define RTC_ER_TIMESTAMP_SEC(n)				(n&0x3F)
-#define RTC_ER_TIMESTAMP_MIN(n)				((n>>6)&0x3F)
-#define RTC_ER_TIMESTAMP_HOUR(n)			((n>>12)&0x1F)
-#define RTC_ER_TIMESTAMP_DOY(n)				((n>>17)&0x1FF)
-
 /**
  * @}
  */
@@ -375,35 +316,6 @@ typedef enum
 	RTC_TIMETYPE_YEAR = 7,
 } RTC_TIMETYPE_Num;
 
-/** @brief Event Monitor/Recording Input Channel configuration */
-typedef struct
-{
- 	Bool	EventOnPosEdge;	// Event occurs on positive edge on the channel
-	Bool	IntWake;		// Create interrupt and wake-up request if there is an event
-	Bool	GPClear;		// Clear GP registers of RTC if there is an event.
-} RTC_ER_CHANNEL_Init_Type;
-
-/** @brief Event Monitor/Recording configuration */
-typedef struct
-{
-	RTC_ER_CHANNEL_Init_Type InputChannel[RTC_ER_INPUT_CHANNEL_NUM];
-	uint32_t				 Clk;	// Sample clock on input channel. (Hz)
-} RTC_ER_CONFIG_Type;
-
-/** @brief Event Monitor/Recording TimeStamp Type */
-typedef struct 
-{
-	/** Seconds Register */
-	uint32_t SEC;
-	/** Minutes Register */
-	uint32_t MIN;
-	/** Hours Register */
-	uint32_t HOUR;
-	/** Day of Year Register */
-	uint32_t DOY;
-} RTC_ER_TIMESTAMP_Type;
-
-
 /**
  * @}
  */
@@ -438,16 +350,6 @@ void RTC_CalibConfig(LPC_RTC_TypeDef *RTCx, uint32_t CalibValue, uint8_t CalibDi
 void RTC_WriteGPREG (LPC_RTC_TypeDef *RTCx, uint8_t Channel, uint32_t Value);
 uint32_t RTC_ReadGPREG (LPC_RTC_TypeDef *RTCx, uint8_t Channel);
 
-void 	RTC_ER_InitConfigStruct(RTC_ER_CONFIG_Type* pConfig);
-Status 	RTC_ER_Init(RTC_ER_CONFIG_Type* pConfig);
-Status 	RTC_ER_Cmd(uint8_t channel, FunctionalState state);
-uint8_t RTC_ER_GetEventCount(uint8_t channel);
-uint32_t RTC_ER_GetStatus(void);
-Bool 	RTC_ER_WakupReqPending(void);
-Bool 	RTC_ER_GPCleared(void);
-Status 	RTC_ER_GetFirstTimeStamp(uint8_t channel, RTC_ER_TIMESTAMP_Type* pTimeStamp);
-Status 	RTC_ER_GetLastTimeStamp(uint8_t channel, RTC_ER_TIMESTAMP_Type* pTimeStamp);
-void	RTC_ER_ClearStatus(uint32_t status);
 /**
  * @}
  */

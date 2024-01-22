@@ -155,9 +155,6 @@ typedef struct __LCD_POLARITY_Type
 	uint16_t cpl; // Number of pixel clocks per line 
 	uint8_t  active_high; // Signal polarity, active HIGH or LOW
 	uint8_t acb;  // AC bias pin frequency
-    uint8_t  invert_panel_clock;   // Invert Panel clock;
-    uint8_t  invert_hsync;          // Invert HSYNC
-    uint8_t  invert_vsync;          // Invert VSYSNC
 }LCD_POLARITY_Type;
 
 /**
@@ -179,7 +176,6 @@ typedef struct __LCD_Config_Type
   uint32_t  lcd_panel_upper;  // base address of frame buffer
   uint32_t  lcd_panel_lower;  // base address of frame buffer
   uint8_t*  lcd_palette;      // point to palette buffer
-  Bool		lcd_bgr;		  // False: RGB , TRUE: BGR
 } LCD_Config_Type;
 
 /**
@@ -218,7 +214,6 @@ void LCD_SetImage(LCD_PANEL panel,const uint8_t *pPain);
 void LCD_FillRect (LCD_PANEL panel, uint32_t startx,uint32_t endx, 
                                         uint32_t starty, uint32_t endy,
                                         LcdPixel_t color);
-void LCD_PutPixel (LCD_PANEL panel, uint32_t X_Left, uint32_t Y_Up, LcdPixel_t color);
 void LCD_LoadPic (LCD_PANEL panel,uint32_t X_Left, uint32_t Y_Up, Bmp_t * pBmp, uint32_t Mask);
 
 /**

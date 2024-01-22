@@ -7,7 +7,6 @@
 #include "main.h"
 
 #include "LPC177x_8x.h"
-#include "lpc177x_8x_dac.h"
 #include "rprintf.h"
 #include "serial.h"
 #include "nand.h"
@@ -31,8 +30,8 @@ static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
-//	if(synthReady)
-//		synth_timerInterrupt();
+	if(synthReady)
+		synth_timerInterrupt();
 }
 
 void delay_us(uint32_t count)
@@ -176,17 +175,14 @@ int main(void)
 {
 	FRESULT res;
 	
+	__disable_irq();
+
 	delay_ms(500);
 
 	SystemCoreClockUpdate();
-	init_serial0(38400);
+	init_serial0(57600);
 	rprintf_devopen(0,putc_serial0); 
 	
-	PINSEL_SetPinMode(0,26,2);
-	PINSEL_DacEnable(0,26,ENABLE);
-	DAC_Init(0);
-	DAC_UpdateValue(0,0);
-		
 	ui_init(); // called early to get a splash screen
 	
 	delay_ms(500);
@@ -234,7 +230,7 @@ int main(void)
 
 	BLOCK_INT(1)
 	{
-//		synth_init();
+		synth_init();
 		synthReady=1;
 	}
 	
@@ -242,7 +238,7 @@ int main(void)
 	
 	for(;;)
 	{
-//		synth_update();
+		synth_update();
 	}
 }
 

@@ -512,7 +512,8 @@ void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t so
 	oriWaveNum=waveNum;
 	oriBankNum=bankNum;
 
-	synth_refreshBankNames(sort);
+	if(!synth_refreshBankNames(sort))
+		return;
 
 reload:
 	
@@ -607,19 +608,19 @@ int8_t synth_getWaveName(int waveIndex, char * res)
 	return 1;
 }
 
-void synth_refreshBankNames(int8_t sort)
+int8_t synth_refreshBankNames(int8_t sort)
 {
 	FRESULT res;
 	
 	if(waveData.bankSorted==sort) // already loaded and same state
-		return;
+		return 1;
 	
 	waveData.bankCount=0;
 
 	if((res=f_opendir(&waveData.curDir,WAVEDATA_PATH)))
 	{
 		rprintf(0,"f_opendir res=%d\n",res);
-		return;
+		return 0;
 	}
 
 	if((res=f_readdir(&waveData.curDir,&waveData.curFile)))
@@ -646,6 +647,8 @@ void synth_refreshBankNames(int8_t sort)
 #ifdef DEBUG
 	rprintf(0,"bankCount %d\n",waveData.bankCount);
 #endif		
+	
+	return 1;
 }
 
 void synth_refreshCurWaveNames(int8_t abx, int8_t sort)
@@ -993,7 +996,9 @@ void synth_init(void)
 	scan_init();
 	tuner_init();
 	assigner_init();
+TR
 	uartMidi_init();
+TR
 	seq_init();
 	arp_init();
 	midi_init();

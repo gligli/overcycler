@@ -228,27 +228,27 @@ void scan_init(void)
 	GPIO_SetValue(0,((1<<POTSCAN_PIN_ADDR)|(1<<POTSCAN_PIN_CLK))<<24);
 	GPIO_SetDir(0,POTSCAN_MASK<<24,1);
 	LPC_GPIO0->FIOMASK3&=~POTSCAN_MASK;
-
+*/
 	// init keypad
 	
-	PINSEL_SetPinFunc(0,22,0); // R1
-	PINSEL_SetPinFunc(0,21,0); // R2
-	PINSEL_SetPinFunc(0,20,0); // R3
-	PINSEL_SetPinFunc(0,19,0); // R4
-	PINSEL_SetPinFunc(0,10,0); // C1
-	PINSEL_SetPinFunc(4,29,0); // C2
-	PINSEL_SetPinFunc(4,28,0); // C3
-	PINSEL_SetPinFunc(2,13,0); // C4
-	PINSEL_SetResistorMode(0,10,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(4,29,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(4,28,PINSEL_PINMODE_PULLUP);
-	PINSEL_SetResistorMode(2,13,PINSEL_PINMODE_PULLUP);
+	PINSEL_ConfigPin(0,22,0); // R1
+	PINSEL_ConfigPin(0,21,0); // R2
+	PINSEL_ConfigPin(0,20,0); // R3
+	PINSEL_ConfigPin(0,19,0); // R4
+	PINSEL_ConfigPin(0,10,0); // C1
+	PINSEL_ConfigPin(4,29,0); // C2
+	PINSEL_ConfigPin(4,28,0); // C3
+	PINSEL_ConfigPin(2,13,0); // C4
+	PINSEL_SetPinMode(0,10,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(4,29,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(4,28,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(2,13,PINSEL_BASICMODE_PULLUP);
 
 	GPIO_SetValue(0,0b1111ul<<19);
 	GPIO_SetDir(0,0b1111ul<<19,1);
 	
 	// init pot scan TMR / DMA
-	
+/*	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
 	DMAREQSEL|=0x10;

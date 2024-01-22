@@ -163,7 +163,7 @@ int8_t WWDT_SetWarning(uint32_t WarnTime);
 int8_t WWDT_SetWindowRaw(uint32_t wndVal);
 int8_t WWDT_SetWindow(uint32_t WindowedTime);
 void WWDT_UpdateTimeOut(uint32_t TimeOut);
-FlagStatus WWDT_GetStatus (uint8_t Status);
+FlagStatus WWDT_GetStatus (uint8_t Status_);
 void WWDT_ClearStatusFlag (uint8_t flag);
 void WWDT_ClrTimeOutFlag (void);
 void WWDT_FeedStdSeq (void);

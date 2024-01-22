@@ -641,16 +641,16 @@ typedef struct {
  * @{
  */
 /* UART Init/DeInit functions --------------------------------------------------*/
-void UART_Init(UART_ID_Type UartID, UART_CFG_Type *UART_ConfigStruct);
-void UART_DeInit(UART_ID_Type UartID);
+void UART_Init(LPC_UART_TypeDef *UARTx, UART_CFG_Type *UART_ConfigStruct);
+void UART_DeInit(LPC_UART_TypeDef *UARTx);
 void UART_ConfigStructInit(UART_CFG_Type *UART_InitStruct);
 
 /* UART Send/Receive functions -------------------------------------------------*/
-void UART_SendByte(UART_ID_Type UartID, uint8_t Data);
-uint8_t UART_ReceiveByte(UART_ID_Type UartID);
-uint32_t UART_Send(UART_ID_Type UartID, uint8_t *txbuf,
+void UART_SendByte(LPC_UART_TypeDef *UARTx, uint8_t Data);
+uint8_t UART_ReceiveByte(LPC_UART_TypeDef *UARTx);
+uint32_t UART_Send(LPC_UART_TypeDef *UARTx, uint8_t *txbuf,
 		uint32_t buflen, TRANSFER_BLOCK_Type flag);
-uint32_t UART_Receive(UART_ID_Type UartID, uint8_t *rxbuf, \
+uint32_t UART_Receive(LPC_UART_TypeDef *UARTx, uint8_t *rxbuf, \
 		uint32_t buflen, TRANSFER_BLOCK_Type flag);
 
 /* UART FIFO functions ----------------------------------------------------------*/
@@ -664,7 +664,7 @@ uint8_t UART_GetLineStatus(UART_ID_Type UartID);
 /* UART operate functions -------------------------------------------------------*/
 void UART_IntConfig(UART_ID_Type UartID, UART_INT_Type UARTIntCfg, \
 				FunctionalState NewState);
-void UART_TxCmd(UART_ID_Type UartID, FunctionalState NewState);
+void UART_TxCmd(LPC_UART_TypeDef *UARTx, FunctionalState NewState);
 FlagStatus UART_CheckBusy(UART_ID_Type UartID);
 void UART_ForceBreak(UART_ID_Type UartID);
 

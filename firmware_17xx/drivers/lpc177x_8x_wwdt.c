@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_wwdt.c			2011-06-02
 *//**
@@ -382,13 +380,13 @@ void WDT_UpdateTimeOut(uint32_t TimeOut)
  *
  * @return		Time out flag status of WDT
  *********************************************************************/
-FlagStatus WWDT_GetStatus (uint8_t Status)
+FlagStatus WWDT_GetStatus (uint8_t Status_)
 {
-	if(Status == WWDT_WARNINT_FLAG)
+	if(Status_ == WWDT_WARNINT_FLAG)
 	{
 		return ((FlagStatus)(LPC_WDT->MOD & (1<<3)));
 	}
-	else if (Status == WWDT_TIMEOUT_FLAG)
+	else if (Status_ == WWDT_TIMEOUT_FLAG)
 	{
 		return ((FlagStatus)(LPC_WDT->MOD & (1<<2)));
 	}
@@ -484,4 +482,3 @@ uint32_t WWDT_GetCurrentCount(void)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */

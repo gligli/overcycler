@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_pwm.c			2011-06-02
 *//**
@@ -579,4 +577,3 @@ void PWM_ChannelCmd(uint8_t pwmId, uint8_t PWMChannel, FunctionalState NewState)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */

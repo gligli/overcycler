@@ -13,6 +13,7 @@
 #include "hd44780.h"
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_pinsel.h"
+#include "lpc177x_8x_dac.h"
 #include "clock.h"
 #include "scan.h"
 
@@ -1306,6 +1307,13 @@ void ui_init(void)
 		
 	rprintf_devopen(1,putc_lcd2); 
 
+	// DAC for contrast
+	
+	PINSEL_SetPinMode(0,26,2);
+	PINSEL_DacEnable(0,26,ENABLE);
+	DAC_Init(0);
+	DAC_UpdateValue(0,0);
+		
 	// welcome message
 
 	sendString(1,"GliGli's OverCycler2");

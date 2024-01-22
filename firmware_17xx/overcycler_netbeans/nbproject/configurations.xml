@@ -2,30 +2,6 @@
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root=".." name="0">
-      <df name="drivers">
-        <in>lpc17xx_adc.c</in>
-        <in>lpc17xx_can.c</in>
-        <in>lpc17xx_clkpwr.c</in>
-        <in>lpc17xx_dac.c</in>
-        <in>lpc17xx_emac.c</in>
-        <in>lpc17xx_gpdma.c</in>
-        <in>lpc17xx_gpio.c</in>
-        <in>lpc17xx_i2c.c</in>
-        <in>lpc17xx_i2s.c</in>
-        <in>lpc17xx_libcfg_default.c</in>
-        <in>lpc17xx_mcpwm.c</in>
-        <in>lpc17xx_nvic.c</in>
-        <in>lpc17xx_pinsel.c</in>
-        <in>lpc17xx_pwm.c</in>
-        <in>lpc17xx_qei.c</in>
-        <in>lpc17xx_rit.c</in>
-        <in>lpc17xx_rtc.c</in>
-        <in>lpc17xx_spi.c</in>
-        <in>lpc17xx_ssp.c</in>
-        <in>lpc17xx_timer.c</in>
-        <in>lpc17xx_uart.c</in>
-        <in>lpc17xx_wdt.c</in>
-      </df>
       <df name="fat_sd">
         <in>ccsbcs.c</in>
         <in>diskio.c</in>
@@ -58,6 +34,7 @@
         <in>main.c</in>
         <in>rprintf.c</in>
         <in>serial.c</in>
+        <in>startup_LPC17xx.S</in>
         <in>syscalls.c</in>
       </df>
       <df name="xnormidi">
@@ -123,97 +100,6 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="../drivers/lpc17xx_adc.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_can.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_clkpwr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_dac.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_emac.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_gpdma.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_gpio.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_i2c.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_i2s.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_libcfg_default.c"
-            ex="false"
-            tool="0"
-            flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_mcpwm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_nvic.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_pinsel.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_pwm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_qei.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_rit.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_rtc.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_spi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_ssp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_timer.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_uart.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../drivers/lpc17xx_wdt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
       <item path="../fat_sd/ccsbcs.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
         </cTool>
@@ -317,6 +203,8 @@
       <item path="../system/serial.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
         </cTool>
+      </item>
+      <item path="../system/startup_LPC17xx.S" ex="false" tool="4" flavor2="0">
       </item>
       <item path="../system/syscalls.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">

@@ -62,7 +62,7 @@ void synth_update(void);
 
 // synth.c internal api
 void synth_refreshFullState(void);
-void synth_refreshBankNames(int8_t sort);
+int8_t synth_refreshBankNames(int8_t sort);
 void synth_refreshCurWaveNames(int8_t abx, int8_t sort);
 void synth_refreshWaveforms(int8_t abx);
 void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort);

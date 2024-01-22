@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_lcd.c			2011-10-14
 *//**
@@ -78,9 +76,6 @@ LCD_RET_CODE LCD_Init (LCD_Config_Type* pConfig)
 	if(pConfig == NULL)
 		return LCD_FUNC_ERR;
 
-    if(pConfig->big_endian_byte & !pConfig->big_endian_pixel)
-      return LCD_FUNC_ERR;
-    
 	lcd_config = *pConfig;
 	
 	// Assign pins
@@ -100,8 +95,6 @@ LCD_RET_CODE LCD_Init (LCD_Config_Type* pConfig)
 	PINSEL_ConfigPin(1,27,7);
 	PINSEL_ConfigPin(1,28,7);
 	PINSEL_ConfigPin(1,29,7);
-    PINSEL_ConfigPin(2,0,7);
-    PINSEL_ConfigPin(2,1,7);
 	PINSEL_ConfigPin(2,2,7);
 	PINSEL_ConfigPin(2,3,7);
 	PINSEL_ConfigPin(2,4,7);
@@ -110,7 +103,6 @@ LCD_RET_CODE LCD_Init (LCD_Config_Type* pConfig)
 	PINSEL_ConfigPin(2,7,7);
 	PINSEL_ConfigPin(2,8,7);
 	PINSEL_ConfigPin(2,9,7);
-    PINSEL_ConfigPin(2,11,7);
 	PINSEL_ConfigPin(2,12,7);
 	PINSEL_ConfigPin(2,13,7);
 	PINSEL_ConfigPin(4,28,7);
@@ -122,9 +114,8 @@ LCD_RET_CODE LCD_Init (LCD_Config_Type* pConfig)
 	// Set clock 	
 	LPC_LCD->POL &= ~(0x01 << 5);
 	if( pConfig->panel_clk > 0) {
-        clkdiv = CLKPWR_GetCLK(CLKPWR_CLKTYPE_CPU) / pConfig->panel_clk - 1;
-	  	LPC_SC->LCD_CFG = clkdiv & 0x1F;
-		LPC_LCD->POL |=(1<<26);
+          clkdiv = CLKPWR_GetCLK(CLKPWR_CLKTYPE_CPU) / pConfig->panel_clk - 1;
+	  LPC_SC->LCD_CFG = clkdiv & 0x1F;
 	}
 
 	// init Horizontal Timing
@@ -147,7 +138,6 @@ LCD_RET_CODE LCD_Init (LCD_Config_Type* pConfig)
 
         // Setup
     LCD_CtrlSetup(pConfig);
-	
     return LCD_FUNC_OK;
 
 	
@@ -181,8 +171,8 @@ void LCD_SetHorizontalTiming(LCD_HConfig_Type* pConfig)
 void LCD_SetVertialTiming(LCD_VConfig_Type* pConfig)
 {
 	LPC_LCD->TIMV = 0;  //reset TIMV value before setting
-	LPC_LCD->TIMV |= ((pConfig->vbp)& 0xFF)<<24;
-	LPC_LCD->TIMV |= ((pConfig->vfp)& 0xFF)<<16;
+	LPC_LCD->TIMV |= ((pConfig->vbp - 1)& 0xFF)<<24;
+	LPC_LCD->TIMV |= ((pConfig->vfp - 1)& 0xFF)<<16;
 	LPC_LCD->TIMV |= ((pConfig->vsw - 1)& 0x3F)<<10;
 	LPC_LCD->TIMV |= ((pConfig->lpp - 1)& 0x03FF)<<0;
 	lcd_vsize =   pConfig->lpp;
@@ -202,21 +192,16 @@ void LCD_SetVertialTiming(LCD_VConfig_Type* pConfig)
  **********************************************************************/
 void LCD_SetPolarity(LCD_TYPES lcd_type, LCD_POLARITY_Type* pConfig)
 {
+    if(lcd_type == LCD_TFT) {
+  	  // bypass internal clk divider
+	  LPC_LCD->POL |=(1<<26);
+    }
 	// LCDFP pin is active LOW and inactive HIGH
-    if(pConfig->invert_vsync)
-        LPC_LCD->POL |= (1<<11);
-    else
-        LPC_LCD->POL &= ~(1<<11);        
+    LPC_LCD->POL |= (1<<11);
     // LCDLP pin is active LOW and inactive HIGH
-    if(pConfig->invert_hsync)
-        LPC_LCD->POL |= (1<<12);
-    else
-        LPC_LCD->POL &= ~(1<<12);
+    LPC_LCD->POL |= (1<<12);
     // data is driven out into the LCD on the falling edge
-    if(pConfig->invert_panel_clock)
-        LPC_LCD->POL |= (1<<13);
-    else
-        LPC_LCD->POL &= ~(1<<13);
+    LPC_LCD->POL |= (1<<13);
 	
     // active high
     if(pConfig->active_high) {
@@ -270,25 +255,25 @@ void LCD_CtrlSetup(LCD_Config_Type* pConfig)
     LPC_LCD->CTRL |=((pConfig->lcd_bpp & 0x07)<<1);
 
     if(pConfig->lcd_type == LCD_TFT) {
-	    LPC_LCD->CTRL |=  (0x01 << 5);  // TFT
+	LPC_LCD->CTRL |=  (0x01 << 5);  // TFT
     }
     else {
 		// Color/Mono
         if(pConfig->lcd_type == LCD_STN_COLOR) {
             LPC_LCD->CTRL &= ~ (0x01 << 4);  // Color
-	    }
-	    else if (pConfig->lcd_type == LCD_STN_MONOCHROME) {
-	        LPC_LCD->CTRL |=  (0x01 << 4);   // Mono
-	     }
+	}
+	else if (pConfig->lcd_type == LCD_STN_MONOCHROME) {
+	    LPC_LCD->CTRL |=  (0x01 << 4);   // Mono
+	  }
 
-	    // STN/TFT
-	    LPC_LCD->CTRL &= ~ (0x01 << 5);  // STN
+	// STN/TFT
+	LPC_LCD->CTRL &= ~ (0x01 << 5);  // STN
 
         // Mono4/8
-    	if(pConfig->lcd_mono8)
-    	    LPC_LCD->CTRL |= (0x01 << 6);
-    	else
-    	    LPC_LCD->CTRL &= ~(0x01 << 6);
+	if(pConfig->lcd_mono8)
+	    LPC_LCD->CTRL |= (0x01 << 6);
+	else
+	    LPC_LCD->CTRL &= ~(0x01 << 6);
 
         // Single/dual
         if(pConfig->lcd_dual)
@@ -298,10 +283,7 @@ void LCD_CtrlSetup(LCD_Config_Type* pConfig)
 	}
 	
 	// notmal output
-	if(pConfig->lcd_bgr)
-		LPC_LCD->CTRL |= (1<<8);	// BGR
-	else
-		LPC_LCD->CTRL &= ~(1<<8);	// RGB
+	LPC_LCD->CTRL &= ~(1<<8);
 
         // Byte order
 	if(pConfig->big_endian_byte)
@@ -393,27 +375,11 @@ uint32_t LCD_GetWordOffset(uint32_t x, uint32_t y)
  **********************************************************************/
 uint32_t LCD_GetBitOffset(uint32_t x, uint32_t y)
 {
-  uint32_t pixel_num;
-  uint32_t ofs;
-  pixel_num = x + y*lcd_hsize;
-  
-  ofs = (pixel_num * bits_per_pixel[lcd_config.lcd_bpp])%32;
-  
-  if(lcd_config.big_endian_pixel & lcd_config.big_endian_byte)
-  {
-     ofs = 32 - bits_per_pixel[lcd_config.lcd_bpp] - ofs;
-  }
-  else if (lcd_config.big_endian_pixel & !lcd_config.big_endian_byte)
-  {
-     if(bits_per_pixel[lcd_config.lcd_bpp] < 8)
-     {
-        ofs = (ofs/8)*8 + (8 - (ofs%8)-bits_per_pixel[lcd_config.lcd_bpp]);
-     }
-  }
-  return ofs;
+
+  uint32_t pixel_num = x + y*lcd_hsize;
+
+  return (pixel_num * bits_per_pixel[lcd_config.lcd_bpp])%32;
 }
-
-
 
 /*********************************************************************//**
  * @brief		Copy pixel values from image buffer to frame buffer.
@@ -428,7 +394,7 @@ uint32_t LCD_GetBitOffset(uint32_t x, uint32_t y)
  **********************************************************************/
 void LCD_SetImage(LCD_PANEL panel, const uint8_t *pPain)
 {
-	volatile uint32_t i;
+	uint32_t i;
 	uint32_t * pWordDst = NULL;
 	uint8_t* pByteDst = NULL;
 	uint32_t bytes_num;
@@ -460,71 +426,16 @@ void LCD_SetImage(LCD_PANEL panel, const uint8_t *pPain)
 
   	for(i = LCD_PWR_ENA_DIS_DLY; i; i--);
 }
-/*********************************************************************//**
- * @brief		Draw a pixel on the given panel.
- *
- * @param[in] panel	         It can be:
- *                                             - LCD_PANEL_UPPER
- *                                             - LCD_PANEL_LOWER
- * @param[in] X_Left	    X position.
- * @param[in] Y_Up	        Y position.
- * @param[in] color	        Color which is placed to the given pixel.
- *
- * @return 	None.
- *
- **********************************************************************/
-void LCD_PutPixel (LCD_PANEL panel, uint32_t X_Left, uint32_t Y_Up, LcdPixel_t color)
-{
-    uint32_t k;
-    uint32_t * pWordData = NULL;
-    uint8_t*   pByteData = NULL;
-    uint32_t  bitOffset;
-    uint8_t*   pByteSrc = (uint8_t*)&color;
-    uint8_t  bpp = bits_per_pixel[lcd_config.lcd_bpp];
-    uint8_t  bytes_per_pixel = bpp/8;
-    uint32_t start_bit;
-  
-    if((X_Left >= lcd_hsize)||(Y_Up >= lcd_vsize))
-        return;
 
-    if(panel == LCD_PANEL_UPPER)
-    pWordData = (uint32_t*) LPC_LCD->UPBASE + LCD_GetWordOffset(X_Left,Y_Up);
-    else
-    pWordData = (uint32_t*) LPC_LCD->LPBASE + LCD_GetWordOffset(X_Left,Y_Up);
-    
-    bitOffset = LCD_GetBitOffset(X_Left,Y_Up);
-    pByteData = (uint8_t*) pWordData;
-    pByteData += bitOffset/8;
-    
-    start_bit =  bitOffset%8;
-
-    if(bpp < 8)
-    {
-	  uint8_t bit_pos = start_bit;
-	  uint8_t bit_ofs = 0;
-	  for(bit_ofs = 0;bit_ofs <bpp; bit_ofs++,bit_pos++)
-	  {
-		  *pByteData &= ~ (0x01 << bit_pos);
-		  *pByteData |= ((*pByteSrc >> (k+bit_ofs)) & 0x01) << bit_pos; 
-	  }
-    }
-    else
-    {
-	     for(k = 0; k < bytes_per_pixel; k++)
-	    {
-		   *(pByteData+ k) = *pByteSrc++;
-	    }
-    }
-}
 /*********************************************************************//**
  * @brief		Place given image to given position.
  *
  * @param[in] panel	         It can be:
  *                                             - LCD_PANEL_UPPER
  *                                             - LCD_PANEL_LOWER
- * @param[in] X_Left	    Start X position.
+ * @param[in] X_Left	        Start X position.
  * @param[in] Y_Up	        Start Y position.
- * @param[in] pBmp	        Image information. 
+ * @param[in] pBmp	        Image information.
  * @param[in] Mask	        Mask on pixel values.
  *
  * @return 	None.
@@ -543,112 +454,65 @@ void LCD_LoadPic (LCD_PANEL panel, uint32_t X_Left, uint32_t Y_Up,
   uint8_t  bytes_per_pixel = bpp/8;
   uint8_t  pixels_per_byte = 8/bpp;
   uint32_t hsize, vsize;
-  uint32_t start_bit;
+  uint32_t start_bit, start_byte;
+
+  if(lcd_config.big_endian_byte != 0 ||
+  	 lcd_config.big_endian_pixel != 0)
+  	 return;  // not support yet
 
   if(pBmp->BytesPP == 0)
   	pBmp->BytesPP = bytes_per_pixel;
     	 
+  if(panel == LCD_PANEL_UPPER)
+	pWordData = (uint32_t*) LPC_LCD->UPBASE + LCD_GetWordOffset(X_Left,Y_Up);
+  else
+	pWordData = (uint32_t*) LPC_LCD->LPBASE + LCD_GetWordOffset(X_Left,Y_Up);
+
+  bitOffset = LCD_GetBitOffset(X_Left,Y_Up);
+  pByteData = (uint8_t*) pWordData;
+  pByteData += bitOffset/8;
+
+  start_bit =  bitOffset%8;
+  start_byte = (start_bit > 0) ? 1:0;
+
   hsize = pBmp->H_Size;
   vsize = pBmp->V_Size;
   inc = (pixels_per_byte > 0) ? pixels_per_byte:1;
-   
   for(i = 0; i < vsize; i++)
   {
-    if(panel == LCD_PANEL_UPPER)
-	pWordData = (uint32_t*) LPC_LCD->UPBASE + LCD_GetWordOffset(X_Left,Y_Up);
-    else
-	pWordData = (uint32_t*) LPC_LCD->LPBASE + LCD_GetWordOffset(X_Left,Y_Up);
-
-	bitOffset = LCD_GetBitOffset(X_Left,Y_Up);
-	pByteData = (uint8_t*) pWordData;
-	pByteData += bitOffset/8;
-    
-	start_bit =  bitOffset%8;
-  
-    if(pBmp->BytesPP > 0)
-	pByteSrc = (uint8_t*) pBmp->pPicStream + i*hsize*pBmp->BytesPP; // storage of each line must be word alignment
-    else
-	pByteSrc = (uint8_t*) pBmp->pPicStream + (i*hsize*pBmp->BitsPP + 7)/8; // storage of each line must be word alignment
-    
-    X_LeftHold = X_Left;
-
-    for(j = 0; j <= hsize; j+= inc)
-    {
-	     if((X_LeftHold  >= lcd_hsize) || (X_LeftHold - X_Left  >= hsize))
-			break;
-	     if(bpp < 8)
-	     {
-		  uint8_t bit_pos = start_bit;
-		  uint8_t bit_ofs = 0;
-		  for(k = 0; k < 8; k+= bpp)
-		  {
-			  for(bit_ofs = 0;bit_ofs <bpp; bit_ofs++,bit_pos++)
-			  {
-			     *pByteData &= ~ (0x01 << bit_pos);
-			     *pByteData |= ((*pByteSrc >> (k+bit_ofs)) & 0x01) << bit_pos; 
-			  }
-			  if(lcd_config.big_endian_byte && lcd_config.big_endian_pixel)
-			  {
-				if(bit_pos >= bpp*2)
-				    bit_pos -= bpp*2;
-				else
-				{
-				   bit_pos = 8-bpp;
-				   if((((uint32_t)pByteData)%4) == 0)
-				     pByteData += 7; // change to next word
-				   else
-				     pByteData--;  // change to previous byte
-				}   
-			 }
-			 else if( !lcd_config.big_endian_byte && lcd_config.big_endian_pixel)
-			  {
-				if(bit_pos >= bpp*2)
-				    bit_pos -= bpp*2;
-				else
-				{
-				   bit_pos = 8-bpp;
-				   pByteData++;  // change to next byte
-				}
-			   }
-			   else
-			   {
-				 if(bit_pos >= 8)
-				 {
-				    bit_pos = 0;
-				    pByteData++; // change to next byte
-				 }
-				   
-			   }
-			   X_LeftHold++;
-			   if((X_LeftHold  >= lcd_hsize) || 
-				   (X_LeftHold - X_Left  >= hsize))
-				    break;
-		  } 
-		  pByteSrc++;
-		  continue;
-	    }
-	    else
-	    {
-		    for(k = 0; k < pBmp->BytesPP; k++)
-		    {
-			   *(pByteData+ k) = *pByteSrc++ ^ Mask;
-		    }
-            if(lcd_config.big_endian_byte)
-            {
-              if((uint32_t)pByteData %4 > 0)
-                pByteData -= bytes_per_pixel;
-              else
-                pByteData += 8 - bytes_per_pixel;
-            }
-            else
-              pByteData+= bytes_per_pixel;
-		    X_LeftHold++;
-	    }
-    }
     if(Y_Up++ >= lcd_vsize)
     {
-	break;
+      break;
     }
+    for(j = 0; j < hsize; j+= inc)
+    {
+      for(k = start_bit; k > 0 && k < 8; k++) {
+  	    *pByteData &= ~ (0x01 << k);
+	    *pByteData |= ((*pByteSrc >> k) & 0x01) << k; 
+      }
+   
+       if(X_LeftHold  >= lcd_hsize)
+      {
+        if(pBmp->BytesPP == 0)
+	      pByteSrc += (hsize - j)*bpp/8;
+        else
+              pByteSrc += (hsize - j)*pBmp->BytesPP;
+        break;
+      }
+	  if(bpp < 8)
+	  {
+	    *(pByteData+ start_byte +(j/inc)) = *pByteSrc++ ^ Mask;
+	    X_LeftHold += pixels_per_byte;
+	  }
+	  else
+	  {
+	    for(k = 0; k < pBmp->BytesPP; k++)
+                *(pByteData+start_byte +j*bytes_per_pixel+k) = *pByteSrc++ ^ Mask;
+                X_LeftHold++;
+	  }
+    }
+    X_LeftHold = X_Left;
+    pByteData += lcd_hsize*bpp/8;
   }
 }
 
@@ -677,6 +541,10 @@ void LCD_FillRect (LCD_PANEL panel, uint32_t startx,uint32_t endx,
    Bmp_t  bitmap;
    uint32_t hsize, vsize;
 
+   if(lcd_config.big_endian_byte != 0 ||
+	  lcd_config.big_endian_pixel != 0)
+	  return;  // not support yet
+
    bpp = bits_per_pixel[lcd_config.lcd_bpp];
    pixels_per_word = 32/bpp;
 
@@ -686,9 +554,9 @@ void LCD_FillRect (LCD_PANEL panel, uint32_t startx,uint32_t endx,
    
    color &= mask;
 
-   word_val = 0;
-   for(x = 0; x < pixels_per_word; x++)
-   	  word_val |= color << (x*bpp);
+   word_val = color;
+   for(x = 1; x < pixels_per_word; x++)
+   	  word_val |= color << bpp;
 	  
    ys = (starty > endy) ? endy : starty;
    ye = (starty > endy) ? starty : endy;
@@ -696,8 +564,8 @@ void LCD_FillRect (LCD_PANEL panel, uint32_t startx,uint32_t endx,
    xs = (startx > endx) ? endx : startx;
    xe = (startx > endx) ? startx : endx;
 
-   bitmap.BitsPP = bpp;
-   bitmap.BytesPP = bpp/8;
+   bitmap.BitsPP = lcd_config.lcd_bpp;
+   bitmap.BytesPP = lcd_config.lcd_bpp/8;
    hsize = xe - xs + 1;
    bitmap.H_Size = hsize;
    vsize = ye - ys + 1;
@@ -850,5 +718,5 @@ void LCD_Cursor_SetImage (const uint32_t *pCursor, int cursor, int size)
  
 #endif /*_LCD*/
 
-#endif /* __LPC177X_8X__ */
+
 

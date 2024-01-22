@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_rtc.c			2011-06-02
 *//**
@@ -312,43 +310,51 @@ void RTC_SetTime (LPC_RTC_TypeDef *RTCx, uint32_t Timetype, uint32_t TimeValue)
 	switch ( Timetype)
 	{
 	case RTC_TIMETYPE_SECOND:
-		if(TimeValue <= RTC_SECOND_MAX) 
-			RTCx->SEC = TimeValue & RTC_SEC_MASK;
+		if(TimeValue >= RTC_SECOND_MAX)
+			while(1); //error loop
+		RTCx->SEC = TimeValue & RTC_SEC_MASK;
 		break;
 
 	case RTC_TIMETYPE_MINUTE:
-		if(TimeValue <= RTC_MINUTE_MAX)
-			RTCx->MIN = TimeValue & RTC_MIN_MASK;
+		if(TimeValue >= RTC_MINUTE_MAX)
+			while(1); //error loop
+		RTCx->MIN = TimeValue & RTC_MIN_MASK;
 		break;
 
 	case RTC_TIMETYPE_HOUR:
-		if(TimeValue <= RTC_HOUR_MAX)
-			RTCx->HOUR = TimeValue & RTC_HOUR_MASK;
+		if(TimeValue >= RTC_HOUR_MAX)
+			while(1); //error loop
+		RTCx->HOUR = TimeValue & RTC_HOUR_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFWEEK:
-		if(TimeValue <= RTC_DAYOFWEEK_MAX)
-			RTCx->DOW = TimeValue & RTC_DOW_MASK;
+		if(TimeValue >= RTC_DAYOFWEEK_MAX)
+			while(1); //error loop
+		RTCx->DOW = TimeValue & RTC_DOW_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFMONTH:
-		if((TimeValue >= RTC_DAYOFMONTH_MIN)&&(TimeValue <= RTC_DAYOFMONTH_MAX))
-			RTCx->DOM = TimeValue & RTC_DOM_MASK;
+		if((TimeValue <= RTC_DAYOFMONTH_MIN)|(TimeValue >= RTC_DAYOFMONTH_MAX))
+			while(1); //error loop
+		RTCx->DOM = TimeValue & RTC_DOM_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFYEAR:
-		if((TimeValue >= RTC_DAYOFYEAR_MIN)&&(TimeValue <= RTC_DAYOFYEAR_MAX))
-			RTCx->DOY = TimeValue & RTC_DOY_MASK;
+		if((TimeValue <= RTC_DAYOFYEAR_MIN)|(TimeValue >= RTC_DAYOFYEAR_MAX))
+			while(1); //error loop
+		RTCx->DOY = TimeValue & RTC_DOY_MASK;
 		break;
 
 	case RTC_TIMETYPE_MONTH:
-		if((TimeValue >= RTC_MONTH_MIN)&&(TimeValue <= RTC_MONTH_MAX))
-			RTCx->MONTH = TimeValue & RTC_MONTH_MASK;
+		if((TimeValue <= RTC_MONTH_MIN)|(TimeValue >= RTC_MONTH_MAX))
+			while(1); //error loop
+		RTCx->MONTH = TimeValue & RTC_MONTH_MASK;
 		break;
 
 	case RTC_TIMETYPE_YEAR:
-		if(TimeValue <= RTC_YEAR_MAX)
-			RTCx->YEAR = TimeValue & RTC_YEAR_MASK;
+		if(TimeValue >= RTC_YEAR_MAX)
+			while(1); //error loop
+		RTCx->YEAR = TimeValue & RTC_YEAR_MASK;
 		break;
 	}
 }
@@ -453,43 +459,51 @@ void RTC_SetAlarmTime (LPC_RTC_TypeDef *RTCx, uint32_t Timetype, uint32_t ALValu
 	switch (Timetype)
 	{
 	case RTC_TIMETYPE_SECOND:
-		if(ALValue <= RTC_SECOND_MAX)
-			RTCx->ALSEC = ALValue & RTC_SEC_MASK;
+		if(ALValue >= RTC_SECOND_MAX)
+			while(1); //error loop
+		RTCx->ALSEC = ALValue & RTC_SEC_MASK;
 		break;
 
 	case RTC_TIMETYPE_MINUTE:
-		if(ALValue <= RTC_MINUTE_MAX)
-			RTCx->ALMIN = ALValue & RTC_MIN_MASK;
+		if(ALValue >= RTC_MINUTE_MAX)
+			while(1); //error loop
+		RTCx->ALMIN = ALValue & RTC_MIN_MASK;
 		break;
 
 	case RTC_TIMETYPE_HOUR:
-		if(ALValue <= RTC_HOUR_MAX)
-			RTCx->ALHOUR = ALValue & RTC_HOUR_MASK;
+		if(ALValue >= RTC_HOUR_MAX)
+			while(1); //error loop
+		RTCx->ALHOUR = ALValue & RTC_HOUR_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFWEEK:
-		if(ALValue <= RTC_DAYOFWEEK_MAX)
-			RTCx->ALDOW = ALValue & RTC_DOW_MASK;
+		if(ALValue >= RTC_DAYOFWEEK_MAX)
+			while(1); //error loop
+		RTCx->ALDOW = ALValue & RTC_DOW_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFMONTH:
-		if((ALValue >= RTC_DAYOFMONTH_MIN)&&(ALValue <= RTC_DAYOFMONTH_MAX))
-			RTCx->ALDOM = ALValue & RTC_DOM_MASK;
+		if((ALValue <= RTC_DAYOFMONTH_MIN)|(ALValue >= RTC_DAYOFMONTH_MAX))
+			while(1); //error loop
+		RTCx->ALDOM = ALValue & RTC_DOM_MASK;
 		break;
 
 	case RTC_TIMETYPE_DAYOFYEAR:
-		if((ALValue >= RTC_DAYOFYEAR_MIN)&&(ALValue <= RTC_DAYOFYEAR_MAX))
-			RTCx->ALDOY = ALValue & RTC_DOY_MASK;
+		if((ALValue <= RTC_DAYOFYEAR_MIN)|(ALValue >= RTC_DAYOFYEAR_MAX))
+			while(1); //error loop
+		RTCx->ALDOY = ALValue & RTC_DOY_MASK;
 		break;
 
 	case RTC_TIMETYPE_MONTH:
-		if((ALValue >= RTC_MONTH_MIN)&&(ALValue <= RTC_MONTH_MAX))
-			RTCx->ALMON = ALValue & RTC_MONTH_MASK;
+		if((ALValue <= RTC_MONTH_MIN)|(ALValue >= RTC_MONTH_MAX))
+			while(1); //error loop
+		RTCx->ALMON = ALValue & RTC_MONTH_MASK;
 		break;
 
 	case RTC_TIMETYPE_YEAR:
-		if(ALValue <= RTC_YEAR_MAX)
-			RTCx->ALYEAR = ALValue & RTC_YEAR_MASK;
+		if(ALValue >= RTC_YEAR_MAX)
+			while(1); //error loop
+		RTCx->ALYEAR = ALValue & RTC_YEAR_MASK;
 		break;
 	}
 }
@@ -642,7 +656,7 @@ void RTC_CalibCounterCmd(LPC_RTC_TypeDef *RTCx, FunctionalState NewState)
  **********************************************************************/
 void RTC_CalibConfig(LPC_RTC_TypeDef *RTCx, uint32_t CalibValue, uint8_t CalibDir)
 {
-	RTCx->CALIBRATION = ((CalibValue) & RTC_CALIBRATION_CALVAL_MASK) \
+	RTCx->CALIBRATION = ((CalibValue - 1) & RTC_CALIBRATION_CALVAL_MASK) \
 			| ((CalibDir == RTC_CALIB_DIR_BACKWARD) ? RTC_CALIBRATION_LIBDIR : 0);
 }
 
@@ -688,304 +702,6 @@ uint32_t RTC_ReadGPREG (LPC_RTC_TypeDef *RTCx, uint8_t Channel)
 	value = *preg;
 	return (value);
 }
-/*********************************************************************//**
- * @brief 		Initialize an variable of type RTC_ER_CONFIG_Type.
- * @param[in]	pConfig	The address of input variable.
- * @return 		None
- **********************************************************************/
-void RTC_ER_InitConfigStruct(RTC_ER_CONFIG_Type* pConfig)
-{
-	uint32_t tmp;
-	if(pConfig == NULL)
-		return;
-
-	for(tmp = 0; tmp < RTC_ER_INPUT_CHANNEL_NUM; tmp++)
-	{
-		pConfig->InputChannel[tmp].EventOnPosEdge = FALSE;
-		pConfig->InputChannel[tmp].GPClear= FALSE;
-		pConfig->InputChannel[tmp].IntWake= FALSE;
-	}
-	pConfig->Clk = 64;
-}
-
-/*********************************************************************//**
- * @brief 		Initialize Event Monitor/Recorder
- * @param[in]	pConfig	Configuration
- * @return 		SUCCESS/ERROR
- * Note: The RTC Module must be intialized before initializing this module.
- **********************************************************************/
-Status RTC_ER_Init(RTC_ER_CONFIG_Type* pConfig)
-{
-	if(pConfig == NULL)
-		return ERROR;
-	if((LPC_RTC->CCR & RTC_CCR_CLKEN) == 0)
-		return ERROR;
-
-	/* EV0 */
-	if(pConfig->InputChannel[0].EventOnPosEdge)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV0_POS_EDGE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV0_POS_EDGE;
-	
-	if(pConfig->InputChannel[0].IntWake)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV0_INTWAKE_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV0_INTWAKE_ENABLE;
-
-	if(pConfig->InputChannel[0].GPClear)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV0_GPCLEAR_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV0_GPCLEAR_ENABLE;
-
-	/* EV1 */
-	if(pConfig->InputChannel[1].EventOnPosEdge)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV1_POS_EDGE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV1_POS_EDGE;
-	
-	if(pConfig->InputChannel[1].IntWake)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV1_INTWAKE_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV1_INTWAKE_ENABLE;
-
-	if(pConfig->InputChannel[1].GPClear)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV1_GPCLEAR_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV1_GPCLEAR_ENABLE;
-
-	/* EV2 */
-	if(pConfig->InputChannel[2].EventOnPosEdge)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV2_POS_EDGE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV2_POS_EDGE;
-	
-	if(pConfig->InputChannel[2].IntWake)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV2_INTWAKE_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV2_INTWAKE_ENABLE;
-
-	if(pConfig->InputChannel[2].GPClear)
-		LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV2_GPCLEAR_ENABLE;
-	else
-		LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV2_GPCLEAR_ENABLE;
-
-	/* Sample Clock */
-	LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_MODE_MASK;
-	switch(pConfig->Clk)
-	{
-		case 0:
-			LPC_RTC->ERCONTROL |= RTC_ERCTRL_MODE_CLK_DISABLE;
-			break;
-		case 16:
-			LPC_RTC->ERCONTROL |= RTC_ERCTRL_MODE_16HZ;
-			break;
-		case 64:
-			LPC_RTC->ERCONTROL |= RTC_ERCTRL_MODE_64HZ;
-			break;
-		case 1000:
-			LPC_RTC->ERCONTROL |= RTC_ERCTRL_MODE_1KHZ;
-			break;
-		default:
-			return ERROR;
-	}
-	return SUCCESS;
-}
-/*********************************************************************//**
- * @brief 		Enable/Disable a input channel for Event Monitor/Recorder
- * @param[in]	channel	Channel Number. It should be 0~2
-  * @param[in]state	ENABLE/DISABLE
- * @return 		SUCCESS/ERROR
- **********************************************************************/
-Status RTC_ER_Cmd(uint8_t channel, FunctionalState state)
-{
-	switch(channel)
-	{
-		case 0:
-			if(state)
-				LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV0_INPUT_ENABLE;
-			else
-				LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV0_INPUT_ENABLE;
-			break;
-		case 1:
-			if(state)
-				LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV1_INPUT_ENABLE;
-			else
-				LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV1_INPUT_ENABLE;
-			break;
-		case 2:
-			if(state)
-				LPC_RTC->ERCONTROL |= RTC_ERCTRL_EV2_INPUT_ENABLE;
-			else
-				LPC_RTC->ERCONTROL &= ~RTC_ERCTRL_EV2_INPUT_ENABLE;
-			break;
-		default:
-			return ERROR;
-	}
-	return SUCCESS;
-}
-/*********************************************************************//**
- * @brief 		Get event count on a given channel.
- * @param[in]	channel	Channel Number. It should be 0~2
- * @return 	counter
- **********************************************************************/
-uint8_t RTC_ER_GetEventCount(uint8_t channel)
-{
-	uint8_t count = 0;
-	switch(channel)
-	{
-		case 0:
-			count = RTC_ER_EV0_COUNTER(LPC_RTC->ERCOUNTERS);
-			break;
-		case 1:
-			count = RTC_ER_EV1_COUNTER(LPC_RTC->ERCOUNTERS);
-			break;
-		case 2:
-			count = RTC_ER_EV2_COUNTER(LPC_RTC->ERCOUNTERS);
-			break;
-		default: 
-			break;		
-	}
-	return count;
-}
-/*********************************************************************//**
- * @brief 		Get Event Monirot/Recorder Status.
- * @param[in]	None
- * @return 	    Status. It can includes:
- *                  RTC_ER_EVENTS_ON_EV0_FLG
- *                  RTC_ER_EVENTS_ON_EV1_FLG
- *                  RTC_ER_EVENTS_ON_EV2_FLG
- *                  RTC_ER_STATUS_GP_CLEARED_FLG
- *                  RTC_ER_STATUS_WAKEUP_REQ_PENDING
- **********************************************************************/
-uint32_t RTC_ER_GetStatus(void)
-{
-    return LPC_RTC->ERSTATUS;
-}
-/*********************************************************************//**
- * @brief 		Clear Event Monitor/recoder status register.
- * @param[in] status	Status Flag. It should be:
- *                  RTC_ER_EVENTS_ON_EV0_FLG
- *                  RTC_ER_EVENTS_ON_EV1_FLG
- *                  RTC_ER_EVENTS_ON_EV2_FLG
- *                  RTC_ER_STATUS_GP_CLEARED_FLG
- *                  RTC_ER_STATUS_WAKEUP_REQ_PENDING
- * @return 	None
- **********************************************************************/
-void RTC_ER_ClearStatus(uint32_t status)
-{
-	LPC_RTC->ERSTATUS |= status;
-}
-/*********************************************************************//**
- * @brief 		Check whether a Wakup request is pending or not.
- * @param[in] None
- * @return 	TRUE/FALSE
- **********************************************************************/
-Bool RTC_ER_WakupReqPending(void)
-{
-	if(LPC_RTC->ERSTATUS & RTC_ER_STATUS_WAKEUP_REQ_PENDING)
-		return TRUE;
-	else
-		return FALSE;
-}
-/*********************************************************************//**
- * @brief 		Check whether RTC General Purpose registed has been cleared or not.
- * @param[in] None
- * @return 	TRUE/FALSE
- **********************************************************************/
-Bool 	 RTC_ER_GPCleared(void)
-{
-	if(LPC_RTC->ERSTATUS & RTC_ER_STATUS_GP_CLEARED_FLG)
-		return TRUE;
-	else
-		return FALSE;
-}
-/*********************************************************************//**
- * @brief 		Get the timestamp of the fist event on a given channel.
- * @param[in] channel	Channel number (It should be 0~2)
- * @param[in] pTimeStamp	point to the buffer
- * @return 	SUCCESS/ERROR
- **********************************************************************/
-Status RTC_ER_GetFirstTimeStamp(uint8_t channel, RTC_ER_TIMESTAMP_Type* pTimeStamp)
-{
-	if(pTimeStamp == NULL)
-		return ERROR;
-	
-	switch(channel)
-	{
-		case 0:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV0_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERFIRSTSTAMP0);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERFIRSTSTAMP0);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERFIRSTSTAMP0);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERFIRSTSTAMP0);
-			break;
-		case 1:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV1_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERFIRSTSTAMP1);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERFIRSTSTAMP1);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERFIRSTSTAMP1);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERFIRSTSTAMP1);
-			break;
-		case 2:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV2_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERFIRSTSTAMP2);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERFIRSTSTAMP2);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERFIRSTSTAMP2);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERFIRSTSTAMP2);
-			break;
-		default: 
-			break;		
-	}
-	return SUCCESS;
-
-}
-/*********************************************************************//**
- * @brief 		Get the timestamp of the last event on a given channel.
- * @param[in] channel	Channel number (It should be 0~2)
- * @param[in] pTimeStamp	point to the buffer
- * @return 	SUCCESS/ERROR
- **********************************************************************/
-Status RTC_ER_GetLastTimeStamp(uint8_t channel, RTC_ER_TIMESTAMP_Type* pTimeStamp)
-{
-	if(pTimeStamp == NULL)
-		return ERROR;
-	
-	switch(channel)
-	{
-		case 0:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV0_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERLASTSTAMP0);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERLASTSTAMP0);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERLASTSTAMP0);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERLASTSTAMP0);
-			break;
-		case 1:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV1_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERLASTSTAMP1);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERLASTSTAMP1);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERLASTSTAMP1);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERLASTSTAMP1);
-			break;
-		case 2:
-			if((LPC_RTC->ERSTATUS & (1<<RTC_ER_STATUS_EV2_BIT)) == 0)
-				return ERROR;
-			pTimeStamp->SEC = RTC_ER_TIMESTAMP_SEC(LPC_RTC->ERLASTSTAMP2);
-			pTimeStamp->MIN= RTC_ER_TIMESTAMP_MIN(LPC_RTC->ERLASTSTAMP2);
-			pTimeStamp->HOUR= RTC_ER_TIMESTAMP_HOUR(LPC_RTC->ERLASTSTAMP2);
-			pTimeStamp->DOY = RTC_ER_TIMESTAMP_DOY(LPC_RTC->ERLASTSTAMP2);
-			break;
-		default: 
-			break;		
-	}
-	return SUCCESS;
-
-}
-
 
 /**
  * @}
@@ -997,4 +713,4 @@ Status RTC_ER_GetLastTimeStamp(uint8_t channel, RTC_ER_TIMESTAMP_Type* pTimeStam
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */
+

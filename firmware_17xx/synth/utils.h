@@ -19,6 +19,9 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
+#define BP {rprintf(0,"[Breakpoint] in function %s, line %d, file %s\n",__FUNCTION__,__LINE__,__FILE__);for(;;);}
+#define TR {rprintf(0,"[Trace] in function %s, line %d\n",__FUNCTION__,__LINE__);}
+
 uint16_t satAddU16U16(uint16_t a, uint16_t b);
 uint16_t satAddU16S32(uint16_t a, int32_t b);
 uint16_t satAddU16S16(uint16_t a, int16_t b);

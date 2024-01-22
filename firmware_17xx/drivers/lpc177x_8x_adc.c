@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_adc.c			2011-06-02
 *//**
@@ -69,7 +67,7 @@ void ADC_Init(LPC_ADC_TypeDef *ADCx, uint32_t rate)
 	// Turn on power and clock
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCADC, ENABLE);
 
-	ADCx->ADCR = 0;
+	ADCx->CR = 0;
 
 	//Enable PDN bit
 	tmp = ADC_CR_PDN;
@@ -87,7 +85,7 @@ void ADC_Init(LPC_ADC_TypeDef *ADCx, uint32_t rate)
 	temp = (ADCPClk * 2 + temp)/(2 * temp) - 1; //get the round value by fomular: (2*A + B)/(2*A)
 	tmp |=  ADC_CR_CLKDIV(temp);
 
-	ADCx->ADCR = tmp;
+	ADCx->CR = tmp;
 }
 
 
@@ -98,13 +96,8 @@ void ADC_Init(LPC_ADC_TypeDef *ADCx, uint32_t rate)
 **********************************************************************/
 void ADC_DeInit(LPC_ADC_TypeDef *ADCx)
 {
-    if (ADCx->ADCR & ADC_CR_START_MASK) //need to stop START bits before DeInit
-        ADCx->ADCR &= ~ADC_CR_START_MASK;
-     // Clear SEL bits
-     ADCx->ADCR &= ~0xFF;
-
 	// Clear PDN bit
-	ADCx->ADCR &= ~ADC_CR_PDN;
+	ADCx->CR &= ~ADC_CR_PDN;
 	// Turn on power and clock
 	CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCADC, DISABLE);
 }
@@ -119,7 +112,7 @@ uint32_t ADC_GetData(uint32_t channel)
 {
 	uint32_t adc_value;
 
-	adc_value = *(uint32_t *)((&LPC_ADC->ADDR0) + channel);
+	adc_value = *(uint32_t *)((&LPC_ADC->DR[0]) + channel);
 	return ADC_GDR_RESULT(adc_value);
 }
 
@@ -140,8 +133,8 @@ uint32_t ADC_GetData(uint32_t channel)
 *********************************************************************/
 void ADC_StartCmd(LPC_ADC_TypeDef *ADCx, uint8_t start_mode)
 {
-	ADCx->ADCR &= ~ADC_CR_START_MASK;
-	ADCx->ADCR |=ADC_CR_START_MODE_SEL((uint32_t)start_mode);
+	ADCx->CR &= ~ADC_CR_START_MASK;
+	ADCx->CR |=ADC_CR_START_MODE_SEL((uint32_t)start_mode);
 }
 
 
@@ -155,9 +148,9 @@ void ADC_StartCmd(LPC_ADC_TypeDef *ADCx, uint8_t start_mode)
 **********************************************************************/
 void ADC_BurstCmd(LPC_ADC_TypeDef *ADCx, FunctionalState NewState)
 {
-	ADCx->ADCR &= ~ADC_CR_BURST;
+	ADCx->CR &= ~ADC_CR_BURST;
 	if (NewState){
-		ADCx->ADCR |= ADC_CR_BURST;
+		ADCx->CR |= ADC_CR_BURST;
 	}
 }
 
@@ -171,9 +164,9 @@ void ADC_BurstCmd(LPC_ADC_TypeDef *ADCx, FunctionalState NewState)
 **********************************************************************/
 void ADC_PowerdownCmd(LPC_ADC_TypeDef *ADCx, FunctionalState NewState)
 {
-	ADCx->ADCR &= ~ADC_CR_PDN;
+	ADCx->CR &= ~ADC_CR_PDN;
 	if (NewState){
-		ADCx->ADCR |= ADC_CR_PDN;
+		ADCx->CR |= ADC_CR_PDN;
 	}
 }
 
@@ -187,9 +180,9 @@ void ADC_PowerdownCmd(LPC_ADC_TypeDef *ADCx, FunctionalState NewState)
 **********************************************************************/
 void ADC_EdgeStartConfig(LPC_ADC_TypeDef *ADCx, uint8_t EdgeOption)
 {
-	ADCx->ADCR &= ~ADC_CR_EDGE;
+	ADCx->CR &= ~ADC_CR_EDGE;
 	if (EdgeOption){
-		ADCx->ADCR |= ADC_CR_EDGE;
+		ADCx->CR |= ADC_CR_EDGE;
 	}
 }
 
@@ -209,9 +202,9 @@ void ADC_EdgeStartConfig(LPC_ADC_TypeDef *ADCx, uint8_t EdgeOption)
 **********************************************************************/
 void ADC_IntConfig (LPC_ADC_TypeDef *ADCx, ADC_TYPE_INT_OPT IntType, FunctionalState NewState)
 {
-	ADCx->ADINTEN &= ~ADC_INTEN_CH(IntType);
+	ADCx->INTEN &= ~ADC_INTEN_CH(IntType);
 	if (NewState){
-		ADCx->ADINTEN |= ADC_INTEN_CH(IntType);
+		ADCx->INTEN |= ADC_INTEN_CH(IntType);
 	}
 }
 
@@ -226,11 +219,9 @@ void ADC_IntConfig (LPC_ADC_TypeDef *ADCx, ADC_TYPE_INT_OPT IntType, FunctionalS
 void ADC_ChannelCmd (LPC_ADC_TypeDef *ADCx, uint8_t Channel, FunctionalState NewState)
 {
 	if (NewState == ENABLE) {
-		ADCx->ADCR |= ADC_CR_CH_SEL(Channel);
-	} else {		
-		if (ADCx->ADCR & ADC_CR_START_MASK) //need to stop START bits before disable channel
-		   ADCx->ADCR &= ~ADC_CR_START_MASK;
-		ADCx->ADCR &= ~ADC_CR_CH_SEL(Channel);
+		ADCx->CR |= ADC_CR_CH_SEL(Channel);
+	} else {
+		ADCx->CR &= ~ADC_CR_CH_SEL(Channel);
 	}
 }
 
@@ -243,7 +234,7 @@ void ADC_ChannelCmd (LPC_ADC_TypeDef *ADCx, uint8_t Channel, FunctionalState New
 uint16_t ADC_ChannelGetData(LPC_ADC_TypeDef *ADCx, uint8_t channel)
 {
 	uint32_t adc_value;
-	adc_value = *(uint32_t *) ((&ADCx->ADDR0) + channel);
+	adc_value = *(uint32_t *) ((&ADCx->DR[0]) + channel);
 	return ADC_DR_RESULT(adc_value);
 }
 
@@ -259,7 +250,7 @@ uint16_t ADC_ChannelGetData(LPC_ADC_TypeDef *ADCx, uint8_t channel)
 FlagStatus ADC_ChannelGetStatus(LPC_ADC_TypeDef *ADCx, uint8_t channel, uint32_t StatusType)
 {
 	uint32_t temp;
-	temp =  *(uint32_t *) ((&ADCx->ADDR0) + channel);
+	temp =  *(uint32_t *) ((&ADCx->DR[0]) + channel);
 	if (StatusType)
 	{
 		temp &= ADC_DR_DONE_FLAG;
@@ -287,7 +278,7 @@ FlagStatus ADC_ChannelGetStatus(LPC_ADC_TypeDef *ADCx, uint8_t channel, uint32_t
 **********************************************************************/
 uint32_t ADC_GlobalGetData(LPC_ADC_TypeDef *ADCx)
 {
-	return ((uint32_t)(ADCx->ADGDR));
+	return ((uint32_t)(ADCx->GDR));
 }
 
 /*********************************************************************//**
@@ -302,7 +293,7 @@ FlagStatus	ADC_GlobalGetStatus(LPC_ADC_TypeDef *ADCx, uint32_t StatusType)
 {
 	uint32_t temp;
 
-	temp =  ADCx->ADGDR;
+	temp =  ADCx->GDR;
 	if (StatusType){
 		temp &= ADC_DR_DONE_FLAG;
 	}else{
@@ -325,4 +316,4 @@ FlagStatus	ADC_GlobalGetStatus(LPC_ADC_TypeDef *ADCx, uint32_t StatusType)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */
+

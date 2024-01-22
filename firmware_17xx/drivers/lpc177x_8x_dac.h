@@ -58,7 +58,7 @@ extern "C"
 
 /** After the selected settling time after this field is written with a
 new VALUE, the voltage on the AOUT pin (with respect to VSSA)
-is VALUE/1024 ?VREF */
+is VALUE/1024 × VREF */
 #define DAC_VALUE(n) 		((uint32_t)((n&0x3FF)<<6))
 
 /** If this bit = 0: The settling time of the DAC is 1 microsecond max,

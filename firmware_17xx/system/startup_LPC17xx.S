@@ -108,6 +108,12 @@ __cs3_interrupt_vector_cortex_m:
     .long   PLL1_IRQHandler             /* 48: PLL1 Lock (USB PLL)          */
     .long	USBActivity_IRQHandler		/* 49: USB Activity 				*/
     .long 	CANActivity_IRQHandler		/* 50: CAN Activity					*/
+    .long 	UART4_IRQHandler			/* 51: UART4						*/
+    .long 	SSP2_IRQHandler         	/* 52: SSP2							*/
+    .long 	LCD_IRQHandler            	/* 53: LCD							*/
+    .long 	GPIO_IRQHandler           	/* 54: GPIO							*/
+    .long 	PWM0_IRQHandler           	/* 55: PWM0							*/
+    .long 	EEPROM_IRQHandler         	/* 56: EEPROM						*/
 
     .size   __cs3_interrupt_vector_cortex_m, . - __cs3_interrupt_vector_cortex_m
 
@@ -173,7 +179,7 @@ ctor_end:
 
     LDR     R0, =SystemInit
     BLX     R0
-    LDR     R0,=main
+    LDR     R0, =main
     BX      R0
     .pool
     .cantunwind
@@ -287,5 +293,11 @@ Default_Handler:
     IRQ     PLL1_IRQHandler
     IRQ		USBActivity_IRQHandler
     IRQ		CANActivity_IRQHandler
+    IRQ		UART4_IRQHandler
+    IRQ		SSP2_IRQHandler
+    IRQ		LCD_IRQHandler
+    IRQ		GPIO_IRQHandler
+    IRQ		PWM0_IRQHandler
+    IRQ		EEPROM_IRQHandler
 
     .end

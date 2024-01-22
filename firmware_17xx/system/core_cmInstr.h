@@ -1,16 +1,16 @@
 /**************************************************************************//**
  * @file     core_cmInstr.h
  * @brief    CMSIS Cortex-M Core Instruction Access Header File
- * @version  V2.01
- * @date     06. December 2010
+ * @version  V2.10
+ * @date     19. July 2011
  *
  * @note
- * Copyright (C) 2009-2010 ARM Limited. All rights reserved.
+ * Copyright (C) 2009-2011 ARM Limited. All rights reserved.
  *
  * @par
- * ARM Limited (ARM) is supplying this software for use with Cortex-M
- * processor based microcontrollers.  This file can be freely distributed
- * within development tools that are supporting such ARM based processors.
+ * ARM Limited (ARM) is supplying this software for use with Cortex-M 
+ * processor based microcontrollers.  This file can be freely distributed 
+ * within development tools that are supporting such ARM based processors. 
  *
  * @par
  * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
@@ -21,19 +21,24 @@
  *
  ******************************************************************************/
 
-#ifndef __CORE_CMINSTR_H__
-#define __CORE_CMINSTR_H__
+#ifndef __CORE_CMINSTR_H
+#define __CORE_CMINSTR_H
 
 
 /* ##########################  Core Instruction Access  ######################### */
-/** \ingroup  CMSIS
-	\addtogroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+/** \defgroup CMSIS_Core_InstructionInterface CMSIS Core Instruction Interface
+  * @ingroup CMSIS_Core
   Access to dedicated instructions
   @{
 */
 
-#if defined ( __CC_ARM   ) /*------------------ RealView Compiler ----------------*/
+#if   defined ( __CC_ARM ) /*------------------RealView Compiler -----------------*/
 /* ARM armcc specific functions */
+
+#if (__ARMCC_VERSION < 400677)
+  #error "Please use ARM Compiler Toolchain V4.0.677 or later!"
+#endif
+
 
 /** \brief  No Operation
 
@@ -67,8 +72,8 @@
 
 /** \brief  Instruction Synchronization Barrier
 
-    Instruction Synchronization Barrier flushes the pipeline in the processor,
-    so that all instructions following the ISB are fetched from cache or
+    Instruction Synchronization Barrier flushes the pipeline in the processor, 
+    so that all instructions following the ISB are fetched from cache or 
     memory, after the instruction has been completed.
  */
 #define __ISB()                           __isb(0xF)
@@ -76,7 +81,7 @@
 
 /** \brief  Data Synchronization Barrier
 
-    This function acts as a special kind of Data Memory Barrier.
+    This function acts as a special kind of Data Memory Barrier. 
     It completes when all explicit memory accesses before this instruction complete.
  */
 #define __DSB()                           __dsb(0xF)
@@ -84,7 +89,7 @@
 
 /** \brief  Data Memory Barrier
 
-    This function ensures the apparent order of the explicit memory operations before
+    This function ensures the apparent order of the explicit memory operations before 
     and after the instruction, without ensuring their completion.
  */
 #define __DMB()                           __dmb(0xF)
@@ -107,15 +112,11 @@
     \param [in]    value  Value to reverse
     \return               Reversed value
  */
-#if (__ARMCC_VERSION < 400677)
-extern uint32_t __REV16(uint32_t value);
-#else  /* (__ARMCC_VERSION >= 400677)  */
 static __INLINE __ASM uint32_t __REV16(uint32_t value)
 {
   rev16 r0, r0
   bx lr
 }
-#endif /* __ARMCC_VERSION  */
 
 
 /** \brief  Reverse byte order in signed short value
@@ -125,15 +126,11 @@ static __INLINE __ASM uint32_t __REV16(uint32_t value)
     \param [in]    value  Value to reverse
     \return               Reversed value
  */
-#if (__ARMCC_VERSION < 400677)
-extern int32_t __REVSH(int32_t value);
-#else  /* (__ARMCC_VERSION >= 400677)  */
 static __INLINE __ASM int32_t __REVSH(int32_t value)
 {
   revsh r0, r0
   bx lr
 }
-#endif /* __ARMCC_VERSION  */
 
 
 #if       (__CORTEX_M >= 0x03)
@@ -219,11 +216,7 @@ static __INLINE __ASM int32_t __REVSH(int32_t value)
     This function removes the exclusive lock which is created by LDREX.
 
  */
-#if (__ARMCC_VERSION < 400000)
-extern void __CLREX(void);
-#else  /* (__ARMCC_VERSION >= 400000)  */
 #define __CLREX                           __clrex
-#endif /* __ARMCC_VERSION  */
 
 
 /** \brief  Signed Saturate
@@ -255,202 +248,19 @@ extern void __CLREX(void);
     \param [in]  value  Value to count the leading zeros
     \return             number of leading zeros in value
  */
-#define __CLZ                             __clz
+#define __CLZ                             __clz 
 
 #endif /* (__CORTEX_M >= 0x03) */
 
 
 
-#elif (defined (__ICCARM__)) /*---------------- ICC Compiler ---------------------*/
+#elif defined ( __ICCARM__ ) /*------------------ ICC Compiler -------------------*/
 /* IAR iccarm specific functions */
 
-#include <intrinsics.h>                     /* IAR Intrinsics   */
-
-#pragma diag_suppress=Pe940
-
-/** \brief  No Operation
-
-    No Operation does nothing. This instruction can be used for code alignment purposes.
- */
-#define __NOP                           __no_operation
+#include <cmsis_iar.h>
 
 
-/** \brief  Wait For Interrupt
-
-    Wait For Interrupt is a hint instruction that suspends execution
-    until one of a number of events occurs.
- */
-static __INLINE  void __WFI(void)
-{
-  __ASM ("wfi");
-}
-
-
-/** \brief  Wait For Event
-
-    Wait For Event is a hint instruction that permits the processor to enter
-    a low-power state until one of a number of events occurs.
- */
-static __INLINE  void __WFE(void)
-{
-  __ASM ("wfe");
-}
-
-
-/** \brief  Send Event
-
-    Send Event is a hint instruction. It causes an event to be signaled to the CPU.
- */
-static __INLINE  void __SEV(void)
-{
-  __ASM ("sev");
-}
-
-
-/* intrinsic     void __ISB(void)            (see intrinsics.h) */
-/* intrinsic     void __DSB(void)            (see intrinsics.h) */
-/* intrinsic     void __DMB(void)            (see intrinsics.h) */
-/* intrinsic uint32_t __REV(uint32_t value)  (see intrinsics.h) */
-/* intrinsic          __SSAT                 (see intrinsics.h) */
-/* intrinsic          __USAT                 (see intrinsics.h) */
-
-
-/** \brief  Reverse byte order (16 bit)
-
-    This function reverses the byte order in two unsigned short values.
-
-    \param [in]    value  Value to reverse
-    \return               Reversed value
- */
-static uint32_t __REV16(uint32_t value)
-{
-  __ASM("rev16 r0, r0");
-}
-
-
-/* intrinsic uint32_t __REVSH(uint32_t value)  (see intrinsics.h */
-
-
-#if       (__CORTEX_M >= 0x03)
-
-/** \brief  Reverse bit order of value
-
-    This function reverses the bit order of the given value.
-
-    \param [in]    value  Value to reverse
-    \return               Reversed value
- */
-static uint32_t __RBIT(uint32_t value)
-{
-  __ASM("rbit r0, r0");
-}
-
-
-/** \brief  LDR Exclusive (8 bit)
-
-    This function performs a exclusive LDR command for 8 bit value.
-
-    \param [in]    ptr  Pointer to data
-    \return             value of type uint8_t at (*ptr)
- */
-static uint8_t __LDREXB(volatile uint8_t *addr)
-{
-  __ASM("ldrexb r0, [r0]");
-}
-
-
-/** \brief  LDR Exclusive (16 bit)
-
-    This function performs a exclusive LDR command for 16 bit values.
-
-    \param [in]    ptr  Pointer to data
-    \return        value of type uint16_t at (*ptr)
- */
-static uint16_t __LDREXH(volatile uint16_t *addr)
-{
-  __ASM("ldrexh r0, [r0]");
-}
-
-
-/** \brief  LDR Exclusive (32 bit)
-
-    This function performs a exclusive LDR command for 32 bit values.
-
-    \param [in]    ptr  Pointer to data
-    \return        value of type uint32_t at (*ptr)
- */
-/* intrinsic unsigned long __LDREX(unsigned long *)  (see intrinsics.h) */
-static uint32_t __LDREXW(volatile uint32_t *addr)
-{
-  __ASM("ldrex r0, [r0]");
-}
-
-
-/** \brief  STR Exclusive (8 bit)
-
-    This function performs a exclusive STR command for 8 bit values.
-
-    \param [in]  value  Value to store
-    \param [in]    ptr  Pointer to location
-    \return          0  Function succeeded
-    \return          1  Function failed
- */
-static uint32_t __STREXB(uint8_t value, volatile uint8_t *addr)
-{
-  __ASM("strexb r0, r0, [r1]");
-}
-
-
-/** \brief  STR Exclusive (16 bit)
-
-    This function performs a exclusive STR command for 16 bit values.
-
-    \param [in]  value  Value to store
-    \param [in]    ptr  Pointer to location
-    \return          0  Function succeeded
-    \return          1  Function failed
- */
-static uint32_t __STREXH(uint16_t value, volatile uint16_t *addr)
-{
-  __ASM("strexh r0, r0, [r1]");
-}
-
-
-/** \brief  STR Exclusive (32 bit)
-
-    This function performs a exclusive STR command for 32 bit values.
-
-    \param [in]  value  Value to store
-    \param [in]    ptr  Pointer to location
-    \return          0  Function succeeded
-    \return          1  Function failed
- */
-/* intrinsic unsigned long __STREX(unsigned long, unsigned long)  (see intrinsics.h )*/
-static uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
-{
-  __ASM("strex r0, r0, [r1]");
-}
-
-
-/** \brief  Remove the exclusive lock
-
-    This function removes the exclusive lock which is created by LDREX.
-
- */
-static __INLINE void __CLREX(void)
-{
-  __ASM ("clrex");
-}
-
-/* intrinsic   unsigned char __CLZ( unsigned long )      (see intrinsics.h) */
-
-#endif /* (__CORTEX_M >= 0x03) */
-
-#pragma diag_default=Pe940
-
-
-
-#elif (defined (__GNUC__)) /*------------------ GNU Compiler ---------------------*/
+#elif defined ( __GNUC__ ) /*------------------ GNU Compiler ---------------------*/
 /* GNU gcc specific functions */
 
 /** \brief  No Operation
@@ -497,8 +307,8 @@ __attribute__( ( always_inline ) ) static __INLINE void __SEV(void)
 
 /** \brief  Instruction Synchronization Barrier
 
-    Instruction Synchronization Barrier flushes the pipeline in the processor,
-    so that all instructions following the ISB are fetched from cache or
+    Instruction Synchronization Barrier flushes the pipeline in the processor, 
+    so that all instructions following the ISB are fetched from cache or 
     memory, after the instruction has been completed.
  */
 __attribute__( ( always_inline ) ) static __INLINE void __ISB(void)
@@ -509,7 +319,7 @@ __attribute__( ( always_inline ) ) static __INLINE void __ISB(void)
 
 /** \brief  Data Synchronization Barrier
 
-    This function acts as a special kind of Data Memory Barrier.
+    This function acts as a special kind of Data Memory Barrier. 
     It completes when all explicit memory accesses before this instruction complete.
  */
 __attribute__( ( always_inline ) ) static __INLINE void __DSB(void)
@@ -520,7 +330,7 @@ __attribute__( ( always_inline ) ) static __INLINE void __DSB(void)
 
 /** \brief  Data Memory Barrier
 
-    This function ensures the apparent order of the explicit memory operations before
+    This function ensures the apparent order of the explicit memory operations before 
     and after the instruction, without ensuring their completion.
  */
 __attribute__( ( always_inline ) ) static __INLINE void __DMB(void)
@@ -539,7 +349,7 @@ __attribute__( ( always_inline ) ) static __INLINE void __DMB(void)
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV(uint32_t value)
 {
   uint32_t result;
-
+  
   __ASM volatile ("rev %0, %1" : "=r" (result) : "r" (value) );
   return(result);
 }
@@ -555,7 +365,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV(uint32_t value
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV16(uint32_t value)
 {
   uint32_t result;
-
+  
   __ASM volatile ("rev16 %0, %1" : "=r" (result) : "r" (value) );
   return(result);
 }
@@ -571,7 +381,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __REV16(uint32_t val
 __attribute__( ( always_inline ) ) static __INLINE int32_t __REVSH(int32_t value)
 {
   uint32_t result;
-
+  
   __ASM volatile ("revsh %0, %1" : "=r" (result) : "r" (value) );
   return(result);
 }
@@ -589,7 +399,7 @@ __attribute__( ( always_inline ) ) static __INLINE int32_t __REVSH(int32_t value
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __RBIT(uint32_t value)
 {
   uint32_t result;
-
+  
    __ASM volatile ("rbit %0, %1" : "=r" (result) : "r" (value) );
    return(result);
 }
@@ -605,7 +415,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __RBIT(uint32_t valu
 __attribute__( ( always_inline ) ) static __INLINE uint8_t __LDREXB(volatile uint8_t *addr)
 {
     uint8_t result;
-
+  
    __ASM volatile ("ldrexb %0, [%1]" : "=r" (result) : "r" (addr) );
    return(result);
 }
@@ -621,7 +431,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint8_t __LDREXB(volatile uin
 __attribute__( ( always_inline ) ) static __INLINE uint16_t __LDREXH(volatile uint16_t *addr)
 {
     uint16_t result;
-
+  
    __ASM volatile ("ldrexh %0, [%1]" : "=r" (result) : "r" (addr) );
    return(result);
 }
@@ -637,7 +447,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint16_t __LDREXH(volatile ui
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __LDREXW(volatile uint32_t *addr)
 {
     uint32_t result;
-
+  
    __ASM volatile ("ldrex %0, [%1]" : "=r" (result) : "r" (addr) );
    return(result);
 }
@@ -655,7 +465,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __LDREXW(volatile ui
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __STREXB(uint8_t value, volatile uint8_t *addr)
 {
    uint32_t result;
-
+  
    __ASM volatile ("strexb %0, %2, [%1]" : "=r" (result) : "r" (addr), "r" (value) );
    return(result);
 }
@@ -673,7 +483,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __STREXB(uint8_t val
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __STREXH(uint16_t value, volatile uint16_t *addr)
 {
    uint32_t result;
-
+  
    __ASM volatile ("strexh %0, %2, [%1]" : "=r" (result) : "r" (addr), "r" (value) );
    return(result);
 }
@@ -691,7 +501,7 @@ __attribute__( ( always_inline ) ) static __INLINE uint32_t __STREXH(uint16_t va
 __attribute__( ( always_inline ) ) static __INLINE uint32_t __STREXW(uint32_t value, volatile uint32_t *addr)
 {
    uint32_t result;
-
+  
    __ASM volatile ("strex %0, %2, [%1]" : "=r" (result) : "r" (addr), "r" (value) );
    return(result);
 }
@@ -750,7 +560,7 @@ __attribute__( ( always_inline ) ) static __INLINE void __CLREX(void)
 __attribute__( ( always_inline ) ) static __INLINE uint8_t __CLZ(uint32_t value)
 {
   uint8_t result;
-
+  
   __ASM volatile ("clz %0, %1" : "=r" (result) : "r" (value) );
   return(result);
 }
@@ -760,12 +570,12 @@ __attribute__( ( always_inline ) ) static __INLINE uint8_t __CLZ(uint32_t value)
 
 
 
-#elif (defined (__TASKING__)) /*--------------- TASKING Compiler -----------------*/
+#elif defined ( __TASKING__ ) /*------------------ TASKING Compiler --------------*/
 /* TASKING carm specific functions */
 
 /*
  * The CMSIS functions have been implemented as intrinsics in the compiler.
- * Please use "carm -?i" to get an up to date list of all instrinsics,
+ * Please use "carm -?i" to get an up to date list of all intrinsics,
  * Including the CMSIS ones.
  */
 
@@ -773,4 +583,4 @@ __attribute__( ( always_inline ) ) static __INLINE uint8_t __CLZ(uint32_t value)
 
 /*@}*/ /* end of group CMSIS_Core_InstructionInterface */
 
-#endif /* __CORE_CMINSTR_H__ */
+#endif /* __CORE_CMINSTR_H */

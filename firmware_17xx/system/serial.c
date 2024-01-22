@@ -10,33 +10,25 @@
 
 #include "LPC177x_8x.h"
 #include "lpc177x_8x_uart.h"
+#include "lpc177x_8x_clkpwr.h"
 #include "lpc177x_8x_pinsel.h"
 #include "serial.h"
 
 /* Initialize Serial Interface UART0 */
 void init_serial0 ( unsigned long baudrate )
 {
+	// power UART0 up
+	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCUART0,ENABLE);
+
 	// Initialize UART0 pin connect
 	PINSEL_ConfigPin(0, 2, 1);
 	PINSEL_ConfigPin(0, 3, 1);
 	
-	// UART Configuration structure variable
-	UART_CFG_Type UARTConfigStruct;
-		
-	/* Initialize UART Configuration parameter structure to default state:
-	* Baudrate = 115200 bps
-	* 8 data bit
-	* 1 Stop bit
-	* None parity
-	*/
-	UART_ConfigStructInit(&UARTConfigStruct);
-	//Configure baud rate
-	UARTConfigStruct.Baud_rate = baudrate;
-	// Initialize UART0 & UART3 peripheral with given to corresponding parameter
-	UART_Init(UART_0, &UARTConfigStruct);
-
-	// Enable UART Transmit
-	UART_TxCmd(UART_0, ENABLE);
+    LPC_UART0->LCR = 0x83;											/* 8 bits, no Parity, 1 Stop bit     */
+    unsigned long Fdiv = ( SystemCoreClock / 32 ) / baudrate ;		/* baud rate                        */
+    LPC_UART0->DLM = Fdiv / 256;
+    LPC_UART0->DLL = Fdiv % 256;
+    LPC_UART0->LCR = 0x03;											/* DLAB = 0                         */
 }
 
 /* Write character to Serial Port 0 with \n -> \r\n  */
@@ -55,7 +47,7 @@ int putc_serial0 (int ch)
 {
     while (UART_CheckBusy(UART_0) == SET);
 
-	UART_SendByte(UART_0, ch);
+	UART_SendByte(LPC_UART0, ch);
 
     return ch;
 }

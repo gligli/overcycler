@@ -40,10 +40,6 @@
 #include "LPC177x_8x.h"
 #include "system_LPC177x_8x.h"
 
-/** @addtogroup LPC177x_8x_System
- * @{
- */
- 
 #define __CLK_DIV(x,y) (((y) == 0) ? 0: (x)/(y))
 
 /*
@@ -179,6 +175,7 @@
 //			<o11.13>	PCCAN1: CAN controller 1 power/clock enable (bit 13)
 //			<o11.14>	PCCAN2: CAN controller 2 power/clock enable (bit 14)
 //			<o11.15>	PCGPIO: IOCON, GPIO, and GPIO interrupts power/clock enable (bit 15)
+//
 //			<o11.17>	PCMCPWM: Motor Control PWM power/clock enable (bit 17)
 //			<o11.18>	PCQEI: Quadrature encoder interface power/clock enable (bit 18)
 //			<o11.19>	PCI2C1: I2C 1 interface power/clock enable (bit 19)
@@ -215,9 +212,6 @@
 //	</e>
 */
 
-/** @addtogroup LPC177x_8x_System_Defines  LPC177x_8x System Defines
-  @{
- */
 #define CLOCK_SETUP           1
 #define SCS_Val               0x00000021
 #define CLKSRCSEL_Val         0x00000001
@@ -229,7 +223,7 @@
 #define USBCLKSEL_Val         0x00000201
 #define EMCCLKSEL_Val         0x00000001
 #define PCLKSEL_Val           0x00000002
-#define PCONP_Val             0x042887DE
+#define PCONP_Val             0x03f0840E
 #define CLKOUTCFG_Val         0x00000100
 
 
@@ -248,10 +242,6 @@
 
 #define FLASH_SETUP           1
 #define FLASHCFG_Val          0x00005000
-
-/*
-//-------- <<< end of configuration section >>> ------------------------------
-*/
 
 /*----------------------------------------------------------------------------
   Check the register settings
@@ -302,15 +292,15 @@
 
 /* Flash Accelerator Configuration -------------------------------------------*/
 #if (CHECK_RSVD((FLASHCFG_Val), ~0x0000F000))
-   #error "FLASHCFG: Invalid values of reserved bits!"
+   #warning "FLASHCFG: Invalid values of reserved bits!"
 #endif
 
 
 /*----------------------------------------------------------------------------
   DEFINES
  *----------------------------------------------------------------------------*/
-/* pll_out_clk = F_cco / (2 × P)
-   F_cco = pll_in_clk × M × 2 × P */
+/* pll_out_clk = F_cco / (2 x P)
+   F_cco = pll_in_clk x M x 2 x P */
 #define __M                   ((PLL0CFG_Val & 0x1F) + 1)
 #define __PLL0_CLK(__F_IN)    (__F_IN * __M)
 #define __CCLK_DIV            (CCLKSEL_Val & 0x1F)
@@ -350,17 +340,12 @@
     #endif
   #endif
 
- /**
-  * @}
-  */
 #else
         #define __CORE_CLK (IRC_OSC)
         #define __PER_CLK  (IRC_OSC)
         #define __EMC_CLK  (__CORE_CLK)
 #endif
-/** @addtogroup LPC177x_8x_System_Public_Variables  LPC177x_8x System Public Variables
-  @{
- */
+
 /*----------------------------------------------------------------------------
   Clock Variable definitions
  *----------------------------------------------------------------------------*/
@@ -369,13 +354,8 @@ uint32_t PeripheralClock = __PER_CLK; /*!< Peripheral Clock Frequency (Pclk)  */
 uint32_t EMCClock		 = __EMC_CLK; /*!< EMC Clock Frequency 				  */
 uint32_t USBClock 		 = (48000000UL);		  /*!< USB Clock Frequency - this value will
 									be updated after call SystemCoreClockUpdate, should be 48MHz*/
-/**
- * @}
- */
 
-/** @addtogroup LPC177x_8x_System_Public_Functions  LPC177x_8x System Public Functions
-  @{
- */
+
 /*----------------------------------------------------------------------------
   Clock functions
  *----------------------------------------------------------------------------*/
@@ -524,13 +504,5 @@ void SystemInit (void)
 #else
   SCB->VTOR  = 0x00000000 & 0x3FFFFF80;
 #endif
-  SystemCoreClockUpdate(); 
+//  SystemCoreClockUpdate(); 
 }
-
-/**
- * @}
- */
-
-/**
- * @}
- */

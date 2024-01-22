@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_emc.c			2011-06-02
 *//**
@@ -1392,7 +1390,7 @@ EMC_FUNC_CODE EMC_SetStaMemoryParameter(uint32_t index ,EMC_STA_MEM_PAR par, uin
  * @}
  */
 #endif /*_EMC*/
-#endif /* __LPC177X_8X__ */
+
 
 
 

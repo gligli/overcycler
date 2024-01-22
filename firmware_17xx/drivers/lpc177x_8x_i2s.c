@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_i2s.c			2011-06-02
 *//**
@@ -273,6 +271,7 @@ void I2S_Stop(LPC_I2S_TypeDef *I2Sx, uint8_t TRMode) {
 		I2Sx->DAI |= I2S_DAI_RESET;
 	}
 }
+
 /********************************************************************//**
  * @brief		Set frequency for I2S
  * @param[in]	I2Sx I2S peripheral selected, should be: LPC_I2S
@@ -284,19 +283,13 @@ void I2S_Stop(LPC_I2S_TypeDef *I2Sx, uint8_t TRMode) {
  * @return 		Status: ERROR or SUCCESS
  *********************************************************************/
 Status I2S_FreqConfig(LPC_I2S_TypeDef *I2Sx, uint32_t Freq, uint8_t TRMode) {
-	uint32_t cclk;
-	uint8_t channel, wordwidth;
-	uint32_t x, y;
-	uint64_t divider;
-	uint16_t dif;
-	uint16_t x_divide, y_divide;
-	uint16_t err, ErrorOptimal = 0xFFFF;
-	
-	uint32_t N;
+	uint32_t i2sMclk;
+	uint8_t bitrate, channel, wordwidth;
 
- 	//get cclk 
-	cclk = CLKPWR_GetCLK(CLKPWR_CLKTYPE_CPU);
-
+ 	//use cclk/2 as default I2S reference clock
+	i2sMclk = CLKPWR_GetCLK(CLKPWR_CLKTYPE_CPU)/2;
+	I2Sx->TXRATE = 1  | (1<<8);
+	I2Sx->RXRATE = 1  | (1<<8);
 	if(TRMode == I2S_TX_MODE)
 	{
 		channel = i2s_GetChannel(I2Sx,I2S_TX_MODE);
@@ -307,61 +300,13 @@ Status I2S_FreqConfig(LPC_I2S_TypeDef *I2Sx, uint32_t Freq, uint8_t TRMode) {
 		channel = i2s_GetChannel(I2Sx,I2S_RX_MODE);
 		wordwidth = i2s_GetWordWidth(I2Sx,I2S_RX_MODE);
 	}
-
-	/* Calculate X and Y divider
-	 * The MCLK rate for the I2S transmitter is determined by the value
-	 * in the I2STXRATE/I2SRXRATE register. The required I2STXRATE/I2SRXRATE
-	 * setting depends on the desired audio sample rate desired, the format
-	 * (stereo/mono) used, and the data size.
-	 * The formula is:
-	 * 		I2S_MCLK = CCLK * (X/Y) / 2
-	 * We have:
-	 * 		I2S_MCLK = Freq * channel*wordwidth * (I2Sx->TXBITRATE+1);
-	 * So: (X/Y) = (Freq * channel*wordwidth * (I2Sx->TXBITRATE+1))/CCLK*2
-	 * We use a loop function to chose the most suitable X,Y value
-	 */
-
-	/* divider is a fixed point number with 16 fractional bits */
-	divider = (((uint64_t)Freq *channel*wordwidth * 2)<<16) / cclk;
-
-	/* find N that make x/y <= 1 -> divider <= 2^16 */
-	for(N=64;N>0;N--){
-		if((divider*N) < (1<<16)) break;
-	}
-
-	if(N == 0) return ERROR;
-
-	divider *= N;
-
-	for (y = 255; y > 0; y--) {
-		x = y * divider;
-		if(x & (0xFF000000)) continue;
-		dif = x & 0xFFFF;
-		if(dif>0x8000) err = 0x10000-dif;
-		else err = dif;
-		if (err == 0)
-		{
-			y_divide = y;
-			break;
-		}
-		else if (err < ErrorOptimal)
-		{
-			ErrorOptimal = err;
-			y_divide = y;
-		}
-	}
-	x_divide = ((uint64_t)y_divide * Freq *(channel*wordwidth)* N * 2)/cclk;
-	if(x_divide >= 256) x_divide = 0xFF;
-	if(x_divide == 0) x_divide = 1;
-	
+	bitrate = i2sMclk /(Freq * channel  * wordwidth) - 1;
 	if (TRMode == I2S_TX_MODE)// Transmitter
 	{
-		I2Sx->TXBITRATE = N-1;
-		I2Sx->TXRATE = y_divide | (x_divide << 8);
+		I2Sx->TXBITRATE = bitrate;
 	} else //Receiver
 	{
-		I2Sx->RXBITRATE = N-1;
-		I2Sx->TXRATE = y_divide | (x_divide << 8);
+		I2Sx->RXBITRATE = bitrate;
 	}
 	return SUCCESS;
 }
@@ -588,4 +533,4 @@ uint8_t I2S_GetIRQDepth(LPC_I2S_TypeDef *I2Sx,uint8_t TRMode)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */
+

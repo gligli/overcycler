@@ -39,9 +39,6 @@ extern "C" {
 
 #include <stdint.h>
 
-/** @addtogroup LPC177x_8x_System
- * @{
- */
 extern uint32_t SystemCoreClock;      /*!< System Clock Frequency (Core Clock)  	*/
 extern uint32_t PeripheralClock;	    /*!< Peripheral Clock Frequency (Pclk) 	    */
 extern uint32_t EMCClock;			        /*!< EMC Clock                              */
@@ -77,7 +74,7 @@ extern void SystemCoreClockUpdate (void);
 #define OSC_CLK     (      XTAL)        /* Main oscillator frequency          */
 #define RTC_CLK     (   32768UL)        /* RTC oscillator frequency           */
 #define IRC_OSC     (12000000UL)        /* Internal RC oscillator frequency   */
-#define WDT_OSC		  (  500000UL)	    	/* Internal WDT oscillator frequency  */
+#define WDT_OSC	    (  500000UL)		/* Internal WDT oscillator frequency  */
 
 
 
@@ -89,7 +86,4 @@ extern void SystemCoreClockUpdate (void);
 }
 #endif
 
-/**
- * @}
- */
 #endif /* __SYSTEM_LPC177x_8x_H */

@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_gpdma.c			2011-06-02
 *//**
@@ -65,7 +63,7 @@ volatile const void *GPDMA_LUTPerAddr[] = {
 		(&LPC_SSP1->DR),				// SSP1 Rx
 		(&LPC_SSP2->DR),				// SSP2 Tx
 		(&LPC_SSP2->DR),				// SSP2 Rx
-		(&LPC_ADC->ADGDR),				// ADC
+		(&LPC_ADC->GDR),				// ADC
 		(&LPC_DAC->CR),					// DAC
 		(&LPC_UART0->/*RBTHDLR.*/THR),	// UART0 Tx
 		(&LPC_UART0->/*RBTHDLR.*/RBR),	// UART0 Rx
@@ -452,4 +450,4 @@ void GPDMA_ClearIntPending(GPDMA_StateClear_Type type, uint8_t channel)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */
+

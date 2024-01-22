@@ -43,10 +43,6 @@
 #include "LPC177x_8x.h"
 #include "lpc_types.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 /* Public Macros -------------------------------------------------------------- */
 /** @defgroup PINSEL_Public_Macros PINSEL Public Macros
@@ -165,6 +161,7 @@ typedef enum
 	PINSEL_PIN_TYPE_UNKNOWN,
 }PinSel_PinType;
 
+
 /**
  * @}
  */
@@ -191,10 +188,6 @@ PINSEL_RET_CODE PINSEL_SetI2CFilter (uint8_t portnum, uint8_t pinnum, uint8_t en
 /**
  * @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* LPC177x_8x_PINSEL_H */
 

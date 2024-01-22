@@ -164,7 +164,7 @@ extern "C"
 #define	 CLKPWR_PCONP_PCENET	((uint32_t)(1<<30))
 
 /** USB interface power/clock control bit*/
-#define	 CLKPWR_PCONP_PCUSB  	(((uint32_t)1<<31))
+#define	 CLKPWR_PCONP_PCUSB  	((uint32_t)(1<<31))
 
 /********************************************************************
 * Power Control for Peripherals Definitions
@@ -208,6 +208,13 @@ extern "C"
  * @}
  */
  
+///* External clock variable from system_LPC177x_8x.h */
+//extern uint32_t SystemCoreClock;     /*!< System Clock Frequency (Core Clock)  	*/
+//extern uint32_t PeripheralClock;	 /*!< Peripheral Clock Frequency (Pclk) 	*/
+//extern uint32_t EMCClock;		 /*!< EMC Clock Frequency                   	*/
+//
+///* External clock variable from lpc177x_8x_clkpwr.h */
+//extern uint32_t USBClock;		/*!< USB Frequency 								*/
 
 /* Public Functions ----------------------------------------------------------- */
 /** @defgroup CLKPWR_Public_Functions CLKPWR Public Functions

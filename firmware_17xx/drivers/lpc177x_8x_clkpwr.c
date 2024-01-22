@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_clkpwr.c			2011-06-02
 *//**
@@ -77,32 +75,26 @@ uint32_t USBFrequency = 0;
  **********************************************************************/
 void CLKPWR_SetCLKDiv (uint8_t ClkType, uint8_t DivVal)
 {
-	uint32_t tmp;
 	switch(ClkType)
 	{
 	case CLKPWR_CLKTYPE_CPU:
-		tmp = 	LPC_SC->CCLKSEL & ~(0x1F);
-		tmp |=  DivVal & 0x1F;
-		LPC_SC->CCLKSEL = tmp;
+		LPC_SC->CCLKSEL &= ~(0x1F);
+		LPC_SC->CCLKSEL |= DivVal & 0x1F;
 		SystemCoreClockUpdate(); //Update clock
 		break;
 	case CLKPWR_CLKTYPE_PER:
-		tmp = 	LPC_SC->PCLKSEL & ~(0x1F);
-		tmp |=  DivVal & 0x1F;
-		LPC_SC->PCLKSEL = tmp;
+		LPC_SC->PCLKSEL &= ~(0x1F);
+		LPC_SC->PCLKSEL |= DivVal & 0x1F;
 		SystemCoreClockUpdate(); //Update clock
 		break;
 	case CLKPWR_CLKTYPE_EMC:
-		tmp = 	LPC_SC->EMCCLKSEL & ~(0x01);
-		tmp |=  DivVal & 0x01;
-		LPC_SC->EMCCLKSEL = tmp;
+		LPC_SC->EMCCLKSEL &= ~(0x01);
+		LPC_SC->EMCCLKSEL |= DivVal & 0x01;
 		SystemCoreClockUpdate(); //Update clock
 		break;
 	case CLKPWR_CLKTYPE_USB:
-		tmp = 	LPC_SC->USBCLKSEL & ~(0x1F);
-		tmp |=  DivVal & 0x1F;
+		LPC_SC->USBCLKSEL &= ~(0x0000001F);
 		LPC_SC->USBCLKSEL |= DivVal & 0x1F;
-		SystemCoreClockUpdate(); //Update clock
 		break;
 	default:
 		while(1);//Error Loop;
@@ -280,7 +272,7 @@ void CLKPWR_DeepSleep(void)
 {
     /* Deep-Sleep Mode, set SLEEPDEEP bit */
 	SCB->SCR = 0x4;
-	LPC_SC->PCON = 0x00;
+	LPC_SC->PCON = 0x8;
 	/* Deep Sleep Mode*/
 	__WFI();
 }
@@ -295,7 +287,7 @@ void CLKPWR_PowerDown(void)
 {
     /* Deep-Sleep Mode, set SLEEPDEEP bit */
 	SCB->SCR = 0x4;
-	LPC_SC->PCON = 0x01;
+	LPC_SC->PCON = 0x09;
 	/* Power Down Mode*/
 	__WFI();
 }
@@ -326,4 +318,3 @@ void CLKPWR_DeepPowerDown(void)
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */

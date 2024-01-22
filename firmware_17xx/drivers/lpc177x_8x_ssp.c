@@ -1,5 +1,3 @@
-#ifdef __LPC177X_8X__
-
 /**********************************************************************
 * $Id$		lpc177x_8x_ssp.c			2011-06-02
 *//**
@@ -343,7 +341,7 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
 
 	// Clear status
 	SSPx->ICR = SSP_ICR_BITMASK;
-	if(SSP_GetDataSize(SSPx)>SSP_DATABIT_8)
+	if(SSP_GetDataSize(SSPx)>8)
 		dataword = 1;
 	else dataword = 0;
 
@@ -643,4 +641,4 @@ void SSP_DMACmd(LPC_SSP_TypeDef *SSPx, uint32_t DMAMode, FunctionalState NewStat
  */
 
 /* --------------------------------- End Of File ------------------------------ */
-#endif /* __LPC177X_8X__ */
+
