@@ -10,5 +10,7 @@ DRESULT nand_disk_ioctl(BYTE ctrl, void *buff);
 DRESULT nand_disk_read(BYTE* buff, DWORD sector, BYTE count);
 DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count);
 
+void nand_test(void);
+
 #endif /* NAND_H */
 

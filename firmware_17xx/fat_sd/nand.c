@@ -222,3 +222,44 @@ DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count)
 
 	return RES_OK;
 }
+
+void nand_test(void)
+{
+	FRESULT res;
+	FIL f;
+	UINT bw;
+	char buf[STORAGE_PAGE_SIZE];
+
+	strcpy(buf, "Test 1234 Although NAND Flash memory devices may contain bad blocks, they can be used reliably in systems that provide bad-block management and error-correction algorithms. This ensures data integrity.");
+	if((res=f_open(&f,"/test.bin",FA_WRITE|FA_CREATE_ALWAYS)))
+	{
+		rprintf(0,"f_open %d\n",res);
+		for(;;);
+	}
+	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
+	
+	memset(buf,0,STORAGE_PAGE_SIZE);
+
+	if((res=f_open(&f,"/test.bin",FA_READ|FA_OPEN_EXISTING)))
+	{
+		rprintf(0,"f_open %d\n",res);
+		for(;;);
+	}
+	f_lseek(&f,10);
+	f_read(&f,buf,STORAGE_PAGE_SIZE,&bw);
+	f_close(&f);
+	rprintf(0,"%s\n",buf);
+
+	if(strncmp(buf,"Although", 8))
+	{
+		rprintf(0,"strncmp\n");
+		for(;;);
+	}
+	
+	if((res=f_unlink("/test.bin")))
+	{
+		rprintf(0,"f_unlink %d\n",res);
+		for(;;);
+	}
+}

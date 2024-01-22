@@ -228,27 +228,7 @@ int main(void)
 		}
 	}
 	
-	FIL f;
-	UINT bw;
-	char buf[STORAGE_PAGE_SIZE];
-
-	strcpy(buf, "Test 1234 Although NAND Flash memory devices may contain bad blocks, they can be used reliably in systems that provide bad-block management and error-correction algorithms. This ensures data integrity.");
-	if((res=f_open(&f,"/test.bin",FA_WRITE|FA_CREATE_ALWAYS)))
-	{
-		rprintf(0,"f_open %d\n",res);
-		for(;;);
-	}
-	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
-	f_close(&f);
-
-	if((res=f_open(&f,"/test.bin",FA_READ|FA_OPEN_EXISTING)))
-	{
-		rprintf(0,"f_open %d\n",res);
-		for(;;);
-	}
-	f_read(&f,buf,STORAGE_PAGE_SIZE,&bw);
-	f_close(&f);
-	rprintf(0,"%s\n",buf);
+//	nand_test();
 	
 	rprintf(0,"synth init...\n");
 
