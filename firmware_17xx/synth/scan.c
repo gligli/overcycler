@@ -6,7 +6,7 @@
 
 #include "ui.h"
 #include "LPC177x_8x.h"
-#include "lpc177x_8x_gpdma.h"
+#include "lpc177x_8x_ssp.h"
 #include "lpc177x_8x_gpio.h"
 
 #define POT_SAMPLES 5
@@ -15,33 +15,15 @@
 
 #define DEBOUNCE_THRESHOLD 5
 
-#define POTSCAN_PIN_CS (24-24)
-#define POTSCAN_PIN_OUT (25-24)
-#define POTSCAN_PIN_ADDR (26-24)
-#define POTSCAN_PIN_CLK (27-24)
-
-#define POTSCAN_MASK ((1<<POTSCAN_PIN_CS)|(1<<POTSCAN_PIN_ADDR)|(1<<POTSCAN_PIN_CLK))
-
-#define POTSCAN_PRE_DIV 12
-#define POTSCAN_RATE 400
-
-#define POTSCAN_TICKS (16*2+10) // 32 writes, 10 reads
-#define POTSCAN_LLI_PER_POT 21
-
-#define POTSCAN_DMACONFIG \
-		GPDMA_DMACCxConfig_E | \
-		GPDMA_DMACCxConfig_SrcPeripheral(12) | \
-		GPDMA_DMACCxConfig_TransferType(2)
-
-static EXT_RAM GPDMA_LLI_Type scanLLIs[SCAN_POT_COUNT][POTSCAN_LLI_PER_POT];
+#define POTSCAN_PIN_CS 8
+#define POTSCAN_PIN_DOUT 4
+#define POTSCAN_PIN_DIN 1
+#define POTSCAN_PIN_CLK 0
 
 static struct
 {
 	int16_t curPotSample;
 
-	uint8_t potCommands[SCAN_POT_COUNT][22];
-	uint8_t potBits[SCAN_POT_COUNT][SCAN_ADC_BITS];
-	
 	uint16_t potSamples[SCAN_POT_COUNT][POT_SAMPLES];
 	uint16_t potValue[SCAN_POT_COUNT];
 	uint32_t potLockTimeout[SCAN_POT_COUNT];
@@ -56,87 +38,62 @@ static uint8_t keypadButtonCode[16]=
 	0x34,0x31
 };
 
-static const uint8_t potCommandsConst[SCAN_POT_COUNT][sizeof(scan.potCommands[0])]=
+static uint16_t readADC(uint16_t channel)
 {
-#define C0O0 0
-#define C0O1 (1<<POTSCAN_PIN_ADDR)
-#define C1O0 (1<<POTSCAN_PIN_CLK)
-#define C1O1 ((1<<POTSCAN_PIN_CLK) | (1<<POTSCAN_PIN_ADDR))
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
+	{
+		// wait until previous data is transferred
+	}
 	
-#define ONE_POT(pot) { \
-		((pot)&8)?C1O1:C1O0,((pot)&8)?C0O1:C0O0, \
-		((pot)&4)?C1O1:C1O0,((pot)&4)?C0O1:C0O0, \
-		((pot)&2)?C1O1:C1O0,((pot)&2)?C0O1:C0O0, \
-		((pot)&1)?C1O1:C1O0,((pot)&1)?C0O1:C0O0, \
-		C1O0,C0O0,C1O0,C0O0,C1O0,C0O0,C1O0,C0O0,C1O0,C0O0,C1O0,C0O0,C1O0,C0O0 \
-	},
-	
-	ONE_POT(0) ONE_POT(1) ONE_POT(2) ONE_POT(3) ONE_POT(4) ONE_POT(5) ONE_POT(6) ONE_POT(7) ONE_POT(8) ONE_POT(9)
-		
-#undef ONE_POT
-};
+	SSP_SendData(LPC_SSP2,channel<<8);
 
-static const GPDMA_LLI_Type scanLLIsConst[SCAN_POT_COUNT][POTSCAN_LLI_PER_POT]=
-{
-#define NEXTPOT(pot,tck) (((pot)*POTSCAN_LLI_PER_POT+(tck)+1)/POTSCAN_LLI_PER_POT)	
-#define ONE_LLI(src,dst,siz,pot,tck,flag) { \
-		(src), \
-		(dst), \
-		(uint32_t)&scanLLIs[NEXTPOT(pot,tck)%SCAN_POT_COUNT][((tck)+1)%POTSCAN_LLI_PER_POT], \
-		GPDMA_DMACCxControl_TransferSize(siz)|GPDMA_DMACCxControl_SI|(flag) \
-	},
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	{
+		// wait for new data
+	}
+
+	uint16_t res=SSP_ReceiveData(LPC_SSP2);
 	
-#define ONE_TICK(idx,wrt,siz,pot,tck) ONE_LLI( \
-		(wrt)?((uint32_t)&scan.potCommands[pot][idx]):((uint32_t)&LPC_GPIO0->FIOPIN3), \
-		(wrt)?((uint32_t)&LPC_GPIO0->FIOPIN3):((uint32_t)&scan.potBits[(pot+SCAN_POT_COUNT-1)%SCAN_POT_COUNT][idx]), \
-		siz, pot, tck, \
-		(wrt)?0:GPDMA_DMACCxControl_Prot3 \
-	)
+	// wait TLV2556 tConvert
 	
-#define ONE_POT(pot) { \
-		ONE_TICK(0,1,2,pot,0) ONE_TICK(0,0,1,pot,1) \
-		ONE_TICK(2,1,2,pot,2) ONE_TICK(1,0,1,pot,3) \
-		ONE_TICK(4,1,2,pot,4) ONE_TICK(2,0,1,pot,5) \
-		ONE_TICK(6,1,2,pot,6) ONE_TICK(3,0,1,pot,7) \
-		ONE_TICK(8,1,2,pot,8) ONE_TICK(4,0,1,pot,9) \
-		ONE_TICK(8,1,2,pot,10) ONE_TICK(5,0,1,pot,11) \
-		ONE_TICK(8,1,2,pot,12) ONE_TICK(6,0,1,pot,13) \
-		ONE_TICK(8,1,2,pot,14) ONE_TICK(7,0,1,pot,15) \
-		ONE_TICK(8,1,2,pot,16) ONE_TICK(8,0,1,pot,17) \
-		ONE_TICK(8,1,2,pot,18) ONE_TICK(9,0,1,pot,19) \
-		ONE_TICK(8,1,12,pot,20) \
-	},
-	
-	ONE_POT(0) ONE_POT(1) ONE_POT(2) ONE_POT(3) ONE_POT(4) ONE_POT(5) ONE_POT(6) ONE_POT(7) ONE_POT(8) ONE_POT(9)
-};
+	delay_us(6);
+
+	return res;
+}
 
 static void readPots(void)
 {
 	uint16_t new;
-	int i,pot;
-	uint16_t tmp[POT_SAMPLES];
+	int pot;
+	uint16_t tmpVal[SCAN_POT_COUNT];
+	uint16_t tmpSmp[POT_SAMPLES];
 	int8_t isUnlockable;
 	
+	// read pots from TLV2556 ADC
+
+	for(pot=0;pot<SCAN_POT_COUNT;++pot)
+	{
+		tmpVal[pot]=readADC(pot);
+	}
+		
 	scan.curPotSample=(scan.curPotSample+1)%POT_SAMPLES;
 	
 	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
-		// read pot from TLV1543 ADC (scanned using GPDMACH1)
+		// reads are off by one by TLV2556 spec
 
-		new=0;
-		for(i=0;i<SCAN_ADC_BITS;++i)
-			new|=(((uint32_t)scan.potBits[pot][i]&(1<<POTSCAN_PIN_OUT))>>POTSCAN_PIN_OUT)<<(SCAN_ADC_BITS-1-i);
+		new=tmpVal[(pot+1)%SCAN_POT_COUNT]>>2;
 
 		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
 		
 		// sort values
 
-		memcpy(&tmp[0],&scan.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
-		qsort(tmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
+		memcpy(&tmpSmp[0],&scan.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
+		qsort(tmpSmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
 		
 		// median
 	
-		new=tmp[POT_SAMPLES/2];
+		new=tmpSmp[POT_SAMPLES/2];
 		
 		// ignore small changes
 
@@ -212,23 +169,22 @@ void scan_init(void)
 {
 	memset(&scan,0,sizeof(scan));
 	
-	memcpy(scan.potCommands,potCommandsConst,sizeof(scan.potCommands));
-	memcpy(scanLLIs,scanLLIsConst,sizeof(scanLLIs));
-/*oc3
-	// init TLV1543 ADC
+	// init TLV2556 ADC
 	
-	PINSEL_SetI2C0Pins(PINSEL_I2C_Fast_Mode, DISABLE);
+	PINSEL_ConfigPin(1,POTSCAN_PIN_CS,4); // CS
+	PINSEL_ConfigPin(1,POTSCAN_PIN_DOUT,4); // DOUT
+	PINSEL_ConfigPin(1,POTSCAN_PIN_DIN,4); // DIN
+	PINSEL_ConfigPin(1,POTSCAN_PIN_CLK,4); // CLK
 	
-	PINSEL_SetPinFunc(0,24+POTSCAN_PIN_CS,0); // CS
-	PINSEL_SetPinFunc(0,24+POTSCAN_PIN_OUT,0); // OUT
-	PINSEL_SetPinFunc(0,24+POTSCAN_PIN_ADDR,0); // ADDR
-	PINSEL_SetPinFunc(0,24+POTSCAN_PIN_CLK,0); // CLK
-	PINSEL_SetPinFunc(0,24+4,0); // EOC
+	SSP_CFG_Type SSP_ConfigStruct;
+	SSP_ConfigStructInit(&SSP_ConfigStruct);
+	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
+	SSP_ConfigStruct.ClockRate=1000000;
+	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
+	SSP_Cmd(LPC_SSP2,ENABLE);
 	
-	GPIO_SetValue(0,((1<<POTSCAN_PIN_ADDR)|(1<<POTSCAN_PIN_CLK))<<24);
-	GPIO_SetDir(0,POTSCAN_MASK<<24,1);
-	LPC_GPIO0->FIOMASK3&=~POTSCAN_MASK;
-*/
+	readADC(0b1111); // config CFGR2
+	
 	// init keypad
 	
 	PINSEL_ConfigPin(0,22,0); // R1
@@ -246,49 +202,6 @@ void scan_init(void)
 
 	GPIO_SetValue(0,0b1111ul<<19);
 	GPIO_SetDir(0,0b1111ul<<19,1);
-	
-	// init pot scan TMR / DMA
-/*	
-	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
-
-	DMAREQSEL|=0x10;
-//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
-
-	TIM_TIMERCFG_Type tim;
-	
-	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
-	tim.PrescaleValue=POTSCAN_PRE_DIV-1;
-	
-	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
-	
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER2,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	
-	TIM_MATCHCFG_Type tm;
-	
-	tm.MatchChannel=0;
-	tm.IntOnMatch=DISABLE;
-	tm.ResetOnMatch=ENABLE;
-	tm.StopOnMatch=DISABLE;
-	tm.ExtMatchOutputType=0;
-	tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_TICKS*POTSCAN_RATE);
-
-	TIM_ConfigMatch(LPC_TIM2,&tm);
-	
-	// start
-	
-	TIM_Cmd(LPC_TIM2,ENABLE);
-	
-	// load first LLI and start GPDMA
-	
-	LPC_GPDMACH1->DMACCSrcAddr=scanLLIs[0][0].SrcAddr;
-	LPC_GPDMACH1->DMACCDestAddr=scanLLIs[0][0].DstAddr;
-	LPC_GPDMACH1->DMACCLLI=scanLLIs[0][0].NextLLI;
-	LPC_GPDMACH1->DMACCControl=scanLLIs[0][0].Control;
-
-	LPC_GPDMACH1->DMACCConfig=POTSCAN_DMACONFIG;
-
-	rprintf(0,"pots scan at %d Hz, tick rate %d Hz\n",POTSCAN_RATE,SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/tm.MatchValue);
- */
 }
 
 void scan_update(void)
