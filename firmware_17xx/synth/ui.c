@@ -1309,8 +1309,6 @@ void ui_init(void)
 
 	// DAC for contrast
 	
-	PINSEL_SetPinMode(0,26,2);
-	PINSEL_DacEnable(0,26,ENABLE);
 	DAC_Init(0);
 	DAC_UpdateValue(0,0);
 		
