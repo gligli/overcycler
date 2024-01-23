@@ -996,9 +996,7 @@ void synth_init(void)
 	scan_init();
 	tuner_init();
 	assigner_init();
-TR
 	uartMidi_init();
-TR
 	seq_init();
 	arp_init();
 	midi_init();
