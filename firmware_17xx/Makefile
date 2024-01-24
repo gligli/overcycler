@@ -74,6 +74,14 @@ SRC+=fat_nand/fattime.c
 SRC+=fat_nand/ff.c
 SRC+=fat_nand/ccsbcs.c
 
+SRC+=usb/usbinit.c
+SRC+=usb/usbstdreq.c
+SRC+=usb/usbhw_lpc.c
+SRC+=usb/usbcontrol.c
+SRC+=usb/msc_bot.c
+SRC+=usb/msc_scsi.c
+SRC+=usb/usb_msc.c
+
 SRC+=synth/adsr.c
 SRC+=synth/arp.c
 SRC+=synth/seq.c
@@ -150,7 +158,7 @@ EXTRA_LIBDIRS =
 CSTANDARD = -std=gnu99
 
 # Place -D or -U options for C here
-CDEFS =  -D$(RUN_MODE) -D__LPC177X_8X__ -DUSB_DEVICE_ONLY -D__USE_CMSIS
+CDEFS =  -D$(RUN_MODE) -D$(SUBMDL)
 
 # Place -I options here
 CINCS = -I $(LIBPATH)

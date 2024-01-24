@@ -9,9 +9,10 @@
 #include "LPC177x_8x.h"
 #include "rprintf.h"
 #include "serial.h"
-#include "nand.h"
 #include "diskio.h"
 #include "ff.h"
+#include "nand.h"
+#include "usb/usb_msc.h"
 
 #include "synth/synth.h"
 #include "synth/ui.h"
@@ -213,18 +214,32 @@ int main(void)
 	{
 		if(res==FR_NO_FILESYSTEM)
 		{
-			rprintf(0,"Formatting disk...",res);
-			rprintf(1,"Formatting disk...",res);
+			rprintf(0,"Formatting disk...");
+			rprintf(1,"Formatting disk...");
 			if((res=f_mkfs(0,0,0)))
 			{
 				rprintf(0,"f_mkfs res=%d\n",res);
 				rprintf(1,"Error: f_mkfs res=%d",res);
 				for(;;);
 			}
+			rprintf(0,"done!");
+			rprintf(1,"done!");
+
+			if((res=f_mkdir(STORAGE_PATH)))
+			{
+				rprintf(0,"f_mkdir res=%d\n",res);
+				rprintf(1,"Error: f_mkdir res=%d",res);
+				for(;;);
+			}
 		}
 	}
 	
 //	nand_test();
+	
+	rprintf(0,"usb init...\n");
+
+	usb_msc_start();
+	usb_msc_poll();
 	
 	rprintf(0,"synth init...\n");
 
@@ -239,6 +254,7 @@ int main(void)
 	for(;;)
 	{
 		synth_update();
+		usb_msc_poll();
 	}
 }
 

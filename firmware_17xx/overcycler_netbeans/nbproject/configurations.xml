@@ -2,6 +2,41 @@
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root=".." name="0">
+      <df name="drivers">
+        <in>lpc177x_8x_adc.c</in>
+        <in>lpc177x_8x_bod.c</in>
+        <in>lpc177x_8x_can.c</in>
+        <in>lpc177x_8x_clkpwr.c</in>
+        <in>lpc177x_8x_dac.c</in>
+        <in>lpc177x_8x_eeprom.c</in>
+        <in>lpc177x_8x_emac.c</in>
+        <in>lpc177x_8x_emc.c</in>
+        <in>lpc177x_8x_exti.c</in>
+        <in>lpc177x_8x_gpdma.c</in>
+        <in>lpc177x_8x_gpio.c</in>
+        <in>lpc177x_8x_i2c.c</in>
+        <in>lpc177x_8x_i2s.c</in>
+        <in>lpc177x_8x_iap.c</in>
+        <in>lpc177x_8x_lcd.c</in>
+        <in>lpc177x_8x_mcpwm.c</in>
+        <in>lpc177x_8x_nvic.c</in>
+        <in>lpc177x_8x_pinsel.c</in>
+        <in>lpc177x_8x_pwm.c</in>
+        <in>lpc177x_8x_qei.c</in>
+        <in>lpc177x_8x_rtc.c</in>
+        <in>lpc177x_8x_ssp.c</in>
+        <in>lpc177x_8x_systick.c</in>
+        <in>lpc177x_8x_timer.c</in>
+        <in>lpc177x_8x_uart.c</in>
+        <in>lpc177x_8x_wwdt.c</in>
+      </df>
+      <df name="fat_nand">
+        <in>ccsbcs.c</in>
+        <in>diskio.c</in>
+        <in>fattime.c</in>
+        <in>ff.c</in>
+        <in>nand.c</in>
+      </df>
       <df name="synth">
         <in>adsr.c</in>
         <in>arp.c</in>
@@ -26,8 +61,18 @@
         <in>main.c</in>
         <in>rprintf.c</in>
         <in>serial.c</in>
-        <in>startup_LPC17xx.S</in>
         <in>syscalls.c</in>
+        <in>system_LPC177x_8x.c</in>
+        <in>xt26g.c</in>
+      </df>
+      <df name="usb">
+        <in>msc_bot.c</in>
+        <in>msc_scsi.c</in>
+        <in>usb_msc.c</in>
+        <in>usbcontrol.c</in>
+        <in>usbhw_lpc.c</in>
+        <in>usbinit.c</in>
+        <in>usbstdreq.c</in>
       </df>
       <df name="xnormidi">
         <df name="bytequeue">
@@ -60,7 +105,7 @@
         <prependToolCollectionPath>false</prependToolCollectionPath>
       </toolsSet>
       <flagsDictionary>
-        <element flagsID="0" commonFlags="-Ofast -std=gnu99"/>
+        <element flagsID="0" commonFlags="-march=armv7-m -O4 -std=gnu99"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -73,18 +118,6 @@
           <executablePath>../overcycler.elf</executablePath>
           <cTool>
             <standard>3</standard>
-            <incDir>
-              <pElem>..</pElem>
-              <pElem>../-Wall</pElem>
-              <pElem>../system</pElem>
-              <pElem>../drivers</pElem>
-              <pElem>../fat_sd</pElem>
-            </incDir>
-            <preprocessorList>
-              <Elem>ROM_RUN</Elem>
-              <Elem>VECTORS_IN_ROM</Elem>
-              <Elem>__LPC177X_8X__</Elem>
-            </preprocessorList>
           </cTool>
         </makeTool>
         <preBuild>
@@ -92,129 +125,639 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="../synth/adsr.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_adc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/arp.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_bod.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/assigner.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_can.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/clock.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_clkpwr.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_dac.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/lfo.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_eeprom.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/midi.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_emac.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/scan.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_emc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/seq.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_exti.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/storage.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_gpdma.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/synth.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_gpio.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/tuner.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_i2c.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_i2s.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/ui.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_iap.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../synth/utils.c" ex="false" tool="0" flavor2="2">
+      <item path="../drivers/lpc177x_8x_lcd.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_mcpwm.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_nvic.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_pinsel.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_pwm.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_qei.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_rtc.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_ssp.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_systick.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_timer.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_uart.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../drivers/lpc177x_8x_wwdt.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../fat_nand/ccsbcs.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../fat_nand</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../fat_nand/diskio.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../fat_nand</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../fat_nand/fattime.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../fat_nand</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../fat_nand/ff.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../fat_nand/nand.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/adsr.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/arp.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/assigner.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/clock.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/lfo.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/midi.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../xnormidi/bytequeue</pElem>
+            <pElem>../xnormidi</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/scan.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/seq.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/storage.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/synth.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/tuner.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/ui.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../synth/utils.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../synth</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/hd44780.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/hd44780.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/main.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/main.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>../synth</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/rprintf.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/rprintf.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/serial.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/serial.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../system/startup_LPC17xx.S" ex="false" tool="4" flavor2="0">
-      </item>
-      <item path="../system/syscalls.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/syscalls.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
-      <item path="../xnormidi/bytequeue/bytequeue.c" ex="false" tool="0" flavor2="2">
+      <item path="../system/system_LPC177x_8x.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../system/xt26g.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/msc_bot.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/msc_scsi.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../fat_nand</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/usb_msc.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/usbcontrol.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/usbhw_lpc.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/usbinit.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../usb/usbstdreq.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../drivers</pElem>
+            <pElem>../usb</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../xnormidi/bytequeue/bytequeue.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>..</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="../xnormidi/bytequeue/interrupt_setting.c"
             ex="false"
             tool="0"
-            flavor2="2">
-        <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="2">
+            flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
+            <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../xnormidi/midi_device.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
-        </cTool>
-      </item>
-      <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="0">
           <incDir>
+            <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
+            <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
+      <item path="../xnormidi/sysex_tools.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../xnormidi</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <folder path="0/drivers">
+        <cTool>
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../drivers</pElem>
+          </incDir>
+        </cTool>
+      </folder>
       <folder path="0/synth">
         <cTool>
           <incDir>
-            <pElem>../synth</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/usb">
+        <cTool>
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/xnormidi">
+        <cTool>
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
           </incDir>
         </cTool>
       </folder>
