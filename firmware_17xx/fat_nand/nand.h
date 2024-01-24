@@ -4,6 +4,9 @@
 #include "lpc_types.h"
 #include "diskio.h"
 
+#define NAND_EMULATED_SECTOR_BITS 12
+#define NAND_EMULATED_SECTOR_SIZE (1<<NAND_EMULATED_SECTOR_BITS)
+
 DSTATUS nand_disk_initialize(void);
 DSTATUS nand_disk_status(void);
 DRESULT nand_disk_ioctl(BYTE ctrl, void *buff);

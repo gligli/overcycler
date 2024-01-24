@@ -6,10 +6,6 @@
 #include "rprintf.h"
 #include "synth/utils.h"
 
-#define NAND_EMULATED_SECTOR_BITS 9
-#define NAND_EMULATED_SECTOR_SIZE (1<<NAND_EMULATED_SECTOR_BITS)
-#define NAND_EMULATED_SECTOR_MASK (NAND_EMULATED_SECTOR_SIZE-1)
-
 #define NAND_EEPROM_MAGIC 0x42381337
 
 static uint32_t readBlockTable(uint16_t idx)
@@ -137,14 +133,14 @@ DSTATUS nand_disk_initialize(void)
 
 DSTATUS nand_disk_status(void)
 {
-	rprintf(0,"nand_disk_status\n");
+//	rprintf(0,"nand_disk_status\n");
 
 	return 0;
 }
 
 DRESULT nand_disk_ioctl(BYTE ctrl, void *buff)
 {
-	rprintf(0,"nand_disk_ioctl %d\n",ctrl);
+//	rprintf(0,"nand_disk_ioctl %d\n",ctrl);
 
 	DRESULT res;
 	res = RES_OK;
@@ -170,30 +166,38 @@ DRESULT nand_disk_ioctl(BYTE ctrl, void *buff)
 
 DRESULT nand_disk_read(BYTE* buff, DWORD sector, BYTE count)
 {
-	rprintf(0,"nand_disk_read %x %d\n",sector,count);
+//	rprintf(0,"nand_disk_read %x %d\n",sector,count);
 	
 	for(;count;--count)
 	{
 		uint32_t srcAddress=translateAddress(sector<<NAND_EMULATED_SECTOR_BITS);
 
+#if NAND_EMULATED_SECTOR_BITS < XT26G_PAGE_BITS
 		XT26G_readPage(srcAddress,NAND_EMULATED_SECTOR_SIZE,0,buff);
+#else
+		for(uint16_t readOffset=0;readOffset<NAND_EMULATED_SECTOR_SIZE;readOffset+=XT26G_PAGE_SIZE)
+		{
+			XT26G_readPage(srcAddress+readOffset,XT26G_PAGE_SIZE,0,&buff[readOffset]);
+		}
+#endif
 
 		buff+=NAND_EMULATED_SECTOR_SIZE;
 		++sector;
 	}
-
+	
 	return RES_OK;
 }
 
 DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count)
 {
-	rprintf(0,"nand_disk_write %x %d\n",sector,count);
+//	rprintf(0,"nand_disk_write %x %d\n",sector,count);
 
 	for(;count;--count)
 	{
 		uint32_t srcAddress=translateAddress(sector<<NAND_EMULATED_SECTOR_BITS);
 		uint32_t srcBlockAddress=(srcAddress>>XT26G_BLOCK_BITS)<<XT26G_BLOCK_BITS;
 		uint32_t dstBlockAddress=findFreeBlock()<<XT26G_BLOCK_BITS;
+		uint16_t mergeOffset=0;
 		
 		// erase the new location
 		XT26G_eraseBlock(dstBlockAddress);
@@ -201,10 +205,17 @@ DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count)
 		// move the entire block to the new location, merging in the sector write
 		for(uint32_t pageAddr=0;pageAddr<XT26G_BLOCK_SIZE;pageAddr+=XT26G_PAGE_SIZE)
 		{
-			if(srcAddress>=srcBlockAddress+pageAddr && srcAddress<srcBlockAddress+pageAddr+XT26G_PAGE_SIZE)
+			if(srcAddress+mergeOffset>=srcBlockAddress+pageAddr &&
+					srcAddress+mergeOffset<srcBlockAddress+pageAddr+XT26G_PAGE_SIZE &&
+					mergeOffset<NAND_EMULATED_SECTOR_SIZE)
 			{
+#if NAND_EMULATED_SECTOR_BITS < XT26G_PAGE_BITS
 				// this is the page where the sector must be written
 				XT26G_movePage(srcAddress,dstBlockAddress+pageAddr,NAND_EMULATED_SECTOR_SIZE,(uint8_t*)buff);
+#else
+				XT26G_movePage(srcAddress+mergeOffset,dstBlockAddress+pageAddr,XT26G_PAGE_SIZE,&((uint8_t*)buff)[mergeOffset]);
+				mergeOffset+=XT26G_PAGE_SIZE;
+#endif
 			}
 			else
 			{
