@@ -68,11 +68,11 @@ SRC+=drivers/lpc177x_8x_timer.c
 SRC+=drivers/lpc177x_8x_uart.c
 SRC+=drivers/lpc177x_8x_wwdt.c
 
-SRC+=fat_sd/nand.c
-SRC+=fat_sd/diskio.c
-SRC+=fat_sd/fattime.c
-SRC+=fat_sd/ff.c
-SRC+=fat_sd/ccsbcs.c
+SRC+=fat_nand/nand.c
+SRC+=fat_nand/diskio.c
+SRC+=fat_nand/fattime.c
+SRC+=fat_nand/ff.c
+SRC+=fat_nand/ccsbcs.c
 
 SRC+=synth/adsr.c
 SRC+=synth/arp.c
@@ -134,7 +134,7 @@ DEBUG = dwarf-2
 
 # List any extra directories to look for include files here.
 #     Each directory must be seperated by a space.
-EXTRAINCDIRS = system drivers fat_sd
+EXTRAINCDIRS = system drivers fat_nand
 
 # List any extra directories to look for library files here.
 #     Each directory must be seperated by a space.
