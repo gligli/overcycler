@@ -202,7 +202,10 @@ DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count)
 		uint16_t mergeOffset=0;
 		
 		// erase the new location
-		XT26G_eraseBlock(dstBlockAddress);
+		if(XT26G_eraseBlock(dstBlockAddress))
+		{
+			return RES_ERROR;
+		}
 		
 		// move the entire block to the new location, merging in the sector write
 		for(uint32_t pageAddr=0;pageAddr<XT26G_BLOCK_SIZE;pageAddr+=XT26G_PAGE_SIZE)
@@ -213,16 +216,25 @@ DRESULT nand_disk_write(const BYTE* buff, DWORD sector, BYTE count)
 			{
 #if NAND_EMULATED_SECTOR_BITS < XT26G_PAGE_BITS
 				// this is the page where the sector must be written
-				XT26G_movePage(srcAddress,dstBlockAddress+pageAddr,NAND_EMULATED_SECTOR_SIZE,(uint8_t*)buff);
+				if(XT26G_movePage(srcAddress,dstBlockAddress+pageAddr,NAND_EMULATED_SECTOR_SIZE,(uint8_t*)buff))
+				{
+					return RES_ERROR;
+				}
 #else
-				XT26G_movePage(srcAddress+mergeOffset,dstBlockAddress+pageAddr,XT26G_PAGE_SIZE,&((uint8_t*)buff)[mergeOffset]);
+				if(XT26G_writePage(dstBlockAddress+pageAddr,XT26G_PAGE_SIZE,&((uint8_t*)buff)[mergeOffset]))
+				{
+					return RES_ERROR;
+				}
 				mergeOffset+=XT26G_PAGE_SIZE;
 #endif
 			}
 			else
 			{
 				// nothing to update in the page, just move it
-				XT26G_movePage(srcBlockAddress+pageAddr,dstBlockAddress+pageAddr,0,NULL);
+				if(XT26G_movePage(srcBlockAddress+pageAddr,dstBlockAddress+pageAddr,0,NULL))
+				{
+					return RES_ERROR;
+				}
 			}
 		}
 				

@@ -26,6 +26,8 @@
 #define STATUS_E_FAIL 4
 #define STATUS_P_FAIL 8
 
+static void reset(void);
+
 static inline void csSet(uint32_t dummy)
 {
 	DELAY_50NS();
@@ -74,7 +76,7 @@ static void send24(uint32_t value)
 	sendRead8(value&0xff);
 }
 
-static void waitOIP(void)
+static int8_t waitOIP(void)
 {
 	uint8_t status;
 	
@@ -92,14 +94,18 @@ static void waitOIP(void)
 	if(status&STATUS_E_FAIL)
 	{
 		rprintf(0,"XT26G: erase failure has occurred\n");
-		for(;;);
+		reset();
+		return STATUS_E_FAIL;
 	}
 
 	if(status&STATUS_P_FAIL)
 	{
 		rprintf(0,"XT26G: program failure has occurred\n");
-		for(;;);
+		reset();
+		return STATUS_P_FAIL;
 	}
+	
+	return 0;
 }
 
 static void enableWrites(void)
@@ -108,6 +114,15 @@ static void enableWrites(void)
 	{
 		sendRead8(CMD_WRITE_ENABLE);
 	}
+}
+
+static void reset(void)
+{
+	HANDLE_CS
+	{
+		sendRead8(CMD_RESET);
+	}
+	waitOIP();
 }
 
 void XT26G_readPage(uint32_t address, uint16_t size, int8_t is_spare, uint8_t * buffer)
@@ -133,7 +148,7 @@ void XT26G_readPage(uint32_t address, uint16_t size, int8_t is_spare, uint8_t * 
 	}
 }
 
-void XT26G_writePage(uint32_t address, uint16_t size, uint8_t * buffer)
+int8_t XT26G_writePage(uint32_t address, uint16_t size, uint8_t * buffer)
 {
 	HANDLE_CS
 	{
@@ -154,10 +169,10 @@ void XT26G_writePage(uint32_t address, uint16_t size, uint8_t * buffer)
 		send24(address>>XT26G_PAGE_BITS);
 	}
 
-	waitOIP();
+	return waitOIP();
 }
 
-void XT26G_eraseBlock(uint32_t address)
+int8_t XT26G_eraseBlock(uint32_t address)
 {
 	enableWrites();
 	
@@ -167,10 +182,10 @@ void XT26G_eraseBlock(uint32_t address)
 		send24(address>>XT26G_PAGE_BITS);
 	}
 
-	waitOIP();
+	return waitOIP();
 }
 
-void XT26G_movePage(uint32_t address, uint32_t newAddress, uint16_t size, uint8_t * buffer)
+int8_t XT26G_movePage(uint32_t address, uint32_t newAddress, uint16_t size, uint8_t * buffer)
 {
 	HANDLE_CS
 	{
@@ -199,7 +214,7 @@ void XT26G_movePage(uint32_t address, uint32_t newAddress, uint16_t size, uint8_
 		send24(newAddress>>XT26G_PAGE_BITS);
 	}
 
-	waitOIP();
+	return waitOIP();
 }
 
 void XT26G_getUniqueID(uint8_t * buffer)
@@ -242,11 +257,7 @@ int8_t XT26G_init(void)
 	
 	// reset the XT26G
 
-	HANDLE_CS
-	{
-		sendRead8(CMD_RESET);
-	}
-	waitOIP();
+	reset();
 		
 	// get model / device id
 
