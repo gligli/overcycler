@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "nand.h"
 
 #include "main.h"
@@ -5,8 +7,6 @@
 #include "lpc177x_8x_eeprom.h"
 #include "rprintf.h"
 #include "synth/utils.h"
-
-#define NAND_EEPROM_MAGIC 0x42381337
 
 static uint32_t readBlockTable(uint16_t idx)
 {
@@ -95,8 +95,9 @@ static void lowLevelFormat(void)
 	}
 	
 	// mark EEPROM as formatted
-	uint32_t magic=NAND_EEPROM_MAGIC;
-	EEPROM_Write((XT26G_USABLE_BLOCK_COUNT<<1)&0x3f,(XT26G_USABLE_BLOCK_COUNT<<1)>>6,&magic,MODE_32_BIT,1);
+	uint8_t nandUID[XT26G_UNIQUE_ID_SIZE];
+	XT26G_getUniqueID(nandUID);	
+	EEPROM_Write((XT26G_USABLE_BLOCK_COUNT<<1)&0x3f,(XT26G_USABLE_BLOCK_COUNT<<1)>>6,nandUID,MODE_8_BIT,XT26G_UNIQUE_ID_SIZE);
 
 	rprintf(0, "done!\n");
 }
@@ -114,10 +115,11 @@ DSTATUS nand_disk_initialize(void)
 	EEPROM_Init();
 	
 	// is EEPROM formatted?	
-	uint32_t magic=0;
-	EEPROM_Read((XT26G_USABLE_BLOCK_COUNT<<1)&0x3f,(XT26G_USABLE_BLOCK_COUNT<<1)>>6,&magic,MODE_32_BIT,1);
-
-	if(magic!=NAND_EEPROM_MAGIC)
+	uint8_t nandUID[XT26G_UNIQUE_ID_SIZE], eepromUID[XT26G_UNIQUE_ID_SIZE];
+	XT26G_getUniqueID(nandUID);	
+	EEPROM_Read((XT26G_USABLE_BLOCK_COUNT<<1)&0x3f,(XT26G_USABLE_BLOCK_COUNT<<1)>>6,eepromUID,MODE_8_BIT,XT26G_UNIQUE_ID_SIZE);
+	
+	if(memcmp(nandUID,eepromUID,XT26G_UNIQUE_ID_SIZE))
 		lowLevelFormat();
 	
 //	for(uint16_t i=0;i<XT26G_USABLE_BLOCK_COUNT;++i)

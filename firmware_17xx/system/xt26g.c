@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "xt26g.h"
 
 #include "main.h"
@@ -198,6 +200,23 @@ void XT26G_movePage(uint32_t address, uint32_t newAddress, uint16_t size, uint8_
 	}
 
 	waitOIP();
+}
+
+void XT26G_getUniqueID(uint8_t * buffer)
+{
+	HANDLE_CS
+	{
+		sendRead8(CMD_READ_UID);
+		sendRead8(0x00);
+		sendRead8(0x00);
+		sendRead8(0x00);
+		sendRead8(0x00);
+
+		for(uint8_t size=16;size;--size)
+		{
+			*buffer++=sendRead8(0x00);
+		}
+	}
 }
 
 int8_t XT26G_init(void)
