@@ -12,6 +12,7 @@
 #include "diskio.h"
 #include "ff.h"
 #include "nand.h"
+#include "usb/usbapi.h"
 #include "usb/usb_msc.h"
 
 #include "synth/synth.h"
@@ -33,6 +34,11 @@ __attribute__ ((used)) void SysTick_Handler(void)
 {
 	if(synthReady)
 		synth_timerInterrupt();
+}
+
+__attribute__ ((used)) void USB_IRQHandler(void)
+{
+	USBHwISR();
 }
 
 void delay_us(uint32_t count)
@@ -238,8 +244,9 @@ int main(void)
 	
 	rprintf(0,"usb init...\n");
 
+	NVIC_SetPriority(USB_IRQn,17);
+	NVIC_EnableIRQ(USB_IRQn);
 	usb_msc_start();
-	usb_msc_poll();
 	
 	rprintf(0,"synth init...\n");
 
@@ -254,7 +261,6 @@ int main(void)
 	for(;;)
 	{
 		synth_update();
-		usb_msc_poll();
 	}
 }
 

@@ -165,10 +165,3 @@ void usb_msc_start(void)
 	// connect to bus
 	USBHwConnect(TRUE);
 }
-
-
-void usb_msc_poll(void)
-{
-	for(;;)
-		USBHwISR();
-}
