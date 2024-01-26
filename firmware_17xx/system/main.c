@@ -14,6 +14,7 @@
 #include "nand.h"
 #include "usb/usbapi.h"
 #include "usb/usb_msc.h"
+#include "usb/usb_midi.h"
 
 #include "synth/synth.h"
 #include "synth/ui.h"
@@ -246,7 +247,7 @@ int main(void)
 
 	NVIC_SetPriority(USB_IRQn,17);
 	NVIC_EnableIRQ(USB_IRQn);
-	usb_msc_start();
+	usb_midi_start();
 	
 	rprintf(0,"synth init...\n");
 

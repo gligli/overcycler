@@ -7,7 +7,7 @@
 __attribute__ ((used)) void UART2_IRQHandler(void)
 {
 	LPC_UART2->IIR; // acknowledge interrupt
-	synth_uartEvent(UART_ReceiveByte(LPC_UART2));
+	synth_uartMIDIEvent(UART_ReceiveByte(LPC_UART2));
 }
 
 void uartMidi_init(void)

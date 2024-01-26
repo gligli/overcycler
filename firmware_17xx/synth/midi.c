@@ -18,7 +18,7 @@
 
 #define MIDI_NOTE_TRANSPOSE_OFFSET -12
 
-static MidiDevice midi;
+static MidiDevice midi[2];
 
 uint16_t midiCombineBytes(uint8_t first, uint8_t second)
 {
@@ -223,21 +223,25 @@ static void midi_realtimeEvent(MidiDevice * device, uint8_t event)
 
 void midi_init(void)
 {
-	midi_device_init(&midi);
-	midi_register_noteon_callback(&midi,midi_noteOnEvent);
-	midi_register_noteoff_callback(&midi,midi_noteOffEvent);
-	midi_register_cc_callback(&midi,midi_ccEvent);
-	midi_register_progchange_callback(&midi,midi_progChangeEvent);
-	midi_register_pitchbend_callback(&midi,midi_pitchBendEvent);
-	midi_register_realtime_callback(&midi,midi_realtimeEvent);
+	for(uint8_t port=0;port<MIDI_PORT_COUNT;++port)
+	{
+		midi_device_init(&midi[port]);
+		midi_register_noteon_callback(&midi[port],midi_noteOnEvent);
+		midi_register_noteoff_callback(&midi[port],midi_noteOffEvent);
+		midi_register_cc_callback(&midi[port],midi_ccEvent);
+		midi_register_progchange_callback(&midi[port],midi_progChangeEvent);
+		midi_register_pitchbend_callback(&midi[port],midi_pitchBendEvent);
+		midi_register_realtime_callback(&midi[port],midi_realtimeEvent);
+	}
 }
 
 void midi_update(void)
 {
-	midi_device_process(&midi);
+	for(uint8_t port=0;port<MIDI_PORT_COUNT;++port)
+		midi_device_process(&midi[port]);
 }
 
-void midi_newData(uint8_t data)
+void midi_newData(uint8_t port, uint8_t data)
 {
-	midi_device_input(&midi,1,&data);
+	midi_device_input(&midi[port],1,&data);
 }

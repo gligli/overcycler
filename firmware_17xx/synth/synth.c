@@ -1309,13 +1309,22 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 
 }
 
-void synth_uartEvent(uint8_t data)
+void synth_uartMIDIEvent(uint8_t data)
 {
 #ifdef DEBUG_
-	rprintf(0,"midi %x\n",data);
+	rprintf(0,"uart midi %x\n",data);
 #endif
 
-	midi_newData(data);
+	midi_newData(MIDI_PORT_UART, data);
+}
+
+void synth_usbMIDIEvent(uint8_t data)
+{
+#ifdef DEBUG_
+	rprintf(0,"usb midi %x\n",data);
+#endif
+
+	midi_newData(MIDI_PORT_USB, data);
 }
 
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)

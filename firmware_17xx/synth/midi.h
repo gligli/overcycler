@@ -3,10 +3,13 @@
 
 #include "synth.h"
 
+#define MIDI_PORT_UART 0
+#define MIDI_PORT_USB 1
+#define MIDI_PORT_COUNT 2
+
 void midi_init(void);
 void midi_update(void);
-void midi_newData(uint8_t data);
-void midi_dumpPresets(void);
+void midi_newData(uint8_t port, uint8_t data);
 
 #endif	/* MIDI_H */
 

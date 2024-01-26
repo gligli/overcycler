@@ -60,7 +60,7 @@ static const U8 abDescriptors[] = {
 	0x01,					// bNumInterfaces
 	0x01,					// bConfigurationValue
 	0x00,					// iConfiguration
-	0xC0,					// bmAttributes
+	0x80,					// bmAttributes
 	0xFA,					// bMaxPower (500ma)
 
 // interface

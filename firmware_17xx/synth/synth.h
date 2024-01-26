@@ -49,7 +49,8 @@ typedef enum
 } syncMode_t;
 
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t flags);
-void synth_uartEvent(uint8_t data);
+void synth_uartMIDIEvent(uint8_t data);
+void synth_usbMIDIEvent(uint8_t data);
 void synth_updateDACsEvent(int32_t start, int32_t count);
 void synth_updateCVsEvent(void);
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask);
