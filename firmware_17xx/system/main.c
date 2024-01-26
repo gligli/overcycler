@@ -30,12 +30,10 @@
 #define STORAGE_PATH "/STORAGE"
 
 FATFS fatFS;
-static volatile int synthReady;
 
 __attribute__ ((used)) void SysTick_Handler(void)
 {
-	if(synthReady)
-		synth_timerInterrupt();
+	synth_timerInterrupt();
 }
 
 __attribute__ ((used)) void USB_IRQHandler(void)
@@ -186,13 +184,21 @@ void usb_setMode(usbMode_t mode)
 	rprintf(0,"usb_setMode %d\n",mode);
 #endif		
 
+	NVIC_SetPriority(USB_IRQn,17);
+	NVIC_EnableIRQ(USB_IRQn);
+	
 	switch(mode)
 	{
 	case umMIDI:
 		usb_midi_start();
 		break;
 	case umMSC:
+		__disable_irq();
 		usb_msc_start();
+		for(;;)
+		{
+			USBHwISR();			
+		}
 		break;
 	default:
 		usb_power_start();
@@ -219,7 +225,6 @@ int main(void)
 	
 	rprintf(0,"storage init...\n");
 	
-	synthReady=0;
 	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
 	NVIC_SetPriority(SysTick_IRQn,16);
 	
@@ -261,20 +266,11 @@ int main(void)
 		}
 	}
 	
-//	nand_test();
-	
-	rprintf(0,"usb init...\n");
-	
-	NVIC_SetPriority(USB_IRQn,17);
-	NVIC_EnableIRQ(USB_IRQn);
-	
 	rprintf(0,"synth init...\n");
 
-	BLOCK_INT(1)
-	{
-		synth_init();
-		synthReady=1;
-	}
+	synth_init();
+
+	__enable_irq();
 	
 	rprintf(0,"done\n");
 	

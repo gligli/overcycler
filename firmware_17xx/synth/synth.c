@@ -1020,8 +1020,6 @@ void synth_init(void)
 		tuner_tuneSynth();
 	}
 
-	__enable_irq();
-	
 	synth_refreshBankNames(1);
 	
 	// upgrade presets from before storing bank/wave names
@@ -1037,8 +1035,26 @@ void synth_init(void)
 	synth_refreshWaveforms(0);
 	synth_refreshWaveforms(1);
 	synth_refreshWaveforms(2);
-	
-	usb_setMode(settings.usbMode);
+
+	if(settings.usbDisk)
+	{
+		// MSC mode is blocking, return to normal function on next reboot
+		settings.usbDisk=0;
+		settings_save();
+		
+		rprintf(1,"USB Disk mode, restart to quit");
+		
+		usb_setMode(umMSC);
+	}
+	else if(settings.usbMIDI)
+	{
+		usb_setMode(umMIDI);
+	}
+	else
+	{
+		// power only
+		usb_setMode(umNone);
+	}
 }
 
 

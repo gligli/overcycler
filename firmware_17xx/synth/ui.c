@@ -349,6 +349,7 @@ static struct
 	enum uiPage_e activePage;
 	int8_t activeSource;
 	int8_t sourceChanges,prevSourceChanges;
+	uint32_t settingsModifiedTimeout;
 	uint32_t activeSourceTimeout;
 	uint32_t slowUpdateTimeout;
 	int16_t slowUpdateTimeoutNumber;
@@ -362,7 +363,6 @@ static struct
 	int32_t potsPrevValue[SCAN_POT_COUNT];
 
 	int8_t presetModified;
-	int8_t settingsModified;
 	
 	int8_t tunerActiveVoice;
 	
@@ -703,7 +703,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 						dv[2-i]='_';				
 					break;
 				case 32:
-					v=settings.usbMode;
+					v=settings.usbDisk?2:(settings.usbMIDI?1:0);
 					break;
 				}
 			}
@@ -835,7 +835,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 {
 	int32_t data,valCount;
 	int32_t potSetting;
-	int8_t potnum,change;
+	int8_t potnum,change,settingsModified;
 	const struct uiParam_s * prm;
 
 //	rprintf(0,"handleUserInput %d\n",source);
@@ -880,13 +880,6 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 		scan_resetPotLocking();
 
 		ui.pendingScreenClear=1;
-		
-		// to store changes made to settings thru UI
-		if(ui.settingsModified)
-		{
-			settings_save();
-			ui.settingsModified=0;
-		}
 		
 		return;
 	}
@@ -1046,6 +1039,9 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 		}
 	}
 
+	change=0;
+	settingsModified=0;
+	
 	// store new setting
 	switch(prm->type)
 	{
@@ -1098,7 +1094,6 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 		}
 		break;
 	case ptCust:
-		change=0;
 		switch(prm->number)
 		{
 			case 2:
@@ -1117,7 +1112,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case 7:
 				settings.midiReceiveChannel=potSetting-1;
-				ui.settingsModified=1;
+				settingsModified=1;
 				break;
 			case 8:
 				ui.activePage=upTuner;
@@ -1135,7 +1130,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case 12:
 				settings.syncMode=potSetting;
-				ui.settingsModified=1;
+				settingsModified=1;
 				break;
 			case 13:
 			case 14:
@@ -1171,11 +1166,11 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case 21:
 				settings.sequencerBank=potSetting;
-				ui.settingsModified=1;
+				settingsModified=1;
 				break;				
 			case 22:
 				settings.seqArpClock=potSetting;
-				ui.settingsModified=1;
+				settingsModified=1;
 				break;
 			case 23:
 				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spABank_Legacy];
@@ -1228,8 +1223,19 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				}
 				break;
 			case 32:
-				settings.usbMode=potSetting;
-				ui.settingsModified=1;
+				switch(potSetting)
+				{
+				case 1:
+					settings.usbMIDI=1;
+					break;
+				case 2:
+					settings.usbDisk=1;
+					break;
+				default:
+					settings.usbMIDI=0;
+					settings.usbDisk=0;
+				}
+				settingsModified=1;
 				break;
 		}
 		break;
@@ -1237,10 +1243,15 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 		/*nothing*/;
 	}
 
-	if(change || ui.settingsModified)
+	if(change || settingsModified)
 	{
 		ui.presetModified=change;
 		synth_refreshFullState();
+	}
+	
+	if(settingsModified)
+	{
+		ui.settingsModifiedTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
 	}
 }
 
@@ -1389,6 +1400,14 @@ void ui_update(void)
 		ui.slowUpdateTimeout=UINT32_MAX;
 	}
 
+	// to store changes made to settings thru UI
+
+	if(currentTick>ui.settingsModifiedTimeout)
+	{
+		settings_save();
+		ui.settingsModifiedTimeout=UINT32_MAX;
+	}
+		
 	// display
 	
 		// don't go fullscreen if more than one source is edited at the same time

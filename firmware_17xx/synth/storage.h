@@ -84,7 +84,8 @@ struct settings_s
 	uint8_t voiceMask;
 	
 	int8_t syncMode;
-	usbMode_t usbMode;
+	int8_t usbMIDI;
+	int8_t usbDisk;
 	
 	uint16_t sequencerBank;
 	uint16_t seqArpClock;

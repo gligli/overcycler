@@ -304,7 +304,8 @@ LOWERCODESIZE int8_t settings_load(void)
 		
 	// v17
 	
-	settings.usbMode=storageRead8();
+	settings.usbMIDI=storageReadS8();
+	settings.usbDisk=storageReadS8();
 
 	return 1;
 }
@@ -340,7 +341,8 @@ LOWERCODESIZE void settings_save(void)
 	
 	// v17
 	
-	storageWrite8(settings.usbMode);
+	storageWriteS8(settings.usbMIDI);
+	storageWriteS8(settings.usbDisk);
 	
 	// this must stay last
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
