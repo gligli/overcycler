@@ -1,5 +1,3 @@
-#include <time.h>
-
 #include "usb_midi.h"
 
 #include "usb_debug.h"
@@ -29,7 +27,7 @@ static const U8 abDescriptors[] = {
 	MAX_PACKET_SIZE,		// bMaxPacketSize
 	LE_WORD(0x6112),		// idVendor
 	LE_WORD(0x0C30),		// idProduct
-	LE_WORD(0x0001),		// bcdDevice
+	LE_WORD(0x0002),		// bcdDevice
 	0x01,					// iManufacturer
 	0x02,					// iProduct
 	0x03,					// iSerialNumber
@@ -168,10 +166,6 @@ void usb_midi_start(void)
 	// initialise stack
 	USBInit();
 	
-	// enable bulk-in interrupts on NAKs
-	// these are required to get the BOT protocol going again after a STALL
-	USBHwNakIntEnable(INACK_BI);
-
 	// register descriptors
 	USBRegisterDescriptors(abDescriptors);
 

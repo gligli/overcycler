@@ -71,6 +71,8 @@
         <in>usb_midi.c</in>
         <in>usb_midi.h</in>
         <in>usb_msc.c</in>
+        <in>usb_power.c</in>
+        <in>usb_power.h</in>
         <in>usbcontrol.c</in>
         <in>usbhw_lpc.c</in>
         <in>usbinit.c</in>
@@ -651,6 +653,10 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="../usb/usb_power.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../usb/usb_power.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../usb/usbcontrol.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">

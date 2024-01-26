@@ -13,8 +13,9 @@
 #include "ff.h"
 #include "nand.h"
 #include "usb/usbapi.h"
-#include "usb/usb_msc.h"
+#include "usb/usb_power.h"
 #include "usb/usb_midi.h"
+#include "usb/usb_msc.h"
 
 #include "synth/synth.h"
 #include "synth/ui.h"
@@ -179,6 +180,25 @@ int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2)
 	return same;
 }
 
+void usb_setMode(usbMode_t mode)
+{
+#ifdef DEBUG
+	rprintf(0,"usb_setMode %d\n",mode);
+#endif		
+
+	switch(mode)
+	{
+	case umMIDI:
+		usb_midi_start();
+		break;
+	case umMSC:
+		usb_msc_start();
+		break;
+	default:
+		usb_power_start();
+	}
+}
+
 int main(void)
 {
 	FRESULT res;
@@ -244,10 +264,9 @@ int main(void)
 //	nand_test();
 	
 	rprintf(0,"usb init...\n");
-
+	
 	NVIC_SetPriority(USB_IRQn,17);
 	NVIC_EnableIRQ(USB_IRQn);
-	usb_midi_start();
 	
 	rprintf(0,"synth init...\n");
 

@@ -47,7 +47,7 @@ static const U8 abDescriptors[] = {
 	MAX_PACKET_SIZE,		// bMaxPacketSize
 	LE_WORD(0x6112),		// idVendor
 	LE_WORD(0x0C30),		// idProduct
-	LE_WORD(0x0001),		// bcdDevice
+	LE_WORD(0x0003),		// bcdDevice
 	0x01,					// iManufacturer
 	0x02,					// iProduct
 	0x03,					// iSerialNumber

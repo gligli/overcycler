@@ -64,6 +64,13 @@ static inline void __restore_irq_stub(uint32_t basepri)
 
 #define EXT_RAM  __attribute__((section(".ext_ram")))
 
+typedef enum
+{
+	umNone=0,umMIDI=1,umMSC=2
+} usbMode_t;
+
+extern void usb_setMode(usbMode_t mode);
+
 extern void storage_write(uint32_t pageIdx, uint8_t *buf);
 extern void storage_read(uint32_t pageIdx, uint8_t *buf);
 extern void storage_delete(uint32_t pageIdx);

@@ -6,9 +6,10 @@
 #include "lfo.h"
 #include "wtosc.h"
 #include "seq.h"
+#include "main.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 16
+#define STORAGE_VERSION 17
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -298,6 +299,13 @@ LOWERCODESIZE int8_t settings_load(void)
 	
 	settings.seqArpClock=storageRead16();
 
+	if (storage.version<17)
+		return 1;
+		
+	// v17
+	
+	settings.usbMode=storageRead8();
+
 	return 1;
 }
 
@@ -329,7 +337,11 @@ LOWERCODESIZE void settings_save(void)
 	// v7
 		
 	storageWrite16(settings.seqArpClock);
-
+	
+	// v17
+	
+	storageWrite8(settings.usbMode);
+	
 	// this must stay last
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
 }

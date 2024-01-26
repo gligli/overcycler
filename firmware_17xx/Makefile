@@ -80,8 +80,9 @@ SRC+=usb/usbhw_lpc.c
 SRC+=usb/usbcontrol.c
 SRC+=usb/msc_bot.c
 SRC+=usb/msc_scsi.c
-SRC+=usb/usb_msc.c
+SRC+=usb/usb_power.c
 SRC+=usb/usb_midi.c
+SRC+=usb/usb_msc.c
 
 SRC+=synth/adsr.c
 SRC+=synth/arp.c

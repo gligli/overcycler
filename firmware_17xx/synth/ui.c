@@ -297,7 +297,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptCust,.number=32,.shortName="UsbM",.longName="USB Mode (a restart is required)",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
 			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 		},
 		{
@@ -701,6 +701,9 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					sprintf(dv,"%03d ",v);
 					for(int i=0;i<=ui.kpInputDecade;++i)
 						dv[2-i]='_';				
+					break;
+				case 32:
+					v=settings.usbMode;
 					break;
 				}
 			}
@@ -1223,6 +1226,10 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 					ui.kpInputDecade=2;
 					ui.activeSourceTimeout=UINT32_MAX;
 				}
+				break;
+			case 32:
+				settings.usbMode=potSetting;
+				ui.settingsModified=1;
 				break;
 		}
 		break;

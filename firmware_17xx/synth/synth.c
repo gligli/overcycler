@@ -22,6 +22,7 @@
 #include "../xnormidi/midi.h"
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_pinsel.h"
+#include "main.h"
 
 #define BIT_INPUT_FOOTSWITCH (1<<26)
 
@@ -1036,6 +1037,8 @@ void synth_init(void)
 	synth_refreshWaveforms(0);
 	synth_refreshWaveforms(1);
 	synth_refreshWaveforms(2);
+	
+	usb_setMode(settings.usbMode);
 }
 
 
