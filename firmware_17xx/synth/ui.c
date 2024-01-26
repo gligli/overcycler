@@ -1332,7 +1332,7 @@ void ui_init(void)
 		
 	// welcome message
 
-	sendString(1,"GliGli's OverCycler2");
+	sendString(1,"GliGli's OverCycler");
 	setPos(1,0,1);
 	sendString(1,"Build " __DATE__ " " __TIME__);
 	rprintf(1,"Sampling at %d Hz", SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
@@ -1431,7 +1431,7 @@ void ui_update(void)
 	{
 		if(ui.pendingScreenClear)
 		{
-			sendString(1,"GliGli's OverCycler2                    ");
+			sendString(1,"GliGli's OverCycler                     ");
 			sendString(1,"A: Miscellaneous   B: Arp/Sequencer     ");
 			sendString(2,"C: Oscs/WaveMod    D: Filter            ");
 			sendString(2,"E: Amplifier       F: LFO1/LFO2         ");
