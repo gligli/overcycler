@@ -65,13 +65,13 @@ static void readPots(void)
 {
 	uint16_t new;
 	int pot;
-	uint16_t tmpVal[SCAN_POT_COUNT];
+	uint16_t tmpVal[SCAN_POT_COUNT+1];
 	uint16_t tmpSmp[POT_SAMPLES];
 	int8_t isUnlockable;
 	
 	// read pots from TLV2556 ADC
 
-	for(pot=0;pot<SCAN_POT_COUNT;++pot)
+	for(pot=0;pot<=SCAN_POT_COUNT;++pot)
 	{
 		tmpVal[pot]=readADC(pot);
 	}
@@ -82,7 +82,7 @@ static void readPots(void)
 	{
 		// reads are off by one by TLV2556 spec
 
-		new=tmpVal[(pot+1)%SCAN_POT_COUNT]>>2;
+		new=tmpVal[pot+1]>>2;
 
 		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
 		
