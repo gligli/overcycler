@@ -105,7 +105,7 @@ static const U8 abDescriptors[] = {
 	DESC_ENDPOINT,
 	MIDI_BULK_OUT_EP,		// bEndpointAddress
 	0x02,					// bmAttributes = bulk
-	LE_WORD(MAX_PACKET_SIZE),// wMaxPacketSize
+	LE_WORD(4),				// wMaxPacketSize (size of MIDI packet)
 	0x00,					// bInterval
 	0x00,        // bRefresh
 	0x00,        // bSyncAddress	
