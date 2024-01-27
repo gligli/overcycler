@@ -6,6 +6,7 @@
 #include "lfo.h"
 #include "wtosc.h"
 #include "seq.h"
+#include "ui.h"
 #include "main.h"
 
 // increment this each time the binary format is changed
@@ -306,6 +307,7 @@ LOWERCODESIZE int8_t settings_load(void)
 	
 	settings.usbMIDI=storageReadS8();
 	settings.usbDisk=storageReadS8();
+	settings.lcdContrast=storageRead8();
 
 	return 1;
 }
@@ -343,6 +345,7 @@ LOWERCODESIZE void settings_save(void)
 	
 	storageWriteS8(settings.usbMIDI);
 	storageWriteS8(settings.usbDisk);
+	storageWrite8(settings.lcdContrast);
 	
 	// this must stay last
 	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
@@ -712,6 +715,7 @@ LOWERCODESIZE void settings_loadDefault(void)
 	settings.midiReceiveChannel=-1;
 	settings.voiceMask=0x3f;
 	settings.seqArpClock=6*UINT16_MAX/10+1;
+	settings.lcdContrast=UI_DEFAULT_LCD_CONTRAST;
 
 	tuner_init(); // use theoretical tuning
 }

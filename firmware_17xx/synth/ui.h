@@ -3,6 +3,9 @@
 
 #include "synth.h"
 
+#define UI_DEFAULT_LCD_CONTRAST 80
+#define UI_MAX_LCD_CONTRAST 100
+
 void ui_init(void);
 void ui_update(void);
 void ui_setPresetModified(int8_t modified);

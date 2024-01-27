@@ -297,7 +297,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptCust,.number=33,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
 			{.type=ptCust,.number=32,.shortName="UsbM",.longName="USB Mode (a restart is required)",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
 		},
 		{
@@ -465,6 +465,11 @@ static void setPos(int lcd, int col, int row)
 		hd44780_driver.set_position(&ui.lcd1,col+row*HD44780_LINE_OFFSET);	
 }
 
+
+static void setLcdContrast(uint8_t contrast)
+{
+	DAC_UpdateValue(0,UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST));
+}
 
 static void drawPresetModified(int lcd)
 {
@@ -704,6 +709,9 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					break;
 				case 32:
 					v=settings.usbDisk?2:(settings.usbMIDI?1:0);
+					break;
+				case 33:
+					v=settings.lcdContrast;
 					break;
 				}
 			}
@@ -1237,6 +1245,10 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				}
 				settingsModified=1;
 				break;
+			case 33:
+				settings.lcdContrast=potSetting;
+				settingsModified=1;
+				break;
 		}
 		break;
 	default:
@@ -1328,7 +1340,7 @@ void ui_init(void)
 	// DAC for contrast
 	
 	DAC_Init(0);
-	DAC_UpdateValue(0,0);
+	setLcdContrast(UI_DEFAULT_LCD_CONTRAST);
 		
 	// welcome message
 
@@ -1556,5 +1568,9 @@ void ui_update(void)
 	ui.pendingScreenClear=0;
 	ui.prevSourceChanges=ui.sourceChanges;
 	ui.sourceChanges=0;
+	
+	// LCD contrast
+	
+	setLcdContrast(settings.lcdContrast);
 }
 

@@ -89,6 +89,8 @@ struct settings_s
 	
 	uint16_t sequencerBank;
 	uint16_t seqArpClock;
+	
+	uint8_t lcdContrast;
 };
 
 struct preset_s
