@@ -234,7 +234,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 			/* 2nd row of pots */
 			{.type=ptNone},
 			{.type=ptNone},
@@ -263,7 +263,7 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptNone},
+			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 			/* 2nd row of pots */
 			{.type=ptCust,.number=21,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
 			{.type=ptNone},
@@ -297,8 +297,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			{.type=ptCust,.number=7,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
+			{.type=ptNone},
 			{.type=ptCust,.number=32,.shortName="UsbM",.longName="USB Mode (a restart is required)",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
-			{.type=ptCust,.number=12,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
 		},
 		{
 			/*0*/ {.type=ptCust,.number=30,.shortName="NPrs",.longName="Numerically set preset number"},
