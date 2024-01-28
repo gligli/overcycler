@@ -824,6 +824,9 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	case cvNoiseVol:
 		value=computeShape(value<<8,vcNoiseLinearizationCurve,1);		
 		break;
+	case cvResonance:
+		value>>=1;
+		break;
 	default:
 		;
 	}
@@ -833,8 +836,8 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 
 static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
-	const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
-	const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
+	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
+	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
 	uint16_t value,channel;
 	
 	v=__USAT(v,16);
