@@ -222,7 +222,7 @@
 #define CCLKSEL_Val           0x00000101
 #define USBCLKSEL_Val         0x00000201
 #define EMCCLKSEL_Val         0x00000001
-#define PCLKSEL_Val           0x00000002
+#define PCLKSEL_Val           0x00000001
 #define PCONP_Val             0x03f0840E
 #define CLKOUTCFG_Val         0x00000100
 

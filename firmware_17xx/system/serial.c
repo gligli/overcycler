@@ -25,7 +25,7 @@ void init_serial0 ( unsigned long baudrate )
 	PINSEL_ConfigPin(0, 3, 1);
 	
     LPC_UART0->LCR = 0x83;											/* 8 bits, no Parity, 1 Stop bit     */
-    unsigned long Fdiv = ( SystemCoreClock / 32 ) / baudrate ;		/* baud rate                        */
+    unsigned long Fdiv = ( SystemCoreClock / 16 ) / baudrate ;		/* baud rate                        */
     LPC_UART0->DLM = Fdiv / 256;
     LPC_UART0->DLL = Fdiv % 256;
     LPC_UART0->LCR = 0x03;											/* DLAB = 0                         */
