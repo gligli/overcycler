@@ -18,9 +18,8 @@
 
 #define SPIMUX_VAL(a,b,c) (((a)<<SPIMUX_PIN_A)|((b)<<SPIMUX_PIN_B)|((c)<<SPIMUX_PIN_C))
 
-#define DACSPI_CMD_SET_A 0x7000
-#define DACSPI_CMD_SET_B 0xf000
-#define DACSPI_CMD_SET_REF 0x7000
+#define DACSPI_CMD_SET_A 0x3000
+#define DACSPI_CMD_SET_B 0xb000
 
 #define DACSPI_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
@@ -44,20 +43,20 @@ static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
 
 static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 {
-	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 5},
-	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOCLR, 1},
-	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOSET, 3},
-	{SPIMUX_VAL(0,0,1), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
-	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOSET, 6},
-	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
-	{SPIMUX_VAL(1,1,1), (uint32_t)&LPC_GPIO0->FIOCLR, 0},
-	{SPIMUX_VAL(1,0,1), (uint32_t)&LPC_GPIO0->FIOSET, 5},
-	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOCLR, 1},
-	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOSET, 3},
-	{SPIMUX_VAL(0,0,1), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
-	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOSET, 6},
-	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
-	{SPIMUX_VAL(1,1,1), (uint32_t)&LPC_GPIO0->FIOSET, 7},
+	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOCLR,5},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO0->FIOCLR,1},
+	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOSET,3},
+	{SPIMUX_VAL(0,0,1),(uint32_t)&LPC_GPIO0->FIOCLR,2},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO0->FIOSET,6},
+	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOCLR,4},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO0->FIOCLR,0},
+	{SPIMUX_VAL(1,0,1),(uint32_t)&LPC_GPIO0->FIOSET,5},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO0->FIOCLR,1},
+	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOSET,3},
+	{SPIMUX_VAL(0,0,1),(uint32_t)&LPC_GPIO0->FIOCLR,2},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO0->FIOSET,6},
+	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOCLR,4},
+	{SPIMUX_VAL(0,1,1),(uint32_t)&LPC_GPIO0->FIOSET,7},
 };
 
 
@@ -98,7 +97,18 @@ void buildLLIs(int buffer, int channel)
 	int muxIndex=lliPos%(DACSPI_CHANNEL_COUNT*2);
 	int muxChannel=dacspi.spiMuxCommands[muxIndex][2];
 	
-	if(channel==DACSPI_CV_CHANNEL)
+	lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.spiMuxCommands[muxIndex][0];
+	lli[lliPos][0].DstAddr=dacspi.spiMuxCommands[muxIndex][1];
+	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
+	lli[lliPos][0].Control=
+		GPDMA_DMACCxControl_TransferSize(1) |
+		GPDMA_DMACCxControl_SWidth(2) |
+		GPDMA_DMACCxControl_DWidth(2);
+
+	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
+	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
+	
+	if(muxChannel==0 || muxChannel==7)
 	{
 		if(muxChannel==0)
 			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer>>1)&7];
@@ -111,7 +121,7 @@ void buildLLIs(int buffer, int channel)
 	}
 	else
 	{
-		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][muxChannel*2];
+		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][(muxChannel-1)*2];
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(2) |
 			GPDMA_DMACCxControl_SWidth(1) |
@@ -119,17 +129,6 @@ void buildLLIs(int buffer, int channel)
 			GPDMA_DMACCxControl_SI;
 	}
 	
-	lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.spiMuxCommands[muxIndex][0];
-	lli[lliPos][0].DstAddr=dacspi.spiMuxCommands[muxIndex][1];
-	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
-	lli[lliPos][0].Control=
-		GPDMA_DMACCxControl_TransferSize(1) |
-		GPDMA_DMACCxControl_SWidth(2) |
-		GPDMA_DMACCxControl_DWidth(2);
-
-	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
-	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
-
 	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
 	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
