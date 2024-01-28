@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #define DEBUG
-#define DEBUG_
+//#define DEBUG_
 
 #include <stdint.h>
 #include <string.h>
