@@ -251,8 +251,8 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 		},
 		{
 			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptCust,.number=2,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
-			/*2*/ {.type=ptCust,.number=3,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
+			/*1*/ {.type=ptCust,.number=cnAMod,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
+			/*2*/ {.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptNone},
 			/*5*/ {.type=ptNone},
@@ -1202,7 +1202,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				settings.presetNumber=data;
 
 				ui.slowUpdateTimeout=0;
-				ui.slowUpdateTimeoutNumber=0x85;
+				ui.slowUpdateTimeoutNumber=0x80+cnLoad;
 				break;
 			case cnPanc:
 				assigner_panicOff();
