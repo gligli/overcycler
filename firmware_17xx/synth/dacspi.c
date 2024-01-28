@@ -16,7 +16,7 @@
 #define SPIMUX_PIN_B 16
 #define SPIMUX_PIN_C 5
 
-#define SPIMUX_VAL(a,b,c) (((a)<<SPIMUX_PIN_A)|((b)<<SPIMUX_PIN_B)|((c)<<SPIMUX_PIN_C))
+#define SPIMUX_VAL(c,b,a) (((a)<<SPIMUX_PIN_A)|((b)<<SPIMUX_PIN_B)|((c)<<SPIMUX_PIN_C))
 
 #define DACSPI_CMD_SET_A 0x3000
 #define DACSPI_CMD_SET_B 0xb000
