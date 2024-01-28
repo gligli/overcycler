@@ -179,7 +179,7 @@ void scan_init(void)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
-	SSP_ConfigStruct.ClockRate=1000000;
+	SSP_ConfigStruct.ClockRate=100000;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
 	
