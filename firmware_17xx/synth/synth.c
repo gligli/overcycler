@@ -833,6 +833,8 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 
 static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
+	const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
+	const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
 	uint16_t value,channel;
 	
 	v=__USAT(v,16);
@@ -841,22 +843,22 @@ static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
 	switch(cv)
 	{
 	case cvAmp:
-		channel=voice;
+		channel=ampVoice2CV[voice];
 		break;
 	case cvNoiseVol:
-		channel=6;
+		channel=8;
 		break;
 	case cvResonance:
-		channel=7;
+		channel=12;
 		break;
 	case cvCutoff:
-		channel=voice+8;
+		channel=cutoffVoice2CV[voice];
 		break;
 	case cvAVol:
-		channel=14;
+		channel=1;
 		break;
 	case cvBVol:
-		channel=15;
+		channel=0;
 		break;
 	default:
 		return;

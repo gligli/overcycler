@@ -7,13 +7,16 @@
 #include "LPC177x_8x.h"
 #include "lpc177x_8x_gpdma.h"
 #include "lpc177x_8x_gpio.h"
+#include "lpc177x_8x_pinsel.h"
+
+#define DMA_CHANNEL_UART2_TX__T3_MAT_1 14
 
 #define SPIMUX_PORT_ABC 0
 #define SPIMUX_PIN_A 15
 #define SPIMUX_PIN_B 16
 #define SPIMUX_PIN_C 5
 
-#define SPIMUX_MASK ((1<<SPIMUX_PIN_A)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_C))
+#define SPIMUX_VAL(a,b,c) (((a)<<SPIMUX_PIN_A)|((b)<<SPIMUX_PIN_B)|((c)<<SPIMUX_PIN_C))
 
 #define DACSPI_CMD_SET_A 0x7000
 #define DACSPI_CMD_SET_B 0xf000
@@ -21,7 +24,7 @@
 
 #define DACSPI_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
-		GPDMA_DMACCxConfig_DestPeripheral(14) | \
+		GPDMA_DMACCxConfig_DestPeripheral(DMA_CHANNEL_UART2_TX__T3_MAT_1) | \
 		GPDMA_DMACCxConfig_TransferType(1) | \
 		GPDMA_DMACCxConfig_ITC
 
@@ -30,36 +33,31 @@
 
 #define DACSPI_CV_CHANNEL 6
 
-static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][4];
+static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
 static EXT_RAM volatile uint8_t marker;
 static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-static const uint8_t channelCPSRConst[DACSPI_CHANNEL_COUNT] =
-{
-	5,5,5,5,5,5,8
-};
-
 static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
 {
-	3,3,3,3,3,4,4 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
+	4,4,4,4,4,4,6 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
 };
 
 static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 {
-	{(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 5},
-	{(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 0},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 1},
-	{(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 3},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
-	{(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 6},
-	{(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 5},
-	{(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 0},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 1},
-	{(0<<SPIMUX_PIN_C)|(1<<SPIMUX_PIN_B)|(0<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 3},
-	{(0<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
-	{(1<<SPIMUX_PIN_C)|(0<<SPIMUX_PIN_B)|(1<<SPIMUX_PIN_A), (uint32_t)&LPC_GPIO0->FIOSET, 7},
+	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 5},
+	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOCLR, 1},
+	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOSET, 3},
+	{SPIMUX_VAL(0,0,1), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
+	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOSET, 6},
+	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
+	{SPIMUX_VAL(1,1,1), (uint32_t)&LPC_GPIO0->FIOCLR, 0},
+	{SPIMUX_VAL(1,0,1), (uint32_t)&LPC_GPIO0->FIOSET, 5},
+	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOCLR, 1},
+	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOSET, 3},
+	{SPIMUX_VAL(0,0,1), (uint32_t)&LPC_GPIO0->FIOCLR, 2},
+	{SPIMUX_VAL(1,0,0), (uint32_t)&LPC_GPIO0->FIOSET, 6},
+	{SPIMUX_VAL(0,1,0), (uint32_t)&LPC_GPIO0->FIOCLR, 4},
+	{SPIMUX_VAL(1,1,1), (uint32_t)&LPC_GPIO0->FIOSET, 7},
 };
 
 
@@ -78,13 +76,12 @@ static struct
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
 	uint16_t cvCommands[DACSPI_CV_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
-	uint8_t channelCPSR[DACSPI_CHANNEL_COUNT];
 } dacspi EXT_RAM;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-//oc3	LPC_GPDMA->DMACIntTCClear=LPC_GPDMA->DMACIntTCStat; // acknowledge interrupt
+	LPC_GPDMA->IntTCClear=LPC_GPDMA->IntTCStat; // acknowledge interrupt
 
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
@@ -103,7 +100,7 @@ void buildLLIs(int buffer, int channel)
 	
 	if(channel==DACSPI_CV_CHANNEL)
 	{
-		if(muxChannel==6)
+		if(muxChannel==0)
 			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer>>1)&7];
 		else
 			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+((buffer>>1)&7)];
@@ -135,17 +132,9 @@ void buildLLIs(int buffer, int channel)
 
 	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
-	lli[lliPos][2].NextLLI=(uint32_t)&lli[lliPos][3];
+	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
 	lli[lliPos][2].Control=
 		GPDMA_DMACCxControl_TransferSize(channelWaitStates[channel]) |
-		GPDMA_DMACCxControl_SWidth(0) |
-		GPDMA_DMACCxControl_DWidth(0);
-
-	lli[lliPos][3].SrcAddr=(uint32_t)&dacspi.channelCPSR[(channel+1)%DACSPI_CHANNEL_COUNT];
-	lli[lliPos][3].DstAddr=(uint32_t)&LPC_SSP0->CPSR;
-	lli[lliPos][3].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
-	lli[lliPos][3].Control=
-		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 }
@@ -157,7 +146,7 @@ FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 
 FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value)
 {
-	dacspi.cvCommands[channel]=(value>>4)|(((channel&7)+1)<<12);
+	dacspi.cvCommands[channel]=(value>>4)|((channel&7)<<12);
 }
 
 void dacspi_init(void)
@@ -167,34 +156,33 @@ void dacspi_init(void)
 	memset(&dacspi,0,sizeof(dacspi));
 
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
-	memcpy(dacspi.channelCPSR,channelCPSRConst,sizeof(channelCPSRConst));
 	
-	// SSP
-
-//oc3	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SSP0,CLKPWR_PCLKSEL_CCLK_DIV_1);
-	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSSP0,ENABLE);
-
-	LPC_SSP0->CPSR=8; // SYNTH_MASTER_CLOCK / n
-	LPC_SSP0->CR0=0x0f; // 16Bit SPI(0,0)
-	LPC_SSP0->CR1=2; // Enable
-	LPC_SSP0->DMACR=3; // DMA
-
 	// SSP pins
 
-//oc3	PINSEL_SetPinFunc(1,20,3);
-//oc3	PINSEL_SetPinFunc(1,21,3);
-//oc3	PINSEL_SetPinFunc(1,24,3);
+	PINSEL_ConfigPin(1,20,5);
+	PINSEL_ConfigPin(1,21,3);
+	PINSEL_ConfigPin(1,24,5);
 	
 	LPC_GPIO1->FIODIR2|=0x20;
 	LPC_GPIO1->FIOMASK2&=~0x20;
 	
+	// SSP
+
+	SSP_CFG_Type SSP_ConfigStruct;
+	SSP_ConfigStructInit(&SSP_ConfigStruct);
+	SSP_ConfigStruct.Databit=SSP_DATABIT_16;
+	SSP_ConfigStruct.ClockRate=30000000;
+	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
+	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
+	SSP_Cmd(LPC_SSP0,ENABLE);
+
 	// init SPI mux
 
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_B,1); // B
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_C,1); // C
-	LPC_GPIO0->FIOMASK&=~SPIMUX_MASK;
-	LPC_GPIO0->FIOSET=SPIMUX_MASK;
+	LPC_GPIO0->FIOMASK&=~SPIMUX_VAL(1,1,1);
+	LPC_GPIO0->FIOSET=SPIMUX_VAL(1,1,1);
 	
 	// prepare LLIs
 
@@ -214,8 +202,8 @@ void dacspi_init(void)
 	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
-//oc3	DMAREQSEL|=0x40;
-//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
+	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_UART2_TX__T3_MAT_1;
+	LPC_GPDMA->Config=GPDMA_DMACConfig_E;
 
 	TIM_TIMERCFG_Type tim;
 	
@@ -223,8 +211,6 @@ void dacspi_init(void)
 	tim.PrescaleValue=1;
 	
 	TIM_Init(LPC_TIM3,TIM_TIMER_MODE,&tim);
-	
-//oc3	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_TIMER3,CLKPWR_PCLKSEL_CCLK_DIV_1);
 	
 	TIM_MATCHCFG_Type tm;
 	
@@ -244,12 +230,12 @@ void dacspi_init(void)
 	
 	TIM_Cmd(LPC_TIM3,ENABLE);
 	
-//oc3	LPC_GPDMACH0->DMACCSrcAddr=lli[0][0].SrcAddr;
-//oc3	LPC_GPDMACH0->DMACCDestAddr=lli[0][0].DstAddr;
-//oc3	LPC_GPDMACH0->DMACCLLI=lli[0][0].NextLLI;
-//oc3	LPC_GPDMACH0->DMACCControl=lli[0][0].Control;
+	LPC_GPDMACH0->CSrcAddr=lli[0][0].SrcAddr;
+	LPC_GPDMACH0->CDestAddr=lli[0][0].DstAddr;
+	LPC_GPDMACH0->CLLI=lli[0][0].NextLLI;
+	LPC_GPDMACH0->CControl=lli[0][0].Control;
 
-//oc3	LPC_GPDMACH0->DMACCConfig=DACSPI_DMACONFIG;
+	LPC_GPDMACH0->CConfig=DACSPI_DMACONFIG;
 	
 	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 }
