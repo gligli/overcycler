@@ -507,11 +507,17 @@ static void drawPresetModified(int lcd)
 		}
 		else
 		{
-			for(i=0;i<8;++i)
+			for(i=0;i<4;++i)
+			{
 				sendChar(lcd, 0b00001);
+				sendChar(lcd, 0b00000);
+			}
 
-			for(i=0;i<8;++i)
+			for(i=0;i<4;++i)
+			{
 				sendChar(lcd, 0b10000);
+				sendChar(lcd, 0b00000);
+			}
 		}
 	
 		old_pm=ui.presetModified;
@@ -534,13 +540,13 @@ static void drawVisualEnv(int lcd, int8_t voicePair)
 				veb|=(1<<i);
 
 		sendChar(lcd, 0b00001 | ((veb>>27) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>23) & 0x1e));
+		sendChar(lcd, 0b00000 | ((veb>>23) & 0x1e));
 		sendChar(lcd, 0b00001 | ((veb>>16) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>15) & 0x1e));
+		sendChar(lcd, 0b00000 | ((veb>>15) & 0x1e));
 		sendChar(lcd, 0b00001 | ((veb>>11) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>7) & 0x1e));
+		sendChar(lcd, 0b00000 | ((veb>>7) & 0x1e));
 		sendChar(lcd, 0b00001 | ((veb>>3) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb<<1) & 0x1e));
+		sendChar(lcd, 0b00000 | ((veb<<1) & 0x1e));
 
 		veb=0;
 		for(i=0;i<32;++i)
@@ -548,13 +554,13 @@ static void drawVisualEnv(int lcd, int8_t voicePair)
 				veb|=(1<<i);
 
 		sendChar(lcd, 0b10000 | ((veb>>28) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>24) & 0xf));
+		sendChar(lcd, 0b00000 | ((veb>>24) & 0xf));
 		sendChar(lcd, 0b10000 | ((veb>>20) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>16) & 0xf));
+		sendChar(lcd, 0b00000 | ((veb>>16) & 0xf));
 		sendChar(lcd, 0b10000 | ((veb>>12) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>8) & 0xf));
+		sendChar(lcd, 0b00000 | ((veb>>8) & 0xf));
 		sendChar(lcd, 0b10000 | ((veb>>4) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb) & 0xf));
+		sendChar(lcd, 0b00000 | ((veb) & 0xf));
 		
 		old_ve[voicePair]=ve;
 		old_ve[voicePair+1]=ve2;
