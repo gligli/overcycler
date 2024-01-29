@@ -86,11 +86,12 @@ static struct
 		uint8_t wmodMask;
 		uint32_t syncResetsMask;
 		int32_t oldCrossOver;
+
+		uint16_t wmodAVal;
+		int16_t wmodAEnvAmt;
 	} partState;
 	
 	uint8_t pendingExtClock;
-	uint16_t wmodAVal;
-	int16_t wmodAEnvAmt;
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -879,7 +880,7 @@ static void refreshCrossOver(uint16_t wmod, int16_t wmodEnvAmt)
 	
 	xovr=wmod;
 
-	// paraphonic filter envelope mod
+	// paraphonic wavemod envelope mod
 	if(currentPreset.continuousParameters[cpWModAEnv]!=HALF_RANGE)
 	{
 		v=assigner_getLatestAssigned(NULL);
@@ -1121,11 +1122,11 @@ void synth_timerInterrupt(void)
 	{
 		int32_t wmod;
 		
-		wmod=synth.wmodAVal;
+		wmod=synth.partState.wmodAVal;
 		wmod+=synth.partState.benderCVs[cvACrossOver];
 		wmod=__USAT(wmod,16);
 				
-		refreshCrossOver(wmod,synth.wmodAEnvAmt);
+		refreshCrossOver(wmod,synth.partState.wmodAEnvAmt);
 	}
 
 	// bit inputs (footswitch / tape in)
@@ -1259,8 +1260,8 @@ void synth_updateCVsEvent(void)
 	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		refreshVoice(v,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
 	
-	synth.wmodAVal=wmodAVal;
-	synth.wmodAEnvAmt=wmodAEnvAmt;
+	synth.partState.wmodAVal=wmodAVal;
+	synth.partState.wmodAEnvAmt=wmodAEnvAmt;
 }
 
 #define PROC_UPDATE_DACS_VOICE(v) \
