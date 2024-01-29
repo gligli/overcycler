@@ -1000,7 +1000,7 @@ void synth_init(void)
 	// init subsystems
 	// ui_init() done in main.c
 	dacspi_init();
-	scan_init();
+	scan_init(0);
 	tuner_init();
 	assigner_init();
 	uartMidi_init();

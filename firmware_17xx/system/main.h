@@ -32,7 +32,7 @@
 #define PROGMEM
 #define pgm_read_byte(addr) (*(uint8_t*)(addr))
 #define print(s) rprintf(0,s)
-#define phex(x) rprintf(0,"%x",x)
+#define phex(x) rprintf(0,"%x",(int)x)
 #define phex16(x) phex(x)
 
 // assumes 120Mhz clock

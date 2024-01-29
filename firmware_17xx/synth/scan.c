@@ -8,6 +8,11 @@
 #include "LPC177x_8x.h"
 #include "lpc177x_8x_ssp.h"
 #include "lpc177x_8x_gpio.h"
+#include "lpc177x_8x_timer.h"
+#include "dacspi.h"
+#include "main.h"
+
+#define ADC_CHANNEL_MASTER_MIX 10
 
 #define POT_SAMPLES 5
 #define POT_THRESHOLD (SCAN_ADC_QUANTUM*3)
@@ -52,7 +57,7 @@ static uint16_t readADC(uint16_t channel)
 		// wait for new data
 	}
 
-	uint16_t res=SSP_ReceiveData(LPC_SSP2);
+	uint16_t res=SSP_ReceiveData(LPC_SSP2)<<4; // convert to 16 bits
 	
 	// wait TLV2556 tConvert
 	
@@ -82,7 +87,7 @@ static void readPots(void)
 	{
 		// reads are off by one by TLV2556 spec
 
-		new=tmpVal[pot+1]>>2;
+		new=tmpVal[pot+1]>>(16-SCAN_ADC_BITS);
 
 		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
 		
@@ -155,6 +160,69 @@ static void readKeypad(void)
 	}
 }
 
+void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
+{
+	TIM_TIMERCFG_Type tim;
+	TIM_MATCHCFG_Type tm;
+	uint16_t * buf,mini=UINT16_MAX,maxi=0,extents;
+		
+	// init timer
+	
+	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
+	tim.PrescaleValue=1;
+	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
+	
+	tm.MatchChannel=0;
+	tm.IntOnMatch=ENABLE;
+	tm.ResetOnMatch=ENABLE;
+	tm.StopOnMatch=DISABLE;
+	tm.ExtMatchOutputType=0;
+	tm.MatchValue=DACSPI_TICK_RATE-1; // same rate as dacspi
+	TIM_ConfigMatch(LPC_TIM2,&tm);
+
+	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
+	TIM_Cmd(LPC_TIM2,ENABLE);
+	
+	readADC(ADC_CHANNEL_MASTER_MIX); // ensure no spurious reads from other channels
+	readADC(ADC_CHANNEL_MASTER_MIX);
+	
+	// sample master mix at dacspi tickrate
+
+	buf=buffer;
+	for(uint16_t sc=sampleCount;sc;--sc)
+	{
+		while(!(LPC_TIM2->IR&TIM_IR_CLR(TIM_MR0_INT)))
+			/* nothing */;
+		
+		TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
+		
+		uint16_t sample=readADC(ADC_CHANNEL_MASTER_MIX);
+		
+		mini=MIN(mini,sample);
+		maxi=MAX(maxi,sample);
+		
+		*buf++=sample;
+	}
+	
+//	rprintf(0,"scan_sampleMasterMix min %d max %d\n",mini,maxi);
+	
+	// extend waveform to 0..UINT16_MAX
+	
+	extents=maxi-mini;
+	buf=buffer;
+	for(uint16_t sc=sampleCount;sc;--sc)
+	{
+		uint16_t sample=*buf;
+		
+		if(extents)
+			sample=(uint32_t)(sample-mini)*UINT16_MAX/extents;
+		else
+			sample=HALF_RANGE;
+		
+		*buf++=sample;
+	}
+}
+
 uint16_t scan_getPotValue(int8_t pot)
 {
 	return scan.potValue[pot]&~(SCAN_ADC_QUANTUM-1);
@@ -165,7 +233,7 @@ void scan_resetPotLocking(void)
 	memset(&scan.potLockTimeout[0],0,SCAN_POT_COUNT*sizeof(uint32_t));
 }
 
-void scan_init(void)
+void scan_init(int8_t isTunerMode)
 {
 	memset(&scan,0,sizeof(scan));
 	
@@ -179,7 +247,7 @@ void scan_init(void)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
-	SSP_ConfigStruct.ClockRate=100000;
+	SSP_ConfigStruct.ClockRate=isTunerMode?8000000:80000;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
 	

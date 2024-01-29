@@ -1,22 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Tunes CVs using the 8253 timer, by measuring audio period
+// Tunes CVs, by sampling audio though the TLV2556 ADC
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "tuner.h"
 #include "storage.h"
 #include "synth.h"
 #include "storage.h"
-#include "main.h"
-#include "system/rprintf.h"
+#include "scan.h"
+#include "dacspi.h"
 
-#define TUNER_TICK 2000000.0
+#define TUNER_TICK (SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE)
 
 #define TUNER_MIDDLE_C_HERTZ 261.63
 #define TUNER_LOWEST_HERTZ (TUNER_MIDDLE_C_HERTZ/16)
 
 #define TUNER_FIL_INIT_OFFSET 6500
 #define TUNER_FIL_INIT_SCALE (65535/13)
-#define TUNER_FIL_PRECISION -3 // higher is preciser but slower
 #define TUNER_FIL_NTH_C_LO 4
 #define TUNER_FIL_NTH_C_HI 7
 
@@ -50,49 +49,51 @@ LOWERCODESIZE static void prepareSynth(void)
 	waitCVUpdate();
 }
 
-static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in 2Mhz ticks
+static NOINLINE double measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
 {
-	uint32_t res=0;
+	uint32_t tzCnt=0;
+		
+#define MAP_BUF_LEN 800
+	uint16_t buf[MAP_BUF_LEN];
+	uint16_t prev;
 	
-	// display / start maintainting CVs
-	
-	for(int8_t i=0;i<25;++i) // lower this and eg. filter tuning starts behaving badly
-		waitCVUpdate();
+	for(uint8_t p=0;p<periods;++p)
+	{
+		scan_sampleMasterMix(MAP_BUF_LEN,buf);
+
+		prev=0;
+		for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
+		{
+			uint16_t sample=buf[pos];
 			
-	return res;
+			if (prev<=HALF_RANGE&&sample>=HALF_RANGE)
+				++tzCnt;
+
+			prev=sample;
+		}
+	}
+	
+	return (double)periods*MAP_BUF_LEN/tzCnt;
 }
 
-static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC, uint8_t lowestNote, int8_t precision)
+static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 {
-	int8_t i,relPrec;
+	int8_t i;
 	uint16_t estimate,bit;
 	double p,tgtp;
-	uint32_t ip;
 
 	tgtp=TUNER_TICK/(TUNER_LOWEST_HERTZ*pow(2.0,nthC));
 	
 	estimate=UINT16_MAX;
 	bit=0x8000;
 	
-	relPrec=precision+nthC;
-	
 	for(i=0;i<12;++i) // 12bit dac
 	{
-		if(estimate>tuner_computeCVFromNote(voice,lowestNote,0,cvCutoff))
-		{
-			synth_refreshCV(voice,cvCutoff,estimate);
-			
-			ip=measureAudioPeriod(1<<relPrec);
-			if(ip==UINT32_MAX)
-				return -1; // failure (untunable osc)
-			
-			p=(double)ip*pow(2.0,-relPrec);
-		}
-		else
-		{
-			p=DBL_MAX;
-		}
-		
+		synth_refreshCV(voice,cvCutoff,estimate);
+		delay_ms(25); // wait analog hardware stabilization	
+
+		p=measureAudioPeriod(nthC);
+
 		// adjust estimate
 		if (p>tgtp)
 			estimate+=bit;
@@ -106,14 +107,8 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC, uint8_t lowest
 
 	settings.tunes[nthC][voice]=estimate;
 
-#ifdef DEBUG		
-	print("cv ");
-	phex16(estimate);
-	print(" per ");
-	phex16(p);
-	print(" ");
-	phex16(tgtp);
-	print("\n");
+#ifdef DEBUG
+	rprintf(0, "cv %d per %d %d\n",estimate,(int)p,(int)tgtp);
 #endif
 	
 	return 0;
@@ -137,7 +132,7 @@ static LOWERCODESIZE void tuneCV(int8_t voice)
 	// tune
 
 	for(i=TUNER_FIL_NTH_C_LO;i<=TUNER_FIL_NTH_C_HI;++i)
-		if (tuneOffset(voice,i,12*(TUNER_FIL_NTH_C_LO-1),TUNER_FIL_PRECISION))
+		if (tuneOffset(voice,i))
 			break;
 
 	for(i=TUNER_FIL_NTH_C_LO-1;i>=0;--i)
@@ -148,7 +143,7 @@ static LOWERCODESIZE void tuneCV(int8_t voice)
 	
 	// close VCA
 
-	synth_refreshCV(voice,cvAmp,UINT16_MAX);
+	synth_refreshCV(voice,cvAmp,0);
 	waitCVUpdate();
 }
 
@@ -209,6 +204,7 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		// reinit tuner
 		
 		tuner_init();
+		scan_init(1);
 		
 		// prepare synth for tuning
 		
@@ -234,6 +230,7 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		for(i=0;i<SYNTH_VOICE_COUNT;++i)
 			synth_refreshCV(i,cvAmp,0);
 		
+		scan_init(0);
 		settings_save();
 	}
 }
