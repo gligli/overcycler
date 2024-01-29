@@ -1379,17 +1379,26 @@ void ui_update(void)
 				break;
 			case 0x80+cnSave:
 				preset_saveCurrent(settings.presetNumber);
-				/* fall through */
-			case 0x80+cnLoad:
 				settings_save();                
-				if(!preset_loadCurrent(settings.presetNumber))
-					preset_loadDefault(1);
 				ui_setPresetModified(0);	
-				
-				synth_refreshWaveforms(0);
-				synth_refreshWaveforms(1);
-				synth_refreshWaveforms(2);
-				synth_refreshFullState();
+				break;
+			case 0x80+cnLoad:
+				BLOCK_INT(1)
+				{
+					// temporarily silence voices
+					for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+						synth_refreshCV(v,cvAmp, 0);					
+					
+					settings_save();                
+					if(!preset_loadCurrent(settings.presetNumber))
+						preset_loadDefault(1);
+					ui_setPresetModified(0);	
+
+					synth_refreshWaveforms(0);
+					synth_refreshWaveforms(1);
+					synth_refreshWaveforms(2);
+					synth_refreshFullState();
+				}
 				break;
 			case 0x80+cnTune:
 				tuner_tuneSynth();
