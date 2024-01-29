@@ -1401,6 +1401,7 @@ void ui_update(void)
 				}
 				break;
 			case 0x80+cnTune:
+				setPos(2,0,1);
 				tuner_tuneSynth();
 				break;
 		}

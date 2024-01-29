@@ -37,10 +37,6 @@ static void waitCVUpdate(void)
 
 LOWERCODESIZE static void prepareSynth(void)
 {
-	// display	
-	for(int spc=0;spc<40;++spc)
-		rprintf(1," ");
-	
 	synth_refreshCV(-1,cvResonance,0);
 	synth_refreshCV(-1,cvNoiseVol,0);
 	synth_refreshCV(-1,cvAVol,0);
@@ -114,12 +110,12 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 	return 0;
 }
 
-static LOWERCODESIZE void tuneCV(int8_t voice)
+static LOWERCODESIZE void tuneFilter(int8_t voice)
 {
 #ifdef DEBUG		
 	print("\ntuning ");phex(voice);print("\n");
 #endif
-	int8_t i;
+	int8_t nthC;
 	
 	// display
 	
@@ -131,15 +127,15 @@ static LOWERCODESIZE void tuneCV(int8_t voice)
 	
 	// tune
 
-	for(i=TUNER_FIL_NTH_C_LO;i<=TUNER_FIL_NTH_C_HI;++i)
-		if (tuneOffset(voice,i))
+	for(nthC=TUNER_FIL_NTH_C_LO;nthC<=TUNER_FIL_NTH_C_HI;++nthC)
+		if (tuneOffset(voice,nthC))
 			break;
 
-	for(i=TUNER_FIL_NTH_C_LO-1;i>=0;--i)
-		settings.tunes[i][voice]=(uint32_t)2*settings.tunes[i+1][voice]-settings.tunes[i+2][voice];
+	for(nthC=TUNER_FIL_NTH_C_LO-1;nthC>=0;--nthC)
+		settings.tunes[nthC][voice]=(uint32_t)2*settings.tunes[nthC+1][voice]-settings.tunes[nthC+2][voice];
 
-	for(i=TUNER_FIL_NTH_C_HI+1;i<TUNER_OCTAVE_COUNT;++i)
-		settings.tunes[i][voice]=(uint32_t)2*settings.tunes[i-1][voice]-settings.tunes[i-2][voice];
+	for(nthC=TUNER_FIL_NTH_C_HI+1;nthC<TUNER_OCTAVE_COUNT;++nthC)
+		settings.tunes[nthC][voice]=(uint32_t)2*settings.tunes[nthC-1][voice]-settings.tunes[nthC-2][voice];
 	
 	// close VCA
 
@@ -184,20 +180,20 @@ NOINLINE uint16_t tuner_computeCVFromNote(int8_t voice, uint8_t note, uint8_t ne
 
 LOWERCODESIZE void tuner_init(void)
 {
-	int8_t i,j;
+	int8_t cv,oct;
 	
 	// theoretical base tuning
 	
-	for(j=0;j<TUNER_OCTAVE_COUNT;++j)
-		for(i=0;i<TUNER_CV_COUNT;++i)
+	for(oct=0;oct<TUNER_OCTAVE_COUNT;++oct)
+		for(cv=0;cv<TUNER_CV_COUNT;++cv)
 		{
-			settings.tunes[j][i]=TUNER_FIL_INIT_OFFSET+j*TUNER_FIL_INIT_SCALE;
+			settings.tunes[oct][cv]=TUNER_FIL_INIT_OFFSET+oct*TUNER_FIL_INIT_SCALE;
 		}
 }
 
 LOWERCODESIZE void tuner_tuneSynth(void)
 {
-	int8_t i;
+	int8_t v;
 	
 	BLOCK_INT(1)
 	{
@@ -216,19 +212,19 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		
 		synth_refreshCV(-1,cvResonance,UINT16_MAX);
 	
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			synth_refreshCV(i,cvCutoff,0);
+		for(v=0;v<SYNTH_VOICE_COUNT;++v)
+			synth_refreshCV(v,cvCutoff,UINT16_MAX);
 	
 			// filters
 		
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			tuneCV(i);
+		for(v=0;v<SYNTH_VOICE_COUNT;++v)
+			tuneFilter(v);
 
 		// finish
 		
 		synth_refreshCV(-1,cvResonance,0);
-		for(i=0;i<SYNTH_VOICE_COUNT;++i)
-			synth_refreshCV(i,cvAmp,0);
+		for(v=0;v<SYNTH_VOICE_COUNT;++v)
+			synth_refreshCV(v,cvAmp,0);
 		
 		scan_init(0);
 		settings_save();

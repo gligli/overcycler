@@ -829,7 +829,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value>>=1;
 		break;
 	default:
-		;
+		/* nothing */;
 	}
 	
 	return value;
