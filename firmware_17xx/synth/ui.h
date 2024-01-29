@@ -3,8 +3,8 @@
 
 #include "synth.h"
 
-#define UI_DEFAULT_LCD_CONTRAST 100
-#define UI_MAX_LCD_CONTRAST 200
+#define UI_DEFAULT_LCD_CONTRAST 5
+#define UI_MAX_LCD_CONTRAST 10
 
 void ui_init(void);
 void ui_update(void);
