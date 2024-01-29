@@ -799,7 +799,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		strcpy(dv,currentPreset.oscWave[2]);
 	}
-	else if (prm->type==ptCust && prm->number==31)
+	else if (prm->type==ptCust && prm->number==cnNVal)
 	{
 		if(ui.kpInputPot>=0)
 			strcpy(dv,uiParameters[ui.activePage][0][ui.kpInputPot].longName);
