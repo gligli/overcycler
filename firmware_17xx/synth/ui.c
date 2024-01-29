@@ -19,7 +19,7 @@
 
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
 
-#define SLOW_UPDATE_TIMEOUT (TICKER_1S/50)
+#define SLOW_UPDATE_TIMEOUT (TICKER_1S/5)
 
 #define PANEL_DEADBAND 2048
 
@@ -37,7 +37,10 @@ enum uiKeypadButton_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upWMod=1,upFil=2,upAmp=3,upLFO1=4,upLFO2=5,upArp=6,upSeq=7,upMisc=8,upTuner=9
+	upNone=-1,upOscs=0,upWMod=1,upFil=2,upAmp=3,upLFO1=4,upLFO2=5,upArp=6,upSeq=7,upMisc=8,
+
+	// /!\ this must stay last
+	upCount
 };
 
 enum uiCustomParamNumber_e
@@ -57,7 +60,7 @@ struct uiParam_s
 	int32_t custPotMul, custPotAdd;
 };
 
-const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=pots/1=keys][pot/key num]
 {
 	/* Oscillators page (A) */
 	{
@@ -318,35 +321,6 @@ const struct uiParam_s uiParameters[10][2][10] = // [pages][0=pots/1=keys][pot/k
 			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
 			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
-	},
-	/* Tuner page */
-	{
-		{
-			/* 1st row of pots */
-			{.type=ptCust,.number=cnTOct,.shortName="Oct1",.longName="Tuner octave 1",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+0*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct2",.longName="Tuner octave 2",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+1*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct3",.longName="Tuner octave 3",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+2*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct4",.longName="Tuner octave 4",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+3*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct5",.longName="Tuner octave 5",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+4*TUNER_FIL_INIT_SCALE-4096},
-			/* 2nd row of pots */
-			{.type=ptCust,.number=cnTOct,.shortName="Oct6",.longName="Tuner octave 6",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+5*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct7",.longName="Tuner octave 7",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+6*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptCust,.number=cnTOct,.shortName="Oct8",.longName="Tuner octave 8",.custPotMul=1<<13,.custPotAdd=TUNER_FIL_INIT_OFFSET+7*TUNER_FIL_INIT_SCALE-4096},
-			{.type=ptNone},
-			{.type=ptNone},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptCust,.number=cnTVce,.shortName="Vce1",.longName="Tuner voice 1"},
-			/*2*/ {.type=ptCust,.number=cnTVce,.shortName="Vce2",.longName="Tuner voice 2"},
-			/*3*/ {.type=ptCust,.number=cnTVce,.shortName="Vce3",.longName="Tuner voice 3"},
-			/*4*/ {.type=ptCust,.number=cnTVce,.shortName="Vce4",.longName="Tuner voice 4"},
-			/*5*/ {.type=ptCust,.number=cnTVce,.shortName="Vce5",.longName="Tuner voice 5"},
-			/*6*/ {.type=ptCust,.number=cnTVce,.shortName="Vce6",.longName="Tuner voice 6"},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnPack,.shortName="Pack",.longName="Pack presets and remove duplicates"},
 		},
 	},
 };
@@ -1128,16 +1102,13 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				break;
 			case cnLoad:
 			case cnSave:
+			case cnTune:
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case cnMidC:
 				settings.midiReceiveChannel=potSetting-1;
 				settingsModified=1;
-				break;
-			case cnTune:
-				ui.activePage=upTuner;
-				ui.pendingScreenClear=1;
 				break;
 			case cnTOct:
 				settings.tunes[potnum][ui.tunerActiveVoice]=potSetting;
@@ -1419,6 +1390,9 @@ void ui_update(void)
 				synth_refreshWaveforms(1);
 				synth_refreshWaveforms(2);
 				synth_refreshFullState();
+				break;
+			case 0x80+cnTune:
+				tuner_tuneSynth();
 				break;
 		}
 		

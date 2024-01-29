@@ -72,6 +72,7 @@ int synth_getCurWaveCount(void);
 int8_t synth_getBankName(int bankIndex, char * res);
 int8_t synth_getWaveName(int waveIndex, char * res);
 int32_t synth_getVisualEnvelope(int8_t voice);
+void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];

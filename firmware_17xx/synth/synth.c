@@ -835,7 +835,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	return value;
 }
 
-static FORCEINLINE void refreshCV(int8_t voice, cv_t cv, uint32_t v)
+FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v)
 {
 	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
 	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
@@ -925,7 +925,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	vf=filterVal;
 	vf+=scaleU16S16(synth.filEnvs[v].output,filEnvAmt);
 	vf+=synth.filterNoteCV[v];
-	refreshCV(v,cvCutoff,vf);
+	synth_refreshCV(v,cvCutoff,vf);
 
 	// oscs
 	
@@ -960,7 +960,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	refreshCV(v,cvAmp,vamp);
+	synth_refreshCV(v,cvAmp,vamp);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1107,10 +1107,10 @@ void synth_timerInterrupt(void)
 
 	// CV update
 
-	refreshCV(-1,cvAVol,(((uint32_t)currentPreset.continuousParameters[cpAVol]*(synth.partState.benderCVs[cvAVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
-	refreshCV(-1,cvBVol,(((uint32_t)currentPreset.continuousParameters[cpBVol]*(synth.partState.benderCVs[cvBVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
-	refreshCV(-1,cvNoiseVol,(((uint32_t)currentPreset.continuousParameters[cpNoiseVol]*(synth.partState.benderCVs[cvNoiseVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
-	refreshCV(-1,cvResonance,resVal);
+	synth_refreshCV(-1,cvAVol,(((uint32_t)currentPreset.continuousParameters[cpAVol]*(synth.partState.benderCVs[cvAVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	synth_refreshCV(-1,cvBVol,(((uint32_t)currentPreset.continuousParameters[cpBVol]*(synth.partState.benderCVs[cvBVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	synth_refreshCV(-1,cvNoiseVol,(((uint32_t)currentPreset.continuousParameters[cpNoiseVol]*(synth.partState.benderCVs[cvNoiseVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	synth_refreshCV(-1,cvResonance,resVal);
 
 	// midi
 
