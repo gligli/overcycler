@@ -50,19 +50,19 @@ static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ti
 	{
 		scan_sampleMasterMix(MAP_BUF_LEN,buf);
 
-		prev=0;
+		prev=buf[0];
 		for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
 		{
 			uint16_t sample=buf[pos];
 			
-			if (prev<=HALF_RANGE&&sample>=HALF_RANGE)
+			if ((prev<=HALF_RANGE&&sample>HALF_RANGE) || (prev>=HALF_RANGE&&sample<HALF_RANGE))
 				++tzCnt;
 
 			prev=sample;
 		}
 	}
 	
-	return ((periods*MAP_BUF_LEN)<<12)/tzCnt;
+	return ((periods*MAP_BUF_LEN*2)<<12)/tzCnt;
 }
 
 static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
