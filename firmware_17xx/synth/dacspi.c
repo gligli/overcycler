@@ -156,6 +156,14 @@ void dacspi_init(void)
 
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
 	
+	// init SPI mux
+
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_B,1); // B
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_C,1); // C
+	LPC_GPIO0->FIOMASK&=~SPIMUX_VAL(1,1,1);
+	LPC_GPIO0->FIOSET=SPIMUX_VAL(1,1,1);
+	
 	// SSP pins
 
 	PINSEL_ConfigPin(1,20,5);
@@ -175,14 +183,6 @@ void dacspi_init(void)
 	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
 	SSP_Cmd(LPC_SSP0,ENABLE);
 
-	// init SPI mux
-
-	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
-	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_B,1); // B
-	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_C,1); // C
-	LPC_GPIO0->FIOMASK&=~SPIMUX_VAL(1,1,1);
-	LPC_GPIO0->FIOSET=SPIMUX_VAL(1,1,1);
-	
 	// prepare LLIs
 
 	for(j=0;j<DACSPI_BUFFER_COUNT;++j)
