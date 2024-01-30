@@ -1219,6 +1219,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				{
 				case 1:
 					settings.usbMIDI=1;
+					settings.usbDisk=0;
 					break;
 				case 2:
 					settings.usbDisk=1;
@@ -1441,9 +1442,9 @@ void ui_update(void)
 		if(ui.pendingScreenClear)
 		{
 			sendString(1,"GliGli's OverCycler                     ");
-			sendString(1,"A: Miscellaneous   B: Arp/Sequencer     ");
-			sendString(2,"C: Oscs/WaveMod    D: Filter            ");
-			sendString(2,"E: Amplifier       F: LFO1/LFO2         ");
+			sendString(1,"A: Oscs/WaveMod    B: Filter            ");
+			sendString(2,"C: Amplifier       D: LFO1/LFO2         ");
+			sendString(2,"*: Miscellaneous   #: Arp/Sequencer     ");
 		}
 		delay_ms(2);
 	}
