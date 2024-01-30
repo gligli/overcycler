@@ -34,7 +34,7 @@ static struct
 	uint32_t potLockTimeout[SCAN_POT_COUNT];
 
 	int8_t keypadState[16];
-} scan EXT_RAM;
+} scan;
 
 static uint8_t keypadButtonCode[16]=
 {
@@ -160,13 +160,29 @@ static void readKeypad(void)
 	}
 }
 
+static void initSSP(int8_t isSmpMasterMixMode)
+{
+	SSP_CFG_Type SSP_ConfigStruct;
+	SSP_ConfigStructInit(&SSP_ConfigStruct);
+	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
+	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?8000000:80000;
+	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
+	SSP_Cmd(LPC_SSP2,ENABLE);
+}
+
 void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 {
 	TIM_TIMERCFG_Type tim;
 	TIM_MATCHCFG_Type tm;
 	int32_t mini=UINT16_MAX,maxi=0,extents;
 	uint16_t *buf;
-		
+	
+	// reinit SSP for high sample frequency
+
+	initSSP(1);
+	readADC(ADC_CHANNEL_MASTER_MIX); // ensure no spurious reads from other channels
+	readADC(ADC_CHANNEL_MASTER_MIX);
+	
 	// init timer
 	
 	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
@@ -183,9 +199,6 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 
 	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
 	TIM_Cmd(LPC_TIM2,ENABLE);
-	
-	readADC(ADC_CHANNEL_MASTER_MIX); // ensure no spurious reads from other channels
-	readADC(ADC_CHANNEL_MASTER_MIX);
 	
 	// sample master mix at dacspi tickrate
 
@@ -220,7 +233,10 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 		*buf++=sample;
 	}
 
-	readADC(0); // restore state for readPots
+	// restore state for readPots
+	
+	initSSP(0);
+	readADC(0);
 	readADC(0);
 }
 
@@ -234,7 +250,7 @@ void scan_resetPotLocking(void)
 	memset(&scan.potLockTimeout[0],0,SCAN_POT_COUNT*sizeof(uint32_t));
 }
 
-void scan_init(int8_t isTunerMode)
+void scan_init(void)
 {
 	memset(&scan,0,sizeof(scan));
 	
@@ -245,13 +261,7 @@ void scan_init(int8_t isTunerMode)
 	PINSEL_ConfigPin(1,POTSCAN_PIN_DIN,4); // DIN
 	PINSEL_ConfigPin(1,POTSCAN_PIN_CLK,4); // CLK
 	
-	SSP_CFG_Type SSP_ConfigStruct;
-	SSP_ConfigStructInit(&SSP_ConfigStruct);
-	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
-	SSP_ConfigStruct.ClockRate=isTunerMode?8000000:80000;
-	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
-	SSP_Cmd(LPC_SSP2,ENABLE);
-	
+	initSSP(0);	
 	readADC(0b1111); // config CFGR2
 	
 	// init keypad

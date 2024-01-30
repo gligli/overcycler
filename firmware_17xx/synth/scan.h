@@ -11,7 +11,7 @@ uint16_t scan_getPotValue(int8_t pot);
 void scan_resetPotLocking(void);
 void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer);
 
-void scan_init(int8_t isTunerMode);
+void scan_init(void);
 void scan_update(void);
 
 #endif /* SCAN_H */

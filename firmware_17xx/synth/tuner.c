@@ -191,7 +191,6 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		// reinit tuner
 		
 		tuner_init();
-		scan_init(1);
 		
 		// prepare synth for tuning
 		
@@ -217,7 +216,6 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
 			synth_refreshCV(v,cvAmp,0);
 		
-		scan_init(0);
 		settings_save();
 	}
 }

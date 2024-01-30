@@ -1000,7 +1000,7 @@ void synth_init(void)
 	// init subsystems
 	// ui_init() done in main.c
 	dacspi_init();
-	scan_init(0);
+	scan_init();
 	tuner_init();
 	assigner_init();
 	uartMidi_init();
@@ -1018,13 +1018,10 @@ void synth_init(void)
 	lfo_init(&synth.lfo[0]);
 	lfo_init(&synth.lfo[1]);
 
-	// load settings from storage; tune when they are bad
+	// load settings from storage
 	
 	if(!settings_load())
-	{
 		settings_loadDefault();
-		tuner_tuneSynth();
-	}
 
 	synth_refreshBankNames(1);
 	
