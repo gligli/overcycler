@@ -164,7 +164,8 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 {
 	TIM_TIMERCFG_Type tim;
 	TIM_MATCHCFG_Type tm;
-	uint16_t * buf,mini=UINT16_MAX,maxi=0,extents;
+	int32_t mini=UINT16_MAX,maxi=0,extents;
+	uint16_t *buf;
 		
 	// init timer
 	
@@ -189,7 +190,7 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	// sample master mix at dacspi tickrate
 
 	buf=buffer;
-	for(uint16_t sc=sampleCount;sc;--sc)
+	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
 		while(!(LPC_TIM2->IR&TIM_IR_CLR(TIM_MR0_INT)))
 			/* nothing */;
@@ -208,19 +209,19 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	
 	// extend waveform to 0..UINT16_MAX
 	
-	extents=maxi-mini;
+	extents=maxi-mini+1;
 	buf=buffer;
-	for(uint16_t sc=sampleCount;sc;--sc)
+	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
 		uint16_t sample=*buf;
 		
-		if(extents)
-			sample=(uint32_t)(sample-mini)*UINT16_MAX/extents;
-		else
-			sample=HALF_RANGE;
+		sample=(((int32_t)sample-mini)<<16)/extents;
 		
 		*buf++=sample;
 	}
+
+	readADC(0); // restore state for readPots
+	readADC(0);
 }
 
 uint16_t scan_getPotValue(int8_t pot)
