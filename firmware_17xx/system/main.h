@@ -6,7 +6,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 #include <stdio.h>
 
 #include <LPC177x_8x.h>

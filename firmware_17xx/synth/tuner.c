@@ -30,26 +30,19 @@ static uint16_t extrapolateUpperOctavesTunes(int8_t voice, int8_t oct)
 	return MIN(v,UINT16_MAX);
 }
 
-static void waitCVUpdate(void)
-{
-	delay_us(500); // enough for dacspi to output CVs to DACs
-}
-
-LOWERCODESIZE static void prepareSynth(void)
+static LOWERCODESIZE void prepareSynth(void)
 {
 	synth_refreshCV(-1,cvResonance,0);
 	synth_refreshCV(-1,cvNoiseVol,0);
 	synth_refreshCV(-1,cvAVol,0);
 	synth_refreshCV(-1,cvBVol,0);
-	
-	waitCVUpdate();
 }
 
-static NOINLINE double measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
+static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
 {
 	uint32_t tzCnt=0;
 		
-#define MAP_BUF_LEN 800
+#define MAP_BUF_LEN 1600
 	uint16_t buf[MAP_BUF_LEN];
 	uint16_t prev;
 	
@@ -69,16 +62,16 @@ static NOINLINE double measureAudioPeriod(uint8_t periods) // in TUNER_TICK tick
 		}
 	}
 	
-	return (double)periods*MAP_BUF_LEN/tzCnt;
+	return ((periods*MAP_BUF_LEN)<<12)/tzCnt;
 }
 
 static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 {
 	int8_t i;
 	uint16_t estimate,bit;
-	double p,tgtp;
+	uint32_t p,tgtp;
 
-	tgtp=TUNER_TICK/(TUNER_LOWEST_HERTZ*pow(2.0,nthC));
+	tgtp=(TUNER_TICK<<12)/(TUNER_LOWEST_HERTZ*(1<<nthC));
 	
 	estimate=UINT16_MAX;
 	bit=0x8000;
@@ -88,7 +81,7 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 		synth_refreshCV(voice,cvCutoff,estimate);
 		delay_ms(25); // wait analog hardware stabilization	
 
-		p=measureAudioPeriod(nthC);
+		p=measureAudioPeriod(1);
 
 		// adjust estimate
 		if (p>tgtp)
@@ -98,13 +91,12 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 
 		// on to finer changes
 		bit>>=1;
-		
 	}
 
 	settings.tunes[nthC][voice]=estimate;
 
 #ifdef DEBUG
-	rprintf(0, "cv %d per %d %d\n",estimate,(int)p,(int)tgtp);
+	rprintf(0, "cv %d per %d theo %d\n",estimate,p,tgtp);
 #endif
 	
 	return 0;
@@ -140,7 +132,6 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 	// close VCA
 
 	synth_refreshCV(voice,cvAmp,0);
-	waitCVUpdate();
 }
 
 NOINLINE uint16_t tuner_computeCVFromNote(int8_t voice, uint8_t note, uint8_t nextInterp, cv_t cv)
