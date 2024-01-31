@@ -1039,25 +1039,7 @@ void synth_init(void)
 	synth_refreshWaveforms(1);
 	synth_refreshWaveforms(2);
 
-	if(settings.usbDisk)
-	{
-		// MSC mode is blocking, return to normal function on next reboot
-		settings.usbDisk=0;
-		settings_save();
-		
-		rprintf(1,"USB Disk mode, restart to quit");
-		
-		usb_setMode(umMSC);
-	}
-	else if(settings.usbMIDI)
-	{
-		usb_setMode(umMIDI);
-	}
-	else
-	{
-		// power only
-		usb_setMode(umNone);
-	}
+	usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
 }
 
 

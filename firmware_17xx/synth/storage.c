@@ -306,7 +306,6 @@ LOWERCODESIZE int8_t settings_load(void)
 	// v17
 	
 	settings.usbMIDI=storageReadS8();
-	settings.usbDisk=storageReadS8();
 	settings.lcdContrast=storageRead8();
 
 	return 1;
@@ -344,7 +343,6 @@ LOWERCODESIZE void settings_save(void)
 	// v17
 	
 	storageWriteS8(settings.usbMIDI);
-	storageWriteS8(settings.usbDisk);
 	storageWrite8(settings.lcdContrast);
 	
 	// this must stay last

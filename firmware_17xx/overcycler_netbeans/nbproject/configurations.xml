@@ -429,7 +429,6 @@
             <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
             <pElem>../synth</pElem>
-            <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -484,6 +483,7 @@
         <cTool flags="0">
           <incDir>
             <pElem>../synth</pElem>
+            <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>

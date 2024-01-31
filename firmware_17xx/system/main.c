@@ -29,6 +29,7 @@
 
 #define STORAGE_PATH "/STORAGE"
 
+usbMode_t usbMode = umNone;
 FATFS fatFS;
 
 __attribute__ ((used)) void SysTick_Handler(void)
@@ -178,8 +179,11 @@ int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2)
 	return same;
 }
 
-void usb_setMode(usbMode_t mode)
+void usb_setMode(usbMode_t mode, usb_MSC_continue_callback_t usbMSCContinue)
 {
+	if(mode==usbMode)
+		return;
+	
 #ifdef DEBUG
 	rprintf(0,"usb_setMode %d\n",mode);
 #endif		
@@ -187,22 +191,41 @@ void usb_setMode(usbMode_t mode)
 	NVIC_SetPriority(USB_IRQn,17);
 	NVIC_EnableIRQ(USB_IRQn);
 	
+	if(usbMode!=umNone || mode==umNone)
+	{
+		USBHwConnect(FALSE);
+		delay_ms(1000);
+	}
+	
 	switch(mode)
 	{
+	case umPowerOnly:
+		usb_power_start();
+		break;
 	case umMIDI:
 		usb_midi_start();
 		break;
 	case umMSC:
-		__disable_irq();
-		usb_msc_start();
-		for(;;)
+		BLOCK_INT(1)
 		{
-			USBHwISR();			
+			usb_msc_start();
+			for(uint32_t t=0;;++t)
+			{
+				USBHwISR();
+				
+				if(!(t&0xffff)) // every ~100ms, to ensure USB interrupts promptness
+				{
+					if(usbMSCContinue && !usbMSCContinue())
+						break;
+				}
+			}
 		}
 		break;
 	default:
-		usb_power_start();
+		/* nothing */;
 	}
+	
+	usbMode=mode;
 }
 
 int main(void)

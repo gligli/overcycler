@@ -85,7 +85,6 @@ struct settings_s
 	
 	int8_t syncMode;
 	int8_t usbMIDI;
-	int8_t usbDisk;
 	
 	uint16_t sequencerBank;
 	uint16_t seqArpClock;

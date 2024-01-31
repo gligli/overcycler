@@ -28,13 +28,6 @@ enum uiParamType_e
 	ptNone=0,ptCont,ptStep,ptCust
 };
 
-enum uiKeypadButton_e
-{
-	kb0=0,kb1,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,
-	kbA,kbB,kbC,kbD,
-	kbSharp,kbAsterisk,
-};
-
 enum uiPage_e
 {
 	upNone=-1,upOscs=0,upWMod=1,upFil=2,upAmp=3,upLFO1=4,upLFO2=5,upArp=6,upSeq=7,upMisc=8,
@@ -45,8 +38,8 @@ enum uiPage_e
 
 enum uiCustomParamNumber_e
 {
-	cnNone=0,cnAMod,cnAHld,cnPrUn,cnLoad,cnSave,cnMidC,cnTune,cnTOct,cnTVce,cnPrTe,cnSync,cnAPly,cnBPly,cnSRec,cnBack,
-	cnTiRe,cnClr,cnTrspM,cnTrspV,cnSBnk,cnClk,cnXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnPrHu,cnNPrs,cnNVal,cnUsbM,
+	cnNone=0,cnAMod,cnAHld,cnPrUn,cnLoad,cnSave,cnMidC,cnTune,cnPrTe,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
+	cnTrspM,cnTrspV,cnSBnk,cnClk,cnXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnPrHu,cnNPrs,cnNVal,cnUsbM,
 	cnCtst
 };
 
@@ -308,7 +301,7 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptCust,.number=cnCtst,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
-			{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode (a restart is required)",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
+			{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
 		},
 		{
 			/*0*/ {.type=ptCust,.number=cnNPrs,.shortName="NPrs",.longName="Numerically set preset number"},
@@ -344,8 +337,7 @@ static struct
 	int32_t potsPrevValue[SCAN_POT_COUNT];
 
 	int8_t presetModified;
-	
-	int8_t tunerActiveVoice;
+	int8_t usbMSC;
 	
 	int8_t seqRecordingTrack;
 	int8_t isTransposing;
@@ -541,7 +533,6 @@ static void drawVisualEnv(int lcd, int8_t voicePair)
 	}
 }
 
-
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	const struct uiParam_s * prm;
@@ -625,12 +616,6 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				case cnTune:
 					v=0;
 					break;
-				case cnTOct:
-					v=settings.tunes[potnum][ui.tunerActiveVoice]>>3;
-					break;
-				case cnTVce:
-					v=ui.tunerActiveVoice+1;
-					break;
 				case cnPrTe:
 					v=((settings.presetNumber+1000)/10)%10;
 					break;
@@ -695,7 +680,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 						dv[2-i]='_';				
 					break;
 				case cnUsbM:
-					v=settings.usbDisk?2:(settings.usbMIDI?1:0);
+					v=ui.usbMSC?umMSC:(settings.usbMIDI?umMIDI:umPowerOnly);
 					break;
 				case cnCtst:
 					v=settings.lcdContrast;
@@ -826,7 +811,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	return dv;
 }
 
-void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
+static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
 	int32_t potSetting;
@@ -899,7 +884,7 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 
 				if(ui.kpInputPot>=0)
 				{
-					ui_scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
+					scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
 				}
 				else
 				{
@@ -1110,13 +1095,6 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 				settings.midiReceiveChannel=potSetting-1;
 				settingsModified=1;
 				break;
-			case cnTOct:
-				settings.tunes[potnum][ui.tunerActiveVoice]=potSetting;
-				settings_save();
-				break;
-			case cnTVce:
-				ui.tunerActiveVoice=source-kb1;
-				break;
 			case cnPrTe:
 				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/10)%10)*10)+potSetting*10;
 				break;
@@ -1217,17 +1195,18 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 			case cnUsbM:
 				switch(potSetting)
 				{
-				case 1:
+				case umMIDI:
 					settings.usbMIDI=1;
-					settings.usbDisk=0;
 					break;
-				case 2:
-					settings.usbDisk=1;
+				case umMSC:
+					ui.usbMSC=1;
 					break;
 				default:
 					settings.usbMIDI=0;
-					settings.usbDisk=0;
+					ui.usbMSC=0;
 				}
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				settingsModified=1;
 				break;
 			case cnCtst:
@@ -1250,6 +1229,26 @@ void ui_scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0.
 	{
 		ui.settingsModifiedTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
 	}
+}
+
+static void scanEventCallback(int8_t source)
+{
+	scanEvent(source,NULL);
+}
+
+static void diskModeScanEventCallback(int8_t source)
+{
+	if(source>=kb0)
+		ui.usbMSC=0;
+}
+
+static int8_t usbMSCCallback(void)
+{
+	scan_setScanEventCallback(diskModeScanEventCallback);
+	scan_update();
+	scan_setScanEventCallback(scanEventCallback);
+	
+	return ui.usbMSC;
 }
 
 void ui_setPresetModified(int8_t modified)
@@ -1404,6 +1403,16 @@ void ui_update(void)
 			case 0x80+cnTune:
 				setPos(2,0,1);
 				tuner_tuneSynth();
+				break;
+			case 0x80+cnUsbM:
+				if(ui.usbMSC)
+				{
+					setPos(2,0,1);
+					sendString(2,"USB Disk mode, press any button to quit");
+					usb_setMode(umMSC,usbMSCCallback);
+					ui.pendingScreenClear=1;
+				}
+				usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
 				break;
 		}
 		
@@ -1570,5 +1579,8 @@ void ui_update(void)
 	// LCD contrast
 	
 	setLcdContrast(settings.lcdContrast);
+	
+	// events from scanner
+	scan_setScanEventCallback(scanEventCallback);
 }
 

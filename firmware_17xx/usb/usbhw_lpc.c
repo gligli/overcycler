@@ -35,6 +35,7 @@
 
 #ifdef LPC1778
 #include "synth/utils.h"
+#include "system/main.h"
 #include "drivers/LPC177x_8x.h"
 #endif
 #ifdef LPC214x
@@ -45,7 +46,6 @@
 #endif
 #include "usbhw_lpc.h"
 #include "usbapi.h"
-
 
 #ifdef DEBUG
 // comment out the following line if you don't want to use debug LEDs
@@ -274,6 +274,15 @@ void USBHwSetAddress(U8 bAddr)
  */
 void USBHwConnect(BOOL fConnect)
 {
+#ifdef LPC1778
+  if(fConnect)
+  {
+	/* P0.29 D1+, P0.30 D1- */
+	LPC_IOCON->P0_29 = 0x1;
+	LPC_IOCON->P0_30 = 0x1;
+  }
+#endif
+
 #ifdef LPC23xx
 #ifndef LPC2378_PORTB
   if(fConnect)
@@ -288,6 +297,18 @@ void USBHwConnect(BOOL fConnect)
 #endif
 #endif
     USBHwCmdWrite(CMD_DEV_STATUS, fConnect ? CON : 0);
+
+#ifdef LPC1778
+  if(!fConnect)
+  {
+	delay_ms(5);
+	
+	/* P0.29, P0.30 pulled low to disconnect */
+	LPC_GPIO0->FIODIR |= (1<<29) | (1<<30); // GPIO as output
+	LPC_IOCON->P0_29 = 0x400; // GPIO mode / open drain mode
+	LPC_IOCON->P0_30 = 0x400;
+  }
+#endif
 }
 
 
@@ -606,14 +627,8 @@ BOOL USBHwInit(void)
 {
 #ifdef LPC1778	
 	/* P0.29 D1+, P0.30 D1- */
-	LPC_IOCON->P0_29 &= ~0x07;    
-	LPC_IOCON->P0_29 |= 0x1;
-	LPC_IOCON->P0_30 &= ~0x07;
-	LPC_IOCON->P0_30 |= 0x1;
-
-	/* USB_SoftConnect */
-	LPC_IOCON->P2_9  &= ~0x07;    
-	LPC_IOCON->P2_9  |= 0x1;
+	LPC_IOCON->P0_29 = 0x1;
+	LPC_IOCON->P0_30 = 0x1;
 
 	/* USB PCLK -> enable USB Per. */
 	LPC_SC->PCONP |= (1UL<<31); 
