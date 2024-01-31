@@ -14,7 +14,7 @@ enum scanKeypadButton_e
 	kbSharp,kbAsterisk,
 };
 
-typedef void (*scan_event_callback_t)(int8_t source); // source: keypad (kb0..kbSharp) / potentiometer (-1..-10)
+typedef void (*scan_event_callback_t)(int8_t source); // source: keypad (kb0..kbAsterisk) / potentiometer (-1..-10)
 
 uint16_t scan_getPotValue(int8_t pot);
 void scan_resetPotLocking(void);

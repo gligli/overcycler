@@ -18,7 +18,7 @@
 
 #define MIDI_NOTE_TRANSPOSE_OFFSET -12
 
-static MidiDevice midi[2];
+static MidiDevice midi[MIDI_PORT_COUNT];
 
 uint16_t midiCombineBytes(uint8_t first, uint8_t second)
 {

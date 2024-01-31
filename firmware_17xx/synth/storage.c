@@ -10,7 +10,7 @@
 #include "main.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 17
+#define STORAGE_VERSION 18
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -428,8 +428,17 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 		// adjust cutoff for base filter tracking note changed to C4
 		currentPreset.continuousParameters[cpCutoff]+=scaleU16U16(MIDDLE_C_NOTE<<8,currentPreset.continuousParameters[cpFilKbdAmt]);
 	}
-
 	
+	if(storage.version<18)
+	{
+		// in this case spLFOShift_Legacy contains the legacy LFO speed range, where value 1 was "fast"
+		// rescale the LFO speed (the speed switch parameter was omitted from version 18 after)
+		// the exponential factor (ratio) was changed from 13000 to 8000
+		currentPreset.continuousParameters[cpLFOFreq]=(uint16_t)(0.615385f*(float)currentPreset.continuousParameters[cpLFOFreq])+25205;
+		// The slow LFO variant in version 17 was made a factor of 8 slower compared to the fast setting, so:
+		if (currentPreset.steppedParameters[spLFOShift_Legacy]==0) currentPreset.continuousParameters[cpLFOFreq]-=16635; // =0 used to be the slow setting
+	}
+
 	if(storage.version<2)
 		return 1;
 
@@ -476,9 +485,21 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.continuousParameters[cpLFO2ResAmt]=storageRead16();
 	
 	currentPreset.steppedParameters[spLFO2Shape]=storageRead8();
-	currentPreset.steppedParameters[spLFO2Shift]=storageRead8();
+	currentPreset.steppedParameters[spLFO2Shift_Legacy]=storageRead8();
 	currentPreset.steppedParameters[spLFO2Targets]=storageRead8();
 	
+	// v9 - bw compat adjustments
+
+	if(storage.version<18)
+	{
+		// in this case spLFO2Shift_Legacy contains the legacy LFO speed range, where value 1 was "fast"
+		// rescale the LFO2 speed (the speed switch parameter was omitted from version 18 after)
+		// the exponential factor (ratio) was changed from 13000 to 8000
+		currentPreset.continuousParameters[cpLFO2Freq]=(uint16_t)(0.615385f*(float)currentPreset.continuousParameters[cpLFO2Freq])+25205;
+		// The slow LFO variant in version 17 was made a factor of 8 slower compared to the fast setting, so:
+		if (currentPreset.steppedParameters[spLFO2Shift_Legacy]==0) currentPreset.continuousParameters[cpLFO2Freq]-=16635; // =0 used to be the slow setting
+	}
+
 	if(storage.version<10)
 		return 1;
 	
@@ -573,7 +594,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite16(currentPreset.continuousParameters[cpLFO2ResAmt]);
 	
 	storageWrite8(currentPreset.steppedParameters[spLFO2Shape]);
-	storageWrite8(currentPreset.steppedParameters[spLFO2Shift]);
+	storageWrite8(currentPreset.steppedParameters[spLFO2Shift_Legacy]);
 	storageWrite8(currentPreset.steppedParameters[spLFO2Targets]);
 
 	// v10
@@ -672,8 +693,8 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-	currentPreset.continuousParameters[cpLFOFreq]=HALF_RANGE;
-	currentPreset.continuousParameters[cpLFO2Freq]=HALF_RANGE;
+	currentPreset.continuousParameters[cpLFOFreq]=0.692*UINT16_MAX;
+	currentPreset.continuousParameters[cpLFO2Freq]=0.692*UINT16_MAX;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
 	currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
@@ -686,10 +707,10 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;
 	currentPreset.steppedParameters[spLFOShape]=lsTri;
 	currentPreset.steppedParameters[spLFOTargets]=otBoth;
-	currentPreset.steppedParameters[spLFOShift]=1;
+	currentPreset.steppedParameters[spLFOShift_Legacy]=1;
 	currentPreset.steppedParameters[spLFO2Shape]=lsTri;
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
-	currentPreset.steppedParameters[spLFO2Shift]=1;
+	currentPreset.steppedParameters[spLFO2Shift_Legacy]=1;
 
 	currentPreset.steppedParameters[spVoiceCount]=5;
 	

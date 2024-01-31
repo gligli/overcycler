@@ -37,7 +37,7 @@ typedef enum
 	spABank_Legacy=0,spAWave_Legacy=1,spAWModType=2,spAWModEnvEn_Legacy=3,
 	spBBank_Legacy=4,spBWave_Legacy=5,spBWModType=6,spBWModEnvEn_Legacy=7,
 			
-	spLFOShape=8,spLFOShift=9,spLFOTargets=10,
+	spLFOShape=8,spLFOShift_Legacy=9,spLFOTargets=10,
 
 	spFilEnvSlow=11,spAmpEnvSlow=12,
 			
@@ -51,7 +51,7 @@ typedef enum
 	spXOvrBank_Legacy=21,spXOvrWave_Legacy=22,
 	spFilEnvLin=23,
 			
-	spLFO2Shape=24,spLFO2Shift=25,spLFO2Targets=26,spVoiceCount=27,
+	spLFO2Shape=24,spLFO2Shift_Legacy=25,spLFO2Targets=26,spVoiceCount=27,
 		
 	spPresetType=28, spPresetStyle=29,
 
