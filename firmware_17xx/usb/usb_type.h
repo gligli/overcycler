@@ -42,12 +42,17 @@ typedef unsigned int		U32;	/**< unsigned 32-bit */
 
 typedef int					BOOL;	/**< #TRUE or #FALSE */
 
-//#define	TRUE	1					/**< TRUE */
-//#define FALSE	0					/**< FALSE */
-//
-//#ifndef NULL
-//#define NULL	((void*)0)			/**< NULL pointer */
-//#endif
+#ifndef TRUE
+#define	TRUE	1					/**< TRUE */
+#endif
+
+#ifndef FALSE
+#define FALSE	0					/**< FALSE */
+#endif
+
+#ifndef NULL
+#define NULL	((void*)0)			/**< NULL pointer */
+#endif
 
 /* some other useful macros */
 #ifndef MIN

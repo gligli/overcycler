@@ -187,7 +187,7 @@ endif
 # Flags for C and C++ (arm-none-eabi-gcc/arm-none-eabi-g++)
 CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
-CFLAGS += -Wall -Wcast-align -Wimplicit 
+CFLAGS += -Wall -Wimplicit 
 CFLAGS += -Wpointer-arith -Wswitch
 CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 CFLAGS += #-Wa,-adhlns=$(subst $(suffix $<),.lst,$<) 

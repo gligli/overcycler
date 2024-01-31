@@ -4,7 +4,6 @@
 
 #include "scan.h"
 
-#include "ui.h"
 #include "LPC177x_8x.h"
 #include "lpc177x_8x_ssp.h"
 #include "lpc177x_8x_gpio.h"
@@ -34,6 +33,8 @@ static struct
 	uint32_t potLockTimeout[SCAN_POT_COUNT];
 
 	int8_t keypadState[16];
+	
+	scan_event_callback_t eventCallback;
 } scan;
 
 static uint8_t keypadButtonCode[16]=
@@ -111,14 +112,14 @@ static void readPots(void)
 				if(new!=scan.potValue[pot] && currentTick>=scan.potLockTimeout[pot])
 				{
 					// out of lock -> current value must be taken into account
-					ui_scanEvent(-pot-1,NULL);
+					if(scan.eventCallback) scan.eventCallback(-pot-1);
 				}
 
 				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
 			}
 			
 			scan.potValue[pot]=new;
-			ui_scanEvent(-pot-1,NULL);
+			if(scan.eventCallback) scan.eventCallback(-pot-1);
 		}
 	}
 }
@@ -151,7 +152,7 @@ static void readKeypad(void)
 			scan.keypadState[key]=MIN(INT8_MAX,scan.keypadState[key]+1);
 
 			if(scan.keypadState[key]==DEBOUNCE_THRESHOLD)
-				ui_scanEvent(key,NULL);
+				if(scan.eventCallback) scan.eventCallback(key);
 		}
 		else
 		{
@@ -248,6 +249,11 @@ uint16_t scan_getPotValue(int8_t pot)
 void scan_resetPotLocking(void)
 {
 	memset(&scan.potLockTimeout[0],0,SCAN_POT_COUNT*sizeof(uint32_t));
+}
+
+void scan_setScanEventCallback(scan_event_callback_t callback)
+{
+	scan.eventCallback=callback;
 }
 
 void scan_init(void)

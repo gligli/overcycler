@@ -122,7 +122,7 @@ void NVIC_SCBDeInit(void)
 	SCB->SCR = 0x00000000;
 	SCB->CCR = 0x00000000;
 
-	for (tmp = 0; tmp < 32; tmp++) {
+	for (tmp = 0; tmp < 12; tmp++) {
 		SCB->SHP[tmp] = 0x00;
 	}
 

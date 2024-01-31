@@ -28,7 +28,7 @@
 #ifndef _USB_DEBUG_H_
 #define _USB_DEBUG_H_
 
-#include "main.h"
+#include "usb_type.h"
 #include "rprintf.h"
 
 //#define DEBUG_USB
