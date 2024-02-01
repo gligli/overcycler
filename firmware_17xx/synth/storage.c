@@ -736,7 +736,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	if(makeSound)
 	{
 		// load default waveforms (perfectwaves/sawtooth)
-		for(int8_t abx=0;abx<=2;++abx)
+		for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
 			synth_reloadLegacyBankWaveIndexes(abx,1,1);
 
 		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;
