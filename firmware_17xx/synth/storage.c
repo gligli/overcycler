@@ -732,7 +732,7 @@ LOWERCODESIZE void settings_loadDefault(void)
 	memset(&settings,0,sizeof(settings));
 
 	settings.midiReceiveChannel=-1;
-	settings.voiceMask=0x3f;
+	settings.voiceMask=(1<<SYNTH_VOICE_COUNT)-1;
 	settings.seqArpClock=6*UINT16_MAX/10+1;
 	settings.lcdContrast=UI_DEFAULT_LCD_CONTRAST;
 

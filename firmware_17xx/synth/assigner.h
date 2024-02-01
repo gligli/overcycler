@@ -3,10 +3,10 @@
 
 #include "synth.h"
 
+#define ASSIGNER_NOTE_COUNT 128
 #define ASSIGNER_NO_NOTE UINT8_MAX
 
 #define ASSIGNER_EVENT_FLAG_LEGATO 1
-#define ASSIGNER_EVENT_FLAG_STOLEN 2
 
 typedef enum
 {

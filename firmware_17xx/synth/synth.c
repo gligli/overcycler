@@ -1271,9 +1271,9 @@ void synth_updateDACsEvent(int32_t start, int32_t count)
 	updateDACsVoice5(start,end);
 }
 
-void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, int8_t flags)
+void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, uint8_t flags)
 {
-#ifdef DEBUG_
+#ifdef DEBUG
 	rprintf(0,"assign note %d gate %d voice %d velocity %d flags %d\n",note,gate,voice,velocity,flags);
 #endif
 
@@ -1294,8 +1294,8 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	}
 
 	if(gate)
-	// handle velocity
 	{
+		// handle velocity
 		velAmt=currentPreset.continuousParameters[cpWModVelocity];
 		adsr_setCVs(&synth.wmodEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 		velAmt=currentPreset.continuousParameters[cpFilVelocity];
@@ -1303,14 +1303,6 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 		velAmt=currentPreset.continuousParameters[cpAmpVelocity];
 		adsr_setCVs(&synth.ampEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 	}
-	// stolen voices must be entirely reset
-	else if(flags&ASSIGNER_EVENT_FLAG_STOLEN)
-	{
-		adsr_reset(&synth.wmodEnvs[voice]);
-		adsr_reset(&synth.filEnvs[voice]);
-		adsr_reset(&synth.ampEnvs[voice]);
-	}
-
 }
 
 void synth_uartMIDIEvent(uint8_t data)
