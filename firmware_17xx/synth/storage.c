@@ -10,7 +10,7 @@
 #include "main.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 18
+#define STORAGE_VERSION 19
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -112,6 +112,8 @@ const uint8_t steppedParametersBits[spCount] =
 	/*WModEnvSlow*/1,
 	/*WModEnvLin*/1,
 	/*WModEnvLoop*/1,
+	/*PressureRange*/2,
+	/*PressureTarget*/3,
 };
 
 struct settings_s settings;
@@ -546,6 +548,14 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spWModEnvLin]=storageRead8();
 	currentPreset.steppedParameters[spWModEnvLoop]=storageRead8();
 
+	if(storage.version<19)
+		return 1;
+
+	// v19
+
+	currentPreset.steppedParameters[spPressureRange]=storageRead8();
+	currentPreset.steppedParameters[spPressureTarget]=storageRead8();
+	
 	return 1;
 }
 
@@ -627,6 +637,11 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	storageWrite8(currentPreset.steppedParameters[spWModEnvLin]);
 	storageWrite8(currentPreset.steppedParameters[spWModEnvLoop]);
 	
+	// v19
+	
+	storageWrite8(currentPreset.steppedParameters[spPressureRange]);
+	storageWrite8(currentPreset.steppedParameters[spPressureTarget]);
+	
 	// /!\ write new version before this
 	storageFinishStore(number,1);
 }
@@ -700,8 +715,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
 	currentPreset.continuousParameters[cpWModBEnv]=HALF_RANGE;
 
-	currentPreset.steppedParameters[spBenderRange]=2; // octave
-	currentPreset.steppedParameters[spBenderTarget]=modFilter;
+	currentPreset.steppedParameters[spBenderTarget]=modPitch;
 	currentPreset.steppedParameters[spModwheelRange]=2; // high
 	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;
@@ -711,8 +725,10 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spLFO2Shape]=lsTri;
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
 	currentPreset.steppedParameters[spLFO2Shift_Legacy]=1;
+	currentPreset.steppedParameters[spPressureRange]=1; // low
+	currentPreset.steppedParameters[spPressureTarget]=modFilter;
 
-	currentPreset.steppedParameters[spVoiceCount]=5;
+	currentPreset.steppedParameters[spVoiceCount]=SYNTH_VOICE_COUNT-1;
 	
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	

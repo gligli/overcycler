@@ -34,7 +34,7 @@ static int8_t midiFilterChannel(uint8_t channel)
 	return settings.midiReceiveChannel<0 || (channel&MIDI_CHANMASK)==settings.midiReceiveChannel;
 }
 
-static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint8_t velocity)
+static void noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint8_t velocity)
 {
 	int16_t intNote;
 	
@@ -71,7 +71,7 @@ static void midi_noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note,
 	}
 }
 
-static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint8_t velocity)
+static void noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint8_t velocity)
 {
 	int16_t intNote;
 	
@@ -100,7 +100,7 @@ static void midi_noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note
 	}
 }
 
-static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8_t value)
+static void ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8_t value)
 {
 	int16_t param;
 	int8_t change=0;
@@ -179,7 +179,7 @@ static void midi_ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, 
 	}
 }
 
-static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t program)
+static void progchangeEvent(MidiDevice * device, uint8_t channel, uint8_t program)
 {
 	if(!midiFilterChannel(channel))
 		return;
@@ -202,7 +202,7 @@ static void midi_progChangeEvent(MidiDevice * device, uint8_t channel, uint8_t p
 	}
 }
 
-static void midi_pitchBendEvent(MidiDevice * device, uint8_t channel, uint8_t v1, uint8_t v2)
+static void pitchBendEvent(MidiDevice * device, uint8_t channel, uint8_t v1, uint8_t v2)
 {
 	if(!midiFilterChannel(channel))
 		return;
@@ -216,7 +216,15 @@ static void midi_pitchBendEvent(MidiDevice * device, uint8_t channel, uint8_t v1
 	synth_wheelEvent(value,0,1);
 }
 
-static void midi_realtimeEvent(MidiDevice * device, uint8_t event)
+static void chanpressureEvent(MidiDevice * device, uint8_t channel, uint8_t pressure)
+{
+	if(!midiFilterChannel(channel))
+		return;
+
+	synth_pressureEvent(pressure<<9);
+}
+
+static void realtimeEvent(MidiDevice * device, uint8_t event)
 {
 	synth_realtimeEvent(event);
 }
@@ -226,12 +234,13 @@ void midi_init(void)
 	for(uint8_t port=0;port<MIDI_PORT_COUNT;++port)
 	{
 		midi_device_init(&midi[port]);
-		midi_register_noteon_callback(&midi[port],midi_noteOnEvent);
-		midi_register_noteoff_callback(&midi[port],midi_noteOffEvent);
-		midi_register_cc_callback(&midi[port],midi_ccEvent);
-		midi_register_progchange_callback(&midi[port],midi_progChangeEvent);
-		midi_register_pitchbend_callback(&midi[port],midi_pitchBendEvent);
-		midi_register_realtime_callback(&midi[port],midi_realtimeEvent);
+		midi_register_noteon_callback(&midi[port],noteOnEvent);
+		midi_register_noteoff_callback(&midi[port],noteOffEvent);
+		midi_register_cc_callback(&midi[port],ccEvent);
+		midi_register_progchange_callback(&midi[port],progchangeEvent);
+		midi_register_pitchbend_callback(&midi[port],pitchBendEvent);
+		midi_register_chanpressure_callback(&midi[port],chanpressureEvent);
+		midi_register_realtime_callback(&midi[port],realtimeEvent);
 	}
 }
 

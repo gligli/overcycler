@@ -30,7 +30,7 @@ typedef enum {
 
 typedef enum
 {
-	modOff=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4
+	modOff=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4,modLFO1=5,modLFO2=6
 } modulationTarget_t;
 
 typedef enum
@@ -54,6 +54,7 @@ void synth_usbMIDIEvent(uint8_t data);
 void synth_updateDACsEvent(int32_t start, int32_t count);
 void synth_updateCVsEvent(void);
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask);
+void synth_pressureEvent(uint16_t pressure);
 void synth_realtimeEvent(uint8_t midiEvent);
 
 void synth_timerInterrupt(void);

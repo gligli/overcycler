@@ -73,10 +73,9 @@ static struct
 
 	struct
 	{
-		int16_t benderCVs[cvCount];
-
 		int16_t benderAmount;
 		uint16_t modwheelAmount;
+		uint16_t pressureAmount;
 		int16_t glideAmount;
 		int8_t gliding;
 
@@ -105,6 +104,23 @@ static const uint8_t abx2wsp[3] = {spAWave_Legacy, spBWave_Legacy, spXOvrWave_Le
 // Non speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
 
+static int32_t getStaticCV(cv_t cv)
+{
+	static const modulationTarget_t cv2mod[cvCount]={modVolume,modVolume,modFilter,modOff,modPitch,modPitch,modCrossOver,modOff,modOff};
+	modulationTarget_t mod=cv2mod[cv];
+	int32_t res=0;
+	
+	if(mod!=modOff)
+	{
+		if(currentPreset.steppedParameters[spBenderTarget]==mod)
+			res+=synth.partState.benderAmount;
+		if(currentPreset.steppedParameters[spPressureTarget]==mod)
+			res+=synth.partState.pressureAmount;
+	}
+	
+	return __SSAT(res,16);
+}
+
 static void computeTunedCVs(void)
 {
 	uint16_t cva,cvb,cvf;
@@ -116,6 +132,8 @@ static void computeTunedCVs(void)
 
 	uint16_t baseCutoffRaw,mTuneRaw,detuneRaw,unisonDetuneRaw,trackRaw;
 	uint8_t chrom;
+	
+	int32_t add;
 	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
@@ -164,8 +182,11 @@ static void computeTunedCVs(void)
 
 		// oscs
 		
-		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),(int32_t)synth.partState.benderCVs[cvAPitch]+mTune-(detune>>1));
-		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),(int32_t)synth.partState.benderCVs[cvBPitch]+mTune+(detune>>1));
+		add=getStaticCV(cvAPitch)+mTune-(detune>>1);
+		cva=satAddU16S32(tuner_computeCVFromNote(v,baseANote+note,baseAPitch,cvAPitch),add);
+		
+		add=getStaticCV(cvBPitch)+mTune+(detune>>1);
+		cvb=satAddU16S32(tuner_computeCVFromNote(v,baseBNote+note,baseBPitch,cvBPitch),add);
 		
 		unisonDetune=(1+(v>>1))*(v&1?-1:1)*(unisonDetuneRaw>>9);
 		cva=satAddU16S16(cva,unisonDetune);
@@ -175,7 +196,8 @@ static void computeTunedCVs(void)
 		
 		trackingNote=MAX(0,baseCutoffNote+((((int8_t)note-MIDDLE_C_NOTE)*(trackRaw>>8))>>8));
 			
-		cvf=satAddU16S16(tuner_computeCVFromNote(v,trackingNote,baseCutoff,cvCutoff),synth.partState.benderCVs[cvCutoff]);
+		add=getStaticCV(cvCutoff);
+		cvf=satAddU16S32(tuner_computeCVFromNote(v,trackingNote,baseCutoff,cvCutoff),add);
 		
 		// glide
 		
@@ -195,65 +217,6 @@ static void computeTunedCVs(void)
 			synth.filterNoteCV[v]=cvf;
 		}
 				
-	}
-}
-
-void computeBenderCVs(void)
-{
-	static const int8_t br[]={3,5,12,0};
-	
-	int32_t bend;
-	uint8_t tgt;
-	
-	bend=synth.partState.benderAmount;
-	tgt=currentPreset.steppedParameters[spBenderTarget];
-	
-	if(tgt!=modPitch)
-	{
-		synth.partState.benderCVs[cvAPitch]=0;
-		synth.partState.benderCVs[cvBPitch]=0;
-	}
-	
-	if(tgt!=modFilter)
-	{
-		synth.partState.benderCVs[cvCutoff]=0;
-	}
-	
-	if(tgt!=modVolume)
-	{
-		synth.partState.benderCVs[cvAVol]=0;
-		synth.partState.benderCVs[cvBVol]=0;
-		synth.partState.benderCVs[cvNoiseVol]=0;
-	}
-	
-	if(tgt!=modCrossOver)
-	{
-		synth.partState.benderCVs[cvACrossOver]=0;
-	}
-	
-	switch(tgt)
-	{
-	case modPitch:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*2,0,cvAPitch)-tuner_computeCVFromNote(0,0,0,cvAPitch);
-		bend/=UINT16_MAX;
-		synth.partState.benderCVs[cvAPitch]=bend;
-		synth.partState.benderCVs[cvBPitch]=bend;
-		break;
-	case modFilter:
-		bend*=tuner_computeCVFromNote(0,br[currentPreset.steppedParameters[spBenderRange]]*8,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff);
-		bend/=UINT16_MAX;
-		synth.partState.benderCVs[cvCutoff]=bend;
-		break;
-	case modVolume:
-		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
-		synth.partState.benderCVs[cvAVol]=bend;
-		synth.partState.benderCVs[cvBVol]=bend;
-		synth.partState.benderCVs[cvNoiseVol]=bend;
-		break;
-	case modCrossOver:
-		bend=(bend*br[currentPreset.steppedParameters[spBenderRange]])/12;
-		synth.partState.benderCVs[cvACrossOver]=bend;
-		break;
 	}
 }
 
@@ -356,8 +319,7 @@ static void refreshEnvSettings(int8_t type)
 
 static void refreshLfoSettings(void)
 {
-	static const int8_t mr[]={5,3,1,0};
-	uint16_t mwAmt,lfoAmt,lfo2Amt,dlyAmt;
+	uint16_t lfoAmt,lfo2Amt,dlyAmt;
 	uint32_t elapsed;
 
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
@@ -385,18 +347,21 @@ static void refreshLfoSettings(void)
 		}
 	}
 
-	mwAmt=synth.partState.modwheelAmount>>mr[currentPreset.steppedParameters[spModwheelRange]];
 	lfoAmt=currentPreset.continuousParameters[cpLFOAmt];
 	lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
+	if(currentPreset.steppedParameters[spPressureTarget]==modLFO1)
+		lfoAmt=satAddU16U16(lfoAmt,synth.partState.pressureAmount);
 
 	lfo2Amt=currentPreset.continuousParameters[cpLFO2Amt];
 	lfo2Amt=(lfo2Amt<POT_DEAD_ZONE)?0:(lfo2Amt-POT_DEAD_ZONE);
+	if(currentPreset.steppedParameters[spPressureTarget]==modLFO2)
+		lfo2Amt=satAddU16U16(lfo2Amt,synth.partState.pressureAmount);
 
 	if(currentPreset.steppedParameters[spModwheelTarget]==0) // targeting lfo1?
 	{
 		lfo_setCVs(&synth.lfo[0],
 				currentPreset.continuousParameters[cpLFOFreq],
-				satAddU16U16(lfoAmt,mwAmt));
+				satAddU16U16(lfoAmt,synth.partState.modwheelAmount));
 		lfo_setCVs(&synth.lfo[1],
 				 currentPreset.continuousParameters[cpLFO2Freq],
 				 scaleU16U16(lfo2Amt,dlyAmt));
@@ -408,7 +373,7 @@ static void refreshLfoSettings(void)
 				scaleU16U16(lfoAmt,dlyAmt));
 		lfo_setCVs(&synth.lfo[1],
 				currentPreset.continuousParameters[cpLFO2Freq],
-				satAddU16U16(lfo2Amt,mwAmt));
+				satAddU16U16(lfo2Amt,synth.partState.modwheelAmount));
 	}
 }
 
@@ -468,7 +433,9 @@ static void refreshMisc(void)
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		int p=(currentPreset.steppedParameters[spAWModType]==wmCrossOver || currentPreset.steppedParameters[spBenderTarget]==modCrossOver)?3:0;
+		int p=(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
+				currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
+				currentPreset.steppedParameters[spPressureTarget]==modCrossOver)?3:0;
 		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],waveData.sampleCount[p]);
 		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleCount[1]);
 	}
@@ -483,7 +450,6 @@ void synth_refreshFullState(void)
 	refreshEnvSettings(1);
 	refreshEnvSettings(2);
 	refreshMisc();
-	computeBenderCVs();
 	computeTunedCVs();
 }
 
@@ -1085,10 +1051,15 @@ void synth_timerInterrupt(void)
 	resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
 
 	// CV update
-
-	synth_refreshCV(-1,cvAVol,(((uint32_t)currentPreset.continuousParameters[cpAVol]*(synth.partState.benderCVs[cvAVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
-	synth_refreshCV(-1,cvBVol,(((uint32_t)currentPreset.continuousParameters[cpBVol]*(synth.partState.benderCVs[cvBVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
-	synth_refreshCV(-1,cvNoiseVol,(((uint32_t)currentPreset.continuousParameters[cpNoiseVol]*(synth.partState.benderCVs[cvNoiseVol]-INT16_MIN))/(-INT16_MIN))*resoFactor/256);
+	
+	auto uint16_t staticCV(cv_t cv)
+	{
+		return getStaticCV(cv)-INT16_MIN;
+	}
+		
+	synth_refreshCV(-1,cvAVol,scaleU16U16(currentPreset.continuousParameters[cpAVol],staticCV(cvAVol))*resoFactor/256);
+	synth_refreshCV(-1,cvBVol,scaleU16U16(currentPreset.continuousParameters[cpBVol],staticCV(cvBVol))*resoFactor/256);
+	synth_refreshCV(-1,cvNoiseVol,scaleU16U16(currentPreset.continuousParameters[cpNoiseVol],staticCV(cvNoiseVol))*resoFactor/256);
 	synth_refreshCV(-1,cvResonance,resVal);
 
 	// midi
@@ -1097,12 +1068,14 @@ void synth_timerInterrupt(void)
 
 	// crossover
 
-	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver || currentPreset.steppedParameters[spBenderTarget]==modCrossOver)
+	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
+			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
+			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
 	{
 		int32_t wmod;
 		
 		wmod=synth.partState.wmodAVal;
-		wmod+=synth.partState.benderCVs[cvACrossOver];
+		wmod+=getStaticCV(cvACrossOver);
 		wmod=__USAT(wmod,16);
 				
 		refreshCrossOver(wmod,synth.partState.wmodAEnvAmt);
@@ -1325,23 +1298,70 @@ void synth_usbMIDIEvent(uint8_t data)
 
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 {
+	static const int8_t br[]={4,7,12,0};
+	static const int8_t mr[]={5,3,1,0};
+
 #ifdef DEBUG_
 	rprintf(0,"wheel bend %d mod %d mask %d\n",bend,modulation,mask);
 #endif
 
 	if(mask&1)
 	{
-		synth.partState.benderAmount=bend;
-		computeBenderCVs();
-		computeTunedCVs();
+		uint8_t range=br[currentPreset.steppedParameters[spBenderRange]];
 		
+		switch(currentPreset.steppedParameters[spBenderTarget])
+		{
+			case modPitch:
+				bend=scaleU16S16(tuner_computeCVFromNote(0,range*2,0,cvAPitch)-tuner_computeCVFromNote(0,0,0,cvAPitch),bend);
+				break;
+			case modFilter:
+				bend=scaleU16S16(tuner_computeCVFromNote(0,range*8,0,cvCutoff)-tuner_computeCVFromNote(0,0,0,cvCutoff),bend);
+				break;
+			case modVolume:
+			case modCrossOver:
+				bend=(bend/12)*range;
+				break;
+		}
+
+		synth.partState.benderAmount=bend;
+
+		if(currentPreset.steppedParameters[spBenderTarget]==modPitch ||
+				currentPreset.steppedParameters[spBenderTarget]==modFilter)
+			computeTunedCVs();
 	}
 	
 	if(mask&2)
 	{
-		synth.partState.modwheelAmount=modulation;
+		synth.partState.modwheelAmount=modulation>>mr[currentPreset.steppedParameters[spModwheelRange]];
 		refreshLfoSettings();
 	}
+}
+
+void synth_pressureEvent(uint16_t pressure)
+{
+	static const int8_t pr[]={5,3,1,0};
+
+#ifdef DEBUG_
+	rprintf(0,"pressure %d\n",pressure);
+#endif
+	
+	synth.partState.pressureAmount=pressure>>pr[currentPreset.steppedParameters[spPressureRange]];
+
+	switch(currentPreset.steppedParameters[spPressureTarget])
+	{
+		case modPitch:
+			synth.partState.pressureAmount>>=2; // less modulation for pitch
+			computeTunedCVs();
+			break;
+		case modFilter:
+			computeTunedCVs();
+			break;
+		case modLFO1:
+		case modLFO2:
+			refreshLfoSettings();
+			break;
+	}
+	
 }
 
 void synth_realtimeEvent(uint8_t midiEvent)
