@@ -237,7 +237,7 @@ int main(void)
 	delay_ms(500);
 
 	SystemCoreClockUpdate();
-	init_serial0(57600);
+	init_serial0(DEBUG_UART_BAUD);
 	rprintf_devopen(0,putc_serial0); 
 	
 	ui_init(); // called early to get a splash screen

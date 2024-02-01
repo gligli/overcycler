@@ -19,6 +19,8 @@ VECTOR_LOCATION=VECTORS_IN_ROM
 ## - Exception vectors in RAM:
 ##VECTOR_LOCATION=VECTORS_IN_RAM
 
+DEBUG_UART_BAUD=57600
+
 # Target file name (without extension).
 TARGET = overcycler
 
@@ -160,7 +162,7 @@ EXTRA_LIBDIRS =
 CSTANDARD = -std=gnu99
 
 # Place -D or -U options for C here
-CDEFS =  -D$(RUN_MODE) -D$(SUBMDL)
+CDEFS =  -D$(RUN_MODE) -D$(SUBMDL) -DDEBUG_UART_BAUD=$(DEBUG_UART_BAUD)
 
 # Place -I options here
 CINCS = -I $(LIBPATH)
@@ -263,7 +265,6 @@ LDFLAGS += -Tldscript_rom_gnu.ld
 LPC21ISP = ./lpc21isp
 LPC21ISP_KILL = /cygdrive/c/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
-LPC21ISP_BAUD = 57600
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
 LPC21ISP_OPTIONS = -term -control -donotstart -wipe -verify
@@ -364,11 +365,11 @@ gccversion :
 # Program the device.  - lpc21isp will not work for SAM7
 program: $(LPC21ISP_FLASHFILE)
 	-$(LPC21ISP_KILL)
-	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
+	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(DEBUG_UART_BAUD) $(LPC21ISP_XTAL)
 
 term:
 	-$(LPC21ISP_KILL)
-	$(LPC21ISP) -termonly -control $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
+	$(LPC21ISP) -termonly -control $(LPC21ISP_PORT) $(DEBUG_UART_BAUD) $(LPC21ISP_XTAL)
 
 # Create final output file (.hex) from ELF output file.
 %.hex: %.elf

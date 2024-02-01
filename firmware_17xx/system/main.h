@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_
 
 #include <stdint.h>
