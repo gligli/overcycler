@@ -121,7 +121,27 @@ static int32_t getStaticCV(cv_t cv)
 	return __SSAT(res,16);
 }
 
-static void computeTunedCVs(void)
+static void handleFinishedVoices(void)
+{
+	int8_t v;
+	
+	for(v=0;v<SYNTH_VOICE_COUNT;++v)
+	{
+		// when amp env finishes, voice is done
+		if(assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
+			assigner_voiceDone(v);
+	
+		// if voice isn't assigned, silence it
+		if(!assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])!=sWait)
+		{
+			adsr_reset(&synth.ampEnvs[v]);
+			adsr_reset(&synth.filEnvs[v]);
+			adsr_reset(&synth.wmodEnvs[v]);
+		}
+	}
+}
+
+static void refreshTunedCVs(void)
 {
 	uint16_t cva,cvb,cvf;
 	uint8_t note,baseCutoffNote,baseANote,baseBNote,trackingNote;
@@ -217,26 +237,6 @@ static void computeTunedCVs(void)
 			synth.filterNoteCV[v]=cvf;
 		}
 				
-	}
-}
-
-static void handleFinishedVoices(void)
-{
-	int8_t v;
-	
-	for(v=0;v<SYNTH_VOICE_COUNT;++v)
-	{
-		// when amp env finishes, voice is done
-		if(assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])==sWait)
-			assigner_voiceDone(v);
-	
-		// if voice isn't assigned, silence it
-		if(!assigner_getAssignment(v,NULL) && adsr_getStage(&synth.ampEnvs[v])!=sWait)
-		{
-			adsr_reset(&synth.ampEnvs[v]);
-			adsr_reset(&synth.filEnvs[v]);
-			adsr_reset(&synth.wmodEnvs[v]);
-		}
 	}
 }
 
@@ -446,7 +446,7 @@ void synth_refreshFullState(void)
 	refreshEnvSettings(1);
 	refreshEnvSettings(2);
 	refreshMisc();
-	computeTunedCVs();
+	refreshTunedCVs();
 }
 
 int32_t synth_getVisualEnvelope(int8_t voice)
@@ -1252,7 +1252,7 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 	refreshModulationDelay(0);
 
 	// prepare CVs
-	computeTunedCVs();
+	refreshTunedCVs();
 
 	// set gates (don't retrigger gate, unless we're arpeggiating)
 	if(!(flags&ASSIGNER_EVENT_FLAG_LEGATO) || arp_getMode()!=amOff)
@@ -1323,7 +1323,7 @@ void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
 
 		if(currentPreset.steppedParameters[spBenderTarget]==modPitch ||
 				currentPreset.steppedParameters[spBenderTarget]==modFilter)
-			computeTunedCVs();
+			refreshTunedCVs();
 	}
 	
 	if(mask&2)
@@ -1347,10 +1347,10 @@ void synth_pressureEvent(uint16_t pressure)
 	{
 		case modPitch:
 			synth.partState.pressureAmount>>=2; // less modulation for pitch
-			computeTunedCVs();
+			refreshTunedCVs();
 			break;
 		case modFilter:
-			computeTunedCVs();
+			refreshTunedCVs();
 			break;
 		case modLFO1:
 		case modLFO2:
