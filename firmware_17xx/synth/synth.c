@@ -115,7 +115,7 @@ static int32_t getStaticCV(cv_t cv)
 		if(currentPreset.steppedParameters[spBenderTarget]==mod)
 			res+=synth.partState.benderAmount;
 		if(currentPreset.steppedParameters[spPressureTarget]==mod)
-			res+=synth.partState.pressureAmount;
+			res+=(int32_t)synth.partState.pressureAmount*(mod==modPitch?-1:1); // pressure to pitch goes downwards
 	}
 	
 	return __SSAT(res,16);
