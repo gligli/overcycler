@@ -106,11 +106,11 @@ static const uint8_t abx2wsp[3] = {spAWave_Legacy, spBWave_Legacy, spXOvrWave_Le
 
 static int32_t getStaticCV(cv_t cv)
 {
-	static const modulationTarget_t cv2mod[cvCount]={modVolume,modVolume,modFilter,modOff,modPitch,modPitch,modCrossOver,modOff,modOff};
+	static const modulationTarget_t cv2mod[cvCount]={modVolume,modVolume,modFilter,modNone,modPitch,modPitch,modCrossOver,modNone,modNone};
 	modulationTarget_t mod=cv2mod[cv];
 	int32_t res=0;
 	
-	if(mod!=modOff)
+	if(mod!=modNone)
 	{
 		if(currentPreset.steppedParameters[spBenderTarget]==mod)
 			res+=synth.partState.benderAmount;

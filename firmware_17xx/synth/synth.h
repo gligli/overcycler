@@ -30,7 +30,7 @@ typedef enum {
 
 typedef enum
 {
-	modOff=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4,modLFO1=5,modLFO2=6
+	modNone=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4,modLFO1=5,modLFO2=6
 } modulationTarget_t;
 
 typedef enum
