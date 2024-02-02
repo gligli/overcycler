@@ -1219,7 +1219,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		/*nothing*/;
 	}
 
-	if(change || settingsModified)
+	if(change)
 	{
 		ui.presetModified=change;
 		synth_refreshFullState();
@@ -1228,6 +1228,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	if(settingsModified)
 	{
 		ui.settingsModifiedTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+		synth_refreshFullState();
 	}
 }
 

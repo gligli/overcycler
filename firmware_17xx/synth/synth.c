@@ -261,6 +261,7 @@ static void refreshAssignerSettings(void)
 
 static void refreshEnvSettings(int8_t type)
 {
+	uint16_t atk,dec,sus,rel;
 	int8_t slow,lin,loop;
 	int8_t i;
 	struct adsr_s * a;
@@ -274,18 +275,33 @@ static void refreshEnvSettings(int8_t type)
 			slow=currentPreset.steppedParameters[spAmpEnvSlow];
 			lin=currentPreset.steppedParameters[spAmpEnvLin];
 			loop=currentPreset.steppedParameters[spAmpEnvLoop];
+
+			atk=currentPreset.continuousParameters[cpAmpAtt];
+			dec=currentPreset.continuousParameters[cpAmpDec];
+			sus=currentPreset.continuousParameters[cpAmpSus];
+			rel=currentPreset.continuousParameters[cpAmpRel];
 			break;
 		case 1:
 			a=&synth.filEnvs[i];
 			slow=currentPreset.steppedParameters[spFilEnvSlow];
 			lin=currentPreset.steppedParameters[spFilEnvLin];
 			loop=currentPreset.steppedParameters[spFilEnvLoop];
+
+			atk=currentPreset.continuousParameters[cpFilAtt];
+			dec=currentPreset.continuousParameters[cpFilDec];
+			sus=currentPreset.continuousParameters[cpFilSus];
+			rel=currentPreset.continuousParameters[cpFilRel];
 			break;
 		case 2:
 			a=&synth.wmodEnvs[i];
 			slow=currentPreset.steppedParameters[spWModEnvSlow];
 			lin=currentPreset.steppedParameters[spWModEnvLin];
 			loop=currentPreset.steppedParameters[spWModEnvLoop];
+
+			atk=currentPreset.continuousParameters[cpWModAtt];
+			dec=currentPreset.continuousParameters[cpWModDec];
+			sus=currentPreset.continuousParameters[cpWModSus];
+			rel=currentPreset.continuousParameters[cpWModRel];
 			break;
 		default:
 			return;
@@ -293,27 +309,7 @@ static void refreshEnvSettings(int8_t type)
 		
 		adsr_setSpeedShift(a,(slow)?4:2,5);
 		adsr_setShape(a,(lin)?0:1,loop);
-
-		adsr_setCVs(&synth.ampEnvs[i],
-				 currentPreset.continuousParameters[cpAmpAtt],
-				 currentPreset.continuousParameters[cpAmpDec],
-				 currentPreset.continuousParameters[cpAmpSus],
-				 currentPreset.continuousParameters[cpAmpRel],
-				 0,0x0f);
-
-		adsr_setCVs(&synth.filEnvs[i],
-				 currentPreset.continuousParameters[cpFilAtt],
-				 currentPreset.continuousParameters[cpFilDec],
-				 currentPreset.continuousParameters[cpFilSus],
-				 currentPreset.continuousParameters[cpFilRel],
-				 0,0x0f);
-
-		adsr_setCVs(&synth.wmodEnvs[i],
-				 currentPreset.continuousParameters[cpWModAtt],
-				 currentPreset.continuousParameters[cpWModDec],
-				 currentPreset.continuousParameters[cpWModSus],
-				 currentPreset.continuousParameters[cpWModRel],
-				 0,0x0f);
+		adsr_setCVs(a,atk,dec,sus,rel,0,0x0f);
 	}
 }
 
