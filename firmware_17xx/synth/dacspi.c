@@ -18,8 +18,8 @@
 
 #define SPIMUX_VAL(c,b,a) (((a)<<SPIMUX_PIN_A)|((b)<<SPIMUX_PIN_B)|((c)<<SPIMUX_PIN_C))
 
-#define DACSPI_CMD_SET_A 0x3000
-#define DACSPI_CMD_SET_B 0xb000
+#define DACSPI_CMD_SET_A 0x7000
+#define DACSPI_CMD_SET_B 0xf000
 
 #define DACSPI_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
@@ -155,7 +155,22 @@ void dacspi_init(void)
 	memset(&dacspi,0,sizeof(dacspi));
 
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
+
+	// cv DACs init
+	for(i=0;i<DACSPI_CV_COUNT;i+=4)
+	{
+		dacspi.cvCommands[i+0]=0b1110000000000000; // data reset
+		dacspi.cvCommands[i+1]=0b1100000000000000; // set all channels power
+		dacspi.cvCommands[i+2]=0b1010000000000000; // /LDAC low
+		dacspi.cvCommands[i+3]=0b1000000000000011; // 0..Vdd range
+	}
+
+	// reset
 	
+	TIM_Cmd(LPC_TIM3,DISABLE);
+	LPC_GPDMA->Config=0;
+	SSP_Cmd(LPC_SSP0,DISABLE);
+
 	// init SPI mux
 
 	GPIO_SetDir(SPIMUX_PORT_ABC,1<<SPIMUX_PIN_A,1); // A
@@ -235,6 +250,10 @@ void dacspi_init(void)
 	LPC_GPDMACH0->CControl=lli[0][0].Control;
 
 	LPC_GPDMACH0->CConfig=DACSPI_DMACONFIG;
+
+	// wait until all CV DACs inits are processed
+	while(marker!=markerSource[0]);
+	while(marker!=markerSource[DACSPI_BUFFER_COUNT/2]);
 	
 	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 }
