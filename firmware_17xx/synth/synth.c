@@ -28,8 +28,8 @@
 
 #define WAVEDATA_PATH "/WAVEDATA"
 
-#define MAX_BANKS 100
-#define MAX_BANK_WAVES 200
+#define MAX_BANKS 128
+#define MAX_BANK_WAVES 256
 
 #define POT_DEAD_ZONE 512
 
@@ -52,7 +52,7 @@ static struct
 
 	DIR curDir;
 	FILINFO curFile;
-	char lfname[_MAX_LFN + 1];
+	char lfname[MAX_FILENAME];
 } waveData;
 
 static struct
@@ -797,14 +797,14 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	return value;
 }
 
-FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v)
+FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value)
 {
 	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
 	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
-	uint16_t value,channel;
+	uint16_t v,channel;
 	
-	v=__USAT(v,16);
-	value=adjustCV(cv,v);
+	value=__USAT(value,16);
+	v=adjustCV(cv,value);
 
 	switch(cv)
 	{
@@ -830,7 +830,7 @@ FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v)
 		return;
 	}
 	
-	dacspi_setCVValue(channel,value);
+	dacspi_setCVValue(channel,v);
 }
 
 static void refreshCrossOver(uint16_t wmod, int16_t wmodEnvAmt)
@@ -996,10 +996,10 @@ void synth_init(void)
 		preset_loadDefault(1);
 	ui_setPresetModified(0);
 
-	synth_refreshFullState();
 	synth_refreshWaveforms(0);
 	synth_refreshWaveforms(1);
 	synth_refreshWaveforms(2);
+	synth_refreshFullState();
 
 	usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
 }

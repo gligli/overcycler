@@ -38,7 +38,7 @@
 #define DELAY_50NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop")
 #define DELAY_100NS() {DELAY_50NS();DELAY_50NS();}
 
-#define MAX_FILENAME _MAX_LFN
+#define MAX_FILENAME (_MAX_LFN + 1)
 
 void delay_us(uint32_t);
 void delay_ms(uint32_t);

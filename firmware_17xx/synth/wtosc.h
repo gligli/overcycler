@@ -3,7 +3,7 @@
 
 #include "synth.h"
 
-#define WTOSC_MAX_SAMPLES 600 // samples
+#define WTOSC_MAX_SAMPLES 2048 // samples
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
 //#define WTOSC_SAMPLES_GUARD_BAND 4600 // about -1.3 decibels
