@@ -559,7 +559,9 @@ reload:
 	
 	if (oriBankNum!=newBankNum || oriWaveNum!=newWaveNum)
 	{
+#ifdef DEBUG
 		rprintf(0,"reloadLegacyBankWaveIndexes abx %d from %d/%d to %d/%d\n",abx,oriBankNum,oriWaveNum,newBankNum,newWaveNum);
+#endif
 		currentPreset.steppedParameters[abx2bsp[abx]]=newBankNum;
 		currentPreset.steppedParameters[abx2wsp[abx]]=newWaveNum;
 	}

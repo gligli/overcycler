@@ -184,9 +184,7 @@ void usb_setMode(usbMode_t mode, usb_MSC_continue_callback_t usbMSCContinue)
 	if(mode==usbMode)
 		return;
 	
-#ifdef DEBUG
 	rprintf(0,"usb_setMode %d\n",mode);
-#endif		
 
 	NVIC_SetPriority(USB_IRQn,17);
 	NVIC_EnableIRQ(USB_IRQn);
