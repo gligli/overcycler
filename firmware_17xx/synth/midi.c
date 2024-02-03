@@ -12,7 +12,9 @@
 #include "../xnormidi/midi_device.h"
 #include "../xnormidi/midi.h"
 
-#define MIDI_NOTE_TRANSPOSE_OFFSET -12
+#define NOTE_TRANSPOSE_OFFSET -12
+
+#define PENDING_UPDATE_TIMEOUT (TICKER_1S/5)
 
 enum midiCC_e
 {
@@ -181,6 +183,8 @@ static struct
 	MidiDevice device[MIDI_PORT_COUNT];
 	int8_t isNrpnStepped[MIDI_PORT_COUNT];
 	int8_t currentNrpn[MIDI_PORT_COUNT];
+	uint32_t presetTimeout;
+	uint32_t pendingBankWaveTimeout[abxCount];
 } midi;
 
 static uint16_t combineBytes(uint8_t first, uint8_t second)
@@ -250,14 +254,14 @@ static int8_t setSteppedParameter(steppedParameter_t param, uint8_t value, int8_
 			case spAXOvrBank_Unsaved:
 			case spBXOvrBank_Unsaved:
 				synth_getBankName(value,currentPreset.oscBank[sp2abx[param]]);
-				synth_refreshCurWaveNames(sp2abx[param],1);
+				midi.pendingBankWaveTimeout[sp2abx[param]]=currentTick+PENDING_UPDATE_TIMEOUT;
 				break;
 			case spAWave_Unsaved:
 			case spBWave_Unsaved:
 			case spAXOvrWave_Unsaved:
 			case spBXOvrWave_Unsaved:
 				synth_getWaveName(value,currentPreset.oscWave[sp2abx[param]]);
-				synth_refreshWaveforms(sp2abx[param]);
+				midi.pendingBankWaveTimeout[sp2abx[param]]=currentTick+PENDING_UPDATE_TIMEOUT;
 				break;
 			default:
 				/* nothing */;
@@ -285,7 +289,7 @@ static void noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint
 	print("\n");
 #endif
 
-	note+=MIDI_NOTE_TRANSPOSE_OFFSET;
+	note+=NOTE_TRANSPOSE_OFFSET;
 	
 	if(ui_isTransposing())
 	{
@@ -322,7 +326,7 @@ static void noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note, uin
 	print("\n");
 #endif
 
-	note+=MIDI_NOTE_TRANSPOSE_OFFSET;
+	note+=NOTE_TRANSPOSE_OFFSET;
 	
 	if(arp_getMode()==amOff)
 	{
@@ -379,7 +383,7 @@ static void ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8
 		case ccBankCoarse:
 		case ccBankFine:
 			settings.presetNumber=(settings.presetNumber%100)+(value%10)*100;
-			settings_save();		
+			midi.presetTimeout=currentTick+PENDING_UPDATE_TIMEOUT;
 			break;
 		case ccContinuousCoarse:
 			change=setContinuousParameterCoarse(cc.number,value);
@@ -463,13 +467,7 @@ static void progchangeEvent(MidiDevice * device, uint8_t channel, uint8_t progra
 	if(program<100 && newPresetNumber!=settings.presetNumber)
 	{
 		settings.presetNumber=newPresetNumber;
-		settings_save();		
-		
-		if(!preset_loadCurrent(newPresetNumber))
-			preset_loadDefault(1);
-		ui_setPresetModified(0);	
-
-		synth_refreshFullState(1);
+		midi.presetTimeout=currentTick+PENDING_UPDATE_TIMEOUT;
 	}
 }
 
@@ -504,6 +502,10 @@ void midi_init(void)
 {
 	memset(&midi,0,sizeof(midi));
 
+	for(abx_t abx=0;abx<abxCount;++abx)
+		midi.pendingBankWaveTimeout[abx]=UINT32_MAX;
+	midi.presetTimeout=UINT32_MAX;
+
 	for(int8_t port=0;port<MIDI_PORT_COUNT;++port)
 	{
 		MidiDevice * d = &midi.device[port];
@@ -519,7 +521,7 @@ void midi_init(void)
 	}
 }
 
-void midi_update(void)
+void midi_processInput(void)
 {
 	for(int8_t port=0;port<MIDI_PORT_COUNT;++port)
 		midi_device_process(&midi.device[port]);
@@ -528,4 +530,39 @@ void midi_update(void)
 void midi_newData(int8_t port, uint8_t data)
 {
 	midi_device_input(&midi.device[port],1,&data);
+}
+
+void midi_update(void)
+{
+	// pending osc bank/wave updates
+	
+	for(abx_t abx=0;abx<abxCount;++abx)
+	{
+		if(currentTick>midi.pendingBankWaveTimeout[abx])
+		{
+			synth_refreshCurWaveNames(abx,1);
+			synth_refreshWaveforms(abx);
+			midi.pendingBankWaveTimeout[abx]=UINT32_MAX;
+		}
+	}	
+	
+	// pending program change updates
+	
+	if(currentTick>midi.presetTimeout)
+		BLOCK_INT(1)
+		{
+			// temporarily silence voices
+			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+				synth_refreshCV(v,cvAmp, 0);					
+			
+			settings_save();		
+
+			if(!preset_loadCurrent(settings.presetNumber))
+				preset_loadDefault(1);
+			ui_setPresetModified(0);	
+
+			synth_refreshFullState(1);
+
+			midi.presetTimeout=UINT32_MAX;
+		}
 }

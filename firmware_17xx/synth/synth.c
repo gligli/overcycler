@@ -102,11 +102,17 @@ const abx_t sp2abx[spCount] =
 	/*ABank*/abxAMain,
 	/*AWave*/abxAMain,
 	
-	/*ABaseWMod*/abxNone,/*AFilWMod*/abxNone,/*BBank*/abxBMain,/*BWave*/abxBMain,/*BBaseWMod*/abxNone,/*BWFilMod*/abxNone,
-	/*LFOShape*/abxNone,/*LFOShift*/abxNone,/*LFOTargets*/abxNone,/*FilEnvSlow*/abxNone,/*AmpEnvSlow*/abxNone,/*BenderRange*/abxNone,
-	/*BenderTarget*/abxNone,/*ModwheelRange*/abxNone,/*ModwheelTarget*/abxNone,/*Unison*/abxNone,/*AssignerPriority*/abxNone,
-	/*ChromaticPitch*/abxNone,/*Sync*/abxNone,/*AXOvrBank*/abxACrossover,
+	/*ABaseWMod*/abxNone,/*AFilWMod*/abxNone,
 	
+	/*BBank*/abxBMain,
+	/*BWave*/abxBMain,
+	
+	/*BBaseWMod*/abxNone,/*BWFilMod*/abxNone,/*LFOShape*/abxNone,/*LFOShift*/abxNone,/*LFOTargets*/abxNone,
+	/*FilEnvSlow*/abxNone,/*AmpEnvSlow*/abxNone,/*BenderRange*/abxNone,	/*BenderTarget*/abxNone,
+	/*ModwheelRange*/abxNone,/*ModwheelTarget*/abxNone,/*Unison*/abxNone,/*AssignerPriority*/abxNone,
+	/*ChromaticPitch*/abxNone,/*Sync*/abxNone,
+	
+	/*AXOvrBank*/abxACrossover,
 	/*AXOvrWave*/abxACrossover,
 	
 	/*FilEnvLin*/abxNone,/*LFO2Shape*/abxNone,/*LFO2Shift*/abxNone,/*LFO2Targets*/abxNone,/*VoiceCount*/abxNone,
@@ -943,7 +949,7 @@ void synth_init(void)
 	waveData.curFile.lfsize=sizeof(waveData.lfname);
 
 	for(i=0;i<4;++i)
-		waveData.sampleCount[i]=WTOSC_MAX_SAMPLES;
+		waveData.sampleCount[i]=0;
 	
 	// init subsystems
 	// ui_init() done in main.c
@@ -1005,6 +1011,7 @@ void synth_update(void)
 
 	scan_update();
 	ui_update();
+	midi_update();
 	
 	refreshLfoSettings();
 	
@@ -1043,7 +1050,7 @@ void synth_timerInterrupt(void)
 
 	// midi
 
-	midi_update();
+	midi_processInput();
 
 	// bit inputs (footswitch / tape in)
 
