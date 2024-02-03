@@ -97,8 +97,8 @@ extern const uint16_t attackCurveLookup[]; // for modulation delay
 
 const uint16_t extClockDividers[16] = {192,168,144,128,96,72,48,36,24,18,12,9,6,4,3,2};
 
-static const uint8_t abx2bsp[3] = {spABank_Legacy, spBBank_Legacy, spXOvrBank_Legacy};
-static const uint8_t abx2wsp[3] = {spAWave_Legacy, spBWave_Legacy, spXOvrWave_Legacy};
+static const uint8_t abx2bsp[3] = {spABank_Unsaved, spBBank_Unsaved, spXOvrBank_Unsaved};
+static const uint8_t abx2wsp[3] = {spAWave_Unsaved, spBWave_Unsaved, spXOvrWave_Unsaved};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code

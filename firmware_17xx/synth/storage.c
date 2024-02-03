@@ -74,46 +74,46 @@ const int8_t continuousParametersZeroCentered[cpCount] =
 	/*cpWModVelocity*/0,
 };
 
-const uint8_t steppedParametersBits[spCount] = 
+const uint8_t steppedParametersSteps[spCount] = 
 {
-	/*ABank*/7,
-	/*AWave*/7,
-	/*ABaseWMod*/3,
+	/*ABank*/128,
+	/*AWave*/128,
+	/*ABaseWMod*/5,
 	/*AFilWMod*/1,
-	/*BBank*/7,
-	/*BWave*/7,
-	/*BBaseWMod*/3,
+	/*BBank*/128,
+	/*BWave*/128,
+	/*BBaseWMod*/4,
 	/*BWFilMod*/1,
-	/*LFOShape*/3,
-	/*LFOShift*/2,
-	/*LFOTargets*/2,
-	/*FilEnvSlow*/1,
-	/*AmpEnvSlow*/1,
-	/*BenderRange*/2,
-	/*BenderTarget*/2,
-	/*ModwheelRange*/2,
-	/*ModwheelTarget*/1,
-	/*Unison*/1,
-	/*AssignerPriority*/2,
-	/*ChromaticPitch*/2,
-	/*Sync*/1,
-	/*XOvrBank*/7,
-	/*XOvrWave*/7,
-	/*FilEnvLin*/1,
-	/*LFO2Shape*/3,
-	/*LFO2Shift*/2,
-	/*LFO2Targets*/2,
-	/*VoiceCount*/3,
-	/*PresetType*/3,
-	/*PresetStyle*/3,
-	/*AmpEnvLin*/1,
-	/*FilEnvLoop*/1,
-	/*AmpEnvLoop*/1,
-	/*WModEnvSlow*/1,
-	/*WModEnvLin*/1,
-	/*WModEnvLoop*/1,
-	/*PressureRange*/2,
-	/*PressureTarget*/3,
+	/*LFOShape*/7,
+	/*LFOShift*/1,
+	/*LFOTargets*/3,
+	/*FilEnvSlow*/2,
+	/*AmpEnvSlow*/2,
+	/*BenderRange*/3,
+	/*BenderTarget*/5,
+	/*ModwheelRange*/4,
+	/*ModwheelTarget*/2,
+	/*Unison*/2,
+	/*AssignerPriority*/3,
+	/*ChromaticPitch*/3,
+	/*Sync*/2,
+	/*XOvrBank*/128,
+	/*XOvrWave*/128,
+	/*FilEnvLin*/2,
+	/*LFO2Shape*/7,
+	/*LFO2Shift*/1,
+	/*LFO2Targets*/3,
+	/*VoiceCount*/SYNTH_VOICE_COUNT,
+	/*PresetType*/8,
+	/*PresetStyle*/8,
+	/*AmpEnvLin*/2,
+	/*FilEnvLoop*/2,
+	/*AmpEnvLoop*/2,
+	/*WModEnvSlow*/2,
+	/*WModEnvLin*/2,
+	/*WModEnvLoop*/2,
+	/*PressureRange*/4,
+	/*PressureTarget*/8,
 };
 
 struct settings_s settings;
@@ -465,8 +465,8 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	// v8
 	
-	currentPreset.steppedParameters[spXOvrBank_Legacy]=storageRead8();
-	currentPreset.steppedParameters[spXOvrWave_Legacy]=storageRead8();
+	currentPreset.steppedParameters[spXOvrBank_Unsaved]=storageRead8();
+	currentPreset.steppedParameters[spXOvrWave_Unsaved]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
 
 	// v8 - bw compat adjustments
@@ -590,8 +590,8 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	// v8
 	
-	storageWrite8(currentPreset.steppedParameters[spXOvrBank_Legacy]);
-	storageWrite8(currentPreset.steppedParameters[spXOvrWave_Legacy]);
+	storageWrite8(currentPreset.steppedParameters[spXOvrBank_Unsaved]);
+	storageWrite8(currentPreset.steppedParameters[spXOvrWave_Unsaved]);
 	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
 	
 	// v9

@@ -34,8 +34,8 @@ typedef enum
 
 typedef enum
 {
-	spABank_Legacy=0,spAWave_Legacy=1,spAWModType=2,spAWModEnvEn_Legacy=3,
-	spBBank_Legacy=4,spBWave_Legacy=5,spBWModType=6,spBWModEnvEn_Legacy=7,
+	spABank_Unsaved=0,spAWave_Unsaved=1,spAWModType=2,spAWModEnvEn_Legacy=3,
+	spBBank_Unsaved=4,spBWave_Unsaved=5,spBWModType=6,spBWModEnvEn_Legacy=7,
 	
 	spLFOShape=8,spLFOShift_Legacy=9,spLFOTargets=10,
 	
@@ -48,7 +48,7 @@ typedef enum
 	
 	spOscSync=20,
 	
-	spXOvrBank_Legacy=21,spXOvrWave_Legacy=22,
+	spXOvrBank_Unsaved=21,spXOvrWave_Unsaved=22,
 	spFilEnvLin=23,
 	
 	spLFO2Shape=24,spLFO2Shift_Legacy=25,spLFO2Targets=26,spVoiceCount=27,
@@ -109,7 +109,7 @@ extern struct settings_s settings;
 extern struct preset_s currentPreset;
 
 extern const int8_t continuousParametersZeroCentered[cpCount];
-extern const uint8_t steppedParametersBits[spCount];
+extern const uint8_t steppedParametersSteps[spCount];
 
 int8_t settings_load(void);
 void settings_save(void);

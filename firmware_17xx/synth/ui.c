@@ -59,14 +59,14 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptStep,.number=spABank_Legacy,.shortName="ABnk",.longName="Osc A Bank"},
-			{.type=ptStep,.number=spAWave_Legacy,.shortName="AWav",.longName="Osc A Waveform"},
+			{.type=ptStep,.number=spABank_Unsaved,.shortName="ABnk",.longName="Osc A Bank"},
+			{.type=ptStep,.number=spAWave_Unsaved,.shortName="AWav",.longName="Osc A Waveform"},
 			{.type=ptCont,.number=cpAFreq,.shortName="AFrq",.longName="Osc A Frequency"},
 			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 			{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
 			/* 2nd row of pots */
-			{.type=ptStep,.number=spBBank_Legacy,.shortName="BBnk",.longName="Osc B Bank"},
-			{.type=ptStep,.number=spBWave_Legacy,.shortName="BWav",.longName="Osc B Waveform"},
+			{.type=ptStep,.number=spBBank_Unsaved,.shortName="BBnk",.longName="Osc B Bank"},
+			{.type=ptStep,.number=spBWave_Unsaved,.shortName="BWav",.longName="Osc B Waveform"},
 			{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
 			{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
 			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
@@ -658,8 +658,8 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					}
 					break;
 				case cnXoCp:
-					v=currentPreset.steppedParameters[spXOvrBank_Legacy]*100;
-					v+=currentPreset.steppedParameters[spXOvrWave_Legacy]%100;
+					v=currentPreset.steppedParameters[spXOvrBank_Unsaved]*100;
+					v+=currentPreset.steppedParameters[spXOvrWave_Unsaved]%100;
 					sprintf(dv,"%04d",v);
 					break;
 				case cnLPrv:
@@ -760,27 +760,27 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 				dv[i]=(i<v) ? '\xff' : ' ';
 		}
 	}
-	if (prm->type==ptStep && prm->number==spABank_Legacy)
+	if (prm->type==ptStep && prm->number==spABank_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscBank[0]);
 	}
-	else if (prm->type==ptStep && prm->number==spBBank_Legacy)
+	else if (prm->type==ptStep && prm->number==spBBank_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscBank[1]);
 	}
-	else if (prm->type==ptStep && prm->number==spXOvrBank_Legacy)
+	else if (prm->type==ptStep && prm->number==spXOvrBank_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscBank[2]);
 	}
-	else if (prm->type==ptStep && prm->number==spAWave_Legacy)
+	else if (prm->type==ptStep && prm->number==spAWave_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscWave[0]);
 	}
-	else if (prm->type==ptStep && prm->number==spBWave_Legacy)
+	else if (prm->type==ptStep && prm->number==spBWave_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscWave[1]);
 	}
-	else if (prm->type==ptStep && prm->number==spXOvrWave_Legacy)
+	else if (prm->type==ptStep && prm->number==spXOvrWave_Unsaved)
 	{
 		strcpy(dv,currentPreset.oscWave[2]);
 	}
@@ -929,26 +929,26 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		{
 			switch(prm->number)
 			{
-				case spABank_Legacy:
-				case spBBank_Legacy:
-				case spXOvrBank_Legacy:
+				case spABank_Unsaved:
+				case spBBank_Unsaved:
+				case spXOvrBank_Unsaved:
 					synth_refreshBankNames(1);
 					valCount=synth_getBankCount();
 					break;
-				case spAWave_Legacy:
+				case spAWave_Unsaved:
 					synth_refreshCurWaveNames(0,1);
 					valCount=synth_getCurWaveCount();
 					break;
-				case spBWave_Legacy:
+				case spBWave_Unsaved:
 					synth_refreshCurWaveNames(1,1);
 					valCount=synth_getCurWaveCount();
 					break;
-				case spXOvrWave_Legacy:
+				case spXOvrWave_Unsaved:
 					synth_refreshCurWaveNames(2,1);
 					valCount=synth_getCurWaveCount();
 					break;
 				default:
-					valCount=1<<steppedParametersBits[prm->number];
+					valCount=steppedParametersSteps[prm->number];
 			}
 		}
 	}
@@ -1042,27 +1042,27 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		// special cases
 		if(change)
 		{
-			if(prm->number==spABank_Legacy || prm->number==spBBank_Legacy || prm->number==spXOvrBank_Legacy ||
-					prm->number==spAWave_Legacy || prm->number==spBWave_Legacy || prm->number==spXOvrWave_Legacy)
+			if(prm->number==spABank_Unsaved || prm->number==spBBank_Unsaved || prm->number==spXOvrBank_Unsaved ||
+					prm->number==spAWave_Unsaved || prm->number==spBWave_Unsaved || prm->number==spXOvrWave_Unsaved)
 			{
 				switch(prm->number)
 				{
-					case spABank_Legacy:
+					case spABank_Unsaved:
 						synth_getBankName(data,currentPreset.oscBank[0]);
 						break;
-					case spBBank_Legacy:
+					case spBBank_Unsaved:
 						synth_getBankName(data,currentPreset.oscBank[1]);
 						break;
-					case spXOvrBank_Legacy:
+					case spXOvrBank_Unsaved:
 						synth_getBankName(data,currentPreset.oscBank[2]);
 						break;
-					case spAWave_Legacy:
+					case spAWave_Unsaved:
 						synth_getWaveName(data,currentPreset.oscWave[0]);
 						break;
-					case spBWave_Legacy:
+					case spBWave_Unsaved:
 						synth_getWaveName(data,currentPreset.oscWave[1]);
 						break;
-					case spXOvrWave_Legacy:
+					case spXOvrWave_Unsaved:
 						synth_getWaveName(data,currentPreset.oscWave[2]);
 						break;
 				}
@@ -1143,8 +1143,8 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				settingsModified=1;
 				break;
 			case cnXoCp:
-				currentPreset.steppedParameters[spXOvrBank_Legacy]=currentPreset.steppedParameters[spABank_Legacy];
-				currentPreset.steppedParameters[spXOvrWave_Legacy]=currentPreset.steppedParameters[spAWave_Legacy];
+				currentPreset.steppedParameters[spXOvrBank_Unsaved]=currentPreset.steppedParameters[spABank_Unsaved];
+				currentPreset.steppedParameters[spXOvrWave_Unsaved]=currentPreset.steppedParameters[spAWave_Unsaved];
 				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[0]);
 				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[0]);
 				synth_refreshWaveforms(2);
@@ -1360,22 +1360,22 @@ void ui_update(void)
 	{
 		switch(ui.slowUpdateTimeoutNumber)
 		{
-			case spABank_Legacy:
+			case spABank_Unsaved:
 				synth_refreshCurWaveNames(0,1);
 				break;
-			case spBBank_Legacy:
+			case spBBank_Unsaved:
 				synth_refreshCurWaveNames(1,1);
 				break;
-			case spXOvrBank_Legacy:
+			case spXOvrBank_Unsaved:
 				synth_refreshCurWaveNames(2,1);
 				break;
-			case spAWave_Legacy:
+			case spAWave_Unsaved:
 				synth_refreshWaveforms(0);
 				break;
-			case spBWave_Legacy:
+			case spBWave_Unsaved:
 				synth_refreshWaveforms(1);
 				break;
-			case spXOvrWave_Legacy:
+			case spXOvrWave_Unsaved:
 				synth_refreshWaveforms(2);
 				break;
 			case 0x80+cnSave:

@@ -9,7 +9,7 @@
 
 void midi_init(void);
 void midi_update(void);
-void midi_newData(uint8_t port, uint8_t data);
+void midi_newData(int8_t port, uint8_t data);
 
 #endif	/* MIDI_H */
 
