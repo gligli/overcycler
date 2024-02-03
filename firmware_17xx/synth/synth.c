@@ -47,7 +47,7 @@ static struct
 	int8_t curWaveABX;
 	char curWaveBank[128];
 	
-	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: XOvr source, 3: XOvr mix
+	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: OscA XOvr, 3: OscB XOvr
 	uint16_t sampleCount[4];
 
 	DIR curDir;
@@ -85,9 +85,6 @@ static struct
 		uint8_t wmodMask;
 		uint32_t syncResetsMask;
 		int32_t oldCrossOver;
-
-		uint16_t wmodAVal;
-		int16_t wmodAEnvAmt;
 	} partState;
 	
 	uint8_t pendingExtClock;
@@ -417,6 +414,8 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=2;
 	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
 		synth.partState.wmodMask|=4;
+	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+		synth.partState.wmodMask|=8;
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
 		synth.partState.wmodMask|=16;
@@ -424,16 +423,15 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=32;
 	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
 		synth.partState.wmodMask|=64;
+	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver)
+		synth.partState.wmodMask|=128;
 	
 	// waveforms
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		int p=(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
-				currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
-				currentPreset.steppedParameters[spPressureTarget]==modCrossOver)?3:0;
-		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[p],waveData.sampleCount[p]);
-		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleCount[1]);
+		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[0],waveData.sampleData[2],MAX(waveData.sampleCount[0],waveData.sampleCount[2]));
+		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleData[3],MAX(waveData.sampleCount[1],waveData.sampleCount[3]));
 	}
 }
 
@@ -715,12 +713,8 @@ void synth_refreshWaveforms(int8_t abx)
 		
 		waveData.sampleCount[abx]=smpSize>>1; 
 	}
-	
-	// XOvr mix waveform
-	waveData.sampleCount[3]=MAX(waveData.sampleCount[0], waveData.sampleCount[2]); 
-	
-	synth.partState.oldCrossOver=-1;
-}
+}	
+
 
 static void handleBitInputs(void)
 {
@@ -833,45 +827,6 @@ FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value)
 	dacspi_setCVValue(channel,v);
 }
 
-static void refreshCrossOver(uint16_t wmod, int16_t wmodEnvAmt)
-{
-	int i;
-	int8_t v;
-	uint32_t xovr;
-	uint16_t *p0,*p2,*p3,xovr16;
-	
-	xovr=wmod;
-
-	// paraphonic wavemod envelope mod
-	if(currentPreset.continuousParameters[cpWModAEnv]!=HALF_RANGE)
-	{
-		v=assigner_getLatestAssigned(NULL);
-		if(v>=0)
-		{
-			xovr+=scaleU16S16(synth.wmodEnvs[v].output,wmodEnvAmt)<<1;
-			xovr=__USAT(xovr,16);
-		}
-	}
-	
-	if(xovr==synth.partState.oldCrossOver)
-		return;
-
-	p0=waveData.sampleData[0];
-	p2=waveData.sampleData[2];
-	p3=waveData.sampleData[3];
-	xovr16=xovr;
-	
-	for(i=0;i<WTOSC_MAX_SAMPLES/4;++i)
-	{
-		*p3++=lerp16(*p0++,*p2++,xovr16);
-		*p3++=lerp16(*p0++,*p2++,xovr16);
-		*p3++=lerp16(*p0++,*p2++,xovr16);
-		*p3++=lerp16(*p0++,*p2++,xovr16);
-	}
-	
-	synth.partState.oldCrossOver=xovr;
-}
-
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
 {
 	int32_t vpa,vpb,vma,vmb,vf,vamp;
@@ -911,13 +866,13 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 
 	vpa+=synth.oscANoteCV[v];
 	vpa=__USAT(vpa,16);
-	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE);
+	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE,(wmodMask&8)?vma:0);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
 	vpb=__USAT(vpb,16);
-	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:HALF_RANGE,(wmodMask&32)?vmb:HALF_RANGE);
+	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:HALF_RANGE,(wmodMask&32)?vmb:HALF_RANGE,(wmodMask&128)?vmb:0);
 
 	// amplifier
 	
@@ -1062,21 +1017,6 @@ void synth_timerInterrupt(void)
 
 	midi_update();
 
-	// crossover
-
-	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
-			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
-			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
-	{
-		int32_t wmod;
-		
-		wmod=synth.partState.wmodAVal;
-		wmod+=getStaticCV(cvACrossOver);
-		wmod=__USAT(wmod,16);
-				
-		refreshCrossOver(wmod,synth.partState.wmodAEnvAmt);
-	}
-
 	// bit inputs (footswitch / tape in)
 
 	handleBitInputs();
@@ -1207,9 +1147,6 @@ void synth_updateCVsEvent(void)
 		
 	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		refreshVoice(v,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
-	
-	synth.partState.wmodAVal=wmodAVal;
-	synth.partState.wmodAEnvAmt=wmodAEnvAmt;
 }
 
 #define PROC_UPDATE_DACS_VOICE(v) \
