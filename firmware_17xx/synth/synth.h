@@ -22,7 +22,7 @@
 #define MIDDLE_C_NOTE 60
 
 typedef enum {
-	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvACrossOver=6,cvAmp=7,cvNoiseVol=8,
+	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvCrossOver=6,cvAmp=7,cvNoiseVol=8,
 			
 	// /!\ this must stay last
 	cvCount

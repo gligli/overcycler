@@ -435,7 +435,9 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=2;
 	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
 		synth.partState.wmodMask|=4;
-	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
+			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
+			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
 		synth.partState.wmodMask|=8;
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
@@ -444,7 +446,9 @@ static void refreshMisc(void)
 		synth.partState.wmodMask|=32;
 	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
 		synth.partState.wmodMask|=64;
-	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver)
+	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver ||
+			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
+			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
 		synth.partState.wmodMask|=128;
 	
 	// waveforms
@@ -891,13 +895,13 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 
 	vpa+=synth.oscANoteCV[v];
 	vpa=__USAT(vpa,16);
-	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE,(wmodMask&8)?vma:0);
+	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE,(wmodMask&8)?vma:HALF_RANGE);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
 	vpb=__USAT(vpb,16);
-	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:HALF_RANGE,(wmodMask&32)?vmb:HALF_RANGE,(wmodMask&128)?vmb:0);
+	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:HALF_RANGE,(wmodMask&32)?vmb:HALF_RANGE,(wmodMask&128)?vmb:HALF_RANGE);
 
 	// amplifier
 	
@@ -1144,19 +1148,21 @@ void synth_updateCVsEvent(void)
 		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otA)
 		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2WModAmt],synth.lfo[1].output);
+	wmodAVal+=getStaticCV(cvCrossOver);
 
 	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
 	if(currentPreset.steppedParameters[spLFOTargets]&otB)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2WModAmt],synth.lfo[1].output);
+	wmodBVal+=getStaticCV(cvCrossOver);
 
 	wmodAEnvAmt=currentPreset.continuousParameters[cpWModAEnv];
 	wmodBEnvAmt=currentPreset.continuousParameters[cpWModBEnv];
 	wmodAEnvAmt+=INT16_MIN;
 	wmodBEnvAmt+=INT16_MIN;
 
-		// restrict range
+	// restrict range
 
 	pitchAVal=__SSAT(pitchAVal,16);
 	pitchBVal=__SSAT(pitchBVal,16);
@@ -1166,7 +1172,7 @@ void synth_updateCVsEvent(void)
 	ampVal=__USAT(ampVal,16);
 
 	// voices computations
-		
+
 	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 		refreshVoice(v,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
 }

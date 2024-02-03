@@ -23,7 +23,7 @@ struct wtosc_s
 
 	int32_t curSample,prevSample,prevSample2,prevSample3;
 	
-	uint32_t cv;
+	uint32_t pitch;
 	uint32_t crossover;
 	uint32_t width;
 	int32_t aliasing;

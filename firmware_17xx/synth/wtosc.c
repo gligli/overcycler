@@ -140,12 +140,12 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xov
 	}
 }
 
-void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width, uint16_t crossover)
+void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
 {
 	uint32_t sampleRate[2], frequency;
-	int32_t increment[2], period[2], aliasing_s;
+	int32_t increment[2], period[2], aliasing_s, crossover_s;
 	
-	cv=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,cv);
+	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
 	
 	aliasing_s=aliasing;
 	aliasing_s+=INT16_MIN;
@@ -163,10 +163,15 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	width=MIN((15*UINT16_MAX)/16,width);
 	width>>=16-WIDTH_MOD_BITS;
 
-	if(cv==o->cv && aliasing_s==o->aliasing && width==o->width && crossover==o->crossover)
+	crossover_s=crossover;
+	crossover_s+=INT16_MIN;
+	crossover_s=abs(crossover_s);
+	crossover_s=crossover_s<<1;
+	
+	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover)
 		return;	
 	
-	frequency=cvToFrequency(cv)*o->halfSampleCount;
+	frequency=cvToFrequency(pitch)*o->halfSampleCount;
 
 	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
@@ -187,15 +192,15 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uin
 	o->pendingPeriod[0]=period[0];	
 	o->pendingPeriod[1]=period[1];	
 
-	o->pendingUpdate=(cv==o->cv && crossover==o->crossover && aliasing_s==o->aliasing)?1:2; // width change needs delayed update (waiting for phase)
+	o->pendingUpdate=(pitch==o->pitch && crossover_s==o->crossover && aliasing_s==o->aliasing)?1:2; // width change needs delayed update (waiting for phase)
 	
-	o->cv=cv;
-	o->crossover=crossover;
+	o->pitch=pitch;
+	o->crossover=crossover_s;
 	o->width=width;
 	o->aliasing=aliasing_s;
 	
 //	 if(!o->channel)
-//		 rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->cv,CLOCK/period[0],CLOCK/period[1]);
+//		 rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->pitch,CLOCK/period[0],CLOCK/period[1]);
 }
 
 FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets)
