@@ -212,10 +212,13 @@ void dacspi_init(void)
 	lli[(1)*DACSPI_CHANNEL_COUNT][0].Control|=GPDMA_DMACCxControl_I;
 	lli[(DACSPI_BUFFER_COUNT/2+1)*DACSPI_CHANNEL_COUNT][0].Control|=GPDMA_DMACCxControl_I;
 	
-	//
+	// GPDMA & timer
 	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
-
+	
+	LPC_SC->MATRIXARB&=~0b11111111;
+	LPC_SC->MATRIXARB|= 0b11001001; // give priority to the GPDMA controller over anything else to lower jitter
+	
 	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_UART2_TX__T3_MAT_1;
 	LPC_GPDMA->Config=GPDMA_DMACConfig_E;
 
