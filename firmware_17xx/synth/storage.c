@@ -10,7 +10,7 @@
 #include "main.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 19
+#define STORAGE_VERSION 20
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -97,8 +97,8 @@ const uint8_t steppedParametersSteps[spCount] =
 	/*AssignerPriority*/3,
 	/*ChromaticPitch*/3,
 	/*Sync*/2,
-	/*XOvrBank*/128,
-	/*XOvrWave*/128,
+	/*AXOvrBank*/128,
+	/*AXOvrWave*/128,
 	/*FilEnvLin*/2,
 	/*LFO2Shape*/7,
 	/*LFO2Shift*/1,
@@ -114,6 +114,8 @@ const uint8_t steppedParametersSteps[spCount] =
 	/*WModEnvLoop*/2,
 	/*PressureRange*/4,
 	/*PressureTarget*/8,
+	/*BXOvrBank*/128,
+	/*BXOvrWave*/128,
 };
 
 struct settings_s settings;
@@ -465,8 +467,8 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	// v8
 	
-	currentPreset.steppedParameters[spXOvrBank_Unsaved]=storageRead8();
-	currentPreset.steppedParameters[spXOvrWave_Unsaved]=storageRead8();
+	currentPreset.steppedParameters[spAXOvrBank_Unsaved]=storageRead8();
+	currentPreset.steppedParameters[spAXOvrWave_Unsaved]=storageRead8();
 	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
 
 	// v8 - bw compat adjustments
@@ -514,7 +516,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	// v11
 	
-	for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
+	for(int8_t abx=0;abx<=abxACrossover;++abx)
 	{
 		storageReadStr(currentPreset.oscBank[abx]);
 		storageReadStr(currentPreset.oscWave[abx]);
@@ -556,6 +558,14 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	currentPreset.steppedParameters[spPressureRange]=storageRead8();
 	currentPreset.steppedParameters[spPressureTarget]=storageRead8();
 	
+	if(storage.version<20)
+		return 1;
+
+	// v20
+
+	storageWriteStr(currentPreset.oscBank[abxBCrossover]);
+	storageWriteStr(currentPreset.oscWave[abxBCrossover]);
+	
 	return 1;
 }
 
@@ -590,8 +600,8 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	// v8
 	
-	storageWrite8(currentPreset.steppedParameters[spXOvrBank_Unsaved]);
-	storageWrite8(currentPreset.steppedParameters[spXOvrWave_Unsaved]);
+	storageWrite8(currentPreset.steppedParameters[spAXOvrBank_Unsaved]);
+	storageWrite8(currentPreset.steppedParameters[spAXOvrWave_Unsaved]);
 	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
 	
 	// v9
@@ -613,7 +623,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 
 	// v11
 	
-	for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
+	for(abx_t abx=0;abx<=abxACrossover;++abx)
 	{
 		storageWriteStr(currentPreset.oscBank[abx]);
 		storageWriteStr(currentPreset.oscWave[abx]);
@@ -641,6 +651,11 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	
 	storageWrite8(currentPreset.steppedParameters[spPressureRange]);
 	storageWrite8(currentPreset.steppedParameters[spPressureTarget]);
+	
+	// v20
+	
+	storageWriteStr(currentPreset.oscBank[abxBCrossover]);
+	storageWriteStr(currentPreset.oscWave[abxBCrossover]);
 	
 	// /!\ write new version before this
 	storageFinishStore(number,1);
@@ -736,7 +751,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	if(makeSound)
 	{
 		// load default waveforms (perfectwaves/sawtooth)
-		for(int8_t abx=0;abx<PRESET_BANKWAVE_ABX_COUNT;++abx)
+		for(abx_t abx=0;abx<abxCount;++abx)
 			synth_reloadLegacyBankWaveIndexes(abx,1,1);
 
 		currentPreset.continuousParameters[cpAVol]=UINT16_MAX;

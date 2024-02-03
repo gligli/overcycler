@@ -5,8 +5,6 @@
 #include "assigner.h"
 #include "tuner.h"
 
-#define PRESET_BANKWAVE_ABX_COUNT 3 // OscA / OscB /XOvr
-
 typedef enum
 {
 	cpAFreq=0,cpAVol=1,cpABaseWMod=2,
@@ -48,7 +46,7 @@ typedef enum
 	
 	spOscSync=20,
 	
-	spXOvrBank_Unsaved=21,spXOvrWave_Unsaved=22,
+	spAXOvrBank_Unsaved=21,spAXOvrWave_Unsaved=22,
 	spFilEnvLin=23,
 	
 	spLFO2Shape=24,spLFO2Shift_Legacy=25,spLFO2Targets=26,spVoiceCount=27,
@@ -61,6 +59,8 @@ typedef enum
 	
 	spPressureRange=36,spPressureTarget=37,
 	
+	spBXOvrBank_Unsaved=38,spBXOvrWave_Unsaved=39,
+
 	// /!\ this must stay last
 	spCount
 } steppedParameter_t;
@@ -101,8 +101,8 @@ struct preset_s
 	
 	uint8_t voicePattern[SYNTH_VOICE_COUNT];
 	
-	char oscBank[PRESET_BANKWAVE_ABX_COUNT][MAX_FILENAME];
-	char oscWave[PRESET_BANKWAVE_ABX_COUNT][MAX_FILENAME];
+	char oscBank[abxCount][MAX_FILENAME];
+	char oscWave[abxCount][MAX_FILENAME];
 };
 
 extern struct settings_s settings;

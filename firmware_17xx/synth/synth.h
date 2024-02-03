@@ -48,6 +48,14 @@ typedef enum
 	smInternal=0,smMIDI=1,smTape=2
 } syncMode_t;
 
+typedef enum
+{
+	abxNone=-1,abxAMain=0,abxBMain,abxACrossover,abxBCrossover,
+	
+	// /!\ this must stay last
+	abxCount
+}abx_t;
+
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, uint8_t flags);
 void synth_uartMIDIEvent(uint8_t data);
 void synth_usbMIDIEvent(uint8_t data);
@@ -63,11 +71,11 @@ void synth_init(void);
 void synth_update(void);
 
 // synth.c internal api
-void synth_refreshFullState(void);
+void synth_refreshFullState(int8_t refreshWaveforms);
 int8_t synth_refreshBankNames(int8_t sort);
-void synth_refreshCurWaveNames(int8_t abx, int8_t sort);
-void synth_refreshWaveforms(int8_t abx);
-void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort);
+void synth_refreshCurWaveNames(abx_t abx, int8_t sort);
+void synth_refreshWaveforms(abx_t abx);
+void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sort);
 int synth_getBankCount(void);
 int synth_getCurWaveCount(void);
 int8_t synth_getBankName(int bankIndex, char * res);
@@ -77,5 +85,6 @@ void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];
+extern const abx_t sp2abx[];
 
 #endif

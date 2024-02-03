@@ -44,11 +44,11 @@ static struct
 	
 	int8_t bankSorted;
 	int8_t curWaveSorted;
-	int8_t curWaveABX;
+	abx_t curWaveABX;
 	char curWaveBank[128];
 	
-	uint16_t sampleData[4][WTOSC_MAX_SAMPLES]; // 0: OscA, 1: OscB, 2: OscA XOvr, 3: OscB XOvr
-	uint16_t sampleCount[4];
+	uint16_t sampleData[abxCount][WTOSC_MAX_SAMPLES];
+	uint16_t sampleCount[abxCount];
 
 	DIR curDir;
 	FILINFO curFile;
@@ -94,8 +94,29 @@ extern const uint16_t attackCurveLookup[]; // for modulation delay
 
 const uint16_t extClockDividers[16] = {192,168,144,128,96,72,48,36,24,18,12,9,6,4,3,2};
 
-static const uint8_t abx2bsp[3] = {spABank_Unsaved, spBBank_Unsaved, spXOvrBank_Unsaved};
-static const uint8_t abx2wsp[3] = {spAWave_Unsaved, spBWave_Unsaved, spXOvrWave_Unsaved};
+static const uint8_t abx2bsp[abxCount] = {spABank_Unsaved, spBBank_Unsaved, spAXOvrBank_Unsaved, spBXOvrBank_Unsaved};
+static const uint8_t abx2wsp[abxCount] = {spAWave_Unsaved, spBWave_Unsaved, spAXOvrWave_Unsaved, spBXOvrWave_Unsaved};
+
+const abx_t sp2abx[spCount] = 
+{
+	/*ABank*/abxAMain,
+	/*AWave*/abxAMain,
+	
+	/*ABaseWMod*/abxNone,/*AFilWMod*/abxNone,/*BBank*/abxBMain,/*BWave*/abxBMain,/*BBaseWMod*/abxNone,/*BWFilMod*/abxNone,
+	/*LFOShape*/abxNone,/*LFOShift*/abxNone,/*LFOTargets*/abxNone,/*FilEnvSlow*/abxNone,/*AmpEnvSlow*/abxNone,/*BenderRange*/abxNone,
+	/*BenderTarget*/abxNone,/*ModwheelRange*/abxNone,/*ModwheelTarget*/abxNone,/*Unison*/abxNone,/*AssignerPriority*/abxNone,
+	/*ChromaticPitch*/abxNone,/*Sync*/abxNone,/*AXOvrBank*/abxACrossover,
+	
+	/*AXOvrWave*/abxACrossover,
+	
+	/*FilEnvLin*/abxNone,/*LFO2Shape*/abxNone,/*LFO2Shift*/abxNone,/*LFO2Targets*/abxNone,/*VoiceCount*/abxNone,
+	/*PresetType*/abxNone,/*PresetStyle*/abxNone,/*AmpEnvLin*/abxNone,/*FilEnvLoop*/abxNone,/*AmpEnvLoop*/abxNone,
+	/*WModEnvSlow*/abxNone,/*WModEnvLin*/abxNone,/*WModEnvLoop*/abxNone,/*PressureRange*/abxNone,/*PressureTarget*/abxNone,
+	
+	/*BXOvrBank*/abxBCrossover,
+	/*BXOvrWave*/abxBCrossover,
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
@@ -435,8 +456,12 @@ static void refreshMisc(void)
 	}
 }
 
-void synth_refreshFullState(void)
+void synth_refreshFullState(int8_t refreshWaveforms)
 {
+	if(refreshWaveforms)
+		for(abx_t abx=0;abx<abxCount;++abx)
+			synth_refreshWaveforms(abx);
+	
 	refreshModulationDelay(1);
 	refreshAssignerSettings();
 	refreshLfoSettings();
@@ -455,7 +480,7 @@ int32_t synth_getVisualEnvelope(int8_t voice)
 		return -1;
 }
 
-void synth_reloadLegacyBankWaveIndexes(int8_t abx, int8_t loadDefault, int8_t sort)
+void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sort)
 {
 	int i,bankNum,waveNum,oriBankNum,oriWaveNum,newBankNum,newWaveNum;
 	char fn[MAX_FILENAME];
@@ -613,7 +638,7 @@ int8_t synth_refreshBankNames(int8_t sort)
 	return 1;
 }
 
-void synth_refreshCurWaveNames(int8_t abx, int8_t sort)
+void synth_refreshCurWaveNames(abx_t abx, int8_t sort)
 {
 	FRESULT res;
 	char fn[128];
@@ -664,7 +689,7 @@ void synth_refreshCurWaveNames(int8_t abx, int8_t sort)
 #endif		
 }
 
-void synth_refreshWaveforms(int8_t abx)
+void synth_refreshWaveforms(abx_t abx)
 {
 	int i;
 	FIL f;
@@ -951,10 +976,7 @@ void synth_init(void)
 		preset_loadDefault(1);
 	ui_setPresetModified(0);
 
-	synth_refreshWaveforms(0);
-	synth_refreshWaveforms(1);
-	synth_refreshWaveforms(2);
-	synth_refreshFullState();
+	synth_refreshFullState(1);
 
 	usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
 }

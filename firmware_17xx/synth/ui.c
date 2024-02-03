@@ -39,7 +39,7 @@ enum uiPage_e
 enum uiCustomParamNumber_e
 {
 	cnNone=0,cnAMod,cnAHld,cnPrUn,cnLoad,cnSave,cnMidC,cnTune,cnPrTe,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
-	cnTrspM,cnTrspV,cnSBnk,cnClk,cnXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnPrHu,cnNPrs,cnNVal,cnUsbM,
+	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnPrHu,cnNPrs,cnNVal,cnUsbM,
 	cnCtst
 };
 
@@ -73,10 +73,10 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 		},
 		{
 			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
-			/*2*/ {.type=ptCust,.number=cnXoCp,.shortName="XoCp",.longName="Crossover WaveMod Copy A Bank/Wave"},
+			/*1*/ {.type=ptCust,.number=cnAXoCp,.shortName="AXoC",.longName="Crossover WaveMod Copy A Bank/Wave"},
+			/*2*/ {.type=ptCust,.number=cnBXoCp,.shortName="BXoC",.longName="Crossover WaveMod Copy B Bank/Wave"},
 			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
-			/*4*/ {.type=ptNone},
+			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
 			/*5*/ {.type=ptNone},
 			/*6*/ {.type=ptNone},
 			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
@@ -103,7 +103,7 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 		{
 			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
 			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Grit","Wdth","Freq","XOvr"}},
-			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Grit","Wdth","Freq"}},
+			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Grit","Wdth","Freq","XOvr"}},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
 			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
@@ -657,9 +657,14 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 						v=((int)settings.seqArpClock*1000)>>16;
 					}
 					break;
-				case cnXoCp:
-					v=currentPreset.steppedParameters[spXOvrBank_Unsaved]*100;
-					v+=currentPreset.steppedParameters[spXOvrWave_Unsaved]%100;
+				case cnAXoCp:
+					v=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
+					v+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
+					sprintf(dv,"%04d",v);
+					break;
+				case cnBXoCp:
+					v=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
+					v+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
 					sprintf(dv,"%04d",v);
 					break;
 				case cnLPrv:
@@ -760,29 +765,17 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 				dv[i]=(i<v) ? '\xff' : ' ';
 		}
 	}
-	if (prm->type==ptStep && prm->number==spABank_Unsaved)
+	if (prm->type==ptStep &&
+			(prm->number==spABank_Unsaved || prm->number==spBBank_Unsaved ||
+			prm->number==spAXOvrBank_Unsaved || prm->number==spBXOvrBank_Unsaved))
 	{
-		strcpy(dv,currentPreset.oscBank[0]);
+		strcpy(dv,currentPreset.oscBank[sp2abx[prm->number]]);
 	}
-	else if (prm->type==ptStep && prm->number==spBBank_Unsaved)
+	else if (prm->type==ptStep &&
+			(prm->number==spAWave_Unsaved || prm->number==spBWave_Unsaved ||
+			prm->number==spAXOvrWave_Unsaved || prm->number==spBXOvrWave_Unsaved))
 	{
-		strcpy(dv,currentPreset.oscBank[1]);
-	}
-	else if (prm->type==ptStep && prm->number==spXOvrBank_Unsaved)
-	{
-		strcpy(dv,currentPreset.oscBank[2]);
-	}
-	else if (prm->type==ptStep && prm->number==spAWave_Unsaved)
-	{
-		strcpy(dv,currentPreset.oscWave[0]);
-	}
-	else if (prm->type==ptStep && prm->number==spBWave_Unsaved)
-	{
-		strcpy(dv,currentPreset.oscWave[1]);
-	}
-	else if (prm->type==ptStep && prm->number==spXOvrWave_Unsaved)
-	{
-		strcpy(dv,currentPreset.oscWave[2]);
+		strcpy(dv,currentPreset.oscWave[sp2abx[prm->number]]);
 	}
 	else if (prm->type==ptCust && prm->number==cnNVal)
 	{
@@ -931,20 +924,16 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			{
 				case spABank_Unsaved:
 				case spBBank_Unsaved:
-				case spXOvrBank_Unsaved:
+				case spAXOvrBank_Unsaved:
+				case spBXOvrBank_Unsaved:
 					synth_refreshBankNames(1);
 					valCount=synth_getBankCount();
 					break;
 				case spAWave_Unsaved:
-					synth_refreshCurWaveNames(0,1);
-					valCount=synth_getCurWaveCount();
-					break;
 				case spBWave_Unsaved:
-					synth_refreshCurWaveNames(1,1);
-					valCount=synth_getCurWaveCount();
-					break;
-				case spXOvrWave_Unsaved:
-					synth_refreshCurWaveNames(2,1);
+				case spAXOvrWave_Unsaved:
+				case spBXOvrWave_Unsaved:
+					synth_refreshCurWaveNames(sp2abx[prm->number],1);
 					valCount=synth_getCurWaveCount();
 					break;
 				default:
@@ -1042,34 +1031,28 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		// special cases
 		if(change)
 		{
-			if(prm->number==spABank_Unsaved || prm->number==spBBank_Unsaved || prm->number==spXOvrBank_Unsaved ||
-					prm->number==spAWave_Unsaved || prm->number==spBWave_Unsaved || prm->number==spXOvrWave_Unsaved)
+			switch(prm->number)
 			{
-				switch(prm->number)
-				{
-					case spABank_Unsaved:
-						synth_getBankName(data,currentPreset.oscBank[0]);
-						break;
-					case spBBank_Unsaved:
-						synth_getBankName(data,currentPreset.oscBank[1]);
-						break;
-					case spXOvrBank_Unsaved:
-						synth_getBankName(data,currentPreset.oscBank[2]);
-						break;
-					case spAWave_Unsaved:
-						synth_getWaveName(data,currentPreset.oscWave[0]);
-						break;
-					case spBWave_Unsaved:
-						synth_getWaveName(data,currentPreset.oscWave[1]);
-						break;
-					case spXOvrWave_Unsaved:
-						synth_getWaveName(data,currentPreset.oscWave[2]);
-						break;
-				}
-				
-				// waveform changes
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number;
+				case spABank_Unsaved:
+				case spBBank_Unsaved:
+				case spAXOvrBank_Unsaved:
+				case spBXOvrBank_Unsaved:
+					synth_getBankName(data,currentPreset.oscBank[sp2abx[prm->number]]);
+
+					// waveform changes
+					ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+					ui.slowUpdateTimeoutNumber=prm->number;
+					break;
+				case spAWave_Unsaved:
+				case spBWave_Unsaved:
+				case spAXOvrWave_Unsaved:
+				case spBXOvrWave_Unsaved:
+					synth_getWaveName(data,currentPreset.oscWave[sp2abx[prm->number]]);
+
+					// waveform changes
+					ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+					ui.slowUpdateTimeoutNumber=prm->number;
+					break;
 			}
 		}
 		break;
@@ -1142,12 +1125,20 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				settings.seqArpClock=potSetting;
 				settingsModified=1;
 				break;
-			case cnXoCp:
-				currentPreset.steppedParameters[spXOvrBank_Unsaved]=currentPreset.steppedParameters[spABank_Unsaved];
-				currentPreset.steppedParameters[spXOvrWave_Unsaved]=currentPreset.steppedParameters[spAWave_Unsaved];
+			case cnAXoCp:
+				currentPreset.steppedParameters[spAXOvrBank_Unsaved]=currentPreset.steppedParameters[spABank_Unsaved];
+				currentPreset.steppedParameters[spAXOvrWave_Unsaved]=currentPreset.steppedParameters[spAWave_Unsaved];
 				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[0]);
 				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[0]);
-				synth_refreshWaveforms(2);
+				synth_refreshWaveforms(abxACrossover);
+				change=1;
+				break;
+			case cnBXoCp:
+				currentPreset.steppedParameters[spBXOvrBank_Unsaved]=currentPreset.steppedParameters[spBBank_Unsaved];
+				currentPreset.steppedParameters[spBXOvrWave_Unsaved]=currentPreset.steppedParameters[spBWave_Unsaved];
+				strcpy(currentPreset.oscBank[3], currentPreset.oscBank[1]);
+				strcpy(currentPreset.oscWave[3], currentPreset.oscWave[1]);
+				synth_refreshWaveforms(abxBCrossover);
 				change=1;
 				break;
 			case cnLPrv:
@@ -1161,13 +1152,12 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				break;
 			case cnPanc:
 				assigner_panicOff();
-				synth_refreshFullState();
+				synth_refreshFullState(0);
 				break;
 			case cnLBas:
 				preset_loadDefault(1);
-				synth_refreshWaveforms(0);
-				synth_refreshWaveforms(1);
-				synth_refreshWaveforms(2);
+				for(abx_t abx=0;abx<abxCount;++abx)
+					synth_refreshWaveforms(abx);
 				change=1;
 				break;
 			case cnPack:
@@ -1222,13 +1212,13 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	if(change)
 	{
 		ui.presetModified=change;
-		synth_refreshFullState();
+		synth_refreshFullState(0);
 	}
 	
 	if(settingsModified)
 	{
 		ui.settingsModifiedTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
-		synth_refreshFullState();
+		synth_refreshFullState(0);
 	}
 }
 
@@ -1361,22 +1351,16 @@ void ui_update(void)
 		switch(ui.slowUpdateTimeoutNumber)
 		{
 			case spABank_Unsaved:
-				synth_refreshCurWaveNames(0,1);
-				break;
 			case spBBank_Unsaved:
-				synth_refreshCurWaveNames(1,1);
-				break;
-			case spXOvrBank_Unsaved:
-				synth_refreshCurWaveNames(2,1);
+			case spAXOvrBank_Unsaved:
+			case spBXOvrBank_Unsaved:
+				synth_refreshCurWaveNames(sp2abx[ui.slowUpdateTimeoutNumber],1);
 				break;
 			case spAWave_Unsaved:
-				synth_refreshWaveforms(0);
-				break;
 			case spBWave_Unsaved:
-				synth_refreshWaveforms(1);
-				break;
-			case spXOvrWave_Unsaved:
-				synth_refreshWaveforms(2);
+			case spAXOvrWave_Unsaved:
+			case spBXOvrWave_Unsaved:
+				synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
 				break;
 			case 0x80+cnSave:
 				preset_saveCurrent(settings.presetNumber);
@@ -1395,10 +1379,7 @@ void ui_update(void)
 						preset_loadDefault(1);
 					ui_setPresetModified(0);	
 
-					synth_refreshWaveforms(0);
-					synth_refreshWaveforms(1);
-					synth_refreshWaveforms(2);
-					synth_refreshFullState();
+					synth_refreshFullState(1);
 				}
 				break;
 			case 0x80+cnTune:

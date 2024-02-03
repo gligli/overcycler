@@ -118,53 +118,53 @@ const struct midiCC_s midiCCs[128]={
 	{ccContinuousCoarse,cpWModBEnv},
 	{ccContinuousCoarse,cpWModVelocity},
 	{ccFree},
-	{ccFree},
-	{ccFree},
-	/* CC 80-87 */
 	{ccStepped,spABank_Unsaved},
 	{ccStepped,spAWave_Unsaved},
+	/* CC 80-87 */
 	{ccStepped,spAWModType},
 	{ccStepped,spBBank_Unsaved},
 	{ccStepped,spBWave_Unsaved},
 	{ccStepped,spBWModType},
 	{ccStepped,spLFOShape},
 	{ccStepped,spLFOTargets},
-	/* CC 88-95 */
 	{ccStepped,spFilEnvSlow},
 	{ccStepped,spAmpEnvSlow},
+	/* CC 88-95 */
 	{ccStepped,spBenderRange},
 	{ccStepped,spBenderTarget},
 	{ccStepped,spModwheelRange},
 	{ccStepped,spModwheelTarget},
 	{ccStepped,spUnison},
 	{ccStepped,spAssignerPriority},
-	/* CC 96-103 */
 	{ccDataIncrement},
 	{ccDataDecrement},
+	/* CC 96-103 */
 	{ccNRPNFine},
 	{ccNRPNCoarse},
 	{ccNone},
 	{ccNone},
 	{ccStepped,spChromaticPitch},
 	{ccStepped,spOscSync},
+	{ccStepped,spAXOvrBank_Unsaved},
+	{ccStepped,spAXOvrWave_Unsaved},
 	/* CC 104-111 */
-	{ccStepped,spXOvrBank_Unsaved},
-	{ccStepped,spXOvrWave_Unsaved},
 	{ccStepped,spFilEnvLin},
 	{ccStepped,spLFO2Shape},
 	{ccStepped,spLFO2Targets},
 	{ccStepped,spVoiceCount},
 	{ccStepped,spPresetType},
 	{ccStepped,spPresetStyle},
-	/* CC 112-119 */
 	{ccStepped,spAmpEnvLin},
 	{ccStepped,spFilEnvLoop},
+	/* CC 112-119 */
 	{ccStepped,spAmpEnvLoop},
 	{ccStepped,spWModEnvSlow},
 	{ccStepped,spWModEnvLin},
 	{ccStepped,spWModEnvLoop},
 	{ccStepped,spPressureRange},
 	{ccStepped,spPressureTarget},
+	{ccStepped,spBXOvrBank_Unsaved},
+	{ccStepped,spBXOvrWave_Unsaved},
 	/* CC 120-127 */
 	{ccAllSoundOff},
 	{ccNone},
@@ -246,28 +246,18 @@ static int8_t setSteppedParameter(steppedParameter_t param, uint8_t value, int8_
 		switch(param)
 		{
 			case spABank_Unsaved:
-				synth_getBankName(value,currentPreset.oscBank[0]);
-				synth_refreshCurWaveNames(0,1);
-				break;
 			case spBBank_Unsaved:
-				synth_getBankName(value,currentPreset.oscBank[1]);
-				synth_refreshCurWaveNames(1,1);
-				break;
-			case spXOvrBank_Unsaved:
-				synth_getBankName(value,currentPreset.oscBank[2]);
-				synth_refreshCurWaveNames(2,1);
+			case spAXOvrBank_Unsaved:
+			case spBXOvrBank_Unsaved:
+				synth_getBankName(value,currentPreset.oscBank[sp2abx[param]]);
+				synth_refreshCurWaveNames(sp2abx[param],1);
 				break;
 			case spAWave_Unsaved:
-				synth_getWaveName(value,currentPreset.oscWave[0]);
-				synth_refreshWaveforms(0);
-				break;
 			case spBWave_Unsaved:
-				synth_getWaveName(value,currentPreset.oscWave[1]);
-				synth_refreshWaveforms(1);
-				break;
-			case spXOvrWave_Unsaved:
-				synth_getWaveName(value,currentPreset.oscWave[2]);
-				synth_refreshWaveforms(2);
+			case spAXOvrWave_Unsaved:
+			case spBXOvrWave_Unsaved:
+				synth_getWaveName(value,currentPreset.oscWave[sp2abx[param]]);
+				synth_refreshWaveforms(sp2abx[param]);
 				break;
 			default:
 				/* nothing */;
@@ -459,7 +449,7 @@ static void ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8
 	if(change)
 	{
 		ui_setPresetModified(1);
-		synth_refreshFullState();
+		synth_refreshFullState(0);
 	}
 }
 
@@ -479,10 +469,7 @@ static void progchangeEvent(MidiDevice * device, uint8_t channel, uint8_t progra
 			preset_loadDefault(1);
 		ui_setPresetModified(0);	
 
-		synth_refreshWaveforms(0);
-		synth_refreshWaveforms(1);
-		synth_refreshWaveforms(2);
-		synth_refreshFullState();
+		synth_refreshFullState(1);
 	}
 }
 
