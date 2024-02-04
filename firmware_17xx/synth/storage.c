@@ -569,8 +569,8 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 
 	// v20
 
-	storageWriteStr(currentPreset.oscBank[abxBCrossover]);
-	storageWriteStr(currentPreset.oscWave[abxBCrossover]);
+	storageReadStr(currentPreset.oscBank[abxBCrossover]);
+	storageReadStr(currentPreset.oscWave[abxBCrossover]);
 	
 	return 1;
 }
