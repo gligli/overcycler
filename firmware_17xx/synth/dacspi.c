@@ -9,7 +9,7 @@
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_pinsel.h"
 
-#define DMA_CHANNEL_UART2_TX__T3_MAT_1 14
+#define DMA_CHANNEL_UART2_TX__T3_MAT_0 14
 
 #define SPIMUX_PORT_ABC 0
 #define SPIMUX_PIN_A 15
@@ -23,8 +23,8 @@
 
 #define DACSPI_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
-		GPDMA_DMACCxConfig_DestPeripheral(DMA_CHANNEL_UART2_TX__T3_MAT_1) | \
-		GPDMA_DMACCxConfig_TransferType(1) | \
+		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_UART2_TX__T3_MAT_0) | \
+		GPDMA_DMACCxConfig_TransferType(2) | \
 		GPDMA_DMACCxConfig_ITC
 
 #define DACSPI_BUFFER_COUNT 32
@@ -91,7 +91,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 }
 
-void buildLLIs(int buffer, int channel)
+static void buildLLIs(int buffer, int channel)
 {
 	int lliPos=buffer*DACSPI_CHANNEL_COUNT+channel;
 	int muxIndex=lliPos%(DACSPI_CHANNEL_COUNT*2);
@@ -219,7 +219,7 @@ void dacspi_init(void)
 	LPC_SC->MATRIXARB&=~0b11111111;
 	LPC_SC->MATRIXARB|= 0b11001001; // give priority to the GPDMA controller over anything else to lower jitter
 	
-	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_UART2_TX__T3_MAT_1;
+	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_UART2_TX__T3_MAT_0;
 	LPC_GPDMA->Config=GPDMA_DMACConfig_E;
 
 	TIM_TIMERCFG_Type tim;

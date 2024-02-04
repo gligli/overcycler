@@ -5,11 +5,14 @@
 #include "scan.h"
 
 #include "LPC177x_8x.h"
+#include "lpc177x_8x_gpdma.h"
 #include "lpc177x_8x_ssp.h"
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_timer.h"
 #include "dacspi.h"
 #include "main.h"
+
+#define DMA_CHANNEL_SSP1_TX__T2_MAT_0 4
 
 #define ADC_CHANNEL_MASTER_MIX 10
 
@@ -24,77 +27,79 @@
 #define POTSCAN_PIN_DIN 1
 #define POTSCAN_PIN_CLK 0
 
+#define POTSCAN_PRE_DIV 12
+#define POTSCAN_SPI_FREQUENCY 80000
+#define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT))
+
+#define POTSCAN_DMACONFIG \
+		GPDMA_DMACCxConfig_E | \
+		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_SSP1_TX__T2_MAT_0) | \
+		GPDMA_DMACCxConfig_TransferType(2)
+
+
+static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
+
 static struct
 {
-	int16_t curPotSample;
-
-	uint16_t potSamples[SCAN_POT_COUNT][POT_SAMPLES];
+	uint16_t potCommands[SCAN_POT_COUNT];
+	uint16_t potSamples[POT_SAMPLES*SCAN_POT_COUNT];
 	uint16_t potValue[SCAN_POT_COUNT];
 	uint32_t potLockTimeout[SCAN_POT_COUNT];
 
-	int8_t keypadState[16];
+	int8_t keypadState[kbCount];
 	
 	scan_event_callback_t eventCallback;
 } scan;
 
-static uint8_t keypadButtonCode[16]=
+static uint8_t keypadButtonCode[kbCount]=
 {
 	0x32,0x01,0x02,0x04,0x11,0x12,0x14,0x21,0x22,0x24,
 	0x08,0x18,0x28,0x38,
 	0x34,0x31
 };
 
-static uint16_t readADC(uint16_t channel)
+static void buildLLIs(int pot, int smp)
 {
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
-	{
-		// wait until previous data is transferred
-	}
+	int lliPos=smp*SCAN_POT_COUNT+pot;
 	
-	SSP_SendData(LPC_SSP2,channel<<8);
+	lli[lliPos][0].SrcAddr=(uint32_t)&scan.potCommands[pot];
+	lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP2->DR;
+	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
+	lli[lliPos][0].Control=
+		GPDMA_DMACCxControl_TransferSize(1) |
+		GPDMA_DMACCxControl_SWidth(1) |
+		GPDMA_DMACCxControl_DWidth(1);
 
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
-	{
-		// wait for new data
-	}
-
-	uint16_t res=SSP_ReceiveData(LPC_SSP2)<<4; // convert to 16 bits
-	
-	// wait TLV2556 tConvert
-	
-	delay_us(6);
-
-	return res;
+	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP2->DR;
+	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-2)%(POT_SAMPLES*SCAN_POT_COUNT)];
+	lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(POT_SAMPLES*SCAN_POT_COUNT)][0];
+	lli[lliPos][1].Control=
+		GPDMA_DMACCxControl_TransferSize(1) |
+		GPDMA_DMACCxControl_SWidth(1) |
+		GPDMA_DMACCxControl_DWidth(1);
 }
 
 static void readPots(void)
 {
 	uint16_t new;
 	int pot;
-	uint16_t tmpVal[SCAN_POT_COUNT+1];
 	uint16_t tmpSmp[POT_SAMPLES];
 	int8_t isUnlockable;
 	
 	// read pots from TLV2556 ADC
 
-	for(pot=0;pot<=SCAN_POT_COUNT;++pot)
-	{
-		tmpVal[pot]=readADC(pot);
-	}
-		
-	scan.curPotSample=(scan.curPotSample+1)%POT_SAMPLES;
-	
 	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
-		// reads are off by one by TLV2556 spec
+		// convert samples to 0..999
 
-		new=tmpVal[pot+1]>>(16-SCAN_ADC_BITS);
-
-		scan.potSamples[pot][scan.curPotSample]=(MAX(0,MIN(999,new-12))*(UINT16_MAX*64/999))>>6;
+		for(int smp=0;smp<POT_SAMPLES;++smp)
+		{
+			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
+			tmpSmp[smp]=(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12))*(UINT16_MAX*64/SCAN_POT_MAX_VALUE))>>6;
+		}
 		
 		// sort values
 
-		memcpy(&tmpSmp[0],&scan.potSamples[pot][0],POT_SAMPLES*sizeof(uint16_t));
 		qsort(tmpSmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
 		
 		// median
@@ -143,7 +148,7 @@ static void readKeypad(void)
 		col[row]|=((LPC_GPIO2->FIOPIN1>>5)&1)?0:8;
 	}
 	
-	for(key=0;key<16;++key)
+	for(key=0;key<kbCount;++key)
 	{
 		newState=(col[keypadButtonCode[key]>>4]&keypadButtonCode[key])?1:0;
 	
@@ -163,18 +168,89 @@ static void readKeypad(void)
 
 static void initSSP(int8_t isSmpMasterMixMode)
 {
+	TIM_TIMERCFG_Type tim;
+	TIM_MATCHCFG_Type tm;
+
+	// reset
+	TIM_Cmd(LPC_TIM2,DISABLE);
+	SSP_Cmd(LPC_SSP2,DISABLE);
+	LPC_GPDMACH1->CConfig=0;
+
+	// inti SSP
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
-	SSP_ConfigStruct.Databit=SSP_DATABIT_12;
-	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?8000000:80000;
+	SSP_ConfigStruct.Databit=isSmpMasterMixMode?SSP_DATABIT_12:SSP_DATABIT_10;
+	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?8000000:POTSCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
+
+	if(isSmpMasterMixMode)
+	{
+		// init timer
+		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
+		tim.PrescaleValue=1;
+		TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
+
+		tm.MatchChannel=0;
+		tm.IntOnMatch=ENABLE;
+		tm.ResetOnMatch=ENABLE;
+		tm.StopOnMatch=DISABLE;
+		tm.ExtMatchOutputType=0;
+		tm.MatchValue=DACSPI_TICK_RATE-1; // same rate as dacspi
+	}
+	else
+	{
+		// init timer
+		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
+		tim.PrescaleValue=POTSCAN_PRE_DIV-1;
+		TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
+
+		tm.MatchChannel=0;
+		tm.IntOnMatch=DISABLE;
+		tm.ResetOnMatch=ENABLE;
+		tm.StopOnMatch=DISABLE;
+		tm.ExtMatchOutputType=0;
+		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY);
+
+		// init GPDMA channel
+		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
+		LPC_GPDMACH1->CDestAddr=lli[0][0].DstAddr;
+		LPC_GPDMACH1->CLLI=lli[0][0].NextLLI;
+		LPC_GPDMACH1->CControl=lli[0][0].Control;
+
+		LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
+	}
+
+	TIM_ConfigMatch(LPC_TIM2,&tm);
+	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
+	TIM_Cmd(LPC_TIM2,ENABLE);
+}
+
+static uint16_t readADC(uint16_t channel)
+{
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
+	{
+		// wait until previous data is transferred
+	}
+	
+	SSP_SendData(LPC_SSP2,channel<<8);
+
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	{
+		// wait for new data
+	}
+
+	uint16_t res=SSP_ReceiveData(LPC_SSP2)<<4; // convert to 16 bits
+	
+	// wait TLV2556 tConvert
+	
+	delay_us(6);
+
+	return res;
 }
 
 void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 {
-	TIM_TIMERCFG_Type tim;
-	TIM_MATCHCFG_Type tm;
 	int32_t mini=UINT16_MAX,maxi=0,extents;
 	uint16_t *buf;
 	
@@ -183,23 +259,6 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	initSSP(1);
 	readADC(ADC_CHANNEL_MASTER_MIX); // ensure no spurious reads from other channels
 	readADC(ADC_CHANNEL_MASTER_MIX);
-	
-	// init timer
-	
-	tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
-	tim.PrescaleValue=1;
-	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
-	
-	tm.MatchChannel=0;
-	tm.IntOnMatch=ENABLE;
-	tm.ResetOnMatch=ENABLE;
-	tm.StopOnMatch=DISABLE;
-	tm.ExtMatchOutputType=0;
-	tm.MatchValue=DACSPI_TICK_RATE-1; // same rate as dacspi
-	TIM_ConfigMatch(LPC_TIM2,&tm);
-
-	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
-	TIM_Cmd(LPC_TIM2,ENABLE);
 	
 	// sample master mix at dacspi tickrate
 
@@ -237,8 +296,6 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	// restore state for readPots
 	
 	initSSP(0);
-	readADC(0);
-	readADC(0);
 }
 
 uint16_t scan_getPotValue(int8_t pot)
@@ -260,15 +317,21 @@ void scan_init(void)
 {
 	memset(&scan,0,sizeof(scan));
 	
+	// prepare LLIs
+
+	for(int pot=0;pot<SCAN_POT_COUNT;++pot)
+	{
+		scan.potCommands[pot]=pot<<(SCAN_ADC_BITS-4);
+		for(int smp=0;smp<POT_SAMPLES;++smp)
+			buildLLIs(pot,smp);
+	}
+
 	// init TLV2556 ADC
 	
 	PINSEL_ConfigPin(1,POTSCAN_PIN_CS,4); // CS
 	PINSEL_ConfigPin(1,POTSCAN_PIN_DOUT,4); // DOUT
 	PINSEL_ConfigPin(1,POTSCAN_PIN_DIN,4); // DIN
 	PINSEL_ConfigPin(1,POTSCAN_PIN_CLK,4); // CLK
-	
-	initSSP(0);	
-	readADC(0b1111); // config CFGR2
 	
 	// init keypad
 	
@@ -287,7 +350,21 @@ void scan_init(void)
 
 	GPIO_SetValue(0,0b1111ul<<19);
 	GPIO_SetDir(0,0b1111ul<<19,1);
-}
+	
+	// init pot scan TMR / DMA
+	
+	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
+
+	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_SSP1_TX__T2_MAT_0;
+//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
+
+	// start
+	
+	initSSP(0);	
+	SSP_SendData(LPC_SSP2,0b1111<<(SCAN_ADC_BITS-4)); // config CFGR2
+	
+	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,POTSCAN_SPI_FREQUENCY);
+ }
 
 void scan_update(void)
 {

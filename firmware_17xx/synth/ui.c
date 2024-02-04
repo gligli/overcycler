@@ -947,13 +947,13 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		switch(prm->type)
 		{
 			case ptCont:
-				potSetting=((*forcedValue)*UINT16_MAX)/999;
+				potSetting=((*forcedValue)*UINT16_MAX)/SCAN_POT_MAX_VALUE;
 				break;
 			case ptStep:
 				potSetting=MIN(*forcedValue,valCount-1);
 				break;
 			case ptCust:
-				potSetting=MIN(((*forcedValue)*UINT16_MAX)/999,prm->custPotMul+prm->custPotAdd-1);
+				potSetting=MIN(((*forcedValue)*UINT16_MAX)/SCAN_POT_MAX_VALUE,prm->custPotMul+prm->custPotAdd-1);
 				break;
 			default:
 				/* nothing */;
