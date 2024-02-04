@@ -754,12 +754,12 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 
+	// load default waveforms (perfectwaves/sawtooth)
+	for(abx_t abx=0;abx<abxCount;++abx)
+		synth_reloadLegacyBankWaveIndexes(abx,1,1);
+
 	if(makeSound)
 	{
-		// load default waveforms (perfectwaves/sawtooth)
-		for(abx_t abx=0;abx<abxCount;++abx)
-			synth_reloadLegacyBankWaveIndexes(abx,1,1);
-
 		currentPreset.continuousParameters[cpAVol]=HALF_RANGE;
 	}
 }
