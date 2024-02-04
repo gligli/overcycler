@@ -443,6 +443,12 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 		if (currentPreset.steppedParameters[spLFOShift_Legacy]==0) currentPreset.continuousParameters[cpLFOFreq]-=16635; // =0 used to be the slow setting
 	}
 
+	if(storage.version<20)
+	{
+		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
+			currentPreset.continuousParameters[cpABaseWMod]=(currentPreset.continuousParameters[cpABaseWMod]>>1)+HALF_RANGE;
+	}
+	
 	if(storage.version<2)
 		return 1;
 
