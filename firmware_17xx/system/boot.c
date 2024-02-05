@@ -216,9 +216,7 @@ void initKeypad(void)
 // boot
 ////////////////////////////////////////////////////////////////////////////////
 
-#define FLASH_FILE_PATH "/overcycler.bin"
-
-typedef void __attribute__((noreturn))(*exec)();
+typedef void __attribute__((noreturn))(*exec_t)();
 
 static void boot(void)
 {
@@ -234,12 +232,14 @@ static void boot(void)
 		"isb\n"
 	);
 
-    ((exec)(*start))();
+    ((exec_t)(*start))();
 }	
 
 ////////////////////////////////////////////////////////////////////////////////
 // flash
 ////////////////////////////////////////////////////////////////////////////////
+
+#define FLASH_FILE_PATH "/overcycler.bin"
 
 void flash_synth(FIL *file)
 {
