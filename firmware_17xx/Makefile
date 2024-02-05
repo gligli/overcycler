@@ -29,7 +29,7 @@ TARGET_BOOT = boot
 
 # List C source files here.
 
-DRIVERS_SRC+=drivers/lpc177x_8x_adc.c
+DRIVERS_SRC=drivers/lpc177x_8x_adc.c
 DRIVERS_SRC+=drivers/lpc177x_8x_bod.c
 DRIVERS_SRC+=drivers/lpc177x_8x_can.c
 DRIVERS_SRC+=drivers/lpc177x_8x_clkpwr.c
@@ -56,7 +56,7 @@ DRIVERS_SRC+=drivers/lpc177x_8x_timer.c
 DRIVERS_SRC+=drivers/lpc177x_8x_uart.c
 DRIVERS_SRC+=drivers/lpc177x_8x_wwdt.c
 
-FAT_SRC+=fat_nand/diskio.c
+FAT_SRC=fat_nand/diskio.c
 FAT_SRC+=fat_nand/fattime.c
 FAT_SRC+=fat_nand/ff.c
 FAT_SRC+=fat_nand/ccsbcs.c
@@ -72,7 +72,7 @@ USB_SRC+=usb/usb_power.c
 USB_SRC+=usb/usb_midi.c
 USB_SRC+=usb/usb_msc.c
 
-SYSTEM_SRC+=system/core_cm3.c
+SYSTEM_SRC=system/core_cm3.c
 SYSTEM_SRC+=system/system_LPC177x_8x.c
 SYSTEM_SRC+=system/rprintf.c
 SYSTEM_SRC+=system/serial.c
@@ -106,7 +106,7 @@ SYNTH_SRC+=synth/wtosc.c
 SRC_SYNTH=$(DRIVERS_SRC) $(FAT_SRC) $(USB_SRC) $(SYSTEM_SRC) $(XNORMIDI_SRC) $(SYNTH_SRC)
 SRC_SYNTH+=system/main.c
 
-SRC_BOOT=$(DRIVERS_SRC) $(FAT_SRC) $(SYSTEM_SRC)
+SRC_BOOT=$(DRIVERS_SRC) $(FAT_SRC) $(USB_SRC) $(SYSTEM_SRC)
 SRC_BOOT+=iap/sbl_iap.c
 SRC_BOOT+=system/boot.c
 
@@ -203,8 +203,8 @@ CFLAGS += #-Wa,-adhlns=$(subst $(suffix $<),.lst,$<)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 CFLAGS += -flto -fuse-linker-plugin
-CFLAGS += -O$(OPT)
 
+CFLAGS_SYNTH_ADDL = -O$(OPT)
 CFLAGS_BOOT_ADDL = -Os
 
 # flags only for C
@@ -393,16 +393,16 @@ term:
 	
 $(TARGET_SYNTH).elf :  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(CPPOBJ) $(CPPOBJARM)
 	@echo $(MSG_LINKING) $@
-	@$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) -T$(@:.elf=.ld)
+	@$(CC) $(THUMB) $(ALL_CFLAGS) $(CFLAGS_SYNTH_ADDL) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) -T$(@:.elf=.ld)
 
 $(TARGET_BOOT).elf :  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM)
 	@echo $(MSG_LINKING) $@
-	@$(CC) $(THUMB) $(ALL_CFLAGS) $(CFLAGS_BOOT_ADDL) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) $(CFLAGS_BOOT_ADDL) -T$(@:.elf=.ld)
+	@$(CC) $(THUMB) $(ALL_CFLAGS) $(CFLAGS_BOOT_ADDL) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) -T$(@:.elf=.ld)
 
 # Compile: create object files from C source files. ARM/Thumb
 $(COBJ_SYNTH) : %.o : %.c
 	@echo $(MSG_COMPILING) $<
-	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $(CFLAGS_SYNTH_ADDL) $< -o $@ 
 
 $(COBJ_BOOT) : %.boot.o : %.c
 	@echo $(MSG_COMPILING) $<

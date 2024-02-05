@@ -10,6 +10,8 @@
 #include "diskio.h"
 #include "ff.h"
 #include "iap/sbl_iap.h"
+#include "usb/usbapi.h"
+#include "usb/usb_msc.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // delay
@@ -278,7 +280,7 @@ void flash_synth(FIL *file)
 
 int main(void)
 {
-	int mode=0;
+	int res,mode=-1;
 	
 	__disable_irq();
 	delay_ms(500);
@@ -295,13 +297,13 @@ int main(void)
 		readKeypad();
 		if(keypadState[kb0]>=DEBOUNCE_THRESHOLD)
 		{
-			mode=1;
+			mode=0;
 			break;
 		}
 		delay_ms(10);
 	}
 		
-	if(mode)
+	if(mode==0)
 	{
 		initLcd();
 
@@ -310,13 +312,19 @@ int main(void)
 		sendString(1,"GliGli's BootLoader");
 		setPos(1,0,1);
 		sendString(1,"Build " __DATE__ " " __TIME__);
-		sendString(2,"Press 1 to flash " FLASH_FILE_PATH);
+		sendString(2,"Press 1 to go into USB disk mode");
 		setPos(2,0,1);
+		sendString(2,"Press 2 to flash " FLASH_FILE_PATH);
 	
 		for(;;)
 		{
 			readKeypad();
 			if(keypadState[kb1]>=DEBOUNCE_THRESHOLD && !keypadState[kb0]) // check kb0 again to ensure keyboard not faulty
+			{
+				mode=1;
+				break;
+			}
+			if(keypadState[kb2]>=DEBOUNCE_THRESHOLD && !keypadState[kb0]) // check kb0 again to ensure keyboard not faulty
 			{
 				mode=2;
 				break;
@@ -324,11 +332,33 @@ int main(void)
 			delay_ms(10);
 		}
 		
+		clear(2);
+		
+		if(mode==1)
+		{
+			sendString(2,"USB Disk mode, restart to quit");
+
+			if((res=disk_initialize(0)))
+			{
+				sendString(2,"Error: disk_initialize failed!");
+				for(;;);
+			}
+
+			usb_msc_start();
+			for(;;)
+			{
+				USBHwISR();
+			}
+		}
+		
 		if(mode==2)
 		{
 			static FATFS fatFS;
 			static FIL f;
-			int res;
+
+			setPos(2,0,0);
+			sendString(2,"Flash mode, please wait...");
+			setPos(2,0,1);
 
 			if((res=disk_initialize(0)))
 			{
