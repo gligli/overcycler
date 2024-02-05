@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 
 #include "rprintf.h"
 #include "serial.h"
@@ -68,6 +67,11 @@ static int sendChar(int lcd, int ch)
 	return -1;
 }
 
+static int putc_lcd2(int ch)
+{
+	return sendChar(2,ch);
+}
+
 static void sendString(int lcd, const char * s)
 {
 	while(*s)
@@ -121,6 +125,8 @@ void initLcd(void)
 
 	DAC_Init(0);
 	setLcdContrast(UI_DEFAULT_LCD_CONTRAST);
+	
+	rprintf_devopen(1,putc_lcd2); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -222,11 +228,11 @@ static void boot(void)
     start = (uint32_t *)(BOOT_MAX_SIZE + 4);
 
 	// reset pipeline, sync bus and memory access
-	__asm (
-		   "dmb\n"
-		   "dsb\n"
-		   "isb\n"
-		  );
+	asm volatile (
+		"dmb\n"
+		"dsb\n"
+		"isb\n"
+	);
 
     ((exec)(*start))();
 }	
@@ -237,8 +243,6 @@ static void boot(void)
 
 void flash_synth(FIL *file)
 {
-	char sbuf[128];
-	
 	clear(2);
 	setPos(2,0,0);
 	sendString(2,"Flashing firmware: Start!");
@@ -256,8 +260,7 @@ void flash_synth(FIL *file)
 		}
 
 		setPos(2,0,1);
-		sprintf(sbuf, "address: 0x%x, readsize: %d", address, readsize);
-		sendString(2, sbuf);
+		rprintf(1, "address: 0x%x, readsize: %d", address, readsize);
 
 		write_flash((void *)address, (char *)readbuf, sizeof(readbuf));
 		address += readsize;
