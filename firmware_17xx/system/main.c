@@ -2,8 +2,6 @@
 // main code
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <sys/stat.h>
-
 #include "main.h"
 
 #include "LPC177x_8x.h"
@@ -11,7 +9,6 @@
 #include "serial.h"
 #include "diskio.h"
 #include "ff.h"
-#include "nand.h"
 #include "usb/usbapi.h"
 #include "usb/usb_power.h"
 #include "usb/usb_midi.h"
@@ -20,10 +17,6 @@
 #include "synth/synth.h"
 #include "synth/ui.h"
 #include "synth/utils.h"
-
-#define IRQ_MASK 0x00000080
-#define FIQ_MASK 0x00000040
-#define INT_MASK (IRQ_MASK | FIQ_MASK)
 
 #define SYNTH_TIMER_HZ 500
 

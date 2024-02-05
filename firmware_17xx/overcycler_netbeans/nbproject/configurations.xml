@@ -426,9 +426,12 @@
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
             <pElem>../synth</pElem>
+            <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -623,7 +626,6 @@
       <item path="../usb/msc_bot.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -642,6 +644,8 @@
       <item path="../usb/usb_midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>../synth</pElem>
@@ -652,7 +656,6 @@
       <item path="../usb/usb_msc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -661,7 +664,6 @@
       <item path="../usb/usb_power.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -670,7 +672,6 @@
       <item path="../usb/usbcontrol.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -679,8 +680,11 @@
       <item path="../usb/usbhw_lpc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
+            <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -688,7 +692,6 @@
       <item path="../usb/usbinit.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -697,7 +700,6 @@
       <item path="../usb/usbstdreq.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -759,14 +761,6 @@
         </cTool>
       </folder>
       <folder path="0/synth">
-        <cTool>
-          <incDir>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/usb">
         <cTool>
           <incDir>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
