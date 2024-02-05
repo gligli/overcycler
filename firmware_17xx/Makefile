@@ -20,88 +20,95 @@ VECTOR_LOCATION=VECTORS_IN_ROM
 ##VECTOR_LOCATION=VECTORS_IN_RAM
 
 DEBUG_UART_BAUD=57600
+BOOT_MAX_SIZE=65536
 
 # Target file name (without extension).
 TARGET = overcycler
+TARGET_SYNTH = synth
+TARGET_BOOT = boot
 
 # List C source files here.
 
-XNORMIDISRC=xnormidi/midi.c
-XNORMIDISRC+=xnormidi/midi_device.c
-XNORMIDISRC+=xnormidi/sysex_tools.c
-XNORMIDISRC+=xnormidi/bytequeue/bytequeue.c
-XNORMIDISRC+=xnormidi/bytequeue/interrupt_setting.c
+DRIVERS_SRC+=drivers/lpc177x_8x_adc.c
+DRIVERS_SRC+=drivers/lpc177x_8x_bod.c
+DRIVERS_SRC+=drivers/lpc177x_8x_can.c
+DRIVERS_SRC+=drivers/lpc177x_8x_clkpwr.c
+DRIVERS_SRC+=drivers/lpc177x_8x_dac.c
+DRIVERS_SRC+=drivers/lpc177x_8x_eeprom.c
+DRIVERS_SRC+=drivers/lpc177x_8x_emac.c
+DRIVERS_SRC+=drivers/lpc177x_8x_emc.c
+DRIVERS_SRC+=drivers/lpc177x_8x_exti.c
+DRIVERS_SRC+=drivers/lpc177x_8x_gpdma.c
+DRIVERS_SRC+=drivers/lpc177x_8x_gpio.c
+DRIVERS_SRC+=drivers/lpc177x_8x_i2c.c
+DRIVERS_SRC+=drivers/lpc177x_8x_i2s.c
+DRIVERS_SRC+=drivers/lpc177x_8x_iap.c
+DRIVERS_SRC+=drivers/lpc177x_8x_lcd.c
+DRIVERS_SRC+=drivers/lpc177x_8x_mcpwm.c
+DRIVERS_SRC+=drivers/lpc177x_8x_nvic.c
+DRIVERS_SRC+=drivers/lpc177x_8x_pinsel.c
+DRIVERS_SRC+=drivers/lpc177x_8x_pwm.c
+DRIVERS_SRC+=drivers/lpc177x_8x_qei.c
+DRIVERS_SRC+=drivers/lpc177x_8x_rtc.c
+DRIVERS_SRC+=drivers/lpc177x_8x_ssp.c
+DRIVERS_SRC+=drivers/lpc177x_8x_systick.c
+DRIVERS_SRC+=drivers/lpc177x_8x_timer.c
+DRIVERS_SRC+=drivers/lpc177x_8x_uart.c
+DRIVERS_SRC+=drivers/lpc177x_8x_wwdt.c
 
-SRC=$(XNORMIDISRC)
+FAT_SRC+=fat_nand/diskio.c
+FAT_SRC+=fat_nand/fattime.c
+FAT_SRC+=fat_nand/ff.c
+FAT_SRC+=fat_nand/ccsbcs.c
+FAT_SRC+=fat_nand/nand.c
 
-SRC+=system/core_cm3.c
-SRC+=system/system_LPC177x_8x.c
-SRC+=system/rprintf.c
-SRC+=system/serial.c
-SRC+=system/syscalls.c
-SRC+=system/main.c
-SRC+=system/hd44780.c
-SRC+=system/xt26g.c
+USB_SRC=usb/usbinit.c
+USB_SRC+=usb/usbstdreq.c
+USB_SRC+=usb/usbhw_lpc.c
+USB_SRC+=usb/usbcontrol.c
+USB_SRC+=usb/msc_bot.c
+USB_SRC+=usb/msc_scsi.c
+USB_SRC+=usb/usb_power.c
+USB_SRC+=usb/usb_midi.c
+USB_SRC+=usb/usb_msc.c
 
-SRC+=drivers/lpc177x_8x_adc.c
-SRC+=drivers/lpc177x_8x_bod.c
-SRC+=drivers/lpc177x_8x_can.c
-SRC+=drivers/lpc177x_8x_clkpwr.c
-SRC+=drivers/lpc177x_8x_dac.c
-SRC+=drivers/lpc177x_8x_eeprom.c
-SRC+=drivers/lpc177x_8x_emac.c
-SRC+=drivers/lpc177x_8x_emc.c
-SRC+=drivers/lpc177x_8x_exti.c
-SRC+=drivers/lpc177x_8x_gpdma.c
-SRC+=drivers/lpc177x_8x_gpio.c
-SRC+=drivers/lpc177x_8x_i2c.c
-SRC+=drivers/lpc177x_8x_i2s.c
-SRC+=drivers/lpc177x_8x_iap.c
-SRC+=drivers/lpc177x_8x_lcd.c
-SRC+=drivers/lpc177x_8x_mcpwm.c
-SRC+=drivers/lpc177x_8x_nvic.c
-SRC+=drivers/lpc177x_8x_pinsel.c
-SRC+=drivers/lpc177x_8x_pwm.c
-SRC+=drivers/lpc177x_8x_qei.c
-SRC+=drivers/lpc177x_8x_rtc.c
-SRC+=drivers/lpc177x_8x_ssp.c
-SRC+=drivers/lpc177x_8x_systick.c
-SRC+=drivers/lpc177x_8x_timer.c
-SRC+=drivers/lpc177x_8x_uart.c
-SRC+=drivers/lpc177x_8x_wwdt.c
+SYSTEM_SRC+=system/core_cm3.c
+SYSTEM_SRC+=system/system_LPC177x_8x.c
+SYSTEM_SRC+=system/rprintf.c
+SYSTEM_SRC+=system/serial.c
+SYSTEM_SRC+=system/syscalls.c
+SYSTEM_SRC+=system/hd44780.c
+SYSTEM_SRC+=system/xt26g.c
 
-SRC+=fat_nand/nand.c
-SRC+=fat_nand/diskio.c
-SRC+=fat_nand/fattime.c
-SRC+=fat_nand/ff.c
-SRC+=fat_nand/ccsbcs.c
+XNORMIDI_SRC=xnormidi/midi.c
+XNORMIDI_SRC+=xnormidi/midi_device.c
+XNORMIDI_SRC+=xnormidi/sysex_tools.c
+XNORMIDI_SRC+=xnormidi/bytequeue/bytequeue.c
+XNORMIDI_SRC+=xnormidi/bytequeue/interrupt_setting.c
 
-SRC+=usb/usbinit.c
-SRC+=usb/usbstdreq.c
-SRC+=usb/usbhw_lpc.c
-SRC+=usb/usbcontrol.c
-SRC+=usb/msc_bot.c
-SRC+=usb/msc_scsi.c
-SRC+=usb/usb_power.c
-SRC+=usb/usb_midi.c
-SRC+=usb/usb_msc.c
+SYNTH_SRC=synth/adsr.c
+SYNTH_SRC+=synth/arp.c
+SYNTH_SRC+=synth/seq.c
+SYNTH_SRC+=synth/clock.c
+SYNTH_SRC+=synth/assigner.c
+SYNTH_SRC+=synth/dacspi.c
+SYNTH_SRC+=synth/lfo.c
+SYNTH_SRC+=synth/midi.c
+SYNTH_SRC+=synth/storage.c
+SYNTH_SRC+=synth/synth.c
+SYNTH_SRC+=synth/tuner.c
+SYNTH_SRC+=synth/uart_midi.c
+SYNTH_SRC+=synth/scan.c
+SYNTH_SRC+=synth/ui.c
+SYNTH_SRC+=synth/utils.c
+SYNTH_SRC+=synth/wtosc.c
 
-SRC+=synth/adsr.c
-SRC+=synth/arp.c
-SRC+=synth/seq.c
-SRC+=synth/clock.c
-SRC+=synth/assigner.c
-SRC+=synth/dacspi.c
-SRC+=synth/lfo.c
-SRC+=synth/midi.c
-SRC+=synth/storage.c
-SRC+=synth/synth.c
-SRC+=synth/tuner.c
-SRC+=synth/uart_midi.c
-SRC+=synth/scan.c
-SRC+=synth/ui.c
-SRC+=synth/utils.c
-SRC+=synth/wtosc.c
+SRC_SYNTH=$(DRIVERS_SRC) $(FAT_SRC) $(USB_SRC) $(SYSTEM_SRC) $(XNORMIDI_SRC) $(SYNTH_SRC)
+SRC_SYNTH+=system/main.c
+
+SRC_BOOT=$(DRIVERS_SRC) $(FAT_SRC) $(SYSTEM_SRC)
+SRC_BOOT+=iap/sbl_iap.c
+SRC_BOOT+=system/boot.c
 
 # List C++ source files here.
 # use file-extension cpp for C++-files (use extension .cpp)
@@ -162,7 +169,7 @@ EXTRA_LIBDIRS =
 CSTANDARD = -std=gnu99
 
 # Place -D or -U options for C here
-CDEFS =  -D$(RUN_MODE) -D$(SUBMDL) -DDEBUG_UART_BAUD=$(DEBUG_UART_BAUD)
+CDEFS =  -D$(RUN_MODE) -D$(SUBMDL) -DDEBUG_UART_BAUD=$(DEBUG_UART_BAUD) -DBOOT_MAX_SIZE=$(BOOT_MAX_SIZE)
 
 # Place -I options here
 CINCS = -I $(LIBPATH)
@@ -197,6 +204,8 @@ CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 CFLAGS += -flto -fuse-linker-plugin
 CFLAGS += -O$(OPT)
+
+CFLAGS_BOOT_ADDL = -Os
 
 # flags only for C
 CONLYFLAGS += -Wnested-externs 
@@ -253,10 +262,6 @@ LDFLAGS += $(patsubst %,-l%,$(EXTRA_LIBS))
 # Set Linker-Script Depending On Selected Memory and Controller
 
 
-#This line is used if you want to load main.hex into 0x00
-LDFLAGS += -Tldscript_rom_gnu.ld
-
-
 # ---------------------------------------------------------------------------
 # Flash-Programming support using lpc21isp by Martin Maurer 
 # only for Philips LPC and Analog ADuC ARMs
@@ -266,8 +271,8 @@ LPC21ISP = ./lpc21isp
 LPC21ISP_KILL = /cygdrive/c/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
 LPC21ISP_XTAL = 12000
-LPC21ISP_FLASHFILE = $(TARGET).hex
-LPC21ISP_OPTIONS = -term -control -donotstart -wipe -verify
+LPC21ISP_FLASHFILE = $(TARGET).bin
+LPC21ISP_OPTIONS = -bin -term -control -donotstart -wipe -verify
 # ---------------------------------------------------------------------------
 
 
@@ -304,12 +309,13 @@ MSG_FORMATERROR = Can not handle output-format
 MSG_LPC21_RESETREMINDER = You may have to bring the target in bootloader-mode now.
 
 # Define all object files.
-COBJ      = $(SRC:.c=.o) 
-AOBJ      = $(ASRC:.S=.o)
-COBJARM   = $(SRCARM:.c=.o)
-AOBJARM   = $(ASRCARM:.S=.o)
-CPPOBJ    = $(CPPSRC:.cpp=.o) 
-CPPOBJARM = $(CPPSRCARM:.cpp=.o)
+COBJ_SYNTH = $(SRC_SYNTH:.c=.o) 
+COBJ_BOOT  = $(SRC_BOOT:.c=.boot.o) 
+AOBJ       = $(ASRC:.S=.o)
+COBJARM    = $(SRCARM:.c=.o)
+AOBJARM    = $(ASRCARM:.S=.o)
+CPPOBJ     = $(CPPSRC:.cpp=.o) 
+CPPOBJARM  = $(CPPSRCARM:.cpp=.o)
 
 # Define all listing files.
 LST = $(ASRC:.S=.lst) $(ASRCARM:.S=.lst) $(SRC:.c=.lst) $(SRCARM:.c=.lst)
@@ -327,13 +333,11 @@ ALL_ASFLAGS = -mcpu=$(MCU) $(THUMB_IW) -I. -x assembler-with-cpp $(ASFLAGS)
 # Default target.
 all: sizebefore build sizeafter
 
-build: elf hex
+build: $(TARGET).bin
 
-bin: $(TARGET).bin
-hex: $(TARGET).hex
-elf: $(TARGET).elf
-lss: $(TARGET).lss 
-sym: $(TARGET).sym
+$(TARGET).bin: $(TARGET_BOOT).bin $(TARGET_SYNTH).bin
+	$(COPY) $(TARGET_BOOT).bin $@
+	@dd if=$(TARGET_SYNTH).bin of=$@ conv=notrunc bs=$(BOOT_MAX_SIZE) seek=1
 
 # Eye candy.
 begin:
@@ -347,15 +351,17 @@ end:
 
 
 # Display size of file.
-HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
-ELFSIZE = $(SIZE) -A $(TARGET).elf
+ELFSIZE_BOOT = $(SIZE) $(TARGET_BOOT).elf
+ELFSIZE_SYNTH = $(SIZE) -A $(TARGET_SYNTH).elf
 sizebefore:
 	@echo $(MSG_SIZE_BEFORE)
-	-@$(ELFSIZE)
+	-@$(ELFSIZE_BOOT)
+	-@$(ELFSIZE_SYNTH)
 
 sizeafter:
 	@echo $(MSG_SIZE_AFTER)
-	@$(ELFSIZE)
+	@$(ELFSIZE_BOOT)
+	@$(ELFSIZE_SYNTH)
 
 
 # Display compiler version information.
@@ -381,36 +387,26 @@ term:
 	@echo $(MSG_FLASH) $@
 	$(OBJCOPY) -O binary $< $@
 
-# Create final output file (.bin) from ELF output file.
-FW.SFE: main.elf
-	@echo $(MSG_FLASH) $@
-	$(OBJCOPY) -O binary $< $@
-
-
-# Create extended listing file from ELF output file.
-# testing: option -C
-%.lss: %.elf
-	@echo $(MSG_EXTENDED_LISTING) $@
-	@$(OBJDUMP) -h -S -C $< > $@
-
-
-# Create a symbol table from ELF output file.
-%.sym: %.elf
-	@echo $(MSG_SYMBOL_TABLE) $@
-	@$(NM) -n $< > $@
-
-
 # Link: create ELF output file from object files.
-.SECONDARY : $(TARGET).elf
-.PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
-%.elf:  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM)
+.SECONDARY : $(TARGET_SYNTH).elf $(TARGET_BOOT).elf
+.PRECIOUS : $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM)
+	
+$(TARGET_SYNTH).elf :  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(CPPOBJ) $(CPPOBJARM)
 	@echo $(MSG_LINKING) $@
-	@$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS)
+	@$(CC) $(THUMB) $(ALL_CFLAGS) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_SYNTH) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) -T$(@:.elf=.ld)
+
+$(TARGET_BOOT).elf :  $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM)
+	@echo $(MSG_LINKING) $@
+	@$(CC) $(THUMB) $(ALL_CFLAGS) $(CFLAGS_BOOT_ADDL) $(AOBJARM) $(AOBJ) $(COBJARM) $(COBJ_BOOT) $(CPPOBJ) $(CPPOBJARM) --output $@ $(LDFLAGS) $(CFLAGS_BOOT_ADDL) -T$(@:.elf=.ld)
 
 # Compile: create object files from C source files. ARM/Thumb
-$(COBJ) : %.o : %.c
+$(COBJ_SYNTH) : %.o : %.c
 	@echo $(MSG_COMPILING) $<
 	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $< -o $@ 
+
+$(COBJ_BOOT) : %.boot.o : %.c
+	@echo $(MSG_COMPILING) $<
+	@$(CC) -c $(THUMB) $(ALL_CFLAGS) $(CONLYFLAGS) $(CFLAGS_BOOT_ADDL) $< -o $@ 
 
 # Compile: create object files from C source files. ARM-only
 $(COBJARM) : %.o : %.c
@@ -445,7 +441,6 @@ clean: begin clean_list finished end
 
 clean_list :
 	@echo $(MSG_CLEANING)
-	$(REMOVE) ../Common_WinARM/$(TARGET).hex
 	$(REMOVE) $(TARGET).hex
 	$(REMOVE) $(TARGET).bin
 	$(REMOVE) $(TARGET).obj
@@ -453,10 +448,9 @@ clean_list :
 	$(REMOVE) $(TARGET).map
 	$(REMOVE) $(TARGET).obj
 	$(REMOVE) $(TARGET).a90
-	$(REMOVE) $(TARGET).sym
 	$(REMOVE) $(TARGET).lnk
-	$(REMOVE) $(TARGET).lss
-	$(REMOVE) $(COBJ)
+	$(REMOVE) $(COBJ_SYNTH)
+	$(REMOVE) $(COBJ_BOOT)
 	$(REMOVE) $(CPPOBJ)
 	$(REMOVE) $(AOBJ)
 	$(REMOVE) $(COBJARM)
@@ -479,5 +473,5 @@ clean_list :
 
 
 # Listing of phony targets.
-.PHONY : all begin finish end sizebefore sizeafter gccversion build elf hex lss sym clean clean_list program
+.PHONY : all begin finish end sizebefore sizeafter gccversion build elf hex clean clean_list program
 

@@ -500,9 +500,9 @@ void SystemInit (void)
   LPC_SC->FLASHCFG  = FLASHCFG_Val|0x03A;
 #endif
 #ifdef  __RAM_MODE__
-  SCB->VTOR  = 0x10000000 & 0x3FFFFF80;
+  SCB->VTOR  = 0x10000000 & 0x3FFFFF00;
 #else
-  SCB->VTOR  = 0x00000000 & 0x3FFFFF80;
+  SCB->VTOR  = ((uint32_t)&__cs3_interrupt_vector_cortex_m) & 0x3FFFFF00;
 #endif
 //  SystemCoreClockUpdate(); 
 }

@@ -224,9 +224,6 @@ int main(void)
 	FRESULT res;
 	
 	__disable_irq();
-
-	delay_ms(500);
-
 	SystemCoreClockUpdate();
 	init_serial0(DEBUG_UART_BAUD);
 	rprintf_devopen(0,putc_serial0); 

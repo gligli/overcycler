@@ -91,6 +91,8 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>../Makefile</itemPath>
+      <itemPath>../boot.ld</itemPath>
+      <itemPath>../synth.ld</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>

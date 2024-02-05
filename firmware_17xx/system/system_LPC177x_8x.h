@@ -44,6 +44,7 @@ extern uint32_t PeripheralClock;	    /*!< Peripheral Clock Frequency (Pclk) 	   
 extern uint32_t EMCClock;			        /*!< EMC Clock                              */
 extern uint32_t USBClock;			        /*!< USB Frequency 						              */
 
+extern int __cs3_interrupt_vector_cortex_m;
 
 /**
  * Initialize the system
