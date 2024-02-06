@@ -62,7 +62,7 @@ static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ti
 		}
 	}
 	
-	return ((periods*MAP_BUF_LEN*2)<<12)/tzCnt;
+	return ((periods*MAP_BUF_LEN*2)<<14)/tzCnt;
 }
 
 static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
@@ -71,26 +71,25 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 	uint16_t estimate,bit;
 	uint32_t p,tgtp;
 
-	tgtp=(TUNER_TICK<<12)/(TUNER_LOWEST_HERTZ*(1<<nthC));
+	tgtp=(TUNER_TICK<<14)/(TUNER_LOWEST_HERTZ*(1<<nthC));
 	
-	estimate=UINT16_MAX;
+	estimate=0x8000;
 	bit=0x8000;
-	
+
 	for(i=0;i<12;++i) // 12bit dac
 	{
 		synth_refreshCV(voice,cvCutoff,estimate);
 		delay_ms(25); // wait analog hardware stabilization	
 
-		p=measureAudioPeriod(1);
+		p=measureAudioPeriod(2);
 
 		// adjust estimate
-		if (p>tgtp)
-			estimate+=bit;
-		else
-			estimate-=bit;
+		if (p<tgtp)
+			estimate&=~bit;
 
 		// on to finer changes
 		bit>>=1;
+		estimate|=bit;
 	}
 
 	settings.tunes[nthC][voice]=estimate;
