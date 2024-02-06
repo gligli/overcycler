@@ -36,11 +36,6 @@ static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
 static EXT_RAM volatile uint8_t marker;
 static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-static const uint8_t channelWaitStates[DACSPI_CHANNEL_COUNT] =
-{
-	4,4,4,4,4,4,6 // change DACSPI_WAIT_STATES_COUNT accordingly (sum of this array)
-};
-
 static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 {
 	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO0->FIOCLR,5},
@@ -133,7 +128,7 @@ static void buildLLIs(int buffer, int channel)
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
 	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
 	lli[lliPos][2].Control=
-		GPDMA_DMACCxControl_TransferSize(channelWaitStates[channel]) |
+		GPDMA_DMACCxControl_TransferSize(DACSPI_CHANNEL_WAIT_STATES) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 }
@@ -193,7 +188,7 @@ void dacspi_init(void)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_16;
-	SSP_ConfigStruct.ClockRate=30000000;
+	SSP_ConfigStruct.ClockRate=20000000;
 	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
 	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
 	SSP_Cmd(LPC_SSP0,ENABLE);
