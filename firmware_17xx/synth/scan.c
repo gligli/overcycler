@@ -17,7 +17,7 @@
 #define ADC_CHANNEL_MASTER_MIX 10
 
 #define POT_SAMPLES 5
-#define POT_THRESHOLD (SCAN_ADC_QUANTUM*4)
+#define POT_THRESHOLD (SCAN_ADC_QUANTUM*6)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define DEBOUNCE_THRESHOLD 2
@@ -174,8 +174,8 @@ static void initSSP(int8_t isSmpMasterMixMode)
 
 	// reset
 	TIM_Cmd(LPC_TIM2,DISABLE);
-	SSP_Cmd(LPC_SSP2,DISABLE);
 	LPC_GPDMACH1->CConfig=0;
+	SSP_Cmd(LPC_SSP2,DISABLE);
 
 	// inti SSP
 	SSP_CFG_Type SSP_ConfigStruct;
@@ -190,7 +190,6 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		// init timer
 		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
 		tim.PrescaleValue=1;
-		TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
 
 		tm.MatchChannel=0;
 		tm.IntOnMatch=ENABLE;
@@ -201,10 +200,25 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	}
 	else
 	{
+		// config CFGR2 for external reference
+
+		SSP_SendData(LPC_SSP2,0b11111100<<(SCAN_ADC_BITS-8));
+
+		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET ||
+				SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+		{
+			// wait until previous sent data is transferred & wait for new received data
+		}
+		
+		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+		{
+			// flush received data
+			SSP_ReceiveData(LPC_SSP2);
+		}
+
 		// init timer
 		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
 		tim.PrescaleValue=POTSCAN_PRE_DIV-1;
-		TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
 
 		tm.MatchChannel=0;
 		tm.IntOnMatch=DISABLE;
@@ -212,13 +226,6 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
 		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY);
-
-		// config CFGR2 for external reference
-		SSP_SendData(LPC_SSP2,0b111111000000); 
-		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
-		{
-			// wait until previous data is transferred
-		}
 
 		// init GPDMA channel
 		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
@@ -229,6 +236,7 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
 	}
 
+	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
 	TIM_ConfigMatch(LPC_TIM2,&tm);
 	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
 	TIM_Cmd(LPC_TIM2,ENABLE);
