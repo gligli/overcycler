@@ -17,7 +17,7 @@
 #define ADC_CHANNEL_MASTER_MIX 10
 
 #define POT_SAMPLES 5
-#define POT_THRESHOLD (SCAN_ADC_QUANTUM*3)
+#define POT_THRESHOLD (SCAN_ADC_QUANTUM*4)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define DEBOUNCE_THRESHOLD 2
@@ -36,6 +36,7 @@
 		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_SSP1_TX__T2_MAT_0) | \
 		GPDMA_DMACCxConfig_TransferType(2)
 
+#define MIXSCAN_SPI_FREQUENCY 8000000
 
 static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
 
@@ -83,14 +84,14 @@ static void readPots(void)
 {
 	uint16_t new;
 	int pot;
-	uint16_t tmpSmp[POT_SAMPLES];
+	int32_t tmpSmp[POT_SAMPLES];
 	int8_t isUnlockable;
 	
 	// read pots from TLV2556 ADC
 
 	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
-		// convert samples to 0..999
+		// convert 10 bits samples to 0..999 and back to 16 bits full scale
 
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
@@ -180,7 +181,7 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=isSmpMasterMixMode?SSP_DATABIT_12:SSP_DATABIT_10;
-	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?8000000:POTSCAN_SPI_FREQUENCY;
+	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
 
@@ -211,6 +212,13 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
 		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY);
+
+		// config CFGR2 for external reference
+		SSP_SendData(LPC_SSP2,0b111111000000); 
+		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
+		{
+			// wait until previous data is transferred
+		}
 
 		// init GPDMA channel
 		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
@@ -361,7 +369,6 @@ void scan_init(void)
 	// start
 	
 	initSSP(0);	
-	SSP_SendData(LPC_SSP2,0b1111<<(SCAN_ADC_BITS-4)); // config CFGR2
 	
 	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,POTSCAN_SPI_FREQUENCY);
  }

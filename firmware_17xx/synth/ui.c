@@ -354,7 +354,7 @@ struct deadband_s {
 	uint32_t precalcHigh;
 };
 
-struct deadband_s panelDeadband = { HALF_RANGE, SCAN_ADC_QUANTUM, PANEL_DEADBAND };
+struct deadband_s panelDeadband = { HALF_RANGE, 0, PANEL_DEADBAND };
 
 // Precalculate factor for dead band scaling to avoid time consuming
 // division operation.
