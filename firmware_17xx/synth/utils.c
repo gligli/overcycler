@@ -110,12 +110,7 @@ uint16_t exponentialCourse(uint16_t v, float ratio, float range)
 
 int uint16Compare(const void * a,const void * b)
 {
-	if (*(uint16_t*)a==*(uint16_t*)b)
-		return 0;
-	else if (*(uint16_t*)a < *(uint16_t*)b)
-		return -1;
-	else
-		return 1;
+	return *(uint16_t*)a - *(uint16_t*)b;
 }
 
 int stringCompare(const void * a,const void * b)
