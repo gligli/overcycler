@@ -14,14 +14,12 @@
 
 #define DMA_CHANNEL_SSP1_TX__T2_MAT_0 4
 
-#define ADC_CHANNEL_MASTER_MIX 10
+#define KEYPAD_DEBOUNCE_THRESHOLD 2
 
 #define POT_SAMPLES 5
 #define POT_THRESHOLD (SCAN_ADC_QUANTUM*6)
 #define POT_TIMEOUT_THRESHOLD (SCAN_ADC_QUANTUM*3)
 #define POT_TIMEOUT (TICKER_1S)
-
-#define DEBOUNCE_THRESHOLD 2
 
 #define POTSCAN_PIN_CS 8
 #define POTSCAN_PIN_DOUT 4
@@ -30,7 +28,7 @@
 
 #define POTSCAN_PRE_DIV 12
 #define POTSCAN_SPI_FREQUENCY 80000
-#define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT))
+#define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
 
 #define POTSCAN_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
@@ -38,6 +36,7 @@
 		GPDMA_DMACCxConfig_TransferType(2)
 
 #define MIXSCAN_SPI_FREQUENCY 8000000
+#define MIXSCAN_ADC_CHANNEL 10
 
 static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
 
@@ -74,7 +73,7 @@ static void buildLLIs(int pot, int smp)
 		GPDMA_DMACCxControl_DWidth(1);
 
 	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP2->DR;
-	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-2)%(POT_SAMPLES*SCAN_POT_COUNT)];
+	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-1)%(POT_SAMPLES*SCAN_POT_COUNT)];
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(POT_SAMPLES*SCAN_POT_COUNT)][0];
 	lli[lliPos][1].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
@@ -102,7 +101,7 @@ static void readPots(void)
 		
 		// sort values
 
-		qsort(tmpSmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);		
+		qsort(tmpSmp,POT_SAMPLES,sizeof(uint16_t),uint16Compare);
 		
 		// median
 	
@@ -152,7 +151,7 @@ static void readKeypad(void)
 		{
 			scan.keypadState[key]=MIN(INT8_MAX,scan.keypadState[key]+1);
 
-			if(scan.keypadState[key]==DEBOUNCE_THRESHOLD)
+			if(scan.keypadState[key]==KEYPAD_DEBOUNCE_THRESHOLD)
 				if(scan.eventCallback) scan.eventCallback(key);
 		}
 		else
@@ -220,7 +219,7 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		tm.ResetOnMatch=ENABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY);
+		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY)-1;
 
 		// init GPDMA channel
 		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
@@ -268,8 +267,8 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	// reinit SSP for high sample frequency
 
 	initSSP(1);
-	readADC(ADC_CHANNEL_MASTER_MIX); // ensure no spurious reads from other channels
-	readADC(ADC_CHANNEL_MASTER_MIX);
+	readADC(MIXSCAN_ADC_CHANNEL); // ensure no spurious reads from other channels
+	readADC(MIXSCAN_ADC_CHANNEL);
 	
 	// sample master mix at dacspi tickrate
 
@@ -281,7 +280,7 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 		
 		TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
 		
-		uint16_t sample=readADC(ADC_CHANNEL_MASTER_MIX);
+		uint16_t sample=readADC(MIXSCAN_ADC_CHANNEL);
 		
 		mini=MIN(mini,sample);
 		maxi=MAX(maxi,sample);
