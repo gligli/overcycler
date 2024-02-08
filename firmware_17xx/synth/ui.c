@@ -1070,7 +1070,11 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				break;
 			case cnLoad:
 			case cnSave:
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number+0x80;
+				break;
 			case cnTune:
+				assigner_panicOff(); // KLUDGE: to work around a strange CV update bug in the tuner
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;

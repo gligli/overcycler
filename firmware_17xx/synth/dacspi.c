@@ -147,8 +147,13 @@ void dacspi_init(void)
 {
 	int i,j;
 	
-	memset(&dacspi,0,sizeof(dacspi));
+	// reset
+	
+	TIM_Cmd(LPC_TIM3,DISABLE);
+	LPC_GPDMACH0->CConfig=0;
+	SSP_Cmd(LPC_SSP0,DISABLE);
 
+	memset(&dacspi,0,sizeof(dacspi));
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
 
 	// cv DACs init
@@ -159,12 +164,6 @@ void dacspi_init(void)
 		dacspi.cvCommands[i+2]=0b1010000000000000; // /LDAC low
 		dacspi.cvCommands[i+3]=0b1000000000000011; // 0..Vdd range
 	}
-
-	// reset
-	
-	TIM_Cmd(LPC_TIM3,DISABLE);
-	LPC_GPDMA->Config=0;
-	SSP_Cmd(LPC_SSP0,DISABLE);
 
 	// init SPI mux
 

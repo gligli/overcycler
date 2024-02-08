@@ -171,10 +171,10 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	LPC_GPDMACH1->CConfig=0;
 	SSP_Cmd(LPC_SSP2,DISABLE);
 
-	// inti SSP
+	// init SSP
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
-	SSP_ConfigStruct.Databit=isSmpMasterMixMode?SSP_DATABIT_12:SSP_DATABIT_10;
+	SSP_ConfigStruct.Databit=SSP_DATABIT_10;
 	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
@@ -243,14 +243,14 @@ static uint16_t readADC(uint16_t channel)
 		// wait until previous data is transferred
 	}
 	
-	SSP_SendData(LPC_SSP2,channel<<8);
+	SSP_SendData(LPC_SSP2,channel<<(SCAN_ADC_BITS-4));
 
 	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
 	{
 		// wait for new data
 	}
 
-	uint16_t res=SSP_ReceiveData(LPC_SSP2)<<4; // convert to 16 bits
+	uint16_t res=SSP_ReceiveData(LPC_SSP2);
 	
 	// wait TLV2556 tConvert
 	
@@ -259,10 +259,10 @@ static uint16_t readADC(uint16_t channel)
 	return res;
 }
 
-void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
+void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 {
 	int32_t mini=UINT16_MAX,maxi=0,extents;
-	uint16_t *buf;
+	uint8_t *buf;
 	
 	// reinit SSP for high sample frequency
 
@@ -280,7 +280,7 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 		
 		TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
 		
-		uint16_t sample=readADC(MIXSCAN_ADC_CHANNEL);
+		uint8_t sample=readADC(MIXSCAN_ADC_CHANNEL)>>(SCAN_ADC_BITS-8);
 		
 		mini=MIN(mini,sample);
 		maxi=MAX(maxi,sample);
@@ -296,9 +296,9 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	buf=buffer;
 	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
-		uint16_t sample=*buf;
+		uint8_t sample=*buf;
 		
-		sample=(((int32_t)sample-mini)<<16)/extents;
+		sample=(((int32_t)sample-mini)<<8)/extents;
 		
 		*buf++=sample;
 	}

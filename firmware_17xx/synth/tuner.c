@@ -16,7 +16,7 @@
 
 #define TUNER_FIL_INIT_OFFSET 6500
 #define TUNER_FIL_INIT_SCALE (65535/13)
-#define TUNER_FIL_NTH_C_LO 4
+#define TUNER_FIL_NTH_C_LO 5
 #define TUNER_FIL_NTH_C_HI 7
 
 static uint16_t extrapolateUpperOctavesTunes(int8_t voice, int8_t oct)
@@ -41,11 +41,12 @@ static LOWERCODESIZE void prepareSynth(void)
 static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
 {
 	uint32_t tzCnt=0;
+	uint8_t prev;
 		
-#define MAP_BUF_LEN 1600
-	uint16_t buf[MAP_BUF_LEN];
-	uint16_t prev;
-	
+#define MAP_BUF_LEN 3200
+#define MAP_BUF_MIDDLE 128
+	uint8_t buf[MAP_BUF_LEN];
+
 	for(uint8_t p=0;p<periods;++p)
 	{
 		scan_sampleMasterMix(MAP_BUF_LEN,buf);
@@ -53,16 +54,16 @@ static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ti
 		prev=buf[0];
 		for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
 		{
-			uint16_t sample=buf[pos];
+			uint8_t sample=buf[pos];
 			
-			if ((prev<=HALF_RANGE&&sample>HALF_RANGE) || (prev>=HALF_RANGE&&sample<HALF_RANGE))
+			if ((prev<=MAP_BUF_MIDDLE&&sample>MAP_BUF_MIDDLE) || (prev>=MAP_BUF_MIDDLE&&sample<MAP_BUF_MIDDLE))
 				++tzCnt;
 
 			prev=sample;
 		}
 	}
 	
-	return ((periods*MAP_BUF_LEN*2)<<14)/tzCnt;
+	return ((periods*MAP_BUF_LEN*2)<<16)/tzCnt;
 }
 
 static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
@@ -71,7 +72,7 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 	uint16_t estimate,bit;
 	uint32_t p,tgtp;
 
-	tgtp=(TUNER_TICK<<14)/(TUNER_LOWEST_HERTZ*(1<<nthC));
+	tgtp=(TUNER_TICK<<(16-nthC))/TUNER_LOWEST_HERTZ;
 	
 	estimate=0x8000;
 	bit=0x8000;

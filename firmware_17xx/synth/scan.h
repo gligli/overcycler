@@ -22,7 +22,7 @@ typedef void (*scan_event_callback_t)(int8_t source); // source: keypad (kb0..kb
 
 uint16_t scan_getPotValue(int8_t pot);
 void scan_resetPotLocking(void);
-void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer);
+void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer);
 void scan_setScanEventCallback(scan_event_callback_t callback);
 
 void scan_init(void);
