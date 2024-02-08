@@ -51,6 +51,8 @@ static struct
 	int8_t keypadState[kbCount];
 	
 	scan_event_callback_t eventCallback;
+	
+	int8_t pendingSPIFlush;
 } scan;
 
 static const uint8_t keypadButtonCode[kbCount]=
@@ -86,6 +88,15 @@ static void readPots(void)
 	uint16_t new;
 	int pot;
 	uint16_t tmpSmp[POT_SAMPLES];
+
+	// if pendingFlush from having reinited the SSP, ensure the FIFO stays empty to ensure proper lli function
+	
+	while(scan.pendingSPIFlush && SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+	{
+		// flush received data
+		SSP_ReceiveData(LPC_SSP2);
+	}
+	scan.pendingSPIFlush=0;
 	
 	// read pots from TLV2556 ADC
 
@@ -179,6 +190,22 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
 
+	// config CFGR2 for external reference
+
+	SSP_SendData(LPC_SSP2,0b11111100<<(SCAN_ADC_BITS-8));
+
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET ||
+			SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	{
+		// wait until previous sent data is transferred & wait for new received data
+	}
+
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+	{
+		// flush received data
+		SSP_ReceiveData(LPC_SSP2);
+	}
+
 	if(isSmpMasterMixMode)
 	{
 		// init timer
@@ -194,22 +221,6 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	}
 	else
 	{
-		// config CFGR2 for external reference
-
-		SSP_SendData(LPC_SSP2,0b11111100<<(SCAN_ADC_BITS-8));
-
-		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET ||
-				SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
-		{
-			// wait until previous sent data is transferred & wait for new received data
-		}
-		
-		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
-		{
-			// flush received data
-			SSP_ReceiveData(LPC_SSP2);
-		}
-
 		// init timer
 		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
 		tim.PrescaleValue=POTSCAN_PRE_DIV-1;
@@ -228,6 +239,8 @@ static void initSSP(int8_t isSmpMasterMixMode)
 		LPC_GPDMACH1->CControl=lli[0][0].Control;
 
 		LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
+		
+		scan.pendingSPIFlush=1;
 	}
 
 	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
