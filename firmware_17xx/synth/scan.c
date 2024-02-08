@@ -18,6 +18,7 @@
 
 #define POT_SAMPLES 5
 #define POT_THRESHOLD (SCAN_ADC_QUANTUM*6)
+#define POT_TIMEOUT_THRESHOLD (SCAN_ADC_QUANTUM*3)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define DEBOUNCE_THRESHOLD 2
@@ -46,6 +47,7 @@ static struct
 	uint16_t potSamples[POT_SAMPLES*SCAN_POT_COUNT];
 	uint16_t potValue[SCAN_POT_COUNT];
 	uint32_t potLockTimeout[SCAN_POT_COUNT];
+	uint16_t potLockValue[SCAN_POT_COUNT];
 
 	int8_t keypadState[kbCount];
 	
@@ -84,8 +86,7 @@ static void readPots(void)
 {
 	uint16_t new;
 	int pot;
-	int32_t tmpSmp[POT_SAMPLES];
-	int8_t isUnlockable;
+	uint16_t tmpSmp[POT_SAMPLES];
 	
 	// read pots from TLV2556 ADC
 
@@ -109,22 +110,16 @@ static void readPots(void)
 		
 		// ignore small changes
 
-		isUnlockable=abs(new-scan.potValue[pot])>=POT_THRESHOLD;
-		
-		if(isUnlockable || currentTick<scan.potLockTimeout[pot])
+		if(abs(new-scan.potValue[pot])>=POT_THRESHOLD || currentTick<scan.potLockTimeout[pot])
 		{
-			if(isUnlockable)
+			if(abs(new-scan.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
 			{
-				if(new!=scan.potValue[pot] && currentTick>=scan.potLockTimeout[pot])
-				{
-					// out of lock -> current value must be taken into account
-					if(scan.eventCallback) scan.eventCallback(-pot-1);
-				}
-
 				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
+				scan.potLockValue[pot]=new;
 			}
-			
+
 			scan.potValue[pot]=new;
+			
 			if(scan.eventCallback) scan.eventCallback(-pot-1);
 		}
 	}
