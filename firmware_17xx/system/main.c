@@ -18,17 +18,10 @@
 #include "synth/ui.h"
 #include "synth/utils.h"
 
-#define SYNTH_TIMER_HZ 500
-
 #define STORAGE_PATH "/STORAGE"
 
 usbMode_t usbMode = umNone;
 FATFS fatFS;
-
-__attribute__ ((used)) void SysTick_Handler(void)
-{
-	synth_timerInterrupt();
-}
 
 __attribute__ ((used)) void USB_IRQHandler(void)
 {
@@ -224,7 +217,7 @@ int main(void)
 	FRESULT res;
 	
 	__disable_irq();
-	SystemCoreClockUpdate();
+
 	init_serial0(DEBUG_UART_BAUD);
 	rprintf_devopen(0,putc_serial0); 
 	
@@ -235,9 +228,6 @@ int main(void)
 	rprintf(0,"\nOverCycler %d Hz\n",SystemCoreClock);
 	
 	rprintf(0,"storage init...\n");
-	
-	SysTick_Config(SystemCoreClock / SYNTH_TIMER_HZ);
-	NVIC_SetPriority(SysTick_IRQn,16);
 	
 	if((res=disk_initialize(0)))
 	{

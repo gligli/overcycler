@@ -504,5 +504,5 @@ void SystemInit (void)
 #else
   SCB->VTOR  = ((uint32_t)&__cs3_interrupt_vector_cortex_m) & 0x3FFFFF00;
 #endif
-//  SystemCoreClockUpdate(); 
+  SystemCoreClockUpdate(); 
 }

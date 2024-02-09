@@ -1022,44 +1022,13 @@ void synth_update(void)
 // Synth interrupts
 ////////////////////////////////////////////////////////////////////////////////
 
-// @ 500Hz from system timer
-void synth_timerInterrupt(void)
+////////////////////////////////////////////////////////////////////////////////
+// Synth internal events
+////////////////////////////////////////////////////////////////////////////////
+
+// @ 500Hz from from dacspi update
+void synth_timerEvent(void)
 {
-	int32_t resVal,resoFactor;
-	
-	resVal=currentPreset.continuousParameters[cpResonance];
-	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
-	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
-	resVal=__USAT(resVal,16);
-
-	// compensate pre filter mixer level for resonance
-
-	resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
-
-	// CV update
-	
-	auto uint16_t staticCV(cv_t cv)
-	{
-		return getStaticCV(cv)-INT16_MIN;
-	}
-		
-	synth_refreshCV(-1,cvAVol,scaleU16U16(currentPreset.continuousParameters[cpAVol],staticCV(cvAVol))*resoFactor/256);
-	synth_refreshCV(-1,cvBVol,scaleU16U16(currentPreset.continuousParameters[cpBVol],staticCV(cvBVol))*resoFactor/256);
-	synth_refreshCV(-1,cvNoiseVol,scaleU16U16(currentPreset.continuousParameters[cpNoiseVol],staticCV(cvNoiseVol))*resoFactor/256);
-	synth_refreshCV(-1,cvResonance,resVal);
-
-	// midi
-
-	midi_processInput();
-
-	// bit inputs (footswitch / tape in)
-
-	handleBitInputs();
-
-	// assigner
-
-	handleFinishedVoices();
-
 	// clocking
 
 	if(settings.syncMode==smInternal || synth.pendingExtClock)
@@ -1100,20 +1069,50 @@ void synth_timerInterrupt(void)
 	++currentTick;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Synth internal events
-////////////////////////////////////////////////////////////////////////////////
-
-// @ 5Khz from dacspi CV update
+// @ 5Khz from dacspi update
 void synth_updateCVsEvent(void)
 {
+	int32_t resVal,resoFactor;
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
+
+	// midi
+
+	midi_processInput();
+
+	// bit inputs (footswitch)
+
+	handleBitInputs();
+
+	// assigner
+
+	handleFinishedVoices();
 
 	// lfos
 		
 	lfo_update(&synth.lfo[0]);
 	lfo_update(&synth.lfo[1]);
 		
+	// global CVs update
+	
+	resVal=currentPreset.continuousParameters[cpResonance];
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
+	resVal=__USAT(resVal,16);
+
+		// compensate resonance lowering volume by abjusting pre filter mixer level
+
+	resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
+
+	auto uint32_t getResonanceCompensatedCV(continuousParameter_t cp, cv_t cv)
+	{
+		return scaleU16U16(currentPreset.continuousParameters[cp],(getStaticCV(cv)-INT16_MIN))*resoFactor/256;
+	}
+		
+	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
+	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
+	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
+	synth_refreshCV(-1,cvResonance,resVal);
+
 	// global computations
 	
 		// pitch
@@ -1171,7 +1170,7 @@ void synth_updateCVsEvent(void)
 	wmodAEnvAmt+=INT16_MIN;
 	wmodBEnvAmt+=INT16_MIN;
 
-	// restrict range
+		// restrict range
 
 	pitchAVal=__SSAT(pitchAVal,16);
 	pitchBVal=__SSAT(pitchBVal,16);

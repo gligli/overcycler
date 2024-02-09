@@ -79,11 +79,20 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
-	// update synth @ 5Khz
-	synth_updateCVsEvent();
-
 	// when second half is playing, update first and vice-versa
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
+	
+	// update CVs @ 5Khz
+	synth_updateCVsEvent();
+
+	// update timer @ 500Hz
+	static uint8_t frc=1;
+	--frc;
+	if(!frc)
+	{
+		synth_timerEvent();
+		frc=10;
+	}
 }
 
 static void buildLLIs(int buffer, int channel)
