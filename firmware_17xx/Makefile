@@ -102,6 +102,7 @@ SYNTH_SRC+=synth/scan.c
 SYNTH_SRC+=synth/ui.c
 SYNTH_SRC+=synth/utils.c
 SYNTH_SRC+=synth/wtosc.c
+SYNTH_SRC+=synth/wave_reader.c
 
 SRC_SYNTH=$(DRIVERS_SRC) $(FAT_SRC) $(USB_SRC) $(SYSTEM_SRC) $(XNORMIDI_SRC) $(SYNTH_SRC)
 SRC_SYNTH+=system/main.c

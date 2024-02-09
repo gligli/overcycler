@@ -22,6 +22,7 @@
 #include "../xnormidi/midi.h"
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_pinsel.h"
+#include "wave_reader.h"
 #include "main.h"
 
 #define BIT_INPUT_FOOTSWITCH (1<<26)
@@ -703,13 +704,12 @@ void synth_refreshCurWaveNames(abx_t abx, int8_t sort)
 
 void synth_refreshWaveforms(abx_t abx)
 {
-	int i;
-	FIL f;
-	FRESULT res;
+	int i, chanOffset;
 	char fn[256];
-	int16_t data[WTOSC_MAX_SAMPLES];
+	wave_reader wr;
 	int32_t d;
-	int32_t smpSize = 0;
+	int32_t smpCnt=0, chanCnt=0;
+	int16_t data[WTOSC_MAX_SAMPLES];
 	
 	strcpy(fn,WAVEDATA_PATH "/");
 	strcat(fn,currentPreset.oscBank[abx]);
@@ -720,35 +720,35 @@ void synth_refreshWaveforms(abx_t abx)
 	rprintf(0,"loading %s\n",fn);
 #endif		
 	
-	if(!f_open(&f,fn,FA_READ))
+	if(wave_reader_open(fn,&wr)==WR_NO_ERROR)
 	{
-
-		if((res=f_lseek(&f,0x28)))
-			rprintf(0,"f_lseek res=%d\n",res);
-
-		if((res=f_read(&f,&smpSize,sizeof(smpSize),&i)))
-			rprintf(0,"f_read res=%d\n",res);
+		if(wave_reader_get_format(&wr)==1 && wave_reader_get_sample_bits(&wr)==16) // linear 16Bits PCM
+		{
+			smpCnt=wave_reader_get_num_samples(&wr);
+			smpCnt=MIN(smpCnt,WTOSC_MAX_SAMPLES);
+		}
 		
-		smpSize=MIN(smpSize,WTOSC_MAX_SAMPLES*2);
+		chanCnt=wave_reader_get_num_channels(&wr);
+		
+		wave_reader_get_samples(&wr,smpCnt,data);
+		wave_reader_close(&wr);
 		
 #ifdef DEBUG
-		rprintf(0, "smpSize %d\n", smpSize);
+		rprintf(0, "smpCnt %d chanCnt %d\n", smpCnt, chanCnt);
 #endif		
-
-		if((res=f_read(&f,data,smpSize,&i)))
-			rprintf(0,"f_read res=%d\n",res);
-
-		f_close(&f);
 		
-		for(i=0;i<WTOSC_MAX_SAMPLES;++i)
+		smpCnt/=chanCnt; // we want only one channel
+		chanOffset=(chanCnt>1 && abx>=abxACrossover)?1:0;
+
+		for(i=0;i<smpCnt;++i)
 		{
-			d=data[i];
+			d=data[i*chanCnt+chanOffset];
 			d=(d*(INT16_MAX-WTOSC_SAMPLES_GUARD_BAND))>>15;
 			d-=INT16_MIN;
 			waveData.sampleData[abx][i]=d;
 		}
 		
-		waveData.sampleCount[abx]=smpSize>>1; 
+		waveData.sampleCount[abx]=smpCnt; 
 	}
 }	
 
