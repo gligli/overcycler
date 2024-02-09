@@ -1396,6 +1396,9 @@ void ui_update(void)
 					setPos(2,0,1);
 					sendString(2,"USB Disk mode, press any button to quit");
 					usb_setMode(umMSC,usbMSCCallback);
+					
+					synth_refreshBankNames(1);
+					synth_refreshFullState(1);
 					ui.pendingScreenClear=1;
 				}
 				usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
