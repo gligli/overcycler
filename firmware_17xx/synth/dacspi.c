@@ -91,6 +91,7 @@ static void buildLLIs(int buffer, int channel)
 	int lliPos=buffer*DACSPI_CHANNEL_COUNT+channel;
 	int muxIndex=lliPos%(DACSPI_CHANNEL_COUNT*2);
 	int muxChannel=dacspi.spiMuxCommands[muxIndex][2];
+	int8_t isCVChannel=muxChannel==0 || muxChannel==7;
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.spiMuxCommands[muxIndex][0];
 	lli[lliPos][0].DstAddr=dacspi.spiMuxCommands[muxIndex][1];
@@ -103,7 +104,7 @@ static void buildLLIs(int buffer, int channel)
 	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
 	
-	if(muxChannel==0 || muxChannel==7)
+	if(isCVChannel)
 	{
 		if(muxChannel==0)
 			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer>>1)&7];
@@ -128,7 +129,7 @@ static void buildLLIs(int buffer, int channel)
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
 	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
 	lli[lliPos][2].Control=
-		GPDMA_DMACCxControl_TransferSize(DACSPI_CHANNEL_WAIT_STATES) |
+		GPDMA_DMACCxControl_TransferSize(isCVChannel?DACSPI_CV_CHANNEL_WAIT_STATES:DACSPI_OSC_CHANNEL_WAIT_STATES) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
 }
