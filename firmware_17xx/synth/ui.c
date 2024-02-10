@@ -1287,6 +1287,19 @@ void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
 	
+	ui.activePage=upNone;
+	ui.activeSource=INT8_MAX;
+	ui.pendingScreenClear=1;
+	ui.seqRecordingTrack=-1;
+	ui.lastInputPot=-1;
+	ui.kpInputDecade=-1;
+	ui.kpInputPot=-1;
+	ui.settingsModifiedTimeout=UINT32_MAX;
+	ui.activeSourceTimeout=UINT32_MAX;
+	ui.slowUpdateTimeout=UINT32_MAX;
+
+	precalcDeadband(&panelDeadband);
+	
 	// init screen
 	
 	ui.lcd1.port = 2;
@@ -1328,25 +1341,12 @@ void ui_init(void)
 	sendString(1,"Build " __DATE__ " " __TIME__);
 	rprintf(1,"Sampling at %d Hz", SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 	setPos(2,0,1);
-
-	ui.activePage=upNone;
-	ui.activeSource=INT8_MAX;
-	ui.pendingScreenClear=1;
-	ui.seqRecordingTrack=-1;
-	ui.lastInputPot=-1;
-	ui.kpInputDecade=-1;
-	ui.kpInputPot=-1;
-	
-	precalcDeadband(&panelDeadband);
 }
 
 void ui_update(void)
 {
 	int i;
-	static uint8_t frc=0;
 	int8_t fsDisp;
-	
-	++frc;
 	
 	// slow updates (if needed)
 	
@@ -1389,6 +1389,8 @@ void ui_update(void)
 			case 0x80+cnTune:
 				setPos(2,0,1);
 				tuner_tuneSynth();
+				settings_save();
+				ui.pendingScreenClear=1;
 				break;
 			case 0x80+cnUsbM:
 				if(ui.usbMSC)

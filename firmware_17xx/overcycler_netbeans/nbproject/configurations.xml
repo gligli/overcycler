@@ -37,9 +37,6 @@
         <in>ff.c</in>
         <in>nand.c</in>
       </df>
-      <df name="iap">
-        <in>sbl_iap.c</in>
-      </df>
       <df name="synth">
         <in>adsr.c</in>
         <in>arp.c</in>
@@ -60,7 +57,6 @@
         <in>wtosc.c</in>
       </df>
       <df name="system">
-        <in>boot.c</in>
         <in>core_cm3.c</in>
         <in>hd44780.c</in>
         <in>main.c</in>
@@ -807,18 +803,6 @@
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/iap">
-        <cTool>
-          <incDir>
-            <pElem>../iap</pElem>
-            <pElem>../system</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>..</pElem>
           </incDir>
         </cTool>
       </folder>

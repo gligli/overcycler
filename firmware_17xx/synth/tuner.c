@@ -38,7 +38,7 @@ static LOWERCODESIZE void prepareSynth(void)
 	synth_refreshCV(-1,cvBVol,0);
 }
 
-static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
+static NOINLINE LOWERCODESIZE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
 {
 	uint32_t tzCnt=0;
 	uint8_t prev;
@@ -66,7 +66,7 @@ static NOINLINE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ti
 	return ((periods*MAP_BUF_LEN*2)<<16)/tzCnt;
 }
 
-static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
+static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 {
 	int8_t i;
 	uint16_t estimate,bit;
@@ -74,11 +74,13 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 
 	tgtp=(TUNER_TICK<<(16-nthC))/TUNER_LOWEST_HERTZ;
 	
-	estimate=0x8000;
+	estimate=0;
 	bit=0x8000;
 
 	for(i=0;i<12;++i) // 12bit dac
 	{
+		estimate|=bit;
+
 		synth_refreshCV(voice,cvCutoff,estimate);
 		delay_ms(25); // wait analog hardware stabilization	
 
@@ -90,7 +92,6 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 
 		// on to finer changes
 		bit>>=1;
-		estimate|=bit;
 	}
 
 	settings.tunes[nthC][voice]=estimate;
@@ -98,8 +99,6 @@ static LOWERCODESIZE int8_t tuneOffset(int8_t voice,uint8_t nthC)
 #ifdef DEBUG
 	rprintf(0, "cv %d per %d theo %d\n",estimate,p,tgtp);
 #endif
-	
-	return 0;
 }
 
 static LOWERCODESIZE void tuneFilter(int8_t voice)
@@ -120,8 +119,7 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 	// tune
 
 	for(nthC=TUNER_FIL_NTH_C_LO;nthC<=TUNER_FIL_NTH_C_HI;++nthC)
-		if (tuneOffset(voice,nthC))
-			break;
+		tuneOffset(voice,nthC);
 
 	for(nthC=TUNER_FIL_NTH_C_LO-1;nthC>=0;--nthC)
 		settings.tunes[nthC][voice]=(uint32_t)2*settings.tunes[nthC+1][voice]-settings.tunes[nthC+2][voice];
@@ -194,6 +192,7 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		
 		// prepare synth for tuning
 		
+		scan_setMode(1);
 		prepareSynth();
 		
 		// tune filters
@@ -215,7 +214,6 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 		synth_refreshCV(-1,cvResonance,0);
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
 			synth_refreshCV(v,cvAmp,0);
-		
-		settings_save();
+		scan_setMode(0);
 	}
 }

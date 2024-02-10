@@ -89,14 +89,20 @@ static void readPots(void)
 	int pot;
 	uint16_t tmpSmp[POT_SAMPLES];
 
-	// if pendingFlush from having reinited the SSP, ensure the FIFO stays empty to ensure proper lli function
-	
-	while(scan.pendingSPIFlush && SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+	if(scan.pendingSPIFlush)
 	{
-		// flush received data
-		SSP_ReceiveData(LPC_SSP2);
+		// ensure the FIFO stays empty for proper lli function
+		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+		{
+			// flush received data
+			SSP_ReceiveData(LPC_SSP2);
+		}
+		
+		// enough for a full loop of the llis
+		delay_ms(20);
+		
+		scan.pendingSPIFlush=0;
 	}
-	scan.pendingSPIFlush=0;
 	
 	// read pots from TLV2556 ADC
 
@@ -172,7 +178,30 @@ static void readKeypad(void)
 	}
 }
 
-static void initSSP(int8_t isSmpMasterMixMode)
+static uint16_t readADC(uint16_t channel)
+{
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
+	{
+		// wait until previous data is transferred
+	}
+	
+	SSP_SendData(LPC_SSP2,channel<<(SCAN_ADC_BITS-4));
+
+	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	{
+		// wait for new data
+	}
+
+	uint16_t res=SSP_ReceiveData(LPC_SSP2);
+	
+	// wait TLV2556 tConvert
+	
+	delay_us(6);
+
+	return res;
+}
+
+void scan_setMode(int8_t isSmpMasterMixMode)
 {
 	TIM_TIMERCFG_Type tim;
 	TIM_MATCHCFG_Type tm;
@@ -249,38 +278,14 @@ static void initSSP(int8_t isSmpMasterMixMode)
 	TIM_Cmd(LPC_TIM2,ENABLE);
 }
 
-static uint16_t readADC(uint16_t channel)
-{
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
-	{
-		// wait until previous data is transferred
-	}
-	
-	SSP_SendData(LPC_SSP2,channel<<(SCAN_ADC_BITS-4));
-
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
-	{
-		// wait for new data
-	}
-
-	uint16_t res=SSP_ReceiveData(LPC_SSP2);
-	
-	// wait TLV2556 tConvert
-	
-	delay_us(6);
-
-	return res;
-}
-
 void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 {
 	int32_t mini=UINT16_MAX,maxi=0,extents;
 	uint8_t *buf;
 	
-	// reinit SSP for high sample frequency
-
-	initSSP(1);
-	readADC(MIXSCAN_ADC_CHANNEL); // ensure no spurious reads from other channels
+	// ensure no spurious reads from other channels
+	
+	readADC(MIXSCAN_ADC_CHANNEL);
 	readADC(MIXSCAN_ADC_CHANNEL);
 	
 	// sample master mix at dacspi tickrate
@@ -315,10 +320,6 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 		
 		*buf++=sample;
 	}
-
-	// restore state for readPots
-	
-	initSSP(0);
 }
 
 uint16_t scan_getPotValue(int8_t pot)
@@ -383,7 +384,7 @@ void scan_init(void)
 
 	// start
 	
-	initSSP(0);	
+	scan_setMode(0);	
 	
 	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,POTSCAN_SPI_FREQUENCY);
  }
