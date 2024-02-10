@@ -42,7 +42,7 @@ void wtosc_init(struct wtosc_s * o, int32_t channel);
 // WTOSC_SAMPLES_GUARD_BAND..65535-WTOSC_SAMPLES_GUARD_BAND
 // this is because hermite interpolation will overshoot on sharp transitions
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData, uint16_t sampleCount);
-void wtosc_setParameters(struct wtosc_s * o, uint16_t cv, uint16_t aliasing, uint16_t width, uint16_t crossover);
+void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover);
 void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets);
 
 #endif
