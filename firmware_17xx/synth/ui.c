@@ -356,6 +356,9 @@ struct deadband_s {
 
 struct deadband_s panelDeadband = { HALF_RANGE, 0, PANEL_DEADBAND };
 
+// forward declarations
+static void scanEvent(int8_t source, uint16_t * forcedValue);
+
 // Precalculate factor for dead band scaling to avoid time consuming
 // division operation.
 // so instead of doing foo*=32768; foo/=factor; we precalculate
@@ -804,6 +807,79 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	return dv;
 }
 
+static void handlePageChange(enum scanKeypadButton_e button)
+{
+	switch(button)
+	{
+		case kbA: 
+			ui.activePage=(ui.activePage==upOscs)?upWMod:upOscs;
+			break;
+		case kbB: 
+			ui.activePage=upFil;
+			break;
+		case kbC: 
+			ui.activePage=upAmp;
+			break;
+		case kbD: 
+			ui.activePage=(ui.activePage==upLFO1)?upLFO2:upLFO1;
+			break;
+		case kbAsterisk: 
+			ui.activePage=upMisc;
+			break;
+		case kbSharp: 
+			ui.activePage=(ui.activePage==upArp)?upSeq:upArp;
+			break;
+		default:
+			return;
+	}
+
+	rprintf(0,"page %d\n",ui.activePage);
+
+	//pots need to be reacquired
+	ui.potsAcquired=0;
+	for(int i=0;i<SCAN_POT_COUNT;++i)
+		ui.potsPrevValue[i]=INT32_MIN;
+
+	// cancel ongoing changes
+	ui.lastInputPot=-1;
+	ui.kpInputPot=-1;
+	ui.kpInputDecade=-1;
+	ui.activeSourceTimeout=0;
+	scan_resetPotLocking();
+
+	ui.pendingScreenClear=1;
+}
+
+static void handleKeypadInput(enum scanKeypadButton_e button)
+{
+	if(button<kb0 && button>kb9)
+		return;
+	
+	uint16_t decade=1;
+	for(int i=0;i<ui.kpInputDecade;++i)
+		decade*=10;
+
+	ui.kpInputValue+=(button-kb0)*decade;
+	--ui.kpInputDecade;
+
+	if(ui.kpInputDecade<0) // end of input?
+	{
+		// back to regular page display
+		ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+		ui.pendingScreenClear=1;
+
+		if(ui.kpInputPot>=0)
+		{
+			scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
+		}
+		else
+		{
+			// preset number
+			settings.presetNumber=ui.kpInputValue;
+		}
+	}
+}
+
 static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	int32_t data,valCount;
@@ -816,77 +892,14 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	// page change
 	if(source>=kbA)
 	{
-		switch(source)
-		{
-			case kbA: 
-				ui.activePage=(ui.activePage==upOscs)?upWMod:upOscs;
-				break;
-			case kbB: 
-				ui.activePage=upFil;
-				break;
-			case kbC: 
-				ui.activePage=upAmp;
-				break;
-			case kbD: 
-				ui.activePage=(ui.activePage==upLFO1)?upLFO2:upLFO1;
-				break;
-			case kbAsterisk: 
-				ui.activePage=upMisc;
-				break;
-			case kbSharp: 
-				ui.activePage=(ui.activePage==upArp)?upSeq:upArp;
-				break;
-		}
-
-		rprintf(0,"page %d\n",ui.activePage);
-		
-		//pots need to be reacquired
-		ui.potsAcquired=0;
-		for(int i=0;i<SCAN_POT_COUNT;++i)
-			ui.potsPrevValue[i]=INT32_MIN;
-
-		// cancel ongoing changes
-		ui.lastInputPot=-1;
-		ui.kpInputPot=-1;
-		ui.kpInputDecade=-1;
-		ui.activeSourceTimeout=0;
-		scan_resetPotLocking();
-
-		ui.pendingScreenClear=1;
-		
+		handlePageChange(source);
 		return;
 	}
 	
 	// keypad value input mode	
 	if (ui.kpInputDecade>=0)
 	{
-		if(source>=kb0 && source<=kb9)
-		{
-			uint16_t decade=1;
-			for(int i=0;i<ui.kpInputDecade;++i)
-				decade*=10;
-
-			ui.kpInputValue+=(source-kb0)*decade;
-			--ui.kpInputDecade;
-
-			if(ui.kpInputDecade<0) // end of input?
-			{
-				// back to regular page display
-				ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
-				ui.pendingScreenClear=1;
-
-				if(ui.kpInputPot>=0)
-				{
-					scanEvent(-ui.kpInputPot-1,&ui.kpInputValue);
-				}
-				else
-				{
-					// preset number
-					settings.presetNumber=ui.kpInputValue;
-				}
-			}
-		}
-
+		handleKeypadInput(source);
 		return;
 	}
 
@@ -1246,6 +1259,69 @@ static int8_t usbMSCCallback(void)
 	return ui.usbMSC;
 }
 
+static void handleSlowUpdates(void)
+{
+	if(currentTick<=ui.slowUpdateTimeout)
+		return;
+	
+	switch(ui.slowUpdateTimeoutNumber)
+	{
+		case spABank_Unsaved:
+		case spBBank_Unsaved:
+		case spAXOvrBank_Unsaved:
+		case spBXOvrBank_Unsaved:
+			synth_refreshCurWaveNames(sp2abx[ui.slowUpdateTimeoutNumber],1);
+			break;
+		case spAWave_Unsaved:
+		case spBWave_Unsaved:
+		case spAXOvrWave_Unsaved:
+		case spBXOvrWave_Unsaved:
+			synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
+			break;
+		case 0x80+cnSave:
+			preset_saveCurrent(settings.presetNumber);
+			settings_save();                
+			ui_setPresetModified(0);	
+			break;
+		case 0x80+cnLoad:
+			BLOCK_INT(1)
+			{
+				// temporarily silence voices
+				for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+					synth_refreshCV(v,cvAmp, 0);					
+
+				settings_save();                
+				if(!preset_loadCurrent(settings.presetNumber))
+					preset_loadDefault(1);
+				ui_setPresetModified(0);	
+
+				synth_refreshFullState(1);
+			}
+			break;
+		case 0x80+cnTune:
+			setPos(2,0,1);
+			tuner_tuneSynth();
+			settings_save();
+			ui.pendingScreenClear=1;
+			break;
+		case 0x80+cnUsbM:
+			if(ui.usbMSC)
+			{
+				setPos(2,0,1);
+				sendString(2,"USB Disk mode, press any button to quit");
+				usb_setMode(umMSC,usbMSCCallback);
+
+				synth_refreshBankNames(1);
+				synth_refreshFullState(1);
+				ui.pendingScreenClear=1;
+			}
+			usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
+			break;
+	}
+
+	ui.slowUpdateTimeout=UINT32_MAX;
+}
+
 void ui_setPresetModified(int8_t modified)
 {
 	ui.presetModified=modified;
@@ -1349,66 +1425,8 @@ void ui_update(void)
 	int8_t fsDisp;
 	
 	// slow updates (if needed)
-	
-	if(currentTick>ui.slowUpdateTimeout)
-	{
-		switch(ui.slowUpdateTimeoutNumber)
-		{
-			case spABank_Unsaved:
-			case spBBank_Unsaved:
-			case spAXOvrBank_Unsaved:
-			case spBXOvrBank_Unsaved:
-				synth_refreshCurWaveNames(sp2abx[ui.slowUpdateTimeoutNumber],1);
-				break;
-			case spAWave_Unsaved:
-			case spBWave_Unsaved:
-			case spAXOvrWave_Unsaved:
-			case spBXOvrWave_Unsaved:
-				synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
-				break;
-			case 0x80+cnSave:
-				preset_saveCurrent(settings.presetNumber);
-				settings_save();                
-				ui_setPresetModified(0);	
-				break;
-			case 0x80+cnLoad:
-				BLOCK_INT(1)
-				{
-					// temporarily silence voices
-					for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-						synth_refreshCV(v,cvAmp, 0);					
-					
-					settings_save();                
-					if(!preset_loadCurrent(settings.presetNumber))
-						preset_loadDefault(1);
-					ui_setPresetModified(0);	
 
-					synth_refreshFullState(1);
-				}
-				break;
-			case 0x80+cnTune:
-				setPos(2,0,1);
-				tuner_tuneSynth();
-				settings_save();
-				ui.pendingScreenClear=1;
-				break;
-			case 0x80+cnUsbM:
-				if(ui.usbMSC)
-				{
-					setPos(2,0,1);
-					sendString(2,"USB Disk mode, press any button to quit");
-					usb_setMode(umMSC,usbMSCCallback);
-					
-					synth_refreshBankNames(1);
-					synth_refreshFullState(1);
-					ui.pendingScreenClear=1;
-				}
-				usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
-				break;
-		}
-		
-		ui.slowUpdateTimeout=UINT32_MAX;
-	}
+	handleSlowUpdates();
 
 	// to store changes made to settings thru UI
 
