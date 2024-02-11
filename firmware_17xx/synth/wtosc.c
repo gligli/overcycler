@@ -11,10 +11,11 @@
 
 #define MAX_SAMPLERATE (CLOCK/TICK_RATE)
 
-#define USE_HERMITE_INTERP
-
-#define WIDTH_MOD_BITS 9
+#define WIDTH_MOD_BITS 12
 #define FRAC_SHIFT 12
+
+static uint16_t incModLUT[WTOSC_IMLUT_COUNT][WTOSC_MAX_SAMPLES/2] EXT_RAM;
+static uint16_t incModLUTHalfSampleCount[WTOSC_IMLUT_COUNT]={0};
 
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
@@ -87,34 +88,6 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	return curPeriod;
 }
 
-static FORCEINLINE uint16_t interpolate(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3)
-{
-	uint16_t r;
-	
-#ifdef USE_HERMITE_INTERP
-	int32_t v,p0,p1,p2,total;
-
-	// do 4-point, 3rd-order Hermite/Catmull-Rom spline (x-form) interpolation
-
-	v=prev2-prev;
-	p0=((prev3-cur-v)>>1)-v;
-	p1=cur+v*2-((prev3+prev)>>1);
-	p2=(prev2-cur)>>1;
-
-	total=((p0*alpha)>>FRAC_SHIFT)+p1;
-	total=((total*alpha)>>FRAC_SHIFT)+p2;
-	total=((total*alpha)>>FRAC_SHIFT)+prev;
-
-	r=__USAT(total,16);
-#else
-	// do linear interpolation
-
-	r=(alpha*prev+(((1<<FRAC_SHIFT)-1)-alpha)*cur)>>FRAC_SHIFT;
-#endif
-	
-	return r;
-}
-
 void wtosc_init(struct wtosc_s * o, int32_t channel)
 {
 	memset(o,0,sizeof(struct wtosc_s));
@@ -128,22 +101,40 @@ void wtosc_init(struct wtosc_s * o, int32_t channel)
 
 void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData, uint16_t sampleCount)
 {
+	int8_t imlut=WTOSC_CHANNEL_TO_IMLUT(o->channel);
+	
 	o->sampleCount=sampleCount;
 	o->halfSampleCount=sampleCount>>1;
 
-	o->data[0]=NULL;
-	o->data[1]=NULL;
 	if(sampleCount<=WTOSC_MAX_SAMPLES)
 	{
 		o->data[0]=mainData;
 		o->data[1]=xovrData;
 	}
+	else
+	{
+		o->data[0]=NULL;
+		o->data[1]=NULL;
+	}
+
+	if(incModLUTHalfSampleCount[imlut]!=o->halfSampleCount)
+	{
+		uint16_t *p=&incModLUT[imlut][0];
+		for(uint16_t i=0;i<WTOSC_MAX_SAMPLES/2;++i)
+		{
+			uint16_t inc=i+1;
+			while(o->halfSampleCount%inc) ++inc;
+			*p++=inc;
+		}
+		incModLUTHalfSampleCount[imlut]=o->halfSampleCount;
+	}	
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
 {
 	uint32_t sampleRate[2], frequency;
 	int32_t increment[2], period[2], aliasing_s, crossover_s;
+	int8_t imlut=WTOSC_CHANNEL_TO_IMLUT(o->channel);
 	
 	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
 	
@@ -159,8 +150,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 		aliasing_s>>=6;
 	}
 	
-	width=MAX(UINT16_MAX/16,width);
-	width=MIN((15*UINT16_MAX)/16,width);
+	width=(width*30+UINT16_MAX)/32;
 	width>>=16-WIDTH_MOD_BITS;
 
 	crossover_s=crossover;
@@ -173,14 +163,14 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	
 	frequency=cvToFrequency(pitch)*o->halfSampleCount;
 
-	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
+	sampleRate[0]=frequency/(((1<<WIDTH_MOD_BITS)-1)-width);
 	sampleRate[1]=frequency/width;
 	
 	increment[0]=1+(sampleRate[0]/MAX_SAMPLERATE);
 	increment[1]=1+(sampleRate[1]/MAX_SAMPLERATE);
 
-	while(o->halfSampleCount%increment[0]) ++increment[0];
-	while(o->halfSampleCount%increment[1]) ++increment[1];
+	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[imlut][increment[0]];
+	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[imlut][increment[1]];
 	
 	increment[0]=MIN(o->sampleCount,increment[0]+aliasing_s);
 	increment[1]=MIN(o->sampleCount,increment[1]+aliasing_s);
@@ -242,7 +232,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 		// interpolate
 		
-		r=interpolate(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3);
+		r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 		
 		// send value to DACs
 

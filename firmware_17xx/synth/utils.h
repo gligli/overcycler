@@ -31,6 +31,7 @@ int16_t scaleU16S16(uint16_t a, int16_t b);
 
 uint16_t lerp(uint16_t a,uint16_t b,uint8_t x);
 uint16_t lerp16(uint16_t a,uint16_t b,uint32_t x);
+uint16_t herp(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3, int8_t frac_shift);
 uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t interpolate);
 
 uint32_t lfsr(uint32_t v, uint8_t taps);

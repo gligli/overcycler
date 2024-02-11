@@ -813,10 +813,10 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		break;
 	case cvAmp:
 		value>>=2; // limit VCA output level to 4Vpp
-		value=computeShape(value<<8,vcaLinearizationCurve,1);
+		value=computeShape(value<<8,vcaLinearizationCurve,2);
 		break;
 	case cvNoiseVol:
-		value=computeShape(value<<8,vcNoiseLinearizationCurve,1);
+		value=computeShape(value<<8,vcNoiseLinearizationCurve,2);
 		break;
 	case cvResonance:
 		value>>=1;

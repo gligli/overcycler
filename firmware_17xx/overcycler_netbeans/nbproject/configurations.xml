@@ -123,6 +123,11 @@
           <executablePath>../overcycler.elf</executablePath>
           <cTool>
             <standard>3</standard>
+            <incDir>
+              <pElem>../system</pElem>
+              <pElem>../drivers</pElem>
+              <pElem>../fat_nand</pElem>
+            </incDir>
           </cTool>
         </makeTool>
         <preBuild>

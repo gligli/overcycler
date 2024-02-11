@@ -130,7 +130,7 @@ inline void lfo_update(struct lfo_s * l)
 		l->rawOutput=l->phase>>8;
 		break;
 	case lsSine:
-		l->rawOutput=computeShape(l->phase,sineShape,1);
+		l->rawOutput=computeShape(l->phase,sineShape,2);
 		break;
 	case lsNoise:
 		l->noise=lfsr(l->noise,(l->speedCV>>12)+1);

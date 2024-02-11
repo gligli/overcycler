@@ -3,11 +3,14 @@
 
 #include "synth.h"
 
+// for incModLUT optimisation
+#define WTOSC_IMLUT_COUNT 2
+#define WTOSC_CHANNEL_TO_IMLUT(channel) ((channel)&1)
+
 #define WTOSC_MAX_SAMPLES 2048 // samples
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
 #define WTOSC_SAMPLES_GUARD_BAND 4600 // about -1.3 decibels
-//#define WTOSC_SAMPLES_GUARD_BAND 0 // no guard band
 
 struct wtosc_s
 {
