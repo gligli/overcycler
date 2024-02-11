@@ -120,7 +120,7 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xov
 	if(o->mainData && incModLUTHalfSampleCount[imlut]!=o->halfSampleCount)
 	{
 		uint16_t *p=&incModLUT[imlut][0];
-		for(uint16_t i=0;i<WTOSC_MAX_SAMPLES/2;++i)
+		for(uint16_t i=0;i<o->halfSampleCount;++i)
 		{
 			uint16_t inc=i+1;
 			while(o->halfSampleCount%inc) ++inc;
