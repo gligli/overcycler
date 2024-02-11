@@ -128,6 +128,12 @@ static void readPots(void)
 
 		if(abs(new-scan.potValue[pot])>=POT_THRESHOLD || currentTick<scan.potLockTimeout[pot])
 		{
+			if(currentTick>=scan.potLockTimeout[pot])
+			{
+				// out of lock -> current value must be taken into account
+				if(scan.eventCallback) scan.eventCallback(-pot-1);
+			}			
+			
 			if(abs(new-scan.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
 			{
 				scan.potLockTimeout[pot]=currentTick+POT_TIMEOUT;
