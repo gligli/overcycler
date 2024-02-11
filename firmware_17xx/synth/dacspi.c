@@ -75,24 +75,26 @@ static struct
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
-	LPC_GPDMA->IntTCClear=LPC_GPDMA->IntTCStat; // acknowledge interrupt
-
+	static uint8_t phase=0;
 	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
+	LPC_GPDMA->IntTCClear=LPC_GPDMA->IntTCStat; // acknowledge interrupt
+
 	// when second half is playing, update first and vice-versa
+
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 	
 	// update CVs @ 5Khz
+
 	synth_updateCVsEvent();
 
 	// update timer @ 500Hz
-	static uint8_t frc=1;
-	--frc;
-	if(!frc)
-	{
-		synth_timerEvent();
-		frc=10;
-	}
+
+	synth_timerEvent(phase);
+
+	++phase;
+	if(phase>=10)
+		phase=0;
 }
 
 static void buildLLIs(int buffer, int channel)
@@ -197,7 +199,7 @@ void dacspi_init(void)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_16;
-	SSP_ConfigStruct.ClockRate=20000000;
+	SSP_ConfigStruct.ClockRate=30000000;
 	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
 	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
 	SSP_Cmd(LPC_SSP0,ENABLE);

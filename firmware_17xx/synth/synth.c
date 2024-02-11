@@ -1012,103 +1012,112 @@ void synth_update(void)
 	scan_update();
 	ui_update();
 	midi_update();
-	
-	refreshLfoSettings();
-	
-	synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Synth internal events
 ////////////////////////////////////////////////////////////////////////////////
 
-// @ 500Hz from from dacspi update
-void synth_timerEvent(void)
+// @ 500Hz on 10 phases from from dacspi update
+void synth_timerEvent(uint8_t phase)
 {
-	// clocking
-
-	if(settings.syncMode==smInternal || synth.pendingExtClock)
-	{
-		if(synth.pendingExtClock)
-			--synth.pendingExtClock;
-
-		if (clock_update())
-		{
-			// sequencer
-
-			if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
-				seq_update();
-
-			// arpeggiator
-
-			if(arp_getMode()!=amOff)
-				arp_update();
-		}
-	}
-
-	// glide
-
-	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-	{
-		int16_t amt=synth.partState.glideAmount;
-
-		if(synth.partState.gliding)
-		{
-			computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
-			computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
-			computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
-		}
-	}
-
-	// 500hz tick counter
-
-	++currentTick;
-}
-
-// @ 5Khz from dacspi update
-void synth_updateCVsEvent(void)
-{
-	int32_t resVal,resoFactor;
-	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
-
-	// midi
-
-	midi_processInput();
-
-	// bit inputs (footswitch)
-
-	handleBitInputs();
-
-	// assigner
-
-	handleFinishedVoices();
-
-	// lfos
-		
-	lfo_update(&synth.lfo[0]);
-	lfo_update(&synth.lfo[1]);
-		
-	// global CVs update
-	
-	resVal=currentPreset.continuousParameters[cpResonance];
-	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
-	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
-	resVal=__USAT(resVal,16);
-
-		// compensate resonance lowering volume by abjusting pre filter mixer level
-
-	resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
+	int32_t resVal;
+	static int32_t resoFactor=0;
 
 	auto uint32_t getResonanceCompensatedCV(continuousParameter_t cp, cv_t cv)
 	{
 		return scaleU16U16(currentPreset.continuousParameters[cp],(getStaticCV(cv)-INT16_MIN))*resoFactor/256;
 	}
 		
-	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
-	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
-	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
-	synth_refreshCV(-1,cvResonance,resVal);
+	switch(phase)
+	{
+		case 0:
+			// midi
+			midi_processInput();
+			break;
+		case 1:
+			// bit inputs (footswitch)
+			handleBitInputs();
+			break;
+		case 2:
+			// assigner
+			handleFinishedVoices();
+			break;
+		case 3:
+			// clocking
+			if(settings.syncMode==smInternal || synth.pendingExtClock)
+			{
+				if(synth.pendingExtClock)
+					--synth.pendingExtClock;
 
+				if (clock_update())
+				{
+					// sequencer
+
+					if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
+						seq_update();
+
+					// arpeggiator
+
+					if(arp_getMode()!=amOff)
+						arp_update();
+				}
+			}
+			break;
+		case 4:
+			// glide
+			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+			{
+				int16_t amt=synth.partState.glideAmount;
+
+				if(synth.partState.gliding)
+				{
+					computeGlide(&synth.oscANoteCV[v],synth.oscATargetCV[v],amt);
+					computeGlide(&synth.oscBNoteCV[v],synth.oscBTargetCV[v],amt);
+					computeGlide(&synth.filterNoteCV[v],synth.filterTargetCV[v],amt);
+				}
+			}
+			break;
+		case 5:
+			// 500hz tick counter
+			++currentTick;
+
+			// compensate resonance lowering volume by abjusting pre filter mixer level
+			resVal=currentPreset.continuousParameters[cpResonance];
+			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
+			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
+			resVal=__USAT(resVal,16);
+			resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
+			break;
+		case 6:
+			// global CVs update (part 1)
+			synth_refreshCV(-1,cvResonance,resVal);
+			synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
+			synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
+			break;
+		case 7:
+			// global CVs update (part 2)
+			synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
+			break;
+		case 8:
+			refreshLfoSettings();
+			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
+			break;
+		default:
+			/* nothing */;
+	}
+}
+
+// @ 5Khz from dacspi update
+void synth_updateCVsEvent(void)
+{
+	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
+
+	// lfos
+		
+	lfo_update(&synth.lfo[0]);
+	lfo_update(&synth.lfo[1]);
+		
 	// global computations
 	
 		// pitch

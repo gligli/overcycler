@@ -56,7 +56,7 @@ typedef enum
 	abxCount
 }abx_t;
 
-void synth_timerEvent(void);
+void synth_timerEvent(uint8_t phase);
 void synth_updateCVsEvent(void);
 void synth_updateDACsEvent(int32_t start, int32_t count);
 void synth_uartMIDIEvent(uint8_t data);

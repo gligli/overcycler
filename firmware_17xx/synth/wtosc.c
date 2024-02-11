@@ -11,7 +11,7 @@
 
 #define MAX_SAMPLERATE (CLOCK/TICK_RATE)
 
-#define WIDTH_MOD_BITS 12
+#define WIDTH_MOD_BITS 10
 #define FRAC_SHIFT 12
 
 static uint16_t incModLUT[WTOSC_IMLUT_COUNT][WTOSC_MAX_SAMPLES/2] EXT_RAM;
@@ -83,7 +83,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	}
 	
 	o->prevSample=o->curSample;
-	o->curSample=lerp16(o->data[0][o->phase],o->data[1][o->phase],o->crossover);
+	o->curSample=lerp16(o->mainData[o->phase],o->crossoverData[o->phase],o->crossover);
 	
 	return curPeriod;
 }
@@ -108,16 +108,16 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xov
 
 	if(sampleCount<=WTOSC_MAX_SAMPLES)
 	{
-		o->data[0]=mainData;
-		o->data[1]=xovrData;
+		o->mainData=mainData;
+		o->crossoverData=xovrData;
 	}
 	else
 	{
-		o->data[0]=NULL;
-		o->data[1]=NULL;
+		o->mainData=NULL;
+		o->crossoverData=NULL;
 	}
 
-	if(incModLUTHalfSampleCount[imlut]!=o->halfSampleCount)
+	if(o->mainData && incModLUTHalfSampleCount[imlut]!=o->halfSampleCount)
 	{
 		uint16_t *p=&incModLUT[imlut][0];
 		for(uint16_t i=0;i<WTOSC_MAX_SAMPLES/2;++i)
@@ -199,7 +199,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	int32_t buf;
 	int32_t alphaDiv,curHalf;
 	
-	if(!o->data)
+	if(!o->mainData)
 		return;
 	
 	updatePeriodIncrement(o,2);

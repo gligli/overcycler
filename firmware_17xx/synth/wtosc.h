@@ -14,7 +14,8 @@
 
 struct wtosc_s
 {
-	uint16_t * data[2]; // 0: main waveform, 1: crossover waveform
+	uint16_t * mainData;
+	uint16_t * crossoverData;
 	
 	int32_t period[2],pendingPeriod[2]; // one per waveform half
 	int32_t increment[2],pendingIncrement[2];
