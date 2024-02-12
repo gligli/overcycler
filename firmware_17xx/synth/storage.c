@@ -10,7 +10,7 @@
 #include "main.h"
 
 // increment this each time the binary format is changed
-#define STORAGE_VERSION 20
+#define STORAGE_VERSION 21
 
 #define STORAGE_MAGIC 0x006116a5
 #define STORAGE_MAX_SIZE 512
@@ -447,6 +447,11 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	{
 		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
 			currentPreset.continuousParameters[cpABaseWMod]=(currentPreset.continuousParameters[cpABaseWMod]>>1)+HALF_RANGE;
+	}
+	
+	if(storage.version<21)
+	{
+		currentPreset.continuousParameters[cpCutoff]=MIN(UINT16_MAX,256L*3*currentPreset.continuousParameters[cpCutoff]/(144*4));
 	}
 	
 	if(storage.version<2)

@@ -200,7 +200,7 @@ static void refreshTunedCVs(void)
 
 		mTune=(mTuneRaw>>7)+INT8_MIN*2;
 		detune=(detuneRaw>>8)+INT8_MIN;
-		baseCutoff=((uint32_t)baseCutoffRaw*3)>>2; // 75% of raw cutoff
+		baseCutoff=((uint32_t)baseCutoffRaw*144)>>8; // tuning in C
 
 		baseCutoffNote=baseCutoff>>8;
 		baseANote=baseAPitch>>8; // 64 semitones
