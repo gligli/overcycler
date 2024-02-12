@@ -18,8 +18,6 @@ static void updateSpeed(struct lfo_s * lfo)
 	spd=exponentialCourse(UINT16_MAX-lfo->speedCV,8000.0,65535.0f);
 	spd<<=lfo->speedShift;
 
-	spd-=spd/lfo->speedDiv;
-	
 	lfo->speed=spd;
 }
 
@@ -65,12 +63,11 @@ void LOWERCODESIZE lfo_setShape(struct lfo_s * lfo, lfoShape_t shape)
 	lfo->noise=random();
 }
 
-void LOWERCODESIZE lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift, int8_t div)
+void LOWERCODESIZE lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift)
 {
-	if(shift!=lfo->speedShift || div!=lfo->speedDiv)
+	if(shift!=lfo->speedShift)
 	{
 		lfo->speedShift=shift;
-		lfo->speedDiv=div;
 		updateSpeed(lfo);
 		updateIncrement(lfo);
 	}

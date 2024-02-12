@@ -21,7 +21,6 @@ struct adsr_s
 
 	int8_t expOutput,gate,loop;
 	int8_t speedShift;
-	int8_t speedDiv;
 	
 	adsrStage_t stage;
 };
@@ -30,7 +29,7 @@ void adsr_setCVs(struct adsr_s * adsr, uint16_t atk, uint16_t dec, uint16_t sus,
 void adsr_setGate(struct adsr_s * adsr, int8_t gate);
 
 void adsr_setShape(struct adsr_s * adsr, int8_t isExp, int8_t isLoop);
-void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift, int8_t div);
+void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift);
 
 adsrStage_t adsr_getStage(struct adsr_s * adsr);
 uint16_t adsr_getOutput(struct adsr_s * adsr);

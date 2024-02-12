@@ -332,7 +332,7 @@ static void refreshEnvSettings(int8_t type)
 			return;
 		}
 		
-		adsr_setSpeedShift(a,(slow)?4:2,5);
+		adsr_setSpeedShift(a,(slow)?4:2);
 		adsr_setShape(a,(lin)?0:1,loop);
 		adsr_setCVs(a,atk,dec,sus,rel,0,0x0f);
 	}
@@ -346,8 +346,8 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
 	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
 	
-	lfo_setSpeedShift(&synth.lfo[0],3,5);
-	lfo_setSpeedShift(&synth.lfo[1],3,5);
+	lfo_setSpeedShift(&synth.lfo[0],3);
+	lfo_setSpeedShift(&synth.lfo[1],3);
 
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
@@ -1018,11 +1018,10 @@ void synth_update(void)
 // Synth internal events
 ////////////////////////////////////////////////////////////////////////////////
 
-// @ 500Hz on 10 phases from from dacspi update
+// @ 500Hz on 8 phases from from dacspi update
 void synth_timerEvent(uint8_t phase)
 {
-	int32_t resVal;
-	static int32_t resoFactor=0;
+	static int32_t resoFactor=0, resVal=0;
 
 	auto uint32_t getResonanceCompensatedCV(continuousParameter_t cp, cv_t cv)
 	{
@@ -1079,9 +1078,6 @@ void synth_timerEvent(uint8_t phase)
 			}
 			break;
 		case 5:
-			// 500hz tick counter
-			++currentTick;
-
 			// compensate resonance lowering volume by abjusting pre filter mixer level
 			resVal=currentPreset.continuousParameters[cpResonance];
 			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
@@ -1090,16 +1086,17 @@ void synth_timerEvent(uint8_t phase)
 			resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
 			break;
 		case 6:
-			// global CVs update (part 1)
+			// global CVs update
 			synth_refreshCV(-1,cvResonance,resVal);
 			synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
 			synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
-			break;
-		case 7:
-			// global CVs update (part 2)
 			synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
 			break;
-		case 8:
+		case 7:
+			// 500hz tick counter
+			++currentTick;
+
+			// misc
 			refreshLfoSettings();
 			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
 			break;
@@ -1108,7 +1105,7 @@ void synth_timerEvent(uint8_t phase)
 	}
 }
 
-// @ 5Khz from dacspi update
+// @ 4Khz from dacspi update
 void synth_updateCVsEvent(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;

@@ -84,7 +84,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 
 	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
 	
-	// update CVs @ 5Khz
+	// update CVs @ 4Khz
 
 	synth_updateCVsEvent();
 
@@ -93,7 +93,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	synth_timerEvent(phase);
 
 	++phase;
-	if(phase>=10)
+	if(phase>=8)
 		phase=0;
 }
 
@@ -199,7 +199,7 @@ void dacspi_init(void)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_16;
-	SSP_ConfigStruct.ClockRate=30000000;
+	SSP_ConfigStruct.ClockRate=20000000;
 	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
 	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
 	SSP_Cmd(LPC_SSP0,ENABLE);

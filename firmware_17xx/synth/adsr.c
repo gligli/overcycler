@@ -88,10 +88,6 @@ static LOWERCODESIZE void updateIncrements(struct adsr_s * adsr)
 	dInc=getPhaseInc(adsr->decayCV>>8)>>adsr->speedShift;
 	rInc=getPhaseInc(adsr->releaseCV>>8)>>adsr->speedShift;
 	
-	aInc-=aInc/adsr->speedDiv;
-	dInc-=dInc/adsr->speedDiv;
-	rInc-=rInc/adsr->speedDiv;
-	
 	adsr->attackIncrement=aInc<<4; // phase is 20 bits, from bit 4 to bit 23
 	adsr->decayIncrement=dInc<<4;
 	adsr->releaseIncrement=rInc<<4;
@@ -224,10 +220,9 @@ inline void adsr_setShape(struct adsr_s * adsr, int8_t isExp, int8_t isLoop)
 	}
 }
 
-LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift, int8_t div)
+LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift)
 {
 	adsr->speedShift=shift;
-	adsr->speedDiv=div;
 	
 	updateIncrements(adsr);
 }
