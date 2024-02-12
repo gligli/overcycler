@@ -1083,7 +1083,7 @@ void synth_timerEvent(uint8_t phase)
 			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
 			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
 			resVal=__USAT(resVal,16);
-			resoFactor=(30*UINT16_MAX+110*(uint32_t)MAX(0,resVal-6000))/(100*256);
+			resoFactor=(30*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
 			break;
 		case 6:
 			// global CVs update
