@@ -3,10 +3,11 @@
 
 #include "synth.h"
 
-#define SCAN_ADC_BITS 10
-#define SCAN_ADC_QUANTUM (65536 / (1<<(SCAN_ADC_BITS)))
 #define SCAN_POT_COUNT 10
 #define SCAN_POT_MAX_VALUE 999
+
+#define SCAN_POT_TO_16BITS(x) (((x)*UINT16_MAX)/SCAN_POT_MAX_VALUE)
+#define SCAN_POT_FROM_16BITS(x) ((((x)+1)*SCAN_POT_MAX_VALUE)/UINT16_MAX)
 
 enum scanKeypadButton_e
 {

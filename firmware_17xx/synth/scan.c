@@ -12,13 +12,15 @@
 #include "dacspi.h"
 #include "main.h"
 
+#define SCAN_ADC_BITS 10
+
 #define DMA_CHANNEL_SSP1_TX__T2_MAT_0 4
 
 #define KEYPAD_DEBOUNCE_THRESHOLD 2
 
 #define POT_SAMPLES 5
-#define POT_THRESHOLD (SCAN_ADC_QUANTUM*6)
-#define POT_TIMEOUT_THRESHOLD (SCAN_ADC_QUANTUM*3)
+#define POT_UNLOCK_THRESHOLD SCAN_POT_TO_16BITS(6)
+#define POT_TIMEOUT_THRESHOLD SCAN_POT_TO_16BITS(3)
 #define POT_TIMEOUT (TICKER_1S)
 
 #define POTSCAN_PIN_CS 8
@@ -113,7 +115,7 @@ static void readPots(void)
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
 			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
-			tmpSmp[smp]=(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12))*(UINT16_MAX*64/SCAN_POT_MAX_VALUE))>>6;
+			tmpSmp[smp]=SCAN_POT_TO_16BITS(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12)));
 		}
 		
 		// sort values
@@ -126,7 +128,7 @@ static void readPots(void)
 		
 		// ignore small changes
 
-		if(abs(new-scan.potValue[pot])>=POT_THRESHOLD || currentTick<scan.potLockTimeout[pot])
+		if(abs(new-scan.potValue[pot])>=POT_UNLOCK_THRESHOLD || currentTick<scan.potLockTimeout[pot])
 		{
 			if(currentTick>=scan.potLockTimeout[pot])
 			{
@@ -220,7 +222,7 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 	// init SSP
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
-	SSP_ConfigStruct.Databit=SSP_DATABIT_10;
+	SSP_ConfigStruct.Databit=SSP_CR0_DSS(SCAN_ADC_BITS);
 	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP2,ENABLE);
@@ -330,7 +332,7 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 
 uint16_t scan_getPotValue(int8_t pot)
 {
-	return scan.potValue[pot]&~(SCAN_ADC_QUANTUM-1);
+	return scan.potValue[pot];
 }
 
 void scan_resetPotLocking(void)

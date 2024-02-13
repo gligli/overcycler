@@ -572,13 +572,34 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 		case ptCont:
 			v=currentPreset.continuousParameters[prm->number];
 			
-			if(continuousParametersZeroCentered[prm->number])
+			switch(prm->number)
 			{
-				sprintf(dv,"%4d",((v+INT16_MIN)*1000)>>16);
-			}
-			else
-			{
-				sprintf(dv,"%4d",(v*1000)>>16);
+				case cpAFreq:
+				case cpBFreq:
+					switch(currentPreset.steppedParameters[spChromaticPitch])
+					{
+						case 2: // octaves
+							v>>=10;
+							sprintf(dv," %s%d",notesNames[0],v/12);
+							break;
+						case 1: // semitones
+							v>>=10;
+							sprintf(dv," %s%d",notesNames[v%12],v/12);
+							break;
+						default:
+							sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v));
+							break;
+					}
+					break;
+				default:
+					if(continuousParametersZeroCentered[prm->number])
+					{
+						sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
+					}
+					else
+					{
+						sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v));
+					}
 			}
 			break;
 		case ptStep:
@@ -657,7 +678,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					}
 					else
 					{
-						v=((int)settings.seqArpClock*1000)>>16;
+						v=SCAN_POT_FROM_16BITS(settings.seqArpClock);
 					}
 					break;
 				case cnAXoCp:
@@ -728,28 +749,20 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		int32_t v=currentPreset.continuousParameters[prm->number];
 		
+		// scale
+		v=(v*40)/UINT16_MAX;
+
 		if(continuousParametersZeroCentered[prm->number])
 		{
-			v+=INT16_MIN;
-
-			// nicer sampling
-			if (v>=0)
-				v+=UINT16_MAX/80;
-			else if (v<0)
-				v-=UINT16_MAX/80;
-			
-			// scale
-			v=v*40>>16;
-
 			// zero centered bargraph			
 			for(int i=0;i<40;++i)
-				if (v>=0)
+				if (v>=20)
 				{
-					dv[i]=((i>=20) && (i-20)<v) ? '\xff' : ' ';
+					dv[i]=((i>20) && i<v) ? '\xff' : ' ';
 				}
 				else
 				{
-					dv[i]=((i<=20) && (i-20)>v) ? '\xff' : ' ';
+					dv[i]=((i<20) && i>=v) ? '\xff' : ' ';
 				}
 			
 			// center
@@ -757,12 +770,6 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		}
 		else
 		{
-			// nicer sampling
-			v+=UINT16_MAX/80;
-			
-			// scale
-			v=v*40>>16;
-
 			// regular bargraph			
 			for(int i=0;i<40;++i)
 				dv[i]=(i<v) ? '\xff' : ' ';
@@ -960,13 +967,13 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		switch(prm->type)
 		{
 			case ptCont:
-				potSetting=((*forcedValue)*UINT16_MAX)/SCAN_POT_MAX_VALUE;
+				potSetting=SCAN_POT_TO_16BITS(*forcedValue);
 				break;
 			case ptStep:
 				potSetting=MIN(*forcedValue,valCount-1);
 				break;
 			case ptCust:
-				potSetting=MIN(((*forcedValue)*UINT16_MAX)/SCAN_POT_MAX_VALUE,prm->custPotMul+prm->custPotAdd-1);
+				potSetting=MIN(SCAN_POT_TO_16BITS(*forcedValue),prm->custPotMul+prm->custPotAdd-1);
 				break;
 			default:
 				/* nothing */;
@@ -990,7 +997,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					if(continuousParametersZeroCentered[prm->number])
 						potSetting=addDeadband(potSetting, &panelDeadband);
 
-					potQuantum=SCAN_ADC_QUANTUM;
+					potQuantum=SCAN_POT_TO_16BITS(1);
 					break;
 				case ptStep:
 					potSetting=(valCount*data)>>16;

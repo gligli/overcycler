@@ -124,6 +124,10 @@ const abx_t sp2abx[spCount] =
 	/*BXOvrWave*/abxBCrossover,
 };
 
+const char * notesNames[12]=
+{
+	"C ","C#","D ","Eb","E ","F ","F#","G ","G#","A ","Bb","B "
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Non speed critical internal code
