@@ -224,7 +224,7 @@
 #define EMCCLKSEL_Val         0x00000001
 #define PCLKSEL_Val           0x00000001
 #define PCONP_Val             0x03f0840E
-#define CLKOUTCFG_Val         0x00000100
+#define CLKOUTCFG_Val         0x00000000
 
 
 /*--------------------- Flash Accelerator Configuration ----------------------
@@ -235,13 +235,13 @@
 //					<1=>	2 CPU clocks (for CPU clock up to 40 MHz)
 //					<2=>	3 CPU clocks (for CPU clock up to 60 MHz)
 //					<3=>	4 CPU clocks (for CPU clock up to 80 MHz)
-//					<4=>	5 CPU clocks (for CPU clock up to 100 MHz)
+//					<4=>	5 CPU clocks (for CPU clock up to 100 MHz, or 120MHz with power boost on)
 //					<5=>	6 CPU clocks (for any CPU clock)
 //	</e>
 */
 
 #define FLASH_SETUP           1
-#define FLASHCFG_Val          0x00005000
+#define FLASHCFG_Val          0x00004000
 
 /*----------------------------------------------------------------------------
   Check the register settings
