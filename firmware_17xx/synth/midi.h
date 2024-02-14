@@ -1,16 +1,20 @@
 #ifndef MIDI_H
 #define	MIDI_H
 
-#include "synth.h"
+#include <stdint.h>
 
-#define MIDI_PORT_UART 0
-#define MIDI_PORT_USB 1
-#define MIDI_PORT_COUNT 2
+typedef enum
+{
+	mpUART=0,mpUSB=1,
+			
+	// /!\ this must stay last
+	mpCount
+} midiPort_t;
 
 void midi_init(void);
 void midi_update(void);
 void midi_processInput(void);
-void midi_newData(int8_t port, uint8_t data);
+void midi_newData(midiPort_t port, uint8_t data);
 
 #endif	/* MIDI_H */
 

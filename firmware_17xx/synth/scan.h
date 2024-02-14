@@ -9,6 +9,8 @@
 #define SCAN_POT_TO_16BITS(x) (((x)*UINT16_MAX)/SCAN_POT_MAX_VALUE)
 #define SCAN_POT_FROM_16BITS(x) ((((x)+1)*SCAN_POT_MAX_VALUE)/UINT16_MAX)
 
+#define SCAN_POT_DEAD_ZONE 512
+
 enum scanKeypadButton_e
 {
 	kb0=0,kb1,kb2,kb3,kb4,kb5,kb6,kb7,kb8,kb9,

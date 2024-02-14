@@ -90,7 +90,7 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 
 	// update timer @ 500Hz
 
-	synth_timerEvent(phase);
+	synth_tickTimerEvent(phase);
 
 	++phase;
 	if(phase>=8)

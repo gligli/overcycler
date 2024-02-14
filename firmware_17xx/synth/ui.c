@@ -233,11 +233,11 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock",.custPotMul=UINT16_MAX+1,.custPotAdd=0},
+			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
+			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
 			/* 2nd row of pots */
 			{.type=ptNone},
 			{.type=ptNone},
@@ -262,11 +262,11 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock",.custPotMul=UINT16_MAX+1,.custPotAdd=0},
+			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
 			{.type=ptNone},
 			{.type=ptNone},
 			{.type=ptNone},
-			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI"},.custPotMul=2,.custPotAdd=0},
+			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
 			/* 2nd row of pots */
 			{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
 			{.type=ptNone},
@@ -670,16 +670,10 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					v=settings.sequencerBank;
 					break;
 				case cnClk:
-					if(settings.syncMode==smMIDI)
-					{
+					if(settings.syncMode!=symInternal)
 						v=clock_getSpeed();
-						if(v==UINT16_MAX)
-							v=0;
-					}
 					else
-					{
-						v=SCAN_POT_FROM_16BITS(settings.seqArpClock);
-					}
+						v=settings.seqArpClock;
 					break;
 				case cnAXoCp:
 					v=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;

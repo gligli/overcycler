@@ -2,6 +2,7 @@
 #define SYNTH_H
 
 #include "main.h"
+#include "midi.h"
 #include "utils.h"
 
 #define SYNTH_VOICE_COUNT 6
@@ -45,18 +46,13 @@ typedef enum
 
 typedef enum
 {
-	smInternal=0,smMIDI=1,smTape=2
-} syncMode_t;
-
-typedef enum
-{
 	abxNone=-1,abxAMain=0,abxBMain,abxACrossover,abxBCrossover,
 	
 	// /!\ this must stay last
 	abxCount
 }abx_t;
 
-void synth_timerEvent(uint8_t phase);
+void synth_tickTimerEvent(uint8_t phase);
 void synth_updateCVsEvent(void);
 void synth_updateDACsEvent(int32_t start, int32_t count);
 void synth_uartMIDIEvent(uint8_t data);
@@ -64,7 +60,8 @@ void synth_usbMIDIEvent(uint8_t data);
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, uint8_t flags);
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask);
 void synth_pressureEvent(uint16_t pressure);
-void synth_realtimeEvent(uint8_t midiEvent);
+void synth_realtimeEvent(midiPort_t port, uint8_t midiEvent);
+void synth_clockEvent(void);
 
 void synth_init(void);
 void synth_update(void);

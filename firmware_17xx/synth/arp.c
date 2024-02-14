@@ -90,7 +90,7 @@ inline void arp_setMode(arpMode_t mode, int8_t hold)
 		{
 			killAllNotes();
 			if (mode!=amOff)
-				arp_resetCounter(settings.syncMode==smInternal);
+				arp_resetCounter(settings.syncMode==symInternal);
 		}
 	}
 
@@ -137,7 +137,7 @@ void arp_assignNote(uint8_t note, int8_t on)
 	{
 
 		// if this is the first note, make sure the arp will start on it as as soon as we update
-		if(isEmpty()) arp_resetCounter(settings.syncMode==smInternal);
+		if(isEmpty()) arp_resetCounter(settings.syncMode==symInternal);
 
 		// assign note			
 		

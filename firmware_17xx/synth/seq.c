@@ -148,7 +148,7 @@ inline void seq_setMode(int8_t track, seqMode_t mode)
 	}	
 
 	if(mode==smPlaying)
-		seq_resetCounter(track,settings.syncMode==smInternal);
+		seq_resetCounter(track,settings.syncMode==symInternal);
 
 	if(mode==smRecording)
 		seq.addTies=0;
@@ -170,7 +170,7 @@ inline void seq_setMode(int8_t track, seqMode_t mode)
 	// one step), so we don't play the step here, but let it be played
 	// as usual from seq_update().
 	uint16_t speed=clock_getSpeed();
-	if(mode==smPlaying&&alreadyPlaying&&speed!=UINT16_MAX&&clock_getCounter()<speed/2)
+	if(mode==smPlaying&&alreadyPlaying&&speed&&clock_getCounter()<speed/2)
 		playStep(track);
 }
 

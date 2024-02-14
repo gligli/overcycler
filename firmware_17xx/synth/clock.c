@@ -4,52 +4,84 @@
 
 #include "clock.h"
 
+#include "scan.h"
 #include "storage.h"
+
+#define FRAC_SHIFT 16
 
 struct
 {
-	uint16_t counter,speed;
+	int32_t counter,speed;
+	uint32_t pendingExtClock;
+	int8_t pendingReset;
 } clock;
 
-inline void clock_setSpeed(uint16_t speed)
+void clock_updateSpeed(void)
 {
-	if(speed<1024)
-		clock.speed=UINT16_MAX;
-	else if(settings.syncMode==smInternal)
-		clock.speed=exponentialCourse(speed,22000.0f,500.0f);
+	if(!settings.seqArpClock)
+		clock.speed=INT32_MAX;
+	else if(settings.syncMode==symInternal)
+		clock.speed=((60UL*TICKER_1S)<<FRAC_SHIFT)/settings.seqArpClock;
 	else
-		clock.speed=extClockDividers[((uint32_t)speed*(sizeof(extClockDividers)/sizeof(uint16_t)))>>16];
+		clock.speed=extClockDividers[((uint32_t)settings.seqArpClock*(sizeof(extClockDividers)/sizeof(uint16_t)-1))/(CLOCK_MAX_BPM-1)]<<FRAC_SHIFT;
 }
 
 inline uint16_t clock_getSpeed(void)
 {
-	return clock.speed;
+	if(clock.speed==INT32_MAX)
+		return 0;
+	else
+		return clock.speed>>FRAC_SHIFT;
 }
 
 inline uint16_t clock_getCounter(void)
 {
-	return clock.counter;
+	return clock.counter>>FRAC_SHIFT;
 }
 
 inline void clock_reset(void)
 {
-	clock.counter = INT16_MAX; // not UINT16_MAX, to avoid overflow
-
+	clock.pendingExtClock=0;
+	clock.pendingReset=1;
 }
 
-inline int8_t clock_update(void)
+inline void clock_extClockTick(void)
 {
-	// speed management
+	++clock.pendingExtClock;
+}
 
-	if(clock.speed==UINT16_MAX)
-		return 0;
+void clock_init(void)
+{
+	memset(&clock,0,sizeof(clock));
+	clock.speed=INT32_MAX;
+}
 
-	++clock.counter;
+void clock_update(void)
+{
+	if(clock.speed!=INT32_MAX)
+	{
+		if(clock.pendingReset)
+		{
+			clock.counter=0;
+			clock.pendingReset=0;
+			synth_clockEvent();
+		}
 
-	if(clock.counter<clock.speed)
-		return 0;
+		if(settings.syncMode==symInternal)
+		{
+			clock.counter+=1<<FRAC_SHIFT;
+		}
+		else
+		{
+			clock.counter+=clock.pendingExtClock<<FRAC_SHIFT;
+		}
 
-	clock.counter=0;
+		if(clock.counter>=clock.speed)
+		{
+			clock.counter-=clock.speed;
+			synth_clockEvent();
+		}
+	}
 
-	return 1;
+	clock.pendingExtClock=0;
 }

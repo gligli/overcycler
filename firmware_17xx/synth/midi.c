@@ -180,9 +180,9 @@ const struct midiCC_s midiCCs[128]={
 
 static struct
 {
-	MidiDevice device[MIDI_PORT_COUNT];
-	int8_t isNrpnStepped[MIDI_PORT_COUNT];
-	int8_t currentNrpn[MIDI_PORT_COUNT];
+	MidiDevice device[mpCount];
+	int8_t isNrpnStepped[mpCount];
+	int8_t currentNrpn[mpCount];
 	uint32_t presetTimeout;
 	uint32_t pendingBankWaveTimeout[abxCount];
 } midi;
@@ -201,9 +201,9 @@ static int8_t filterChannel(uint8_t channel)
 	return settings.midiReceiveChannel<0 || (channel&MIDI_CHANMASK)==settings.midiReceiveChannel;
 }
 
-static int8_t getPort(MidiDevice * device)
+static midiPort_t getPort(MidiDevice * device)
 {
-	for(int8_t port=0;port<MIDI_PORT_COUNT;++port)
+	for(midiPort_t port=0;port<mpCount;++port)
 		if(device==&midi.device[port])
 			return port;
 	return -1;
@@ -495,7 +495,7 @@ static void chanpressureEvent(MidiDevice * device, uint8_t channel, uint8_t pres
 
 static void realtimeEvent(MidiDevice * device, uint8_t event)
 {
-	synth_realtimeEvent(event);
+	synth_realtimeEvent(getPort(device),event);
 }
 
 void midi_init(void)
@@ -506,7 +506,7 @@ void midi_init(void)
 		midi.pendingBankWaveTimeout[abx]=UINT32_MAX;
 	midi.presetTimeout=UINT32_MAX;
 
-	for(int8_t port=0;port<MIDI_PORT_COUNT;++port)
+	for(midiPort_t port=0;port<mpCount;++port)
 	{
 		MidiDevice * d = &midi.device[port];
 		
@@ -523,11 +523,11 @@ void midi_init(void)
 
 void midi_processInput(void)
 {
-	for(int8_t port=0;port<MIDI_PORT_COUNT;++port)
+	for(midiPort_t port=0;port<mpCount;++port)
 		midi_device_process(&midi.device[port]);
 }
 
-void midi_newData(int8_t port, uint8_t data)
+void midi_newData(midiPort_t port, uint8_t data)
 {
 	midi_device_input(&midi.device[port],1,&data);
 }

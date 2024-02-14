@@ -7,6 +7,7 @@
 #include "wtosc.h"
 #include "seq.h"
 #include "ui.h"
+#include "clock.h"
 #include "main.h"
 
 // increment this each time the binary format is changed
@@ -775,7 +776,7 @@ LOWERCODESIZE void settings_loadDefault(void)
 
 	settings.midiReceiveChannel=-1;
 	settings.voiceMask=(1<<SYNTH_VOICE_COUNT)-1;
-	settings.seqArpClock=6*UINT16_MAX/10+1;
+	settings.seqArpClock=CLOCK_MAX_BPM/2;
 	settings.lcdContrast=UI_DEFAULT_LCD_CONTRAST;
 
 	tuner_init(); // use theoretical tuning

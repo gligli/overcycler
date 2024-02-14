@@ -32,8 +32,6 @@
 #define MAX_BANKS 128
 #define MAX_BANK_WAVES 256
 
-#define POT_DEAD_ZONE 512
-
 volatile uint32_t currentTick=0; // 500hz
 
 static struct
@@ -87,8 +85,6 @@ static struct
 		uint32_t syncResetsMask;
 		int32_t oldCrossOver;
 	} partState;
-	
-	uint8_t pendingExtClock;
 } synth;
 
 extern const uint16_t attackCurveLookup[]; // for modulation delay
@@ -256,7 +252,7 @@ static void refreshTunedCVs(void)
 			synth.oscBTargetCV[v]=cvb;
 			synth.filterTargetCV[v]=cvf;
 
-			if(trackRaw<POT_DEAD_ZONE)
+			if(trackRaw<SCAN_POT_DEAD_ZONE)
 				synth.filterNoteCV[v]=cvf; // no glide if no tracking for filter
 		}
 		else			
@@ -358,7 +354,7 @@ static void refreshLfoSettings(void)
 	dlyAmt=0;
 	if(synth.partState.modulationDelayStart!=UINT32_MAX)
 	{
-		if(currentPreset.continuousParameters[cpModDelay]<POT_DEAD_ZONE)
+		if(currentPreset.continuousParameters[cpModDelay]<SCAN_POT_DEAD_ZONE)
 		{
 			dlyAmt=UINT16_MAX;
 		}
@@ -373,12 +369,10 @@ static void refreshLfoSettings(void)
 	}
 
 	lfoAmt=currentPreset.continuousParameters[cpLFOAmt];
-	lfoAmt=(lfoAmt<POT_DEAD_ZONE)?0:(lfoAmt-POT_DEAD_ZONE);
 	if(currentPreset.steppedParameters[spPressureTarget]==modLFO1)
 		lfoAmt=satAddU16U16(lfoAmt,synth.partState.pressureAmount);
 
 	lfo2Amt=currentPreset.continuousParameters[cpLFO2Amt];
-	lfo2Amt=(lfo2Amt<POT_DEAD_ZONE)?0:(lfo2Amt-POT_DEAD_ZONE);
 	if(currentPreset.steppedParameters[spPressureTarget]==modLFO2)
 		lfo2Amt=satAddU16U16(lfo2Amt,synth.partState.pressureAmount);
 
@@ -428,9 +422,9 @@ static void refreshModulationDelay(int8_t refreshTickCount)
 
 static void refreshMisc(void)
 {
-	// arp
+	// clock
 
-	clock_setSpeed(settings.seqArpClock);
+	clock_updateSpeed();
 
 	// glide
 
@@ -965,6 +959,7 @@ void synth_init(void)
 	seq_init();
 	arp_init();
 	midi_init();
+	clock_init();
 	
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
@@ -1023,7 +1018,7 @@ void synth_update(void)
 ////////////////////////////////////////////////////////////////////////////////
 
 // @ 500Hz on 8 phases from from dacspi update
-void synth_timerEvent(uint8_t phase)
+void synth_tickTimerEvent(uint8_t phase)
 {
 	static int32_t resoFactor=0, resVal=0;
 
@@ -1048,24 +1043,7 @@ void synth_timerEvent(uint8_t phase)
 			break;
 		case 3:
 			// clocking
-			if(settings.syncMode==smInternal || synth.pendingExtClock)
-			{
-				if(synth.pendingExtClock)
-					--synth.pendingExtClock;
-
-				if (clock_update())
-				{
-					// sequencer
-
-					if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
-						seq_update();
-
-					// arpeggiator
-
-					if(arp_getMode()!=amOff)
-						arp_update();
-				}
-			}
+			clock_update();
 			break;
 		case 4:
 			// glide
@@ -1259,7 +1237,7 @@ void synth_uartMIDIEvent(uint8_t data)
 	rprintf(0,"uart midi %x\n",data);
 #endif
 
-	midi_newData(MIDI_PORT_UART, data);
+	midi_newData(mpUART, data);
 }
 
 void synth_usbMIDIEvent(uint8_t data)
@@ -1268,7 +1246,7 @@ void synth_usbMIDIEvent(uint8_t data)
 	rprintf(0,"usb midi %x\n",data);
 #endif
 
-	midi_newData(MIDI_PORT_USB, data);
+	midi_newData(mpUSB, data);
 }
 
 void synth_wheelEvent(int16_t bend, uint16_t modulation, uint8_t mask)
@@ -1339,26 +1317,38 @@ void synth_pressureEvent(uint16_t pressure)
 	
 }
 
-void synth_realtimeEvent(uint8_t midiEvent)
+void synth_realtimeEvent(midiPort_t port, uint8_t midiEvent)
 {
-	if(settings.syncMode!=smMIDI)
+	if(!(port==mpUART && settings.syncMode==symMIDI || port==mpUSB && settings.syncMode==symUSB))
 		return;
 	
 	switch(midiEvent)
 	{
 		case MIDI_CLOCK:
-			++synth.pendingExtClock;
+			clock_extClockTick();
 			break;
 		case MIDI_START:
 			seq_resetCounter(0,0);
 			seq_resetCounter(1,0);
 			arp_resetCounter(0);
 			clock_reset(); // always do a beat reset on MIDI START
-			synth.pendingExtClock=0;
 			break;
 		case MIDI_STOP:
 			seq_silence(0);
 			seq_silence(1);
 			break;
 	}
+}
+
+void synth_clockEvent(void)
+{
+	// sequencer
+
+	if(seq_getMode(0)!=smOff || seq_getMode(1)!=smOff)
+		seq_update();
+
+	// arpeggiator
+
+	if(arp_getMode()!=amOff)
+		arp_update();
 }
