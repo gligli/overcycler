@@ -175,7 +175,7 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCont,.number=cpLFOFreq,.shortName="1Frq",.longName="LFO1 Frequency"},
+			{.type=ptCont,.number=cpLFOFreq,.shortName="1Spd",.longName="LFO1 Speed (BPM)"},
 			{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
 			{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
 			{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
@@ -204,7 +204,7 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCont,.number=cpLFO2Freq,.shortName="2Frq",.longName="LFO2 Frequency"},
+			{.type=ptCont,.number=cpLFO2Freq,.shortName="2Spd",.longName="LFO2 Speed (BPM)"},
 			{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
 			{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
 			{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},

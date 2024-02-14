@@ -8,6 +8,7 @@
 #include "seq.h"
 #include "ui.h"
 #include "clock.h"
+#include "scan.h"
 #include "main.h"
 
 // increment this each time the binary format is changed
@@ -735,8 +736,8 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-	currentPreset.continuousParameters[cpLFOFreq]=0.692*UINT16_MAX;
-	currentPreset.continuousParameters[cpLFO2Freq]=0.692*UINT16_MAX;
+	currentPreset.continuousParameters[cpLFOFreq]=SCAN_POT_TO_16BITS(210);
+	currentPreset.continuousParameters[cpLFO2Freq]=SCAN_POT_TO_16BITS(210);
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
 
 	currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
@@ -748,10 +749,8 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;
 	currentPreset.steppedParameters[spLFOShape]=lsTri;
 	currentPreset.steppedParameters[spLFOTargets]=otBoth;
-	currentPreset.steppedParameters[spLFOShift_Legacy]=1;
 	currentPreset.steppedParameters[spLFO2Shape]=lsTri;
 	currentPreset.steppedParameters[spLFO2Targets]=otBoth;
-	currentPreset.steppedParameters[spLFO2Shift_Legacy]=1;
 	currentPreset.steppedParameters[spPressureRange]=1; // low
 	currentPreset.steppedParameters[spPressureTarget]=modFilter;
 
