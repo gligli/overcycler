@@ -3,6 +3,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "lfo.h"
+#include "scan.h"
+#include "dacspi.h"
 
 static uint16_t sineShape[256];
 
@@ -15,7 +17,7 @@ static void updateSpeed(struct lfo_s * lfo)
 {
 	int32_t spd;
 	
-	spd=exponentialCourse(UINT16_MAX-lfo->speedCV,8000.0,65535.0f);
+	spd=((1LL<<24)*SCAN_POT_FROM_16BITS(lfo->bpmCV))/(DACSPI_UPDATE_HZ*30);
 	spd<<=lfo->speedShift;
 
 	lfo->speed=spd;
@@ -41,13 +43,13 @@ static void handlePhaseOverflow(struct lfo_s * l)
 	}
 }
 
-void LOWERCODESIZE lfo_setCVs(struct lfo_s * lfo, uint16_t spd, uint16_t lvl)
+void LOWERCODESIZE lfo_setCVs(struct lfo_s * lfo, uint16_t bpm, uint16_t lvl)
 {
 	lfo->levelCV=lvl;
 
-	if(spd!=lfo->speedCV)
+	if(bpm!=lfo->bpmCV)
 	{
-		lfo->speedCV=spd;
+		lfo->bpmCV=bpm;
 		updateSpeed(lfo);
 		updateIncrement(lfo);
 	}
@@ -71,7 +73,6 @@ void LOWERCODESIZE lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift)
 		updateSpeed(lfo);
 		updateIncrement(lfo);
 	}
-
 }
 
 int16_t inline lfo_getOutput(struct lfo_s * lfo)
@@ -130,7 +131,7 @@ inline void lfo_update(struct lfo_s * l)
 		l->rawOutput=computeShape(l->phase,sineShape,2);
 		break;
 	case lsNoise:
-		l->noise=lfsr(l->noise,(l->speedCV>>12)+1);
+		l->noise=lfsr(l->noise,(l->bpmCV>>12)+1);
 		l->rawOutput=l->noise;
 		break;
 	case lsSaw:

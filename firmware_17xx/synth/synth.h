@@ -12,7 +12,7 @@
 #define SYNTH_DEFAULT_WAVE_BANK "AKWF_bw_perfectwaves"
 #define SYNTH_DEFAULT_WAVE_NAME "AKWF_saw.wav"
 
-#define TICKER_1S 500
+#define TICKER_HZ 500
 
 // Some constants for 16 bit ranges */
 #define FULL_RANGE UINT16_MAX

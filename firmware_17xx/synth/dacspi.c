@@ -27,7 +27,6 @@
 		GPDMA_DMACCxConfig_TransferType(2) | \
 		GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_BUFFER_COUNT 32
 #define DACSPI_CV_COUNT 16
 
 #define DACSPI_CV_CHANNEL 6

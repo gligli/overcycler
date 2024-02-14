@@ -21,7 +21,7 @@ void clock_updateSpeed(void)
 	if(!settings.seqArpClock)
 		clock.speed=INT32_MAX;
 	else if(settings.syncMode==symInternal)
-		clock.speed=((60UL*TICKER_1S)<<FRAC_SHIFT)/settings.seqArpClock;
+		clock.speed=((60UL*TICKER_HZ)<<FRAC_SHIFT)/settings.seqArpClock;
 	else
 		clock.speed=extClockDividers[((uint32_t)settings.seqArpClock*(sizeof(extClockDividers)/sizeof(uint16_t)-1))/(CLOCK_MAX_BPM-1)]<<FRAC_SHIFT;
 }

@@ -346,9 +346,6 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
 	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
 	
-	lfo_setSpeedShift(&synth.lfo[0],3);
-	lfo_setSpeedShift(&synth.lfo[1],3);
-
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
 	dlyAmt=0;
@@ -1000,11 +997,11 @@ void synth_update(void)
 #else
 	static int32_t frc=0,prevTick=0;
 	++frc;
-	if(currentTick-prevTick>TICKER_1S)
+	if(currentTick-prevTick>=TICKER_HZ)
 	{
 		rprintf(0,"%d u/s\n",frc);
 		frc=0;
-		prevTick=currentTick;
+		prevTick+=TICKER_HZ;
 	}
 #endif
 

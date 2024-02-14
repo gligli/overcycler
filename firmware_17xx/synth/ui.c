@@ -17,9 +17,9 @@
 #include "clock.h"
 #include "scan.h"
 
-#define ACTIVE_SOURCE_TIMEOUT (TICKER_1S)
+#define ACTIVE_SOURCE_TIMEOUT (TICKER_HZ)
 
-#define SLOW_UPDATE_TIMEOUT (TICKER_1S/5)
+#define SLOW_UPDATE_TIMEOUT (TICKER_HZ/5)
 
 #define PANEL_DEADBAND 2048
 
