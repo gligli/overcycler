@@ -102,8 +102,8 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 		},
 		{
 			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"Off ","Grit","Wdth","Freq","XOvr"}},
-			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"Off ","Grit","Wdth","Freq","XOvr"}},
+			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
+			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
 			/*3*/ {.type=ptNone},
 			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
 			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
@@ -291,11 +291,11 @@ const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=p
 	{
 		{
 			/* 1st row of pots */
-			{.type=ptCust,.number=cnPrHu,.shortName="PrHu",.longName="Preset number hundreds",.custPotMul=10,.custPotAdd=0},
-			{.type=ptCust,.number=cnPrTe,.shortName="PrTe",.longName="Preset number tens",.custPotMul=10,.custPotAdd=0},
-			{.type=ptCust,.number=cnPrUn,.shortName="PrUn",.longName="Preset number units",.custPotMul=10,.custPotAdd=0},
-			{.type=ptStep,.number=spPresetType,.shortName="PrTy",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
-			{.type=ptStep,.number=spPresetStyle,.shortName="PrSt",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
+			{.type=ptCust,.number=cnPrHu,.shortName="Hndr",.longName="Preset number hundreds",.custPotMul=10,.custPotAdd=0},
+			{.type=ptCust,.number=cnPrTe,.shortName="Tens",.longName="Preset number tens",.custPotMul=10,.custPotAdd=0},
+			{.type=ptCust,.number=cnPrUn,.shortName="Unit",.longName="Preset number units",.custPotMul=10,.custPotAdd=0},
+			{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
+			{.type=ptStep,.number=spPresetStyle,.shortName="Styl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 			/* 2nd row of pots */
 			{.type=ptCust,.number=cnMidC,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
 			{.type=ptNone},
