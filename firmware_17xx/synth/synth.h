@@ -81,6 +81,8 @@ void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];
+extern const uint8_t abx2bsp[abxCount];
+extern const uint8_t abx2wsp[abxCount];
 extern const abx_t sp2abx[];
 extern const char * notesNames[12];
 
