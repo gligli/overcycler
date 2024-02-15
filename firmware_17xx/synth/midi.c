@@ -138,15 +138,15 @@ const struct midiCC_s midiCCs[128]={
 	{ccStepped,spModwheelTarget},
 	{ccStepped,spUnison},
 	{ccStepped,spAssignerPriority},
+	{ccStepped,spChromaticPitch},
+	{ccStepped,spOscSync},
+	/* CC 96-103 */
 	{ccDataIncrement},
 	{ccDataDecrement},
-	/* CC 96-103 */
 	{ccNRPNFine},
 	{ccNRPNCoarse},
 	{ccNone},
 	{ccNone},
-	{ccStepped,spChromaticPitch},
-	{ccStepped,spOscSync},
 	{ccStepped,spAXOvrBank_Unsaved},
 	{ccStepped,spAXOvrWave_Unsaved},
 	/* CC 104-111 */
