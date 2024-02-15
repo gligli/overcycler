@@ -58,7 +58,7 @@ void storage_write(uint32_t pageIdx, uint8_t *buf)
 	char fn[_MAX_LFN];
 	UINT bw;
 	
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
 
 #ifdef DEBUG
 	rprintf(0,"storage_write %d %s\n",pageIdx,fn);
@@ -81,7 +81,7 @@ void storage_read(uint32_t pageIdx, uint8_t *buf)
 	char fn[_MAX_LFN];
 	UINT br;
 
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
 
 #ifdef DEBUG
 	rprintf(0,"storage_read %d %s\n",pageIdx,fn);
@@ -104,7 +104,7 @@ void storage_delete(uint32_t pageIdx)
 {
 	char fn[_MAX_LFN];
 
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
 
 #ifdef DEBUG
 	rprintf(0,"storage_delete %d %s\n",pageIdx,fn);
@@ -122,7 +122,7 @@ int8_t storage_pageExists(uint32_t pageIdx)
 	FIL f;
 	char fn[_MAX_LFN];
 
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
 	
 	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
 		return 0;
@@ -144,11 +144,11 @@ int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2)
 	rprintf(0,"storage_samePage %d %d\n",pageIdx,pageIdx2);
 #endif		
 
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
 	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
 		return 0;
 	
-	snprintf(fn,_MAX_LFN,STORAGE_PATH "/page_%04x.bin",pageIdx2);
+	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx2);
 	if(f_open(&f2,fn,FA_READ|FA_OPEN_EXISTING))
 		return 0;
 	

@@ -26,7 +26,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include "rprintf.h"
-#include "main.h" //Needed for delay_ms
 
 #define SCRATCH 12  //32Bits go up to 4GB + 1 Byte for \0
 
@@ -45,12 +44,16 @@
 // only lowercase format flags are used
 #define PADDING         //SPACE and ZERO padding
 
+#define RSPRINTF_CHANNEL 3
 
-static int (*putcharfunc[4])(int c)={NULL};
+static int srprintf_putchar(int c);
+
+static int (*putcharfunc[4])(int c)={NULL,NULL,NULL,srprintf_putchar};
+static char *rsprintf_ptr=NULL;
 
 void rprintf_devopen(int channel, int(*put)(int))
 {
-    putcharfunc[channel]=put;
+	if(channel!=RSPRINTF_CHANNEL) putcharfunc[channel]=put;
 }
 
 static void myputchar(int channel,unsigned char c)
@@ -59,14 +62,13 @@ static void myputchar(int channel,unsigned char c)
     putcharfunc[channel](c);
 }
 
-void rprintf(int channel, char const *format, ...)
+static void rprintf_va(int channel, char const *format, va_list ap)
 {
     unsigned char scratch[SCRATCH];
     unsigned char format_flag;
     unsigned short base;
     unsigned char *ptr;
     unsigned char issigned=0;
-    va_list ap;
 
     #ifdef USE_LONG
         // #warning "use long"
@@ -81,15 +83,14 @@ void rprintf(int channel, char const *format, ...)
     unsigned char fill;
     unsigned char width;
 
-    va_start (ap, format);
     for (;;)
     {
 //		delay_us(1000); //Added for VCOM testing - without it, rprintf will overrun the VCOM buffer causing it to crash
 		
         while ((format_flag = *(format++)) != '%')
         {      // Until '%' or '\0'
-            if (!format_flag){va_end (ap); return;}
-                myputchar(channel,format_flag);
+            if (!format_flag) return;
+            myputchar(channel,format_flag);
         }
 
         issigned=0; //default unsigned
@@ -245,6 +246,31 @@ void rprintf(int channel, char const *format, ...)
                 #endif
 
                 while(*ptr) { myputchar(channel,*ptr); ptr++; }
-                    }
-        }
-    }
+		}
+	}
+}
+
+void rprintf(int channel, char const *format, ...)
+{
+    va_list ap;
+    va_start(ap,format);
+	rprintf_va(channel, format, ap);
+	va_end(ap);
+}
+
+void srprintf(char *str, char const *format, ...)
+{
+    va_list ap;
+	rsprintf_ptr=str;
+    va_start(ap,format);
+	rprintf_va(RSPRINTF_CHANNEL, format, ap);
+	va_end(ap);
+}
+
+static int srprintf_putchar(int c)
+{
+	*rsprintf_ptr++=c;
+	*rsprintf_ptr='\0';
+	return c;
+}
+

@@ -1,6 +1,5 @@
 /* Author: Domen Puncer <domen@cba.si>.  License: WTFPL, see file LICENSE */
 /* Ported to lpc17xx by GliGli */
-#include <stdio.h>
 #include <system/hd44780.h>
 #include <system/rprintf.h>
 #include <system/main.h>

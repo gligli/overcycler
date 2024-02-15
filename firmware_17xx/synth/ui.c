@@ -580,25 +580,25 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					{
 						case 2: // octaves
 							v>>=10;
-							sprintf(dv," %s%d",notesNames[0],v/12);
+							srprintf(dv," %s%d",notesNames[0],v/12);
 							break;
 						case 1: // semitones
 							v>>=10;
-							sprintf(dv," %s%d",notesNames[v%12],v/12);
+							srprintf(dv," %s%d",notesNames[v%12],v/12);
 							break;
 						default:
-							sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v));
+							srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v));
 							break;
 					}
 					break;
 				default:
 					if(continuousParametersZeroCentered[prm->number])
 					{
-						sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
+						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
 					}
 					else
 					{
-						sprintf(dv,"%4d",SCAN_POT_FROM_16BITS(v));
+						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v));
 					}
 			}
 			break;
@@ -678,12 +678,12 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				case cnAXoCp:
 					v=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
 					v+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
-					sprintf(dv,"%04d",v);
+					srprintf(dv,"%04d",v);
 					break;
 				case cnBXoCp:
 					v=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
 					v+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
-					sprintf(dv,"%04d",v);
+					srprintf(dv,"%04d",v);
 					break;
 				case cnLPrv:
 				case cnLNxt:
@@ -698,7 +698,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				case cnNPrs:
 				case cnNVal:
 					v=ui.kpInputValue;
-					sprintf(dv,"%03d ",v);
+					srprintf(dv,"%03d ",v);
 					for(int i=0;i<=ui.kpInputDecade;++i)
 						dv[2-i]='_';				
 					break;
@@ -716,7 +716,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				if(v>=0 && v<valCount)
 					strcpy(dv,prm->values[v]);
 				else
-					sprintf(dv,"%4d",v);
+					srprintf(dv,"% 4d",v);
 			}
 			break;
 		default:
