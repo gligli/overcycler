@@ -17,6 +17,9 @@
 #include "clock.h"
 #include "scan.h"
 
+#define LCD_WIDTH 40
+#define LCD_HEIGHT 4
+
 #define ACTIVE_SOURCE_TIMEOUT (TICKER_HZ)
 
 #define SLOW_UPDATE_TIMEOUT (TICKER_HZ/5)
@@ -447,12 +450,12 @@ static void setLcdContrast(uint8_t contrast)
 	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*400/UI_MAX_LCD_CONTRAST);
 }
 
-static void drawPresetModified(int lcd)
+static void drawPresetModified(int lcd, int8_t force)
 {
 	int8_t i;
 	static int8_t old_pm=INT8_MIN;
 
-	if(ui.presetModified!=old_pm)
+	if(ui.presetModified!=old_pm || force)
 	{
 		if(ui.presetModified)
 		{
@@ -493,7 +496,7 @@ static void drawPresetModified(int lcd)
 	}
 }
 
-static void drawVisualEnv(int lcd, int8_t voicePair)
+static void drawVisualEnv(int lcd, int8_t voicePair, int8_t force)
 {
 	int8_t i,ve,ve2;
 	uint32_t veb;
@@ -501,7 +504,7 @@ static void drawVisualEnv(int lcd, int8_t voicePair)
 	
 	ve=synth_getVisualEnvelope(voicePair)>>11;
 	ve2=synth_getVisualEnvelope(voicePair+1)>>11;
-	if(ve!=old_ve[voicePair] || ve2!=old_ve[voicePair+1])
+	if(ve!=old_ve[voicePair] || ve2!=old_ve[voicePair+1] || force)
 	{
 		veb=0;
 		for(i=0;i<32;++i)
@@ -536,13 +539,171 @@ static void drawVisualEnv(int lcd, int8_t voicePair)
 	}
 }
 
+static void drawWaveform(abx_t abx)
+{
+	uint16_t smpCnt;
+	uint16_t * data=synth_getWaveformData(abx,&smpCnt);
+	
+	uint8_t points[LCD_HEIGHT][LCD_WIDTH]={{0}};
+	uint8_t vcgram[2][8];
+	uint8_t vcgramCount[2]={0};
+	
+	// transform waveform into LCD chars of 2*3 "pixels" each
+	
+	uint32_t acc=0;
+	uint16_t prevx=0,cnt=0;
+	for(uint16_t i=0;i<smpCnt;++i)
+	{
+		uint16_t x=i*(LCD_WIDTH*2-1)/(smpCnt-1);
+		
+		if(x!=prevx)
+		{
+			uint16_t y=acc*(LCD_HEIGHT*3-1)/(UINT16_MAX*cnt);
+			uint16_t lx=x>>1;
+			uint16_t ly=y/3;
+
+			prevx=x;
+
+			x-=lx<<1;
+			y-=ly*3;
+		
+			points[LCD_HEIGHT-1-ly][lx]|=1<<((y<<1)+x);
+
+			acc=0;
+			cnt=0;
+		}
+		
+		acc+=data[i];
+		++cnt;
+	}
+
+	// try to fit all the "pixels" variations per char into a "virtual" CGRAM
+	
+	for(uint16_t y=0;y<LCD_HEIGHT;++y)
+	{
+		int lcd=y>>1;
+
+		for(uint16_t x=0;x<LCD_WIDTH;++x)
+		{
+			uint8_t vch=points[y][x];
+					
+			if(!vch)
+			{
+				points[y][x]=' ';
+			}
+			else
+			{
+				int8_t cgpos=-1;
+				for(uint8_t cgp=0;cgp<vcgramCount[lcd];++cgp)
+					if(vcgram[lcd][cgp]==vch)
+					{
+						cgpos=cgp;
+						break;
+					}
+
+				if(cgpos>=0)
+				{
+					// already exists in vcgram
+					points[y][x]=cgpos;
+				}
+				else if(vcgramCount[lcd]<8)
+				{
+					// add it to vcgram
+					vcgram[lcd][vcgramCount[lcd]]=vch;
+					points[y][x]=vcgramCount[lcd];
+					++vcgramCount[lcd];
+				}
+				else
+				{
+					// try to find the most approaching char
+					int8_t best=INT8_MAX,bestp=-1;
+					
+					for(uint8_t cgp=0;cgp<vcgramCount[lcd];++cgp)
+					{
+						int8_t pcnt=__builtin_popcount(vcgram[lcd][cgp]^vch);
+						
+						if(pcnt<=best)
+						{
+							bestp=cgp;
+							best=pcnt;
+						}
+					}
+
+					points[y][x]=bestp;
+				}
+			}
+		}
+	}
+
+	// upload "virtual" CGRAM to CGRAM
+	
+	for(int lcd=1;lcd<=2;++lcd)
+	{
+		hd44780_driver.write_cmd(lcd==1?&ui.lcd1:&ui.lcd2,CMD_CGRAM_ADDR);
+		
+		for(int8_t i=0;i<vcgramCount[lcd-1];++i)
+		{		
+			uint8_t vch=vcgram[lcd-1][i];
+
+			sendChar(lcd,((vch&16)?0b11000:0)|((vch&32)?0b00011:0));
+			sendChar(lcd,((vch&16)?0b11000:0)|((vch&32)?0b00011:0));
+			sendChar(lcd,0);
+			sendChar(lcd,((vch&4)?0b11000:0)|((vch&8)?0b00011:0));
+			sendChar(lcd,((vch&4)?0b11000:0)|((vch&8)?0b00011:0));
+			sendChar(lcd,0);
+			sendChar(lcd,((vch&1)?0b11000:0)|((vch&2)?0b00011:0));
+			sendChar(lcd,((vch&1)?0b11000:0)|((vch&2)?0b00011:0));
+		}
+	}
+
+	// include waveform name (find spot with less waveform covered)
+	
+	char *s=currentPreset.oscWave[abx];
+	uint8_t sl=strlen(s);
+	uint8_t ltup=0,ltdn=0,rtup=0,rtdn=0,best;
+	
+	for(uint8_t x=0;x<sl;++x)
+	{
+		ltup+=points[0][x]==' '?1:0;
+		ltdn+=points[3][x]==' '?1:0;
+		rtup+=points[0][LCD_WIDTH-sl+x]==' '?1:0;
+		rtdn+=points[3][LCD_WIDTH-sl+x]==' '?1:0;
+	}
+
+	best=MAX(MAX(ltup,ltdn),MAX(rtup,rtdn));
+
+	if(best==ltdn)
+		memcpy(&points[3][0],s,sl);
+	else if (best==rtdn)
+		memcpy(&points[3][LCD_WIDTH-sl],s,sl);
+	else if (best==ltup)
+		memcpy(&points[0][0],s,sl);
+	else
+		memcpy(&points[0][LCD_WIDTH-sl],s,sl);
+
+	// draw the display
+	
+	for(uint16_t y=0;y<LCD_HEIGHT;++y)
+	{
+		int lcd=(y&2)?2:1;
+		setPos(lcd,0,y&1);
+		for(uint16_t x=0;x<LCD_WIDTH;++x)
+		{
+			sendChar(lcd,points[y][x]);
+		}
+	}
+}
+
+const struct uiParam_s * getUiParameter(int8_t source)
+{
+	int8_t potnum;
+	potnum=-source-1;
+	return &uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+}
+
 static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
-	const struct uiParam_s * prm;
-	int8_t potnum;
-
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	const struct uiParam_s * prm=getUiParameter(source);
 
 	if(!longName && prm->shortName)
 		return prm->shortName;
@@ -555,17 +716,13 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
 	static char dv[10]={0};
-	const struct uiParam_s * prm;
-	int8_t potnum;
+	const struct uiParam_s * prm=getUiParameter(source);
 	int32_t valCount;
 	int32_t v=INT32_MIN;
 
 	dv[0]=0;
 	if(valueOut)
 		*valueOut=v;
-	
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
 	
 	switch(prm->type)
 	{
@@ -731,42 +888,39 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 
 static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
 {
-	static char dv[41];
-	const struct uiParam_s * prm;
-	int8_t potnum;
+	static char dv[LCD_WIDTH+1];
+	const struct uiParam_s * prm=getUiParameter(source);
 	
 	dv[0]=0;	
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
 	
 	if(prm->type==ptCont)
 	{
 		int32_t v=currentPreset.continuousParameters[prm->number];
 		
 		// scale
-		v=(v*40)/UINT16_MAX;
+		v=(v*(LCD_WIDTH-1))/UINT16_MAX;
 
 		if(continuousParametersZeroCentered[prm->number])
 		{
 			// zero centered bargraph			
-			for(int i=0;i<40;++i)
-				if (v>=20)
+			for(int i=0;i<LCD_WIDTH;++i)
+				if (v>=LCD_WIDTH/2)
 				{
-					dv[i]=((i>20) && i<v) ? '\xff' : ' ';
+					dv[i]=((i>LCD_WIDTH/2) && i<=v) ? '\xff' : ' ';
 				}
 				else
 				{
-					dv[i]=((i<20) && i>=v) ? '\xff' : ' ';
+					dv[i]=((i<LCD_WIDTH/2) && i>=v) ? '\xff' : ' ';
 				}
 			
 			// center
-			dv[20]='|';
+			dv[LCD_WIDTH/2]='|';
 		}
 		else
 		{
 			// regular bargraph			
-			for(int i=0;i<40;++i)
-				dv[i]=(i<v) ? '\xff' : ' ';
+			for(int i=0;i<LCD_WIDTH;++i)
+				dv[i]=(i<=v) ? '\xff' : ' ';
 		}
 	}
 	if (prm->type==ptStep &&
@@ -802,8 +956,8 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	}
 
 	// always 40chars
-	for(int i=strlen(dv);i<40;++i) dv[i]=' ';
-	dv[40]=0;
+	for(int i=strlen(dv);i<LCD_WIDTH;++i) dv[i]=' ';
+	dv[LCD_WIDTH]=0;
 
 	return dv;
 }
@@ -950,7 +1104,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	// get uiParam_s from source
 	
 	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	prm=getUiParameter(source);
 	
 	if(source<0)
 		ui.lastInputPot=potnum;
@@ -1499,23 +1653,33 @@ void ui_update(void)
 		char * dv;
 		int32_t v;
 		int8_t noAcq,smaller,larger;
+		const struct uiParam_s * prm;
 		
-		if(ui.pendingScreenClear)
-			sendString(1,getName(ui.activeSource,1));
+		prm=getUiParameter(ui.activeSource);
 
 		dv=getDisplayValue(ui.activeSource, &v);
 				
 		noAcq=ui.activeSource<0&&(((ui.potsAcquired>>(-ui.activeSource-1))&1)==0);
 		smaller=noAcq&&ui.potsPrevValue[-ui.activeSource-1]<v;
 		larger=noAcq&&ui.potsPrevValue[-ui.activeSource-1]>v;
-		
-		setPos(2,17,0);
-		sendChar(2,(smaller) ? '\x7e' : ' ');
-		sendString(2,dv);
-		sendChar(2,(larger) ? '\x7f' : ' ');
-		
-		setPos(2,0,1);
-		sendString(2,getDisplayFulltext(ui.activeSource));
+
+		if(noAcq || prm->type!=ptStep || prm->number!=spAWave_Unsaved && prm->number!=spBWave_Unsaved)
+		{
+			if(ui.pendingScreenClear)
+				sendString(1,getName(ui.activeSource,1));
+
+			setPos(2,17,0);
+			sendChar(2,(smaller) ? '\x7e' : ' ');
+			sendString(2,dv);
+			sendChar(2,(larger) ? '\x7f' : ' ');
+
+			setPos(2,0,1);
+			sendString(2,getDisplayFulltext(ui.activeSource));
+		}
+		else
+		{
+			drawWaveform(sp2abx[prm->number]);
+		}
 	}
 	else
 	{
@@ -1558,14 +1722,14 @@ void ui_update(void)
 			// CGRAM update ("preset modified", visual envelopes)
 		
 		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
-		drawPresetModified(1);
+		drawPresetModified(1,ui.pendingScreenClear);
 		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16);
-		drawVisualEnv(1,0);
+		drawVisualEnv(1,0,ui.pendingScreenClear);
 		
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
-		drawVisualEnv(2,2);
+		drawVisualEnv(2,2,ui.pendingScreenClear);
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16);
-		drawVisualEnv(2,4);
+		drawVisualEnv(2,4,ui.pendingScreenClear);
 
 			// actual "text"
 		

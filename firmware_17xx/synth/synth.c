@@ -486,6 +486,13 @@ int32_t synth_getVisualEnvelope(int8_t voice)
 		return -1;
 }
 
+uint16_t * synth_getWaveformData(abx_t abx, uint16_t * sampleCount)
+{
+	if(sampleCount)
+		*sampleCount=waveData.sampleCount[abx];
+	return &waveData.sampleData[abx][0];
+}
+
 void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sort)
 {
 	int i,bankNum,waveNum,oriBankNum,oriWaveNum,newBankNum,newWaveNum;
