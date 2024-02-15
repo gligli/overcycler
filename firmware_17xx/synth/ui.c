@@ -881,59 +881,16 @@ static void handleKeypadInput(enum scanKeypadButton_e button)
 	}
 }
 
-static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
+static int32_t getParameterValueCount(const struct uiParam_s * prm)
 {
-	int32_t data,valCount;
-	int32_t potSetting;
-	int8_t potnum,change,settingsModified;
-	const struct uiParam_s * prm;
-
-//	rprintf(0,"handleUserInput %d\n",source);
+	int32_t valCount=0;
 	
-	// page change
-	if(source>=kbA)
+	switch(prm->type)
 	{
-		handlePageChange(source);
-		return;
-	}
-	
-	// keypad value input mode	
-	if (ui.kpInputDecade>=0)
-	{
-		handleKeypadInput(source);
-		return;
-	}
-
-	potnum=-source-1;
-	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
-	
-	if(source<0)
-		ui.lastInputPot=potnum;
-
-	// nothing to do -> return
-	if(ui.activePage==upNone || prm->type==ptNone)
-		return;
-	
-	// fullscreen display
-	++ui.sourceChanges;
-	ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
-	if (ui.activeSource!=source)
-	{
-		ui.pendingScreenClear=ui.sourceChanges==1 || ui.sourceChanges!=ui.prevSourceChanges;
-		if(!ui.pendingScreenClear)
-			ui.activeSourceTimeout=0;
-		ui.activeSource=source;
-	}
-	
-	// get stepped parameter value count
-	valCount=0;
-	if(prm->type==ptStep)
-	{
-		while(valCount<8 && prm->values[valCount]!=NULL)
-			++valCount;
-		
-		if(!valCount)
-		{
+		case ptCont:
+			valCount=UINT16_MAX;
+			break;
+		case ptStep:
 			switch(prm->number)
 			{
 				case spABank_Unsaved:
@@ -953,8 +910,72 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				default:
 					valCount=steppedParametersSteps[prm->number];
 			}
-		}
+			break;
+		case ptCust:
+			while(valCount<8 && prm->values[valCount]!=NULL)
+				++valCount;
+			break;
+		default:
+			/* nothing */;
 	}
+	
+	return valCount;
+}
+
+static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
+{
+	int32_t data,valueCount;
+	int32_t potSetting;
+	int8_t potnum,change,settingsModified;
+	const struct uiParam_s * prm;
+
+//	rprintf(0,"handleUserInput %d\n",source);
+	
+	// page change
+	
+	if(source>=kbA)
+	{
+		handlePageChange(source);
+		return;
+	}
+	
+	// keypad value input mode	
+	
+	if (ui.kpInputDecade>=0)
+	{
+		handleKeypadInput(source);
+		return;
+	}
+
+	// get uiParam_s from source
+	
+	potnum=-source-1;
+	prm=&uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	
+	if(source<0)
+		ui.lastInputPot=potnum;
+
+	// nothing to do -> return
+	if(ui.activePage==upNone || prm->type==ptNone)
+		return;
+	
+	// fullscreen display
+	
+	++ui.sourceChanges;
+	ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+	if (ui.activeSource!=source)
+	{
+		ui.pendingScreenClear=ui.sourceChanges==1 || ui.sourceChanges!=ui.prevSourceChanges;
+		if(!ui.pendingScreenClear)
+			ui.activeSourceTimeout=0;
+		ui.activeSource=source;
+	}
+	
+	// get parameter value count
+	
+	valueCount=getParameterValueCount(prm);
+	
+	// get new setting value (either forced or transformed from panel value)
 	
 	if(forcedValue)
 	{
@@ -964,7 +985,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				potSetting=SCAN_POT_TO_16BITS(*forcedValue);
 				break;
 			case ptStep:
-				potSetting=MIN(*forcedValue,valCount-1);
+				potSetting=MIN(*forcedValue,valueCount-1);
 				break;
 			case ptCust:
 				potSetting=MIN(SCAN_POT_TO_16BITS(*forcedValue),prm->custPotMul+prm->custPotAdd-1);
@@ -977,7 +998,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	{
 		int32_t potQuantum;
 		
-		// transform potentiometer value into setting value
+		// transform panel value into setting value
 		potSetting=0;
 		potQuantum=0;
 		if(source<0)
@@ -994,7 +1015,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					potQuantum=SCAN_POT_TO_16BITS(1);
 					break;
 				case ptStep:
-					potSetting=(valCount*data)>>16;
+					potSetting=(valueCount*data)>>16;
 					break;
 				case ptCust:
 					potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
@@ -1012,20 +1033,26 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 
 			prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
 
+			// in case the value is unattainable, detect max pot value
+			if(value>=valueCount && potSetting>=valueCount-1-potQuantum)
+				ui.potsAcquired|=1<<potnum;
+
+			// did we go through the locked value?
 			if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
 				ui.potsAcquired|=1<<potnum;
 
 			ui.potsPrevValue[potnum]=potSetting;
 
+			// value not acquired -> ignore event
 			if(((ui.potsAcquired>>potnum)&1)==0)
 				return;
 		}
 	}
 
+	// store new setting
+
 	change=0;
 	settingsModified=0;
-	
-	// store new setting
 	switch(prm->type)
 	{
 	case ptCont:
@@ -1037,7 +1064,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		if(source<0)
 			data=potSetting;
 		else
-			data=(currentPreset.steppedParameters[prm->number]+1)%valCount;
+			data=(currentPreset.steppedParameters[prm->number]+1)%valueCount;
 
 		change=currentPreset.steppedParameters[prm->number]!=data;
 		currentPreset.steppedParameters[prm->number]=data;
