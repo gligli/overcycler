@@ -918,7 +918,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		{
 			// regular bargraph			
 			for(int i=0;i<LCD_WIDTH;++i)
-				dv[i]=(i<=v) ? '\xff' : ' ';
+				dv[i]=(i<v) ? '\xff' : ' ';
 		}
 	}
 	if (prm->type==ptStep &&
