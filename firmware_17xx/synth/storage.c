@@ -729,22 +729,21 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	currentPreset.continuousParameters[cpUnisonDetune]=512;
 	currentPreset.continuousParameters[cpMasterTune]=HALF_RANGE;
-
 	currentPreset.continuousParameters[cpDetune]=HALF_RANGE;
+
 	currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE;
 	currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE;
-	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
-	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
-	currentPreset.continuousParameters[cpLFOPitchAmt]=UINT16_MAX/16;
-	currentPreset.continuousParameters[cpLFOFreq]=SCAN_POT_TO_16BITS(210);
-	currentPreset.continuousParameters[cpLFO2Freq]=SCAN_POT_TO_16BITS(210);
-	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
-
 	currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
 	currentPreset.continuousParameters[cpWModBEnv]=HALF_RANGE;
+	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
+	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
+	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
+	currentPreset.continuousParameters[cpLFOPitchAmt]=SCAN_POT_TO_16BITS(100);
+	currentPreset.continuousParameters[cpLFOFreq]=SCAN_POT_TO_16BITS(5*60);
+	currentPreset.continuousParameters[cpLFO2Freq]=SCAN_POT_TO_16BITS(5*60);
 
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
-	currentPreset.steppedParameters[spModwheelRange]=2; // high
+	currentPreset.steppedParameters[spModwheelRange]=1; // low
 	currentPreset.steppedParameters[spChromaticPitch]=2; // octave
 	currentPreset.steppedParameters[spAssignerPriority]=apLast;
 	currentPreset.steppedParameters[spLFOShape]=lsTri;
