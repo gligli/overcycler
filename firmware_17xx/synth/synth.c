@@ -430,6 +430,11 @@ static void refreshMisc(void)
 
 	// WaveMod mask
 
+	uint16_t scA,scB;
+
+	scA=waveData.sampleCount[abxAMain];
+	scB=waveData.sampleCount[abxBMain];
+	
 	synth.partState.wmodMask=0;
 	if(currentPreset.steppedParameters[spAWModType]==wmAliasing)
 		synth.partState.wmodMask|=1;
@@ -440,7 +445,10 @@ static void refreshMisc(void)
 	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
+	{
 		synth.partState.wmodMask|=8;
+		scA=MAX(waveData.sampleCount[abxAMain],waveData.sampleCount[abxACrossover]);
+	}
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
 		synth.partState.wmodMask|=16;
@@ -451,14 +459,17 @@ static void refreshMisc(void)
 	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver ||
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
+	{
 		synth.partState.wmodMask|=128;
+		scB=MAX(waveData.sampleCount[abxBMain],waveData.sampleCount[abxBCrossover]);
+	}
 	
 	// waveforms
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[0],waveData.sampleData[2],MAX(waveData.sampleCount[0],waveData.sampleCount[2]));
-		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[1],waveData.sampleData[3],MAX(waveData.sampleCount[1],waveData.sampleCount[3]));
+		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover],scA);
+		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover],scB);
 	}
 }
 
@@ -736,7 +747,7 @@ void synth_refreshWaveforms(abx_t abx)
 		wave_reader_close(&wr);
 		
 #ifdef DEBUG
-		rprintf(0, "smpCnt %d chanCnt %d\n", smpCnt, chanCnt);
+		rprintf(0,"smpCnt %d chanCnt %d\n",smpCnt,chanCnt);
 #endif		
 		
 		smpCnt/=chanCnt; // we want only one channel
@@ -749,6 +760,10 @@ void synth_refreshWaveforms(abx_t abx)
 			d-=INT16_MIN;
 			waveData.sampleData[abx][i]=d;
 		}
+		
+		// fill the rest of the buffer with neutral value (in case crossover with longer waveform)
+		for(i=smpCnt;i<WTOSC_MAX_SAMPLES;++i)
+			waveData.sampleData[abx][i]=HALF_RANGE;
 		
 		waveData.sampleCount[abx]=smpCnt; 
 	}
