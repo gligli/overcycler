@@ -4,11 +4,9 @@
 
 #include "ui.h"
 #include "storage.h"
-#include "integer.h"
 #include "assigner.h"
 #include "arp.h"
 #include "seq.h"
-#include "ffconf.h"
 #include "dacspi.h"
 #include "hd44780.h"
 #include "lpc177x_8x_gpio.h"
@@ -751,7 +749,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				default:
 					if(continuousParametersZeroCentered[prm->number])
 					{
-						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
+						srprintf(dv,v>=-INT16_MIN?"% 4d":"% 3d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
 					}
 					else
 					{
@@ -898,7 +896,7 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 		int32_t v=currentPreset.continuousParameters[prm->number];
 		
 		// scale
-		v=(v*(LCD_WIDTH-1))/UINT16_MAX;
+		v=(v*LCD_WIDTH)/UINT16_MAX;
 
 		if(continuousParametersZeroCentered[prm->number])
 		{
@@ -1459,6 +1457,7 @@ static void handleSlowUpdates(void)
 		case spAXOvrWave_Unsaved:
 		case spBXOvrWave_Unsaved:
 			synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
+			synth_refreshFullState(0);
 			break;
 		case 0x80+cnSave:
 			preset_saveCurrent(settings.presetNumber);
