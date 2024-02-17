@@ -115,7 +115,7 @@ const uint8_t steppedParametersSteps[spCount] =
 	/*WModEnvLin*/2,
 	/*WModEnvLoop*/2,
 	/*PressureRange*/4,
-	/*PressureTarget*/8,
+	/*PressureTarget*/7,
 	/*BXOvrBank*/128,
 	/*BXOvrWave*/128,
 };
