@@ -31,7 +31,7 @@ enum uiParamType_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs=0,upWMod=1,upFil=2,upAmp=3,upLFO1=4,upLFO2=5,upArp=6,upSeq=7,upMisc=8,
+	upNone=-1,upOscs,upWMod,upFil,upAmp,upLFO1,upLFO2,upArp,upSeqPlay,upSeqRec,upMisc,upPresets,
 
 	// /!\ this must stay last
 	upCount
@@ -39,9 +39,9 @@ enum uiPage_e
 
 enum uiCustomParamNumber_e
 {
-	cnNone=0,cnAMod,cnAHld,cnPrUn,cnLoad,cnSave,cnMidC,cnTune,cnPrTe,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
-	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnPrHu,cnNPrs,cnNVal,cnUsbM,
-	cnCtst
+	cnNone=0,cnAMod,cnAHld,cnLoad,cnSave,cnMidC,cnTune,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
+	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnNPrs,cnNVal,cnUsbM,cnCtst,
+	cnWEnT,cnFEnT,cnAEnT,
 };
 
 struct uiParam_s
@@ -54,268 +54,249 @@ struct uiParam_s
 	int32_t custPotMul, custPotAdd;
 };
 
-const struct uiParam_s uiParameters[upCount][2][SCAN_POT_COUNT] = // [pages][0=pots/1=keys][pot/key num]
+const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] = // [pages][pot/key num]
 {
-	/* Oscillators page (A) */
+	/* Oscillators page (1) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptStep,.number=spABank_Unsaved,.shortName="ABnk",.longName="Osc A Bank"},
-			{.type=ptStep,.number=spAWave_Unsaved,.shortName="AWav",.longName="Osc A Waveform"},
-			{.type=ptCont,.number=cpAFreq,.shortName="AFrq",.longName="Osc A Frequency"},
-			{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
-			{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
-			/* 2nd row of pots */
-			{.type=ptStep,.number=spBBank_Unsaved,.shortName="BBnk",.longName="Osc B Bank"},
-			{.type=ptStep,.number=spBWave_Unsaved,.shortName="BWav",.longName="Osc B Waveform"},
-			{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
-			{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
-			{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptCust,.number=cnAXoCp,.shortName="AXoC",.longName="Crossover WaveMod Copy A Bank/Wave"},
-			/*2*/ {.type=ptCust,.number=cnBXoCp,.shortName="BXoC",.longName="Crossover WaveMod Copy B Bank/Wave"},
-			/*3*/ {.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
-			/*4*/ {.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
-			/*5*/ {.type=ptNone},
-			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptStep,.number=spABank_Unsaved,.shortName="ABnk",.longName="Osc A Bank"},
+		{.type=ptStep,.number=spBBank_Unsaved,.shortName="BBnk",.longName="Osc B Bank"},
+		{.type=ptCont,.number=cpAFreq,.shortName="AFrq",.longName="Osc A Frequency"},
+		{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
+		{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
+		/* 2nd row of pots */
+		{.type=ptStep,.number=spAWave_Unsaved,.shortName="AWav",.longName="Osc A Waveform"},
+		{.type=ptStep,.number=spBWave_Unsaved,.shortName="BWav",.longName="Osc B Waveform"},
+		{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
+		{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
+		{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnAXoCp,.shortName="AXoC",.longName="Copy A bank/wave to A Crossover"},
+		{.type=ptCust,.number=cnBXoCp,.shortName="BXoC",.longName="Copy B bank/wave to B Crossover"},
+		{.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
+		{.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* WaveMod page (A) */
+	/* WaveMod page (2) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
-			{.type=ptCont,.number=cpBBaseWMod,.shortName="BWmo",.longName="Osc B WaveMod"},
-			{.type=ptNone},
-			{.type=ptCont,.number=cpWModAEnv,.shortName="AWEA",.longName="Osc A WaveMod Envelope amount"},
-			{.type=ptCont,.number=cpWModBEnv,.shortName="BWEA",.longName="Osc B WaveMod Envelope amount"},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpWModAtt,.shortName="WAtk",.longName="WaveMod Attack"},
-			{.type=ptCont,.number=cpWModDec,.shortName="WDec",.longName="WaveMod Decay"},
-			{.type=ptCont,.number=cpWModSus,.shortName="WSus",.longName="WaveMod Sustain"},
-			{.type=ptCont,.number=cpWModRel,.shortName="WRel",.longName="WaveMod Release"},
-			{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
-			/*2*/ {.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
-			/*3*/ {.type=ptNone},
-			/*4*/ {.type=ptStep,.number=spWModEnvSlow,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"Fast","Slow"}},
-			/*5*/ {.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
-			/*6*/ {.type=ptStep,.number=spWModEnvLin,.shortName="WEnS",.longName="WaveMod Envelope Shape",.values={"Exp ","Lin "}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCont,.number=cpABaseWMod,.shortName="AWmo",.longName="Osc A WaveMod"},
+		{.type=ptCont,.number=cpBBaseWMod,.shortName="BWmo",.longName="Osc B WaveMod"},
+		{.type=ptNone},
+		{.type=ptCont,.number=cpWModAEnv,.shortName="AWEA",.longName="Osc A WaveMod Envelope amount"},
+		{.type=ptCont,.number=cpWModBEnv,.shortName="BWEA",.longName="Osc B WaveMod Envelope amount"},
+		/* 2nd row of pots */
+		{.type=ptCont,.number=cpWModAtt,.shortName="WAtk",.longName="WaveMod Attack"},
+		{.type=ptCont,.number=cpWModDec,.shortName="WDec",.longName="WaveMod Decay"},
+		{.type=ptCont,.number=cpWModSus,.shortName="WSus",.longName="WaveMod Sustain"},
+		{.type=ptCont,.number=cpWModRel,.shortName="WRel",.longName="WaveMod Release"},
+		{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
+		{.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr"}},
+		{.type=ptCust,.number=cnWEnT,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"FExp","SExp","FLin","SLin"}},
+		{.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* Filter page (B) */
+	/* Filter page (3) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCont,.number=cpCutoff,.shortName="FCut",.longName="Filter Cutoff freqency"},
-			{.type=ptCont,.number=cpResonance,.shortName="FRes",.longName="Filter Resonance"},
-			{.type=ptNone},
-			{.type=ptCont,.number=cpFilKbdAmt,.shortName="FKbd",.longName="Filter Keyboard tracking"},
-			{.type=ptCont,.number=cpFilEnvAmt,.shortName="FEnv",.longName="Filter Envelope amount"},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpFilAtt,.shortName="FAtk",.longName="Filter Attack"},
-			{.type=ptCont,.number=cpFilDec,.shortName="FDec",.longName="Filter Decay"},
-			{.type=ptCont,.number=cpFilSus,.shortName="FSus",.longName="Filter Sustain"},
-			{.type=ptCont,.number=cpFilRel,.shortName="FRel",.longName="Filter Release"},
-			{.type=ptCont,.number=cpFilVelocity,.shortName="FVel",.longName="Filter Velocity"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptNone},
-			/*2*/ {.type=ptNone},
-			/*3*/ {.type=ptNone},
-			/*4*/ {.type=ptStep,.number=spFilEnvSlow,.shortName="FEnT",.longName="Filter Envelope Type",.values={"Fast","Slow"}},
-			/*5*/ {.type=ptStep,.number=spFilEnvLoop,.shortName="FEnL",.longName="Filter Envelope Loop",.values={"Norm","Loop"}},
-			/*6*/ {.type=ptStep,.number=spFilEnvLin,.shortName="FEnS",.longName="Filter Envelope Shape",.values={"Exp ","Lin "}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCont,.number=cpCutoff,.shortName="FCut",.longName="Filter Cutoff freqency"},
+		{.type=ptCont,.number=cpResonance,.shortName="FRes",.longName="Filter Resonance"},
+		{.type=ptNone},
+		{.type=ptCont,.number=cpFilKbdAmt,.shortName="FKbd",.longName="Filter Keyboard tracking"},
+		{.type=ptCont,.number=cpFilEnvAmt,.shortName="FEnv",.longName="Filter Envelope amount"},
+		/* 2nd row of pots */
+		{.type=ptCont,.number=cpFilAtt,.shortName="FAtk",.longName="Filter Attack"},
+		{.type=ptCont,.number=cpFilDec,.shortName="FDec",.longName="Filter Decay"},
+		{.type=ptCont,.number=cpFilSus,.shortName="FSus",.longName="Filter Sustain"},
+		{.type=ptCont,.number=cpFilRel,.shortName="FRel",.longName="Filter Release"},
+		{.type=ptCont,.number=cpFilVelocity,.shortName="FVel",.longName="Filter Velocity"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnFEnT,.shortName="FEnT",.longName="Filter Envelope Type",.values={"FExp","SExp","FLin","SLin"}},
+		{.type=ptStep,.number=spFilEnvLoop,.shortName="FEnL",.longName="Filter Envelope Loop",.values={"Norm","Loop"}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* Amplifier page (C) */
+	/* Amplifier page (4) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
-			{.type=ptNone},
-			{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
-			{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
-			{.type=ptStep,.number=spVoiceCount,.shortName="VCnt",.longName="Voice count",.values={"   1","   2","   3","   4","   5","   6"}},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpAmpAtt,.shortName="AAtk",.longName="Amplifier Attack"},
-			{.type=ptCont,.number=cpAmpDec,.shortName="ADec",.longName="Amplifier Decay"},
-			{.type=ptCont,.number=cpAmpSus,.shortName="ASus",.longName="Amplifier Sustain"},
-			{.type=ptCont,.number=cpAmpRel,.shortName="ARel",.longName="Amplifier Release"},
-			{.type=ptCont,.number=cpAmpVelocity,.shortName="AVel",.longName="Amplifier Velocity"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spUnison,.shortName="Unis",.longName="Unison",.values={"Off ","On  "}},
-			/*2*/ {.type=ptStep,.number=spAssignerPriority,.shortName="Prio",.longName="Assigner Priority",.values={"Last","Low ","High"}},
-			/*3*/ {.type=ptNone},
-			/*4*/ {.type=ptStep,.number=spAmpEnvSlow,.shortName="AEnT",.longName="Amplifier Envelope Type",.values={"Fast","Slow"}},
-			/*5*/ {.type=ptStep,.number=spAmpEnvLoop,.shortName="AEnL",.longName="Amplifier Envelope Loop",.values={"Norm","Loop"}},
-			/*6*/ {.type=ptStep,.number=spAmpEnvLin,.shortName="AEnS",.longName="Amplifier Envelope Shape",.values={"Exp ","Lin "}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
+		{.type=ptNone},
+		{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
+		{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
+		{.type=ptStep,.number=spVoiceCount,.shortName="VCnt",.longName="Voice count",.values={"   1","   2","   3","   4","   5","   6"}},
+		/* 2nd row of pots */
+		{.type=ptCont,.number=cpAmpAtt,.shortName="AAtk",.longName="Amplifier Attack"},
+		{.type=ptCont,.number=cpAmpDec,.shortName="ADec",.longName="Amplifier Decay"},
+		{.type=ptCont,.number=cpAmpSus,.shortName="ASus",.longName="Amplifier Sustain"},
+		{.type=ptCont,.number=cpAmpRel,.shortName="ARel",.longName="Amplifier Release"},
+		{.type=ptCont,.number=cpAmpVelocity,.shortName="AVel",.longName="Amplifier Velocity"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptStep,.number=spUnison,.shortName="Unis",.longName="Unison",.values={"Off ","On  "}},
+		{.type=ptStep,.number=spAssignerPriority,.shortName="Prio",.longName="Assigner Priority",.values={"Last","Low ","High"}},
+		{.type=ptCust,.number=cnAEnT,.shortName="AEnT",.longName="Amplifier Envelope Type",.values={"FExp","SExp","FLin","SLin"}},
+		{.type=ptStep,.number=spAmpEnvLoop,.shortName="AEnL",.longName="Amplifier Envelope Loop",.values={"Norm","Loop"}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* LFO1 page (D) */
+	/* LFO1 page (5) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCont,.number=cpLFOFreq,.shortName="1Spd",.longName="LFO1 Speed (BPM)"},
-			{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
-			{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
-			{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
-			{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpLFOPitchAmt,.shortName="1Pit",.longName="Pitch LFO1 Amount"},
-			{.type=ptCont,.number=cpLFOWModAmt,.shortName="1Wmo",.longName="WaveMod LFO1 Amount"},
-			{.type=ptCont,.number=cpLFOFilAmt,.shortName="1Fil",.longName="Filter frequency LFO1 Amount"},
-			{.type=ptCont,.number=cpLFOResAmt,.shortName="1Res",.longName="Filter resonance LFO1 Amount"},
-			{.type=ptCont,.number=cpLFOAmpAmt,.shortName="1Amp",.longName="Amplifier LFO1 Amount"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
-			/*2*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
-			/*3*/ {.type=ptStep,.number=spPressureRange,.shortName="PRng",.longName="Pressure Range",.values={"Min ","Low ","High","Full"}},
-			/*4*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
-			/*5*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None","Pit ","Fil ","Vol ","XOvr"}},
-			/*6*/ {.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None","Pit ","Fil ","Vol ","XOvr","LFO1","LFO2"}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCont,.number=cpLFOFreq,.shortName="1Spd",.longName="LFO1 Speed (BPM)"},
+		{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
+		{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
+		{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
+		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
+		/* 2nd row of pots */
+		{.type=ptCont,.number=cpLFOPitchAmt,.shortName="1Pit",.longName="Pitch LFO1 Amount"},
+		{.type=ptCont,.number=cpLFOWModAmt,.shortName="1Wmo",.longName="WaveMod LFO1 Amount"},
+		{.type=ptCont,.number=cpLFOFilAmt,.shortName="1Fil",.longName="Filter frequency LFO1 Amount"},
+		{.type=ptCont,.number=cpLFOResAmt,.shortName="1Res",.longName="Filter resonance LFO1 Amount"},
+		{.type=ptCont,.number=cpLFOAmpAmt,.shortName="1Amp",.longName="Amplifier LFO1 Amount"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* LFO2 page (D) */
+	/* LFO2 page (6) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCont,.number=cpLFO2Freq,.shortName="2Spd",.longName="LFO2 Speed (BPM)"},
-			{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
-			{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
-			{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},
-			{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
-			/* 2nd row of pots */
-			{.type=ptCont,.number=cpLFO2PitchAmt,.shortName="2Pit",.longName="Pitch LFO2 Amount"},
-			{.type=ptCont,.number=cpLFO2WModAmt,.shortName="2Wmo",.longName="WaveMod LFO2 Amount"},
-			{.type=ptCont,.number=cpLFO2FilAmt,.shortName="2Fil",.longName="Filter frequency LFO2 Amount"},
-			{.type=ptCont,.number=cpLFO2ResAmt,.shortName="2Res",.longName="Filter resonance LFO2 Amount"},
-			{.type=ptCont,.number=cpLFO2AmpAmt,.shortName="2Amp",.longName="Amplifier LFO2 Amount"},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
-			/*2*/ {.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
-			/*3*/ {.type=ptStep,.number=spPressureRange,.shortName="PRng",.longName="Pressure Range",.values={"Min ","Low ","High","Full"}},
-			/*4*/ {.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
-			/*5*/ {.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None","Pit ","Fil ","Vol ","XOvr"}},
-			/*6*/ {.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None","Pit ","Fil ","Vol ","XOvr","LFO1","LFO2"}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCont,.number=cpLFO2Freq,.shortName="2Spd",.longName="LFO2 Speed (BPM)"},
+		{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
+		{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
+		{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},
+		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
+		/* 2nd row of pots */
+		{.type=ptCont,.number=cpLFO2PitchAmt,.shortName="2Pit",.longName="Pitch LFO2 Amount"},
+		{.type=ptCont,.number=cpLFO2WModAmt,.shortName="2Wmo",.longName="WaveMod LFO2 Amount"},
+		{.type=ptCont,.number=cpLFO2FilAmt,.shortName="2Fil",.longName="Filter frequency LFO2 Amount"},
+		{.type=ptCont,.number=cpLFO2ResAmt,.shortName="2Res",.longName="Filter resonance LFO2 Amount"},
+		{.type=ptCont,.number=cpLFO2AmpAmt,.shortName="2Amp",.longName="Amplifier LFO2 Amount"},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* Arpeggiator page (#) */
+	/* Arpeggiator page (7) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
-			/* 2nd row of pots */
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptCust,.number=cnAMod,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
-			/*2*/ {.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
-			/*3*/ {.type=ptNone},
-			/*4*/ {.type=ptNone},
-			/*5*/ {.type=ptNone},
-			/*6*/ {.type=ptNone},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* 2nd row of pots */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnAMod,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
+		{.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* Sequencer page (#) */
+	/* Sequencer page (8) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
-			/* 2nd row of pots */
-			{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Numerically set last potentiometer value"},
-			/*1*/ {.type=ptCust,.number=cnAPly,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
-			/*2*/ {.type=ptCust,.number=cnBPly,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "}},
-			/*3*/ {.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
-			/*4*/ {.type=ptCust,.number=cnTiRe,.shortName="TiRe",.longName="Add Tie/Rest"},
-			/*5*/ {.type=ptCust,.number=cnBack,.shortName="Back",.longName="Back one step"},
-			/*6*/ {.type=ptCust,.number=cnClr,.shortName="Clr ",.longName="Clear sequence"},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* 2nd row of pots */
+		{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnAPly,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
+		{.type=ptCust,.number=cnBPly,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "}},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
-	/* Miscellaneous page (*) */
+	/* Sequencer record page (8) */
 	{
-		{
-			/* 1st row of pots */
-			{.type=ptCust,.number=cnPrHu,.shortName="Hndr",.longName="Preset number hundreds",.custPotMul=10,.custPotAdd=0},
-			{.type=ptCust,.number=cnPrTe,.shortName="Tens",.longName="Preset number tens",.custPotMul=10,.custPotAdd=0},
-			{.type=ptCust,.number=cnPrUn,.shortName="Unit",.longName="Preset number units",.custPotMul=10,.custPotAdd=0},
-			{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
-			{.type=ptStep,.number=spPresetStyle,.shortName="Styl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
-			/* 2nd row of pots */
-			{.type=ptCust,.number=cnMidC,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
-			{.type=ptNone},
-			{.type=ptNone},
-			{.type=ptCust,.number=cnCtst,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
-			{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
-		},
-		{
-			/*0*/ {.type=ptCust,.number=cnNPrs,.shortName="NPrs",.longName="Numerically set preset number"},
-			/*1*/ {.type=ptCust,.number=cnLoad,.shortName="Load",.longName="Load preset"},
-			/*2*/ {.type=ptNone},
-			/*3*/ {.type=ptCust,.number=cnSave,.shortName="Save",.longName="Save preset"},
-			/*4*/ {.type=ptCust,.number=cnLPrv,.shortName="LPrv",.longName="Load previous preset",.values={""}},
-			/*5*/ {.type=ptCust,.number=cnLNxt,.shortName="LNxt",.longName="Load next preset",.values={""}},
-			/*6*/ {.type=ptCust,.number=cnTune,.shortName="Tune",.longName="Tune filters",.values={""}},
-			/*7*/ {.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
-			/*8*/ {.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-			/*9*/ {.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
-		},
+		/* 1st row of pots */
+		{.type=ptCust,.number=cnClk,.shortName="Clk ",.longName="Seq/Arp Clock (Int:BPM, MIDI:Divider)",.custPotMul=CLOCK_MAX_BPM+1,.custPotAdd=0},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* 2nd row of pots */
+		{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnTiRe,.shortName="TiRe",.longName="Add Tie/Rest"},
+		{.type=ptCust,.number=cnBack,.shortName="Back",.longName="Back one step"},
+		{.type=ptCust,.number=cnClr,.shortName="Clr ",.longName="Clear sequence"},
+		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
+	},
+	/* Miscellaneous page (9) */
+	{
+		/* 1st row of pots */
+		{.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={" Min"," Low","High","Full"}},
+		{.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={" 3rd"," 5th"," Oct"}},
+		{.type=ptStep,.number=spPressureRange,.shortName="PRng",.longName="Pressure Range",.values={" Min"," Low","High","Full"}},
+		{.type=ptCust,.number=cnMidC,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
+		{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={" Int","MIDI", " USB"},.custPotMul=3,.custPotAdd=0},
+		/* 2nd row of pots */
+		{.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
+		{.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None"," Pit"," Fil"," Vol","XOvr"}},
+		{.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None"," Pit"," Fil"," Vol","XOvr","LFO1","LFO2"}},
+		{.type=ptCust,.number=cnCtst,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
+		{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode",.values={"None","MIDI","Disk"},.custPotMul=3,.custPotAdd=0},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
+		{.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTune,.shortName="Tune",.longName="Tune filters",.values={""}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
+	},
+	/* Presets page (0) */
+	{
+		/* 1st row of pots */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* 2nd row of pots */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
+		{.type=ptStep,.number=spPresetStyle,.shortName="Styl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptCust,.number=cnLoad,.shortName="Load",.longName="Load preset"},
+		{.type=ptCust,.number=cnSave,.shortName="Save",.longName="Save preset"},
+		{.type=ptCust,.number=cnLPrv,.shortName="Prev",.longName="Load previous preset",.values={""}},
+		{.type=ptCust,.number=cnLNxt,.shortName="Next",.longName="Load next preset",.values={""}},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptCust,.number=cnNPrs,.shortName="NPrs",.longName="Set preset number digits"},
 	},
 };
 
@@ -338,6 +319,7 @@ static struct
 	int32_t potsPrevValue[SCAN_POT_COUNT];
 
 	int8_t presetModified;
+	int8_t presetModifiedWarning;
 	int8_t usbMSC;
 	
 	int8_t seqRecordingTrack;
@@ -448,6 +430,45 @@ static void setLcdContrast(uint8_t contrast)
 	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*400/UI_MAX_LCD_CONTRAST);
 }
 
+static void drawABCD(int lcd)
+{
+	sendChar(lcd, 0b01110);
+	sendChar(lcd, 0b11011);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10001);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b01110);
+
+	sendChar(lcd, 0b01110);
+	sendChar(lcd, 0b10011);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10011);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10011);
+	sendChar(lcd, 0b01110);
+
+	sendChar(lcd, 0b01110);
+	sendChar(lcd, 0b11011);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10111);
+	sendChar(lcd, 0b10111);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b11011);
+	sendChar(lcd, 0b01110);
+
+	sendChar(lcd, 0b01110);
+	sendChar(lcd, 0b10011);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10101);
+	sendChar(lcd, 0b10011);
+	sendChar(lcd, 0b01110);
+}
+
 static void drawPresetModified(int lcd, int8_t force)
 {
 	int8_t i;
@@ -457,37 +478,28 @@ static void drawPresetModified(int lcd, int8_t force)
 	{
 		if(ui.presetModified)
 		{
-			sendChar(lcd, 0b00000);
-			sendChar(lcd, 0b00110);
-			sendChar(lcd, 0b00101);
-			sendChar(lcd, 0b00101);
-			sendChar(lcd, 0b00110);
-			sendChar(lcd, 0b00100);
-			sendChar(lcd, 0b00100);
-			sendChar(lcd, 0b00000);
+			sendChar(lcd, 0b01111);
+			sendChar(lcd, 0b10011);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10011);
+			sendChar(lcd, 0b10111);
+			sendChar(lcd, 0b10111);
+			sendChar(lcd, 0b01111);
 
-			sendChar(lcd, 0b00000);
-			sendChar(lcd, 0b10100);
-			sendChar(lcd, 0b11100);
-			sendChar(lcd, 0b10100);
-			sendChar(lcd, 0b10100);
-			sendChar(lcd, 0b10100);
-			sendChar(lcd, 0b10100);
-			sendChar(lcd, 0b00000);
+			sendChar(lcd, 0b11110);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10001);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b10101);
+			sendChar(lcd, 0b11110);
 		}
 		else
 		{
-			for(i=0;i<4;++i)
-			{
-				sendChar(lcd, 0b00001);
+			for(i=0;i<16;++i)
 				sendChar(lcd, 0b00000);
-			}
-
-			for(i=0;i<4;++i)
-			{
-				sendChar(lcd, 0b10000);
-				sendChar(lcd, 0b00000);
-			}
 		}
 	
 		old_pm=ui.presetModified;
@@ -509,28 +521,28 @@ static void drawVisualEnv(int lcd, int8_t voicePair, int8_t force)
 			if(ve>=i)
 				veb|=(1<<i);
 
-		sendChar(lcd, 0b00001 | ((veb>>27) & 0x1e));
-		sendChar(lcd, 0b00000 | ((veb>>23) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>16) & 0x1e));
-		sendChar(lcd, 0b00000 | ((veb>>15) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>11) & 0x1e));
-		sendChar(lcd, 0b00000 | ((veb>>7) & 0x1e));
-		sendChar(lcd, 0b00001 | ((veb>>3) & 0x1e));
-		sendChar(lcd, 0b00000 | ((veb<<1) & 0x1e));
+		sendChar(lcd, ((veb>>27) & 0x1e));
+		sendChar(lcd, ((veb>>23) & 0x1e));
+		sendChar(lcd, ((veb>>16) & 0x1e));
+		sendChar(lcd, ((veb>>15) & 0x1e));
+		sendChar(lcd, ((veb>>11) & 0x1e));
+		sendChar(lcd, ((veb>>7) & 0x1e));
+		sendChar(lcd, ((veb>>3) & 0x1e));
+		sendChar(lcd, ((veb<<1) & 0x1e));
 
 		veb=0;
 		for(i=0;i<32;++i)
 			if(ve2>=i)
 				veb|=(1<<i);
 
-		sendChar(lcd, 0b10000 | ((veb>>28) & 0xf));
-		sendChar(lcd, 0b00000 | ((veb>>24) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>20) & 0xf));
-		sendChar(lcd, 0b00000 | ((veb>>16) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>12) & 0xf));
-		sendChar(lcd, 0b00000 | ((veb>>8) & 0xf));
-		sendChar(lcd, 0b10000 | ((veb>>4) & 0xf));
-		sendChar(lcd, 0b00000 | ((veb) & 0xf));
+		sendChar(lcd, ((veb>>28) & 0xf));
+		sendChar(lcd, ((veb>>24) & 0xf));
+		sendChar(lcd, ((veb>>20) & 0xf));
+		sendChar(lcd, ((veb>>16) & 0xf));
+		sendChar(lcd, ((veb>>12) & 0xf));
+		sendChar(lcd, ((veb>>8) & 0xf));
+		sendChar(lcd, ((veb>>4) & 0xf));
+		sendChar(lcd, ((veb) & 0xf));
 		
 		old_ve[voicePair]=ve;
 		old_ve[voicePair+1]=ve2;
@@ -692,14 +704,25 @@ static void drawWaveform(abx_t abx)
 	}
 }
 
-const struct uiParam_s * getUiParameter(int8_t source)
+const struct uiParam_s * getUiParameter(int8_t source) // source: keypad (kbA..kbSharp) / pots (-1..-10)
 {
 	int8_t potnum;
 	potnum=-source-1;
-	return &uiParameters[ui.activePage][source<0?0:1][source<0?potnum:source];
+	return &uiParameters[ui.activePage][source<0?potnum:SCAN_POT_COUNT-kbA+source];
 }
 
-static const char * getName(int8_t source, int8_t longName) // source: keypad (kb0..kbSharp) / (-1..-10)
+static int8_t setPresetModifiedWarning(enum uiCustomParamNumber_e cp)
+{
+	if(ui.presetModified && ui.presetModifiedWarning!=cp)
+	{
+		ui.presetModifiedWarning=cp;
+		return 0;
+	}
+	ui.presetModifiedWarning=-1;
+	return 1;
+}
+
+static const char * getName(int8_t source, int8_t longName)
 {
 	const struct uiParam_s * prm=getUiParameter(source);
 
@@ -711,7 +734,7 @@ static const char * getName(int8_t source, int8_t longName) // source: keypad (k
 		return "    ";
 }
 
-static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keypad (kb0..kbSharp) / (-1..-10)
+static char * getDisplayValue(int8_t source, int32_t * valueOut)
 {
 	static char dv[10]={0};
 	const struct uiParam_s * prm=getUiParameter(source);
@@ -780,9 +803,6 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				case cnAHld:
 					v=arp_getHold();
 					break;
-				case cnPrUn:
-					v=(settings.presetNumber+1000)%10;
-					break;
 				case cnLoad:
 				case cnSave:
 					v=settings.presetNumber;
@@ -794,9 +814,6 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					break;
 				case cnTune:
 					v=0;
-					break;
-				case cnPrTe:
-					v=((settings.presetNumber+1000)/10)%10;
 					break;
 				case cnSync:
 					v=settings.syncMode;
@@ -847,9 +864,6 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 				case cnPack:
 					v=0;
 					break;
-				case cnPrHu:
-					v=((settings.presetNumber+1000)/100)%10;
-					break;
 				case cnNPrs:
 				case cnNVal:
 					v=ui.kpInputValue;
@@ -862,6 +876,15 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 					break;
 				case cnCtst:
 					v=settings.lcdContrast;
+					break;
+				case cnWEnT:
+					v=currentPreset.steppedParameters[spWModEnvLin]*2+currentPreset.steppedParameters[spWModEnvSlow];
+					break;
+				case cnFEnT:
+					v=currentPreset.steppedParameters[spFilEnvLin]*2+currentPreset.steppedParameters[spFilEnvSlow];
+					break;
+				case cnAEnT:
+					v=currentPreset.steppedParameters[spAmpEnvLin]*2+currentPreset.steppedParameters[spAmpEnvSlow];
 					break;
 				}
 			}
@@ -884,7 +907,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut) // source: keyp
 	return dv;
 }
 
-static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp) / (-1..-10)
+static char * getDisplayFulltext(int8_t source)
 {
 	static char dv[LCD_WIDTH+1];
 	const struct uiParam_s * prm=getUiParameter(source);
@@ -933,10 +956,16 @@ static char * getDisplayFulltext(int8_t source) // source: keypad (kb0..kbSharp)
 	{
 		strcpy(dv,currentPreset.oscWave[sp2abx[prm->number]]);
 	}
+	else if (prm->type==ptCust &&
+			(prm->number==cnLoad || prm->number==cnLNxt || prm->number==cnLPrv || prm->number==cnLBas))
+	{
+		if(ui.presetModified && ui.presetModifiedWarning==prm->number)
+			strcpy(dv,"Warning: preset modified, press again");
+	}
 	else if (prm->type==ptCust && prm->number==cnNVal)
 	{
 		if(ui.kpInputPot>=0)
-			strcpy(dv,uiParameters[ui.activePage][0][ui.kpInputPot].longName);
+			strcpy(dv,uiParameters[ui.activePage][ui.kpInputPot].longName);
 	}
 	else
 	{
@@ -964,23 +993,35 @@ static void handlePageChange(enum scanKeypadButton_e button)
 {
 	switch(button)
 	{
-		case kbA: 
-			ui.activePage=(ui.activePage==upOscs)?upWMod:upOscs;
+		case kb1: 
+			ui.activePage=upOscs;
 			break;
-		case kbB: 
+		case kb2: 
+			ui.activePage=upWMod;
+			break;
+		case kb3: 
 			ui.activePage=upFil;
 			break;
-		case kbC: 
+		case kb4: 
 			ui.activePage=upAmp;
 			break;
-		case kbD: 
-			ui.activePage=(ui.activePage==upLFO1)?upLFO2:upLFO1;
+		case kb5: 
+			ui.activePage=upLFO1;
 			break;
-		case kbAsterisk: 
+		case kb6: 
+			ui.activePage=upLFO2;
+			break;
+		case kb7: 
+			ui.activePage=upArp;
+			break;
+		case kb8: 
+			ui.activePage=ui.seqRecordingTrack<0?upSeqPlay:upSeqRec;
+			break;
+		case kb9: 
 			ui.activePage=upMisc;
 			break;
-		case kbSharp: 
-			ui.activePage=(ui.activePage==upArp)?upSeq:upArp;
+		case kb0: 
+			ui.activePage=upPresets;
 			break;
 		default:
 			return;
@@ -1005,8 +1046,15 @@ static void handlePageChange(enum scanKeypadButton_e button)
 
 static void handleKeypadInput(enum scanKeypadButton_e button)
 {
-	if(button<kb0 && button>kb9)
+	if(button<kb0 || button>kb9)
+	{
+		ui.kpInputDecade=-1; // end of input
+		
+		// back to regular page display
+		ui.activeSourceTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
+		ui.pendingScreenClear=1;
 		return;
+	}
 	
 	uint16_t decade=1;
 	for(int i=0;i<ui.kpInputDecade;++i)
@@ -1029,6 +1077,7 @@ static void handleKeypadInput(enum scanKeypadButton_e button)
 		{
 			// preset number
 			settings.presetNumber=ui.kpInputValue;
+			ui.settingsModifiedTimeout=currentTick+ACTIVE_SOURCE_TIMEOUT;
 		}
 	}
 }
@@ -1074,7 +1123,7 @@ static int32_t getParameterValueCount(const struct uiParam_s * prm)
 	return valCount;
 }
 
-static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / (-1..-10)
+static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (kb0..kbSharp) / pots (-1..-10)
 {
 	int32_t data,valueCount;
 	int32_t potSetting;
@@ -1082,14 +1131,6 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	const struct uiParam_s * prm;
 
 //	rprintf(0,"handleUserInput %d\n",source);
-	
-	// page change
-	
-	if(source>=kbA)
-	{
-		handlePageChange(source);
-		return;
-	}
 	
 	// keypad value input mode	
 	
@@ -1099,6 +1140,14 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		return;
 	}
 
+	// page change
+	
+	if(source>=kb0 && source<=kb9)
+	{
+		handlePageChange(source);
+		return;
+	}
+	
 	// get uiParam_s from source
 	
 	potnum=-source-1;
@@ -1258,10 +1307,10 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnAHld:
 				arp_setMode(arp_getMode(),!arp_getHold());
 				break;
-			case cnPrUn:
-				settings.presetNumber=settings.presetNumber-(settings.presetNumber%10)+potSetting;
-				break;
 			case cnLoad:
+				if(!setPresetModifiedWarning(prm->number))
+					break;
+				/* fall through */
 			case cnSave:
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
@@ -1274,9 +1323,6 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnMidC:
 				settings.midiReceiveChannel=potSetting-1;
 				settingsModified=1;
-				break;
-			case cnPrTe:
-				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/10)%10)*10)+potSetting*10;
 				break;
 			case cnSync:
 				settings.syncMode=potSetting;
@@ -1295,6 +1341,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				if(seq_getMode(1)==smRecording) seq_setMode(1,smOff);
 				if(ui.seqRecordingTrack>=0)
 					seq_setMode(ui.seqRecordingTrack,smRecording);
+				handlePageChange(kb8);
 				break;
 			case cnBack:
 				if(ui.seqRecordingTrack>=0)
@@ -1340,10 +1387,11 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				break;
 			case cnLPrv:
 			case cnLNxt:
+				if(!setPresetModifiedWarning(prm->number))
+					break;
 				data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
 				data=(data+1000)%1000;
 				settings.presetNumber=data;
-
 				ui.slowUpdateTimeout=0;
 				ui.slowUpdateTimeoutNumber=0x80+cnLoad;
 				break;
@@ -1352,6 +1400,8 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				synth_refreshFullState(0);
 				break;
 			case cnLBas:
+				if(!setPresetModifiedWarning(prm->number))
+					break;
 				preset_loadDefault(1);
 				for(abx_t abx=0;abx<abxCount;++abx)
 					synth_refreshWaveforms(abx);
@@ -1359,9 +1409,6 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				break;
 			case cnPack:
 				preset_packAndRemoveDuplicates();
-				break;
-			case cnPrHu:
-				settings.presetNumber=settings.presetNumber-(((settings.presetNumber/100)%10)*100)+potSetting*100;
 				break;
 			case cnNPrs:
 				ui.kpInputValue=0;
@@ -1372,7 +1419,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnNVal:
 				ui.kpInputValue=0;
 				ui.kpInputDecade=-1;
-				if(ui.lastInputPot>=0 && uiParameters[ui.activePage][0][ui.lastInputPot].type!=ptNone)
+				if(ui.lastInputPot>=0 && uiParameters[ui.activePage][ui.lastInputPot].type!=ptNone)
 				{
 					ui.kpInputPot=ui.lastInputPot;
 					ui.kpInputDecade=2;
@@ -1400,6 +1447,27 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				settings.lcdContrast=potSetting;
 				settingsModified=1;
 				break;
+			case cnWEnT:
+				getDisplayValue(source,&data);
+				data=(data+1)&3;
+				currentPreset.steppedParameters[spWModEnvSlow]=data&1;
+				currentPreset.steppedParameters[spWModEnvLin]=data>>1;
+				change=1;
+				break;
+			case cnFEnT:
+				getDisplayValue(source,&data);
+				data=(data+1)&3;
+				currentPreset.steppedParameters[spFilEnvSlow]=data&1;
+				currentPreset.steppedParameters[spFilEnvLin]=data>>1;
+				change=1;
+				break;
+			case cnAEnT:
+				getDisplayValue(source,&data);
+				data=(data+1)&3;
+				currentPreset.steppedParameters[spAmpEnvSlow]=data&1;
+				currentPreset.steppedParameters[spAmpEnvLin]=data>>1;
+				change=1;
+				break;
 		}
 		break;
 	default:
@@ -1408,7 +1476,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 
 	if(change)
 	{
-		ui.presetModified=change;
+		ui_setPresetModified(1);
 		synth_refreshFullState(0);
 	}
 	
@@ -1506,16 +1574,18 @@ static void handleSlowUpdates(void)
 void ui_setPresetModified(int8_t modified)
 {
 	ui.presetModified=modified;
+	if(!modified)
+		ui.presetModifiedWarning=-1;
 }
 
 int8_t ui_isPresetModified(void)
 {
-	return ui.presetModified;
+	return !!ui.presetModified;
 }
 
 int8_t ui_isTransposing(void)
 {
-	return ui.isTransposing;
+	return !!ui.isTransposing;
 }
 
 int32_t ui_getTranspose(void)
@@ -1547,6 +1617,7 @@ void ui_init(void)
 	ui.activePage=upNone;
 	ui.activeSource=INT8_MAX;
 	ui.pendingScreenClear=1;
+	ui.presetModifiedWarning=-1;
 	ui.seqRecordingTrack=-1;
 	ui.lastInputPot=-1;
 	ui.kpInputDecade=-1;
@@ -1640,10 +1711,10 @@ void ui_update(void)
 	{
 		if(ui.pendingScreenClear)
 		{
-			sendString(1,"GliGli's OverCycler                     ");
-			sendString(1,"A: Oscs/WaveMod    B: Filter            ");
-			sendString(2,"C: Amplifier       D: LFO1/LFO2         ");
-			sendString(2,"*: Miscellaneous   #: Arp/Sequencer     ");
+			sendString(1,"1:Oscillators   2:WaveMod    3:Filter   ");
+			sendString(1,"4:Amplifier     5:LFO1       6:LFO2     ");
+			sendString(2,"7:Arpeggiator   8:Sequencer  9:Misc.    ");
+			sendString(2,"*:Set digits    0:Presets    #:Transpose");
 		}
 		delay_ms(2);
 	}
@@ -1684,35 +1755,35 @@ void ui_update(void)
 	{
 		ui.activeSource=INT8_MAX;
 
-		 // buttons
+		// buttons
 		
-		setPos(1,26,1);
-		setPos(2,26,0);
-		for(i=kb1;i<=kb6;++i)
-		{
-			int lcd=(i<=kb3)?1:2;
-			sendString(lcd,getDisplayValue(i, NULL));
-			if(i!=kb6 && i!=kb3)
-				sendChar(lcd,' ');
-		}
-	
+			// CGRAM update (ABCD)
+
 		if(ui.pendingScreenClear)
 		{
-			setPos(1,26,0);
-			
-			for(i=kb1;i<=kb3;++i)
+			hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
+			drawABCD(1);
+		}
+		
+			// text
+		
+		for(i=kbA;i<=kbD;++i)
+		{
+			if(getUiParameter(i)->type!=ptNone)
 			{
-				sendString(1,getName(i,0));
-				if(i<kb3)
-					sendChar(1,' ');
-			}
+				int pos=5+(i-kbA)*9;
+				
+				setPos(2,pos,0);
+				sendString(2,getDisplayValue(i,NULL));
 
-			setPos(2,26,1);
-			for(i=kb4;i<=kb6;++i)
-			{
-				sendString(2,getName(i,0));
-				if(i<kb6)
-					sendChar(2,' ');
+				if(ui.pendingScreenClear)
+				{
+					setPos(1,pos,0);
+					sendChar(1,i-kbA+'\x00');
+
+					setPos(1,pos,1);
+					sendString(1,getName(i,0));
+				}
 			}
 		}
 		
@@ -1720,54 +1791,51 @@ void ui_update(void)
 
 			// CGRAM update ("preset modified", visual envelopes)
 		
-		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
-		drawPresetModified(1,ui.pendingScreenClear);
-		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16);
-		drawVisualEnv(1,0,ui.pendingScreenClear);
-		
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
-		drawVisualEnv(2,2,ui.pendingScreenClear);
+		drawVisualEnv(2,0,ui.pendingScreenClear);
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16);
+		drawVisualEnv(2,2,ui.pendingScreenClear);
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+32);
 		drawVisualEnv(2,4,ui.pendingScreenClear);
 
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+48);
+		drawPresetModified(2,ui.pendingScreenClear);
+		
 			// actual "text"
 		
 		if(ui.pendingScreenClear)
 		{
-			setPos(1,24,0); sendChar(1,'\x08'); sendChar(1,'\x09');
-			setPos(1,24,1); sendChar(1,'\x0a'); sendChar(1,'\x0b');
-			setPos(2,24,0); sendChar(2,'\x08'); sendChar(2,'\x09');
-			setPos(2,24,1); sendChar(2,'\x0a'); sendChar(2,'\x0b');
+			setPos(2,16,1); sendChar(2,'\x00');
+			setPos(2,23,1); sendChar(2,'\x01');
+			setPos(2,14,1); sendChar(2,'\x02');
+			setPos(2,25,1); sendChar(2,'\x03');
+			setPos(2, 7,1); sendChar(2,'\x04');
+			setPos(2,32,1); sendChar(2,'\x05');
+
+			setPos(2, 5,1); sendChar(2,'\x06');
+			setPos(2, 6,1); sendChar(2,'\x07');
 		}
 		
 		// pots
-
-		setPos(1,0,1);
-		hd44780_driver.home(&ui.lcd2);
-		for(i=0;i<SCAN_POT_COUNT;++i)
+		
+		for(i=0;i<SCAN_POT_COUNT/2;++i)
 		{
-			int lcd=(i<SCAN_POT_COUNT/2)?1:2;
-			sendString(lcd,getDisplayValue(-i-1, NULL));
-			if(i!=SCAN_POT_COUNT-1 && i!=SCAN_POT_COUNT/2-1)
-				sendChar(lcd,' ');
+			setPos(1,i*9,1);
+			setPos(2,i*9,0);
+
+			sendString(1,getDisplayValue(-i-1,NULL));
+			sendString(2,getDisplayValue(-i-1-SCAN_POT_COUNT/2,NULL));
 		}
 
 		if(ui.pendingScreenClear)
 		{
-			hd44780_driver.home(&ui.lcd1);
 			for(i=0;i<SCAN_POT_COUNT/2;++i)
 			{
-				sendString(1,getName(-i-1,0));
-				if(i<SCAN_POT_COUNT/2-1)
-					sendChar(1,' ');
-			}
+				setPos(1,i*9,0);
+				setPos(2,i*9,1);
 
-			setPos(2,0,1);
-			for(i=SCAN_POT_COUNT/2;i<SCAN_POT_COUNT;++i)
-			{
-				sendString(2,getName(-i-1,0));
-				if(i<SCAN_POT_COUNT-1)
-					sendChar(2,' ');
+				sendString(1,getName(-i-1,0));
+				sendString(2,getName(-i-1-SCAN_POT_COUNT/2,0));
 			}
 		}
 	}
