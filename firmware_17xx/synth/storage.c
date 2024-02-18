@@ -9,6 +9,7 @@
 #include "ui.h"
 #include "clock.h"
 #include "scan.h"
+#include "dacspi.h"
 #include "main.h"
 
 // increment this each time the binary format is changed
@@ -437,12 +438,13 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	
 	if(storage.version<18)
 	{
-		// in this case spLFOShift_Legacy contains the legacy LFO speed range, where value 1 was "fast"
-		// rescale the LFO speed (the speed switch parameter was omitted from version 18 after)
-		// the exponential factor (ratio) was changed from 13000 to 8000
-		currentPreset.continuousParameters[cpLFOFreq]=(uint16_t)(0.615385f*(float)currentPreset.continuousParameters[cpLFOFreq])+25205;
-		// The slow LFO variant in version 17 was made a factor of 8 slower compared to the fast setting, so:
-		if (currentPreset.steppedParameters[spLFOShift_Legacy]==0) currentPreset.continuousParameters[cpLFOFreq]-=16635; // =0 used to be the slow setting
+		int tmp=currentPreset.continuousParameters[cpLFOFreq];
+
+		tmp=linearCourse(UINT16_MAX-tmp,13000.0,65535.0f); // inverse of old formula
+		tmp=SCAN_POT_TO_16BITS(((DACSPI_UPDATE_HZ*30)*tmp)/(1LL<<24)); // inverse of new formula
+		tmp<<=currentPreset.steppedParameters[spLFOShift_Legacy]*2;
+		
+		currentPreset.continuousParameters[cpLFOFreq]=MIN(UINT16_MAX,tmp);
 	}
 
 	if(storage.version<20)
@@ -509,12 +511,13 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 
 	if(storage.version<18)
 	{
-		// in this case spLFO2Shift_Legacy contains the legacy LFO speed range, where value 1 was "fast"
-		// rescale the LFO2 speed (the speed switch parameter was omitted from version 18 after)
-		// the exponential factor (ratio) was changed from 13000 to 8000
-		currentPreset.continuousParameters[cpLFO2Freq]=(uint16_t)(0.615385f*(float)currentPreset.continuousParameters[cpLFO2Freq])+25205;
-		// The slow LFO variant in version 17 was made a factor of 8 slower compared to the fast setting, so:
-		if (currentPreset.steppedParameters[spLFO2Shift_Legacy]==0) currentPreset.continuousParameters[cpLFO2Freq]-=16635; // =0 used to be the slow setting
+		int tmp=currentPreset.continuousParameters[cpLFO2Freq];
+
+		tmp=linearCourse(UINT16_MAX-tmp,13000.0,65535.0f); // inverse of old formula
+		tmp=SCAN_POT_TO_16BITS(((DACSPI_UPDATE_HZ*30)*tmp)/(1LL<<24)); // inverse of new formula
+		tmp<<=currentPreset.steppedParameters[spLFO2Shift_Legacy]*2;
+		
+		currentPreset.continuousParameters[cpLFO2Freq]=MIN(UINT16_MAX,tmp);
 	}
 
 	if(storage.version<10)

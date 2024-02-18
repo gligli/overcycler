@@ -156,6 +156,11 @@ uint16_t exponentialCourse(uint16_t v, float ratio, float range)
 	return expf(-(float)v/ratio)*range;
 }
 
+uint16_t linearCourse(uint16_t v, float ratio, float range)
+{
+	return -logf((float)v/range)*ratio;
+}
+
 int uint16Compare(const void * a,const void * b)
 {
 	return *(uint16_t*)a - *(uint16_t*)b;

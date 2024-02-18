@@ -37,6 +37,7 @@ uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t interpolat
 uint32_t lfsr(uint32_t v, uint8_t taps);
 
 uint16_t exponentialCourse(uint16_t v, float ratio, float range);
+uint16_t linearCourse(uint16_t v, float ratio, float range); // reverse of exponentialCourse
 		
 int uint16Compare(const void * a,const void * b); // for qsort
 int stringCompare(const void * a,const void * b); // for qsort
