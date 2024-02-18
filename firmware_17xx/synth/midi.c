@@ -263,6 +263,9 @@ static int8_t setSteppedParameter(steppedParameter_t param, uint8_t value, int8_
 				synth_getWaveName(value,currentPreset.oscWave[sp2abx[param]]);
 				midi.pendingBankWaveTimeout[sp2abx[param]]=currentTick+PENDING_UPDATE_TIMEOUT;
 				break;
+			case spUnison:
+				synth_updateAssignerPattern();
+				break;
 			default:
 				/* nothing */;
 		}

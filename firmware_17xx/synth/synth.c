@@ -269,16 +269,6 @@ static void refreshAssignerSettings(void)
 {
 	static const uint8_t vc2msk[7]={1,3,7,15,31,63};
  
-	if(currentPreset.steppedParameters[spUnison]!=assigner_getMono())
-	{
-		if(currentPreset.steppedParameters[spUnison])
-			assigner_latchPattern();
-		else
-			assigner_setPoly();
-		
-		assigner_getPattern(currentPreset.voicePattern,NULL);
-	}
-
 	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
 	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
 	assigner_setVoiceMask(vc2msk[currentPreset.steppedParameters[spVoiceCount]]);
@@ -471,6 +461,37 @@ static void refreshMisc(void)
 		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover],scA);
 		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover],scB);
 	}
+}
+
+static void handleBitInputs(void)
+{
+	uint32_t cur;
+	static uint32_t last=0;
+	
+	cur=GPIO_ReadValue(3);
+	
+	// control footswitch 
+	 
+	if(arp_getMode()==amOff && currentPreset.steppedParameters[spUnison] && !(cur&BIT_INPUT_FOOTSWITCH) && last&BIT_INPUT_FOOTSWITCH)
+	{
+		assigner_latchPattern();
+		assigner_getPattern( currentPreset.voicePattern,NULL);
+	}
+	else if((cur&BIT_INPUT_FOOTSWITCH)!=(last&BIT_INPUT_FOOTSWITCH))
+	{
+		if(arp_getMode()!=amOff)
+		{
+			arp_setMode(arp_getMode(),(cur&BIT_INPUT_FOOTSWITCH)?0:1);
+		}
+		else
+		{
+			assigner_holdEvent((cur&BIT_INPUT_FOOTSWITCH)?0:1);
+		}
+	}
+
+	// this must stay last
+	
+	last=cur;
 }
 
 void synth_refreshFullState(int8_t refreshWaveforms)
@@ -792,36 +813,14 @@ void synth_refreshWaveforms(abx_t abx)
 	currentPreset.steppedParameters[abx2wsp[abx]]=waveNum;
 }	
 
-
-static void handleBitInputs(void)
+void synth_updateAssignerPattern(void)
 {
-	uint32_t cur;
-	static uint32_t last=0;
-	
-	cur=GPIO_ReadValue(3);
-	
-	// control footswitch 
-	 
-	if(arp_getMode()==amOff && currentPreset.steppedParameters[spUnison] && !(cur&BIT_INPUT_FOOTSWITCH) && last&BIT_INPUT_FOOTSWITCH)
-	{
+	if(currentPreset.steppedParameters[spUnison])
 		assigner_latchPattern();
-		assigner_getPattern( currentPreset.voicePattern,NULL);
-	}
-	else if((cur&BIT_INPUT_FOOTSWITCH)!=(last&BIT_INPUT_FOOTSWITCH))
-	{
-		if(arp_getMode()!=amOff)
-		{
-			arp_setMode(arp_getMode(),(cur&BIT_INPUT_FOOTSWITCH)?0:1);
-		}
-		else
-		{
-			assigner_holdEvent((cur&BIT_INPUT_FOOTSWITCH)?0:1);
-		}
-	}
+	else
+		assigner_setPoly();
 
-	// this must stay last
-	
-	last=cur;
+	assigner_getPattern(currentPreset.voicePattern,NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

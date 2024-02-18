@@ -1298,6 +1298,9 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 					ui.slowUpdateTimeoutNumber=prm->number;
 					break;
+				case spUnison:
+					synth_updateAssignerPattern();
+					break;
 			}
 		}
 		break;
