@@ -523,7 +523,7 @@ void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sor
 	oriWaveNum=waveNum;
 	oriBankNum=bankNum;
 
-	if(!synth_refreshBankNames(sort))
+	if(!synth_refreshBankNames(sort,0))
 		return;
 
 reload:
@@ -621,11 +621,11 @@ int8_t synth_getWaveName(int waveIndex, char * res)
 	return 1;
 }
 
-int8_t synth_refreshBankNames(int8_t sort)
+int8_t synth_refreshBankNames(int8_t sort, int8_t force)
 {
 	FRESULT res;
 	
-	if(waveData.bankSorted==sort) // already loaded and same state
+	if(waveData.bankSorted==sort && !force) // already loaded and same state
 		return 1;
 	
 	waveData.bankCount=0;
@@ -717,7 +717,7 @@ void synth_refreshCurWaveNames(abx_t abx, int8_t sort)
 
 void synth_refreshWaveforms(abx_t abx)
 {
-	int i, chanOffset;
+	int i, chanOffset,bankNum,waveNum;
 	char fn[256];
 	wave_reader wr;
 	int32_t d;
@@ -767,6 +767,29 @@ void synth_refreshWaveforms(abx_t abx)
 		
 		waveData.sampleCount[abx]=smpCnt; 
 	}
+	
+	// also recompute bank/wave indexes
+
+	bankNum=0;
+	synth_refreshBankNames(1,0);
+	for(i=0;i<synth_getBankCount();++i)
+		if(!strcmp(currentPreset.oscBank[abx],waveData.bankNames[i]))
+		{
+			bankNum=i;
+			break;
+		}
+
+	waveNum=0;
+	synth_refreshCurWaveNames(abx,1);
+	for(i=0;i<synth_getCurWaveCount();++i)
+		if(!strcmp(currentPreset.oscWave[abx],waveData.curWaveNames[i]))
+		{
+			waveNum=i;
+			break;
+		}
+
+	currentPreset.steppedParameters[abx2bsp[abx]]=bankNum;
+	currentPreset.steppedParameters[abx2wsp[abx]]=waveNum;
 }	
 
 
@@ -995,7 +1018,7 @@ void synth_init(void)
 	if(!settings_load())
 		settings_loadDefault();
 
-	synth_refreshBankNames(1);
+	synth_refreshBankNames(1,1);
 	
 	// upgrade presets from before storing bank/wave names
 	preset_upgradeBankWaveStorage();

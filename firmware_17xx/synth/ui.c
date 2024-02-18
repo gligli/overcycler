@@ -1101,7 +1101,7 @@ static int32_t getParameterValueCount(const struct uiParam_s * prm)
 				case spBBank_Unsaved:
 				case spAXOvrBank_Unsaved:
 				case spBXOvrBank_Unsaved:
-					synth_refreshBankNames(1);
+					synth_refreshBankNames(1,0);
 					valCount=synth_getBankCount();
 					break;
 				case spAWave_Unsaved:
@@ -1563,7 +1563,7 @@ static void handleSlowUpdates(void)
 				sendString(2,"USB Disk mode, press any button to quit");
 				usb_setMode(umMSC,usbMSCCallback);
 
-				synth_refreshBankNames(1);
+				synth_refreshBankNames(1,1);
 				synth_refreshFullState(1);
 				ui.pendingScreenClear=1;
 			}
