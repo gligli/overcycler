@@ -739,16 +739,16 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 	static char dv[10]={0};
 	const struct uiParam_s * prm=getUiParameter(source);
 	int32_t valCount;
-	int32_t v=INT32_MIN;
+	int32_t value=INT32_MIN,tmp;
 
 	dv[0]=0;
 	if(valueOut)
-		*valueOut=v;
+		*valueOut=value;
 	
 	switch(prm->type)
 	{
 		case ptCont:
-			v=currentPreset.continuousParameters[prm->number];
+			value=currentPreset.continuousParameters[prm->number];
 			
 			switch(prm->number)
 			{
@@ -757,26 +757,27 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 					switch(currentPreset.steppedParameters[spChromaticPitch])
 					{
 						case 2: // octaves
-							v>>=10;
-							srprintf(dv," %s%d",notesNames[0],v/12);
+							tmp=value>>10;
+							srprintf(dv," %s%d",notesNames[0],tmp/12);
 							break;
 						case 1: // semitones
-							v>>=10;
-							srprintf(dv," %s%d",notesNames[v%12],v/12);
+							tmp=value>>10;
+							srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
 							break;
 						default:
-							srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v));
+							srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(value));
 							break;
 					}
 					break;
 				default:
 					if(continuousParametersZeroCentered[prm->number])
 					{
-						srprintf(dv,v>=-INT16_MIN?"% 4d":"% 3d",SCAN_POT_FROM_16BITS(v+INT16_MIN));
+						tmp=SCAN_POT_FROM_16BITS(value+INT16_MIN);
+						srprintf(dv,tmp>=0?"% 4d":"% 3d",tmp);
 					}
 					else
 					{
-						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(v));
+						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(value));
 					}
 			}
 			break;
@@ -788,113 +789,115 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 
 			if(prm->type==ptStep)
 			{
-				v=currentPreset.steppedParameters[prm->number];
+				value=currentPreset.steppedParameters[prm->number];
 			}
 			else
 			{
 				switch(prm->number)
 				{
 				case cnNone:
-					v=0;
+					value=0;
 					break;
 				case cnAMod:
-					v=arp_getMode();
+					value=arp_getMode();
 					break;
 				case cnAHld:
-					v=arp_getHold();
+					value=arp_getHold();
 					break;
 				case cnLoad:
 				case cnSave:
-					v=settings.presetNumber;
+					value=settings.presetNumber;
 					break;
 				case cnMidC:
-					v=settings.midiReceiveChannel+1;
-					if(!v)
+					value=settings.midiReceiveChannel+1;
+					if(!value)
 						strcpy(dv,"Omni");
 					break;
 				case cnTune:
-					v=0;
+					value=0;
 					break;
 				case cnSync:
-					v=settings.syncMode;
+					value=settings.syncMode;
 					break;
 				case cnAPly:
 				case cnBPly:
-					v=seq_getMode((prm->number==cnBPly)?1:0);
+					value=seq_getMode((prm->number==cnBPly)?1:0);
 					break;
 				case cnSRec:
-					v=ui.seqRecordingTrack+1;
+					value=ui.seqRecordingTrack+1;
 					break;
 				case cnBack:
 				case cnTiRe:
 				case cnClr:
-					v=0;
+					value=0;
 					if(ui.seqRecordingTrack>=0)
-						v=seq_getStepCount(ui.seqRecordingTrack);
+						value=seq_getStepCount(ui.seqRecordingTrack);
 					break;
 				case cnTrspM:
-					v=ui.isTransposing;
+					value=ui.isTransposing;
 					break;
 				case cnTrspV:
-					v=ui.transpose;
+					value=ui.transpose;
+					tmp=value+MIDDLE_C_NOTE;
+					srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
 					break;
 				case cnSBnk:
-					v=settings.sequencerBank;
+					value=settings.sequencerBank;
 					break;
 				case cnClk:
 					if(settings.syncMode!=symInternal)
-						v=clock_getSpeed();
+						value=clock_getSpeed();
 					else
-						v=settings.seqArpClock;
+						value=settings.seqArpClock;
 					break;
 				case cnAXoCp:
-					v=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
-					v+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
-					srprintf(dv,"%04d",v);
+					value=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
+					value+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
+					srprintf(dv,"%04d",value);
 					break;
 				case cnBXoCp:
-					v=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
-					v+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
-					srprintf(dv,"%04d",v);
+					value=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
+					value+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
+					srprintf(dv,"%04d",value);
 					break;
 				case cnLPrv:
 				case cnLNxt:
 				case cnPanc:
 				case cnLBas:
 				case cnPack:
-					v=0;
+					value=0;
 					break;
 				case cnNPrs:
 				case cnNVal:
-					v=ui.kpInputValue;
-					srprintf(dv,"%03d ",v);
+					value=ui.kpInputValue;
+					srprintf(dv,"%03d ",value);
 					for(int i=0;i<=ui.kpInputDecade;++i)
 						dv[2-i]='_';				
 					break;
 				case cnUsbM:
-					v=ui.usbMSC?umMSC:(settings.usbMIDI?umMIDI:umPowerOnly);
+					value=ui.usbMSC?umMSC:(settings.usbMIDI?umMIDI:umPowerOnly);
 					break;
 				case cnCtst:
-					v=settings.lcdContrast;
+					value=settings.lcdContrast;
 					break;
 				case cnWEnT:
-					v=currentPreset.steppedParameters[spWModEnvLin]*2+currentPreset.steppedParameters[spWModEnvSlow];
+					value=currentPreset.steppedParameters[spWModEnvLin]*2+currentPreset.steppedParameters[spWModEnvSlow];
 					break;
 				case cnFEnT:
-					v=currentPreset.steppedParameters[spFilEnvLin]*2+currentPreset.steppedParameters[spFilEnvSlow];
+					value=currentPreset.steppedParameters[spFilEnvLin]*2+currentPreset.steppedParameters[spFilEnvSlow];
 					break;
 				case cnAEnT:
-					v=currentPreset.steppedParameters[spAmpEnvLin]*2+currentPreset.steppedParameters[spAmpEnvSlow];
+					value=currentPreset.steppedParameters[spAmpEnvLin]*2+currentPreset.steppedParameters[spAmpEnvSlow];
 					break;
 				}
 			}
 
 			if(!dv[0])
 			{
-				if(v>=0 && v<valCount)
-					strcpy(dv,prm->values[v]);
+				if(value>=0 && value<valCount)
+					strcpy(dv,prm->values[value]);
 				else
-					srprintf(dv,"% 4d",v);
+					srprintf(dv,"% 4d",value);
 			}
 			break;
 		default:
@@ -902,7 +905,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 	}
 
 	if(valueOut)
-		*valueOut=v;
+		*valueOut=value;
 
 	return dv;
 }
