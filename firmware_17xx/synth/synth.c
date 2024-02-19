@@ -664,7 +664,11 @@ int8_t synth_refreshBankNames(int8_t sort, int8_t force)
 	{
 		if(strcmp(waveData.curFile.fname,".") && strcmp(waveData.curFile.fname,".."))
 		{
-			strncpy(waveData.bankNames[waveData.bankCount],waveData.curFile.lfname,waveData.curFile.lfsize);
+			if(strlen(waveData.curFile.lfname))
+				strncpy(waveData.bankNames[waveData.bankCount],waveData.curFile.lfname,MAX_FILENAME);
+			else
+				strncpy(waveData.bankNames[waveData.bankCount],waveData.curFile.fname,MAX_FILENAME);
+			
 			++waveData.bankCount;
 		}
 		
@@ -715,7 +719,11 @@ void synth_refreshCurWaveNames(abx_t abx, int8_t sort)
 	{
 		if(strstr(waveData.curFile.fname,".WAV") || strstr(waveData.curFile.fname,".wav"))
 		{
-			strncpy(waveData.curWaveNames[waveData.curWaveCount],waveData.curFile.lfname,waveData.curFile.lfsize);
+			if(strlen(waveData.curFile.lfname))
+				strncpy(waveData.curWaveNames[waveData.curWaveCount],waveData.curFile.lfname,MAX_FILENAME);
+			else
+				strncpy(waveData.curWaveNames[waveData.curWaveCount],waveData.curFile.fname,MAX_FILENAME);
+			
 			++waveData.curWaveCount;
 		}
 		

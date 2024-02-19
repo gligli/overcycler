@@ -9,8 +9,8 @@
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 120000000
 
-#define SYNTH_DEFAULT_WAVE_BANK "AKWF_bw_perfectwaves"
-#define SYNTH_DEFAULT_WAVE_NAME "AKWF_saw.wav"
+#define SYNTH_DEFAULT_WAVE_BANK "_basic"
+#define SYNTH_DEFAULT_WAVE_NAME "saw.wav"
 
 #define TICKER_HZ 500
 
