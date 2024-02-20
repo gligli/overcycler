@@ -4,724 +4,447 @@
 
 #include "storage.h"
 #include "lfo.h"
-#include "wtosc.h"
 #include "seq.h"
 #include "ui.h"
 #include "clock.h"
 #include "scan.h"
 #include "dacspi.h"
 #include "main.h"
+#include "midi.h"
+#include "ff.h"
 
-// increment this each time the binary format is changed
-#define STORAGE_VERSION 21
+#include <ctype.h>
+#include <alloca.h>
 
-#define STORAGE_MAGIC 0x006116a5
-#define STORAGE_MAX_SIZE 512
+#define SAVE_INT " = %d\n"
+#define SAVE_STR " = %s\n"
 
-#define SETTINGS_PAGE_COUNT 1
-#define SETTINGS_PAGE (STORAGE_PAGE_COUNT-4)
-
-#define SEQUENCER_START_PAGE 65000
-
-const int8_t continuousParametersZeroCentered[cpCount] = 
+const struct namedParam_s continuousParametersZeroCentered[cpCount] = 
 {
-	/*cpAFreq*/0,
-	/*cpAVol*/0,
-	/*cpABaseWMod*/1,
-	/*cpBFreq*/0,
-	/*cpBVol*/0,
-	/*cpBBaseWMod*/1,
-	/*cpDetune*/1,
-	/*cpCutoff*/0,
-	/*cpResonance*/0,
-	/*cpFilEnvAmt*/1,
-	/*cpFilKbdAmt*/0,
-	/*cpWModAEnv*/1,
-	/*cpFilAtt*/0,
-	/*cpFilDec*/0,
-	/*cpFilSus*/0,
-	/*cpFilRel*/0,
-	/*cpAmpAtt*/0,
-	/*cpAmpDec*/0,
-	/*cpAmpSus*/0,
-	/*cpAmpRel*/0,
-	/*cpLFOFreq*/0,
-	/*cpLFOAmt*/0,
-	/*cpLFOPitchAmt*/0,
-	/*cpLFOWModAmt*/0,
-	/*cpLFOFilAmt*/0,
-	/*cpLFOAmpAmt*/0,
-	/*cpLFO2Freq*/0,
-	/*cpLFO2Amt*/0,
-	/*cpModDelay*/0,
-	/*cpGlide*/0,
-	/*cpAmpVelocity*/0,
-	/*cpFilVelocity*/0,
-	/*cpMasterTune*/1,
-	/*cpUnisonDetune*/0,
-	/*cpMasterLeft_Legacy*/0,
-	/*cpMasterRight_Legacy*/0,
-	/*cpSeqArpClock_Legacy*/0,
-	/*cpNoiseVol*/0,
-	/*cpLFO2PitchAmt*/0,
-	/*cpLFO2WModAmt*/0,
-	/*cpLFO2FilAmt*/0,
-	/*cpLFO2AmpAmt*/0,
-	/*cpLFOResAmt*/0,
-	/*cpLFO2ResAmt*/0,
-	/*cpWModAtt*/0,
-	/*cpWModDec*/0,
-	/*cpWModSus*/0,
-	/*cpWModRel*/0,
-	/*cpWModBEnv*/1,
-	/*cpWModVelocity*/0,
+	{"cpAFreq",0},
+	{"cpAVol",0},
+	{"cpABaseWMod",1},
+	{"cpBFreq",0},
+	{"cpBVol",0},
+	{"cpBBaseWMod",1},
+	{"cpDetune",1},
+	{"cpCutoff",0},
+	{"cpResonance",0},
+	{"cpFilEnvAmt",1},
+	{"cpFilKbdAmt",0},
+	{"cpWModAEnv",1},
+	{"cpFilAtt",0},
+	{"cpFilDec",0},
+	{"cpFilSus",0},
+	{"cpFilRel",0},
+	{"cpAmpAtt",0},
+	{"cpAmpDec",0},
+	{"cpAmpSus",0},
+	{"cpAmpRel",0},
+	{"cpLFOFreq",0},
+	{"cpLFOAmt",0},
+	{"cpLFOPitchAmt",0},
+	{"cpLFOWModAmt",0},
+	{"cpLFOFilAmt",0},
+	{"cpLFOAmpAmt",0},
+	{"cpLFO2Freq",0},
+	{"cpLFO2Amt",0},
+	{"cpModDelay",0},
+	{"cpGlide",0},
+	{"cpAmpVelocity",0},
+	{"cpFilVelocity",0},
+	{"cpMasterTune",1},
+	{"cpUnisonDetune",0},
+	{NULL,0},
+	{NULL,0},
+	{NULL,0},
+	{"cpNoiseVol",0},
+	{"cpLFO2PitchAmt",0},
+	{"cpLFO2WModAmt",0},
+	{"cpLFO2FilAmt",0},
+	{"cpLFO2AmpAmt",0},
+	{"cpLFOResAmt",0},
+	{"cpLFO2ResAmt",0},
+	{"cpWModAtt",0},
+	{"cpWModDec",0},
+	{"cpWModSus",0},
+	{"cpWModRel",0},
+	{"cpWModBEnv",1},
+	{"cpWModVelocity",0},
 };
 
-const uint8_t steppedParametersSteps[spCount] = 
+const struct namedParam_s steppedParametersSteps[spCount] = 
 {
-	/*ABank*/128,
-	/*AWave*/128,
-	/*ABaseWMod*/5,
-	/*AFilWMod*/1,
-	/*BBank*/128,
-	/*BWave*/128,
-	/*BBaseWMod*/5,
-	/*BWFilMod*/1,
-	/*LFOShape*/7,
-	/*LFOShift*/1,
-	/*LFOTargets*/4,
-	/*FilEnvSlow*/2,
-	/*AmpEnvSlow*/2,
-	/*BenderRange*/3,
-	/*BenderTarget*/5,
-	/*ModwheelRange*/4,
-	/*ModwheelTarget*/2,
-	/*Unison*/2,
-	/*AssignerPriority*/3,
-	/*ChromaticPitch*/3,
-	/*Sync*/2,
-	/*AXOvrBank*/128,
-	/*AXOvrWave*/128,
-	/*FilEnvLin*/2,
-	/*LFO2Shape*/7,
-	/*LFO2Shift*/1,
-	/*LFO2Targets*/4,
-	/*VoiceCount*/SYNTH_VOICE_COUNT,
-	/*PresetType*/8,
-	/*PresetStyle*/8,
-	/*AmpEnvLin*/2,
-	/*FilEnvLoop*/2,
-	/*AmpEnvLoop*/2,
-	/*WModEnvSlow*/2,
-	/*WModEnvLin*/2,
-	/*WModEnvLoop*/2,
-	/*PressureRange*/4,
-	/*PressureTarget*/7,
-	/*BXOvrBank*/128,
-	/*BXOvrWave*/128,
+	{NULL,128},
+	{NULL,128},
+	{"spABaseWMod",5},
+	{NULL,1},
+	{NULL,128},
+	{NULL,128},
+	{"spBBaseWMod",5},
+	{NULL,1},
+	{"spLFOShape",7},
+	{NULL,1},
+	{"spLFOTargets",4},
+	{"spFilEnvSlow",2},
+	{"spAmpEnvSlow",2},
+	{"spBenderRange",3},
+	{"spBenderTarget",5},
+	{"spModwheelRange",4},
+	{"spModwheelTarget",2},
+	{"spUnison",2},
+	{"spAssignerPriority",3},
+	{"spChromaticPitch",3},
+	{"spSync",2},
+	{NULL,128},
+	{NULL,128},
+	{"spFilEnvLin",2},
+	{"spLFO2Shape",7},
+	{NULL,1},
+	{"spLFO2Targets",4},
+	{"spVoiceCount",SYNTH_VOICE_COUNT},
+	{"spPresetType",8},
+	{"spPresetStyle",8},
+	{"spAmpEnvLin",2},
+	{"spFilEnvLoop",2},
+	{"spAmpEnvLoop",2},
+	{"spWModEnvSlow",2},
+	{"spWModEnvLin",2},
+	{"spWModEnvLoop",2},
+	{"spPressureRange",4},
+	{"spPressureTarget",7},
+	{NULL,128},
+	{NULL,128},
 };
 
 struct settings_s settings;
 struct preset_s currentPreset;
 
-static struct
+struct loadLL_s
 {
-	uint8_t buffer[STORAGE_MAX_SIZE];
-	uint8_t * bufPtr;
-	uint8_t version;
-} storage;
+	char *name,*strValue;
+	struct loadLL_s *next;
+};
 
-static uint32_t storageRead32(void)
+typedef void (*parse_callback_t)(struct loadLL_s * ll);
+
+LOWERCODESIZE static FRESULT prepareConfigFileSave(FIL *f, const char * fn)
 {
-	uint32_t v;
-	memcpy(&v,storage.bufPtr,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-	return v;
+	FRESULT res;
+	res=f_open(f,fn,FA_WRITE|FA_CREATE_ALWAYS);
+	if(res)
+		return res;
+		
+	f_printf(f,"# %s %s\n", synthName, synthVersion);	
+	return 0;
 }
 
-static uint16_t storageRead16(void)
+LOWERCODESIZE static FRESULT parseConfigFile(const char * fn, parse_callback_t callback)
 {
-	uint16_t v;
-	memcpy(&v,storage.bufPtr,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-	return v;
-}
-
-/*
-static int16_t storageReadS16(void)
-{
-	int16_t v;
-	memcpy(&v,storage.bufPtr,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-	return v;
-}
-*/
-
-static uint8_t storageRead8(void)
-{
-	uint8_t v;
-	v=*(uint8_t*)storage.bufPtr;
-	storage.bufPtr+=sizeof(v);
-	return v;
-}
-
-static int8_t storageReadS8(void)
-{
-	int8_t v;
-	v=*(int8_t*)storage.bufPtr;
-	storage.bufPtr+=sizeof(v);
-	return v;
-}
-
-static void storageReadStr(char * v)
-{
-	strcpy(v,(const char *)storage.bufPtr);
-	storage.bufPtr+=strlen(v)+1;
-}
-
-static void storageWrite32(uint32_t v)
-{
-	memcpy(storage.bufPtr,&v,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-}
-
-static void storageWrite16(uint16_t v)
-{
-	memcpy(storage.bufPtr,&v,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-}
-
-/*
-static void storageWriteS16(int16_t v)
-{
-	memcpy(storage.bufPtr,&v,sizeof(v));
-	storage.bufPtr+=sizeof(v);
-}
-*/
-
-static void storageWrite8(uint8_t v)
-{
-	*(uint8_t*)storage.bufPtr=v;
-	storage.bufPtr+=sizeof(v);
-}
-
-static void storageWriteS8(int8_t v)
-{
-	*(int8_t*)storage.bufPtr=v;
-	storage.bufPtr+=sizeof(v);
-}
-
-static void storageWriteStr(const char * v)
-{
-	strcpy((char *)storage.bufPtr,v);
-	storage.bufPtr+=strlen(v)+1;
-}
-
-static LOWERCODESIZE int8_t storageLoad(uint16_t pageIdx, uint8_t pageCount)
-{
-	uint16_t i;
+	FIL f;
+	FRESULT res;
+	struct loadLL_s *ll, *prev_ll=NULL, *first_ll=NULL;
+	char line[256];
+	char *p, *locName, *locValue;
 	
-	memset(storage.buffer,0,sizeof(storage.buffer));
-	
-	for (i=0;i<pageCount;++i)
-		storage_read(pageIdx+i,&storage.buffer[STORAGE_PAGE_SIZE*i]);
-	
-	storage.bufPtr=storage.buffer;
-	storage.version=0;
+	res=f_open(&f,fn,FA_READ|FA_OPEN_EXISTING);
+	if(res)
+		return res;
 
-	if(storageRead32()!=STORAGE_MAGIC)
+	while(f_gets(line,sizeof(line),&f))
 	{
-#ifdef DEBUG
-		print("Warning: empty page !\n"); 
-#endif		
-		return 0;
-	}
+		// alloc on stack, clear
+		
+		ll=alloca(sizeof(struct loadLL_s));
+		memset(ll,0,sizeof(struct loadLL_s));
 
-	storage.version=storageRead8();
-	
-	return 1;
-}
+		// parse line
+		
+		locName=NULL;
+		locValue=NULL;
+		
+			// remove comments
+		p=strchr(line,'#');
+		if(p) *p='\n';
+				
+			// remove lf and trim (value) right
+		p=strchr(line,'\n');
+		if(p)
+		{
+			*p--='\0';
+			while(isspace(*p)) *p--='\0';
+		}
+		
+			// trim name left
+		locName=line;
+		while(isspace(*locName)) ++locName;
+		
+		p=strchr(locName,'=');
+		if(p)
+		{
+			locValue=p+1;
+			
+			// trim name right
+			while(isspace(*p) || *p=='=') *p--='\0';
 
-static LOWERCODESIZE void storagePrepareStore(void)
-{
-	memset(storage.buffer,0,sizeof(storage.buffer));
-	storage.bufPtr=storage.buffer;
-	storage.version=STORAGE_VERSION;
-	
-	storageWrite32(STORAGE_MAGIC);
-	storageWrite8(storage.version);
-}
-
-static LOWERCODESIZE void storageFinishStore(uint16_t pageIdx, uint8_t pageCount)
-{
-	if((storage.bufPtr-storage.buffer)>sizeof(storage.buffer))
-	{
-		print("Error: writing too much data to storage !\n"); 
-		return;
+			// trim value left
+			while(isspace(*locValue)) ++locValue;
+		}
+		
+		// alloc strings
+		
+		if(locName)
+		{
+			ll->name=alloca(strlen(locName)+1);
+			strcpy(ll->name,locName);
+		}
+		
+		if(locValue)
+		{
+			ll->strValue=alloca(strlen(locValue)+1);
+			strcpy(ll->strValue,locValue);
+		}
+		
+		// handle linked list
+		
+		if(!first_ll)
+			first_ll=ll;
+		
+		if(prev_ll)
+			prev_ll->next=ll;
+		prev_ll=ll;
 	}
 	
-	uint16_t i;
+	if(callback) callback(first_ll);
 	
-	for (i=0;i<pageCount;++i)
-		storage_write(pageIdx+i,&storage.buffer[STORAGE_PAGE_SIZE*i]);
+	f_close(&f);
+	
+	return 0;
+}
+
+LOWERCODESIZE static const char * getStrValue(struct loadLL_s *ll, const char * name)
+{
+	while(ll && strcmp(name, ll->name)) ll=ll->next;
+	
+	if(ll)
+		return ll->strValue;
+	else
+		return NULL;
+}
+
+LOWERCODESIZE static void getIntValue(struct loadLL_s *ll, const char * name, void * default_, int size)
+{
+	const char *sv = getStrValue(ll,name);
+	if(sv && default_)
+	{
+		int v=atoi(sv);
+		memcpy(default_,&v,size);
+	}
+}
+
+LOWERCODESIZE static void getSafeIntValue(struct loadLL_s *ll, const char * name, void * default_, int size, int min, int max)
+{
+	const char *sv = getStrValue(ll,name);
+	if(sv && default_)
+	{
+		int v=MAX(min,MIN(max,atoi(sv)));
+		memcpy(default_,&v,size);
+	}
+}
+
+LOWERCODESIZE static void getContinuousValue(struct loadLL_s *ll, continuousParameter_t cp)
+{
+	const struct namedParam_s *np=&continuousParametersZeroCentered[cp];
+	int v=SCAN_POT_FROM_16BITS(currentPreset.continuousParameters[cp]);
+	getIntValue(ll,np->name,&v,sizeof(v));
+
+	v=SCAN_POT_TO_16BITS(v);
+	if(np->param) v-=INT16_MIN;
+	
+	currentPreset.continuousParameters[cp]=MAX(0,MIN(UINT16_MAX,v));
+}
+
+LOWERCODESIZE static void getSteppedValue(struct loadLL_s *ll, steppedParameter_t sp)
+{
+	const struct namedParam_s *np=&steppedParametersSteps[sp];
+	int v=currentPreset.steppedParameters[sp];
+	getIntValue(ll,np->name,&v,sizeof(v));
+	
+	currentPreset.steppedParameters[sp]=MAX(0,MIN(np->param-1,v));
 }
 
 LOWERCODESIZE int8_t settings_load(void)
 {
-	int8_t i,j;
+	auto void load(struct loadLL_s * ll)
+	{
+		char buf[32];
+
+		getSafeIntValue(ll,"presetNumber",&settings.presetNumber,sizeof(settings.presetNumber),0,999);
+		getSafeIntValue(ll,"midiReceiveChannel",&settings.midiReceiveChannel,sizeof(settings.midiReceiveChannel),-1,MIDI_CHANMASK);
+		getSafeIntValue(ll,"voiceMask",&settings.voiceMask,sizeof(settings.voiceMask),0,(1<<SYNTH_VOICE_COUNT)-1);
+		getSafeIntValue(ll,"syncMode",&settings.syncMode,sizeof(settings.syncMode),0,symCount-1);
+		getSafeIntValue(ll,"sequencerBank",&settings.sequencerBank,sizeof(settings.sequencerBank),0,SEQ_BANK_COUNT-1);
+		getSafeIntValue(ll,"seqArpClock",&settings.seqArpClock,sizeof(settings.seqArpClock),0,CLOCK_MAX_BPM);
+		getSafeIntValue(ll,"usbMIDI",&settings.usbMIDI,sizeof(settings.usbMIDI),0,1);
+		getSafeIntValue(ll,"lcdContrast",&settings.lcdContrast,sizeof(settings.lcdContrast),0,UI_MAX_LCD_CONTRAST);
+
+		for(int8_t i=0;i<TUNER_CV_COUNT;++i)
+			for(int8_t j=0;j<TUNER_OCTAVE_COUNT;++j)
+			{
+				srprintf(buf,"tune_v%d_o%d",i,j);
+				getSafeIntValue(ll,buf,&settings.tunes[j][i],sizeof(settings.tunes[j][i]),0,UINT16_MAX);
+			}
+	}
 	
-	if(!storageLoad(SETTINGS_PAGE,SETTINGS_PAGE_COUNT))
+	settings_loadDefault();
+
+	if(parseConfigFile("/overcycler.conf",load))
 		return 0;
-
-	if (storage.version<1)
-		return 0;
-
-	// v1
-	for(j=0;j<TUNER_OCTAVE_COUNT;++j)
-		for(i=0;i<TUNER_CV_COUNT;++i)
-			settings.tunes[j][i]=storageRead16();
-
-	settings.presetNumber=storageRead16();
-	settings.midiReceiveChannel=storageReadS8();
-	settings.voiceMask=storageRead8();
-	settings.midiSendChannel=storageReadS8();
-
-	if (storage.version<2)
+	else
 		return 1;
-
-	// v2
-
-	settings.syncMode=storageRead8();
-
-	if (storage.version<6)
-		return 1;
-		
-	// v6
-	
-	settings.sequencerBank=storageRead16();
-	
-	if (storage.version<7)
-		return 1;
-		
-	// v7
-	
-	settings.seqArpClock=storageRead16();
-
-	if (storage.version<17)
-		return 1;
-		
-	// v17
-	
-	settings.usbMIDI=storageReadS8();
-	settings.lcdContrast=storageRead8();
-
-	return 1;
 }
 
 LOWERCODESIZE void settings_save(void)
 {
-	int8_t i,j;
+	FIL f;
+	if(prepareConfigFileSave(&f,"/overcycler.conf"))
+		return;
+
+	f_printf(&f,"presetNumber" SAVE_INT,settings.presetNumber);
+	f_printf(&f,"midiReceiveChannel" SAVE_INT,settings.midiReceiveChannel);
+	f_printf(&f,"voiceMask" SAVE_INT,settings.voiceMask);
+	f_printf(&f,"syncMode" SAVE_INT,settings.syncMode);
+	f_printf(&f,"sequencerBank" SAVE_INT,settings.sequencerBank);
+	f_printf(&f,"seqArpClock" SAVE_INT,settings.seqArpClock);
+	f_printf(&f,"usbMIDI" SAVE_INT,settings.usbMIDI);
+	f_printf(&f,"lcdContrast" SAVE_INT,settings.lcdContrast);
 	
-	storagePrepareStore();
+	for(int8_t i=0;i<TUNER_CV_COUNT;++i)
+		for(int8_t j=0;j<TUNER_OCTAVE_COUNT;++j)
+			f_printf(&f,"tune_v%d_o%d" SAVE_INT,i,j,settings.tunes[j][i]);
 
-	// v1
-
-	for(j=0;j<TUNER_OCTAVE_COUNT;++j)
-		for(i=0;i<TUNER_CV_COUNT;++i)
-			storageWrite16(settings.tunes[j][i]);
-
-	storageWrite16(settings.presetNumber);
-	storageWriteS8(settings.midiReceiveChannel);
-	storageWrite8(settings.voiceMask);
-	storageWriteS8(settings.midiSendChannel);
-
-	// v2
-
-	storageWrite8(settings.syncMode);
-	
-	// v6
-		
-	storageWrite16(settings.sequencerBank);
-
-	// v7
-		
-	storageWrite16(settings.seqArpClock);
-	
-	// v17
-	
-	storageWriteS8(settings.usbMIDI);
-	storageWrite8(settings.lcdContrast);
-	
-	// this must stay last
-	storageFinishStore(SETTINGS_PAGE,SETTINGS_PAGE_COUNT);
+	f_close(&f);
 }
 
-LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
+LOWERCODESIZE void settings_loadDefault(void)
 {
-	int8_t i;
+	memset(&settings,0,sizeof(settings));
 
-	storageLoad(number,1);
-	
-	preset_loadDefault(0);
+	settings.midiReceiveChannel=-1;
+	settings.voiceMask=(1<<SYNTH_VOICE_COUNT)-1;
+	settings.seqArpClock=CLOCK_MAX_BPM/2;
+	settings.lcdContrast=UI_DEFAULT_LCD_CONTRAST;
 
-	if (storage.version<1)
-		return 0;
-
-	// v1
-
-	continuousParameter_t cp;
-	for(cp=0;cp<=cpSeqArpClock_Legacy;++cp)
-		currentPreset.continuousParameters[cp]=storageRead16();
-	storageRead16(); // bw compat fix
-
-	steppedParameter_t sp;
-	for(sp=0;sp<=spChromaticPitch;++sp)
-		currentPreset.steppedParameters[sp]=storageRead8();
-	storageRead8(); // bw compat fix
-
-	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		currentPreset.voicePattern[i]=storageRead8();
-	
-	// v1 - bw compat adjustments
-	
-	if(storage.version<3)
-	{
-		currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]>>1)+HALF_RANGE;
-	}
-
-	if(storage.version<11)
-	{
-		synth_reloadLegacyBankWaveIndexes(0,0,0);
-		synth_reloadLegacyBankWaveIndexes(1,0,0);
-	}
-	
-	if(storage.version<13)
-	{
-		for(cp=cpFilAtt;cp<=cpFilRel;++cp)
-			currentPreset.continuousParameters[cp+cpWModAtt-cpFilAtt]=currentPreset.continuousParameters[cp];
-		if(currentPreset.steppedParameters[spBWModEnvEn_Legacy])
-			currentPreset.continuousParameters[cpWModBEnv]=currentPreset.continuousParameters[cpWModAEnv];
-		if(!currentPreset.steppedParameters[spAWModEnvEn_Legacy])
-			currentPreset.continuousParameters[cpWModAEnv]=HALF_RANGE;
-		currentPreset.continuousParameters[cpWModVelocity]=currentPreset.continuousParameters[cpFilVelocity];
-		currentPreset.steppedParameters[spWModEnvSlow]=currentPreset.steppedParameters[spFilEnvSlow];
-	}
-		
-	if(storage.version<14)
-	{
-		if(currentPreset.continuousParameters[cpBFreq]>=HALF_RANGE)
-		{
-			currentPreset.continuousParameters[cpAFreq]=0;
-			currentPreset.continuousParameters[cpBFreq]=(currentPreset.continuousParameters[cpBFreq]-HALF_RANGE)<<1;
-		}
-		else
-		{
-			currentPreset.continuousParameters[cpAFreq]=(HALF_RANGE-currentPreset.continuousParameters[cpBFreq])<<1;
-			currentPreset.continuousParameters[cpBFreq]=0;
-		}
-	}
-		
-	if(storage.version<15)
-	{
-		if(currentPreset.steppedParameters[spAWModType]==wmAliasing)
-			currentPreset.continuousParameters[cpABaseWMod]=HALF_RANGE-(currentPreset.continuousParameters[cpABaseWMod]>>1);
-		
-		if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
-			currentPreset.continuousParameters[cpBBaseWMod]=HALF_RANGE-(currentPreset.continuousParameters[cpBBaseWMod]>>1);
-	}
-	
-	if(storage.version<16)
-	{
-		// adjust cutoff for base filter tracking note changed to C4
-		currentPreset.continuousParameters[cpCutoff]+=scaleU16U16(MIDDLE_C_NOTE<<8,currentPreset.continuousParameters[cpFilKbdAmt]);
-	}
-	
-	if(storage.version<18)
-	{
-		int tmp=currentPreset.continuousParameters[cpLFOFreq];
-
-		tmp=linearCourse(UINT16_MAX-tmp,13000.0,65535.0f); // inverse of old formula
-		tmp=SCAN_POT_TO_16BITS(((DACSPI_UPDATE_HZ*30)*tmp)/(1LL<<24)); // inverse of new formula
-		tmp<<=currentPreset.steppedParameters[spLFOShift_Legacy]*2;
-		
-		currentPreset.continuousParameters[cpLFOFreq]=MIN(UINT16_MAX,tmp);
-	}
-
-	if(storage.version<20)
-	{
-		if(currentPreset.steppedParameters[spAWModType]==wmCrossOver)
-			currentPreset.continuousParameters[cpABaseWMod]=(currentPreset.continuousParameters[cpABaseWMod]>>1)+HALF_RANGE;
-	}
-	
-	if(storage.version<21)
-	{
-		currentPreset.continuousParameters[cpCutoff]=MIN(UINT16_MAX,256L*3*currentPreset.continuousParameters[cpCutoff]/(144*4));
-	}
-	
-	if(storage.version<2)
-		return 1;
-
-	// v2
-	
-	if(storage.version<4)
-		return 1;
-
-	// v4
-	
-	currentPreset.continuousParameters[cpNoiseVol]=storageRead16();
-	
-	if(storage.version<5)
-		return 1;
-	
-	// v5
-	
-	currentPreset.steppedParameters[spOscSync]=storageRead8();
-
-	if(storage.version<8)
-		return 1;
-	
-	// v8
-	
-	currentPreset.steppedParameters[spAXOvrBank_Unsaved]=storageRead8();
-	currentPreset.steppedParameters[spAXOvrWave_Unsaved]=storageRead8();
-	currentPreset.steppedParameters[spFilEnvLin]=storageRead8();
-
-	// v8 - bw compat adjustments
-	
-	currentPreset.steppedParameters[spWModEnvLin]=currentPreset.steppedParameters[spFilEnvLin];
-	synth_reloadLegacyBankWaveIndexes(2,0,0);
-
-	if(storage.version<9)
-		return 1;
-	
-	// v9
-
-	currentPreset.continuousParameters[cpLFO2PitchAmt]=storageRead16();
-	currentPreset.continuousParameters[cpLFO2WModAmt]=storageRead16();
-	currentPreset.continuousParameters[cpLFO2FilAmt]=storageRead16();
-	currentPreset.continuousParameters[cpLFO2AmpAmt]=storageRead16();
-	currentPreset.continuousParameters[cpLFOResAmt]=storageRead16();
-	currentPreset.continuousParameters[cpLFO2ResAmt]=storageRead16();
-	
-	currentPreset.steppedParameters[spLFO2Shape]=storageRead8();
-	currentPreset.steppedParameters[spLFO2Shift_Legacy]=storageRead8();
-	currentPreset.steppedParameters[spLFO2Targets]=storageRead8();
-	
-	// v9 - bw compat adjustments
-
-	if(storage.version<18)
-	{
-		int tmp=currentPreset.continuousParameters[cpLFO2Freq];
-
-		tmp=linearCourse(UINT16_MAX-tmp,13000.0,65535.0f); // inverse of old formula
-		tmp=SCAN_POT_TO_16BITS(((DACSPI_UPDATE_HZ*30)*tmp)/(1LL<<24)); // inverse of new formula
-		tmp<<=currentPreset.steppedParameters[spLFO2Shift_Legacy]*2;
-		
-		currentPreset.continuousParameters[cpLFO2Freq]=MIN(UINT16_MAX,tmp);
-	}
-
-	if(storage.version<10)
-		return 1;
-	
-	// v10
-
-	currentPreset.steppedParameters[spVoiceCount]=storageRead8();
-
-	if(storage.version<11)
-		return 1;
-	
-	// v11
-	
-	for(int8_t abx=0;abx<=abxACrossover;++abx)
-	{
-		storageReadStr(currentPreset.oscBank[abx]);
-		storageReadStr(currentPreset.oscWave[abx]);
-	}
-
-	currentPreset.steppedParameters[spPresetType]=storageRead8();
-	currentPreset.steppedParameters[spPresetStyle]=storageRead8();
-
-	if(storage.version<12)
-		return 1;
-
-	// v12
-	
-	currentPreset.steppedParameters[spAmpEnvLin]=storageRead8();
-	currentPreset.steppedParameters[spFilEnvLoop]=storageRead8();
-	currentPreset.steppedParameters[spAmpEnvLoop]=storageRead8();
-
-	// v12 - bw compat adjustments
-	
-	currentPreset.steppedParameters[spWModEnvLoop]=currentPreset.steppedParameters[spFilEnvLoop];
-
-	if(storage.version<13)
-		return 1;
-
-	// v13
-	
-	for(cp=cpWModAtt;cp<=cpWModVelocity;++cp)
-		currentPreset.continuousParameters[cp]=storageRead16();
-
-	currentPreset.steppedParameters[spWModEnvSlow]=storageRead8();
-	currentPreset.steppedParameters[spWModEnvLin]=storageRead8();
-	currentPreset.steppedParameters[spWModEnvLoop]=storageRead8();
-
-	if(storage.version<19)
-		return 1;
-
-	// v19
-
-	currentPreset.steppedParameters[spPressureRange]=storageRead8();
-	currentPreset.steppedParameters[spPressureTarget]=storageRead8();
-	
-	if(storage.version<20)
-		return 1;
-
-	// v20
-
-	storageReadStr(currentPreset.oscBank[abxBCrossover]);
-	storageReadStr(currentPreset.oscWave[abxBCrossover]);
-	
-	return 1;
-}
-
-LOWERCODESIZE void preset_saveCurrent(uint16_t number)
-{
-	int8_t i;
-	
-	storagePrepareStore();
-
-	// v1
-
-	continuousParameter_t cp;
-	for(cp=0;cp<=cpSeqArpClock_Legacy;++cp)
-		storageWrite16(currentPreset.continuousParameters[cp]);
-	storageWrite16(0); // bw compat fix
-
-	steppedParameter_t sp;
-	for(sp=0;sp<=spChromaticPitch;++sp)
-		storageWrite8(currentPreset.steppedParameters[sp]);
-	storageWrite8(0); // bw compat fix
-
-	for(i=0;i<SYNTH_VOICE_COUNT;++i)
-		storageWrite8(currentPreset.voicePattern[i]);
-
-	// v4
-	
-	storageWrite16(currentPreset.continuousParameters[cpNoiseVol]);
-	
-	// v5
-	
-	storageWrite8(currentPreset.steppedParameters[spOscSync]);
-	
-	// v8
-	
-	storageWrite8(currentPreset.steppedParameters[spAXOvrBank_Unsaved]);
-	storageWrite8(currentPreset.steppedParameters[spAXOvrWave_Unsaved]);
-	storageWrite8(currentPreset.steppedParameters[spFilEnvLin]);
-	
-	// v9
-
-	storageWrite16(currentPreset.continuousParameters[cpLFO2PitchAmt]);
-	storageWrite16(currentPreset.continuousParameters[cpLFO2WModAmt]);
-	storageWrite16(currentPreset.continuousParameters[cpLFO2FilAmt]);
-	storageWrite16(currentPreset.continuousParameters[cpLFO2AmpAmt]);
-	storageWrite16(currentPreset.continuousParameters[cpLFOResAmt]);
-	storageWrite16(currentPreset.continuousParameters[cpLFO2ResAmt]);
-	
-	storageWrite8(currentPreset.steppedParameters[spLFO2Shape]);
-	storageWrite8(currentPreset.steppedParameters[spLFO2Shift_Legacy]);
-	storageWrite8(currentPreset.steppedParameters[spLFO2Targets]);
-
-	// v10
-	
-	storageWrite8(currentPreset.steppedParameters[spVoiceCount]);
-
-	// v11
-	
-	for(abx_t abx=0;abx<=abxACrossover;++abx)
-	{
-		storageWriteStr(currentPreset.oscBank[abx]);
-		storageWriteStr(currentPreset.oscWave[abx]);
-	}
-	
-	storageWrite8(currentPreset.steppedParameters[spPresetType]);
-	storageWrite8(currentPreset.steppedParameters[spPresetStyle]);
-		
-	// v12
-
-	storageWrite8(currentPreset.steppedParameters[spAmpEnvLin]);
-	storageWrite8(currentPreset.steppedParameters[spFilEnvLoop]);
-	storageWrite8(currentPreset.steppedParameters[spAmpEnvLoop]);
-
-	// v13
-
-	for(cp=cpWModAtt;cp<=cpWModVelocity;++cp)
-		storageWrite16(currentPreset.continuousParameters[cp]);
-
-	storageWrite8(currentPreset.steppedParameters[spWModEnvSlow]);
-	storageWrite8(currentPreset.steppedParameters[spWModEnvLin]);
-	storageWrite8(currentPreset.steppedParameters[spWModEnvLoop]);
-	
-	// v19
-	
-	storageWrite8(currentPreset.steppedParameters[spPressureRange]);
-	storageWrite8(currentPreset.steppedParameters[spPressureTarget]);
-	
-	// v20
-	
-	storageWriteStr(currentPreset.oscBank[abxBCrossover]);
-	storageWriteStr(currentPreset.oscWave[abxBCrossover]);
-	
-	// /!\ write new version before this
-	storageFinishStore(number,1);
+	tuner_init(); // use theoretical tuning
 }
 
 LOWERCODESIZE int8_t storage_loadSequencer(int8_t track, uint8_t * data, uint8_t size)
 {
-	if (!storageLoad(SEQUENCER_START_PAGE+track+settings.sequencerBank*SEQ_TRACK_COUNT,1))
-		return 0;
+	auto void load(struct loadLL_s * ll)
+	{
+		char buf[32];
+		for(uint8_t i=0;i<size;++i)
+		{
+			srprintf(buf,"step%02x",i);
+			getSafeIntValue(ll,buf,&data[i],sizeof(data[i]),0,UINT8_MAX);
+		}
+	}
 
-	while(size--)
-		*data++=storageRead8();
-	
-	return 1;
+	char fn[256];
+	srprintf(fn,SYNTH_SEQUENCES_PATH "/sequence_%02d%c.conf",settings.sequencerBank,'a'+track);
+	if(parseConfigFile(fn,load))
+		return 0;
+	else
+		return 1;
 }
 
 LOWERCODESIZE void storage_saveSequencer(int8_t track, uint8_t * data, uint8_t size)
 {
-	storagePrepareStore();
+	FIL f;
+	char buf[256];
+	
+	f_mkdir(SYNTH_SEQUENCES_PATH);
+	
+	srprintf(buf,SYNTH_SEQUENCES_PATH "/sequence_%02d%c.conf",settings.sequencerBank,'a'+track);
+	if(prepareConfigFileSave(&f,buf))
+		return;
 
-	while(size--)
-		storageWrite8(*data++);
-
-	// this must stay last
-	storageFinishStore(SEQUENCER_START_PAGE+track+settings.sequencerBank*SEQ_TRACK_COUNT,1);
+	for(uint8_t i=0;i<size;++i)
+		f_printf(&f,"step%02x" SAVE_INT,i,data[i]);
+	
+	f_close(&f);
 }
 
-LOWERCODESIZE void storage_export(uint16_t number, uint8_t * buf, int16_t * size)
+LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 {
-	int16_t actualSize;
+	auto void load(struct loadLL_s * ll)
+	{
+		char buf[32];
 
-	storageLoad(number,1);
+		for(abx_t abx=0;abx<abxCount;++abx)
+		{
+			srprintf(buf,"bank%d",abx);
+			strcpy(currentPreset.oscBank[abx],getStrValue(ll,buf));
+			srprintf(buf,"wave%d",abx);
+			strcpy(currentPreset.oscWave[abx],getStrValue(ll,buf));
+		}
 
-	// don't export trailing zeroes		
+		for(continuousParameter_t cp=0;cp<cpCount;++cp)
+			getContinuousValue(ll,cp);
 
-	actualSize=STORAGE_PAGE_SIZE;
-	while(storage.buffer[actualSize-1]==0)
-		--actualSize;
+		for(steppedParameter_t sp=0;sp<spCount;++sp)
+			getSteppedValue(ll,sp);
 
-	buf[0]=number;		
-	memcpy(&buf[1],storage.buffer,actualSize);
-	*size=actualSize+1;
+		for(int8_t i=0;i<SYNTH_VOICE_COUNT;++i)
+		{
+			srprintf(buf,"voicePattern%d",i);
+			getSafeIntValue(ll,buf,&currentPreset.voicePattern[i],sizeof(currentPreset.voicePattern[i]),0,UINT8_MAX);
+		}
+	}
+	
+	preset_loadDefault(1);
+
+	char fn[256];
+	srprintf(fn,SYNTH_PRESETS_PATH "/preset_%04d.conf",number);
+	if(parseConfigFile(fn,load))
+		return 0;
+	else
+		return 1;
 }
 
-LOWERCODESIZE void storage_import(uint16_t number, uint8_t * buf, int16_t size)
+LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 {
-	memset(storage.buffer,0,sizeof(storage.buffer));
-	memcpy(storage.buffer,buf,size);
-	storage.bufPtr=storage.buffer+size;
-	storageFinishStore(number,1);
+	FIL f;
+	char buf[256];
+	
+	f_mkdir(SYNTH_PRESETS_PATH);
+	
+	srprintf(buf,SYNTH_PRESETS_PATH "/preset_%04d.conf",number);
+	if(prepareConfigFileSave(&f,buf))
+		return;
+
+	for(abx_t abx=0;abx<abxCount;++abx)
+	{
+		f_printf(&f,"bank%d" SAVE_STR,abx,currentPreset.oscBank[abx]);
+		f_printf(&f,"wave%d" SAVE_STR,abx,currentPreset.oscWave[abx]);
+	}
+	
+	for(continuousParameter_t cp=0;cp<cpCount;++cp)
+		if(continuousParametersZeroCentered[cp].name)
+			f_printf(&f,"%s" SAVE_INT,
+				continuousParametersZeroCentered[cp].name,
+				SCAN_POT_FROM_16BITS(currentPreset.continuousParameters[cp]+(continuousParametersZeroCentered[cp].param?INT16_MIN:0)));
+
+	for(steppedParameter_t sp=0;sp<spCount;++sp)
+		if(steppedParametersSteps[sp].name)
+			f_printf(&f,"%s" SAVE_INT,
+				steppedParametersSteps[sp].name,
+				currentPreset.steppedParameters[sp]);
+
+	for(int8_t i=0;i<SYNTH_VOICE_COUNT;++i)
+		f_printf(&f,"voicePattern%d" SAVE_INT,i,currentPreset.voicePattern[i]);
+	
+	f_close(&f);
 }
 
 LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
@@ -761,104 +484,14 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	for(i=0;i<SYNTH_VOICE_COUNT;++i)
 		currentPreset.voicePattern[i]=(i==0)?0:ASSIGNER_NO_NOTE;	
 
-	// load default waveforms (perfectwaves/sawtooth)
 	for(abx_t abx=0;abx<abxCount;++abx)
-		synth_reloadLegacyBankWaveIndexes(abx,1,1);
+	{
+		strcpy(currentPreset.oscBank[abx],SYNTH_DEFAULT_WAVE_BANK);
+		strcpy(currentPreset.oscWave[abx],SYNTH_DEFAULT_WAVE_NAME);
+	}
 
 	if(makeSound)
 	{
 		currentPreset.continuousParameters[cpAVol]=HALF_RANGE;
-	}
-}
-
-LOWERCODESIZE void settings_loadDefault(void)
-{
-	memset(&settings,0,sizeof(settings));
-
-	settings.midiReceiveChannel=-1;
-	settings.voiceMask=(1<<SYNTH_VOICE_COUNT)-1;
-	settings.seqArpClock=CLOCK_MAX_BPM/2;
-	settings.lcdContrast=UI_DEFAULT_LCD_CONTRAST;
-
-	tuner_init(); // use theoretical tuning
-}
-
-LOWERCODESIZE void preset_upgradeBankWaveStorage(void)
-{
-	if(settings_load() && storage.version<11)
-	{
-		rprintf(1,"Upgrading presets...");
-
-		for(uint16_t p=0;p<400;++p)
-		{
-			rprintf(0,"Upgrading preset %d ",p);
-			
-			preset_loadDefault(0);
-			if(preset_loadCurrent(p))
-			{
-				if(storage.version<11)
-				{
-					preset_saveCurrent(p);
-					rprintf(0,"Done!\n");
-				}
-				else
-				{
-					rprintf(0,"Already upgraded...\n");
-				}
-			}
-			else
-			{
-				rprintf(0,"Not found...\n",p);
-			}
-		}
-		
-		settings_save();
-	}
-}
-
-LOWERCODESIZE void preset_packAndRemoveDuplicates(void)
-{
-	int16_t to=0;
-	for(int16_t p=0;p<400;++p)
-	{
-		rprintf(1,"Packing pass 1 (% 3d)...\n               ", p);
-	
-		if(storage_pageExists(p))
-		{
-			if(p!=to)
-			{
-				storage_read(p, storage.buffer);
-				storage_write(to, storage.buffer);
-				storage_delete(p);
-			}
-			++to;
-		}
-	}
-
-	for(int16_t p=0;p<=to;++p)
-	{
-		rprintf(1,"Removing duplicates (% 3d)...            ", p);
-
-		if(storage_pageExists(p))
-			for(int16_t q=p+1;q<=to;++q)
-				if(storage_samePage(p, q))
-					storage_delete(q);
-	}
-
-	to=0;
-	for(int16_t p=0;p<400;++p)
-	{
-		rprintf(1,"Packing pass 2 (% 3d)...\n               ", p);
-	
-		if(storage_pageExists(p))
-		{
-			if(p!=to)
-			{
-				storage_read(p, storage.buffer);
-				storage_write(to, storage.buffer);
-				storage_delete(p);
-			}
-			++to;
-		}
 	}
 }

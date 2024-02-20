@@ -64,6 +64,8 @@
         <in>serial.c</in>
         <in>syscalls.c</in>
         <in>system_LPC177x_8x.c</in>
+        <in>version.c</in>
+        <in>version.h</in>
         <in>xt26g.c</in>
       </df>
       <df name="usb">
@@ -488,6 +490,7 @@
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -656,6 +659,10 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="../system/version.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../system/version.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../system/xt26g.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">

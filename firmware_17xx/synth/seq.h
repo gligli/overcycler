@@ -20,6 +20,7 @@
 // sequencer config
 #define SEQ_NOTE_MEMORY 128
 #define SEQ_TRACK_COUNT 2
+#define SEQ_BANK_COUNT 20
 
 // Codes from keypad presses
 #define SEQ_NOTE_STEP UINT8_MAX-1

@@ -2,6 +2,7 @@
 #define	MIDI_H
 
 #include <stdint.h>
+#include "../xnormidi/midi.h"
 
 typedef enum
 {

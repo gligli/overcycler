@@ -82,7 +82,6 @@ struct settings_s
 	uint16_t presetNumber;
 	
 	int8_t midiReceiveChannel; // -1: omni / 0-15: channel 1-16
-	int8_t midiSendChannel; // 0-15: channel 1-16
 	uint8_t voiceMask;
 	
 	int8_t syncMode;
@@ -105,11 +104,17 @@ struct preset_s
 	char oscWave[abxCount][MAX_FILENAME];
 };
 
+struct namedParam_s
+{
+	char *name;
+	uint8_t param;
+};
+
 extern struct settings_s settings;
 extern struct preset_s currentPreset;
 
-extern const int8_t continuousParametersZeroCentered[cpCount];
-extern const uint8_t steppedParametersSteps[spCount];
+extern const struct namedParam_s continuousParametersZeroCentered[cpCount];
+extern const struct namedParam_s steppedParametersSteps[spCount];
 
 int8_t settings_load(void);
 void settings_save(void);
@@ -119,11 +124,6 @@ void preset_saveCurrent(uint16_t number);
 
 void preset_loadDefault(int8_t makeSound);
 void settings_loadDefault(void);
-void preset_upgradeBankWaveStorage(void);
-void preset_packAndRemoveDuplicates(void);
-
-void storage_export(uint16_t number, uint8_t * buf, int16_t * size);
-void storage_import(uint16_t number, uint8_t * buf, int16_t size);
 
 int8_t storage_loadSequencer(int8_t track, uint8_t * data, uint8_t size);
 void storage_saveSequencer(int8_t track, uint8_t * data, uint8_t size);

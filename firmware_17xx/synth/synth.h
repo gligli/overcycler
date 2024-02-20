@@ -9,6 +9,10 @@
 //#define SYNTH_MASTER_CLOCK SystemCoreClock
 #define SYNTH_MASTER_CLOCK 120000000
 
+#define SYNTH_WAVEDATA_PATH "/WAVEDATA"
+#define SYNTH_PRESETS_PATH "/PRESETS"
+#define SYNTH_SEQUENCES_PATH "/SEQUENCES"
+
 #define SYNTH_DEFAULT_WAVE_BANK "_basic"
 #define SYNTH_DEFAULT_WAVE_NAME "saw.wav"
 
@@ -71,7 +75,6 @@ void synth_refreshFullState(int8_t refreshWaveforms);
 int8_t synth_refreshBankNames(int8_t sort, int8_t force);
 void synth_refreshCurWaveNames(abx_t abx, int8_t sort);
 void synth_refreshWaveforms(abx_t abx);
-void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sort);
 int synth_getBankCount(void);
 int synth_getCurWaveCount(void);
 int8_t synth_getBankName(int bankIndex, char * res);

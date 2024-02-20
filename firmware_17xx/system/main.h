@@ -24,6 +24,7 @@
 #include <lpc177x_8x_uart.h>
 #include <lpc177x_8x_gpdma.h>
 
+#include "version.h"
 #include "ff.h"
 
 //AVR compatibility

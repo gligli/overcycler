@@ -27,8 +27,6 @@
 
 #define BIT_INPUT_FOOTSWITCH (1<<26)
 
-#define WAVEDATA_PATH "/WAVEDATA"
-
 #define MAX_BANKS 128
 #define MAX_BANK_WAVES 256
 
@@ -525,89 +523,6 @@ uint16_t * synth_getWaveformData(abx_t abx, uint16_t * sampleCount)
 	return &waveData.sampleData[abx][0];
 }
 
-void synth_reloadLegacyBankWaveIndexes(abx_t abx, int8_t loadDefault, int8_t sort)
-{
-	int i,bankNum,waveNum,oriBankNum,oriWaveNum,newBankNum,newWaveNum;
-	char fn[MAX_FILENAME];
-
-	if(loadDefault)
-	{
-		bankNum=-1;
-		waveNum=-1;
-	}
-	else
-	{
-		bankNum=currentPreset.steppedParameters[abx2bsp[abx]];
-		waveNum=currentPreset.steppedParameters[abx2wsp[abx]];
-	}
-	
-	oriWaveNum=waveNum;
-	oriBankNum=bankNum;
-
-	if(!synth_refreshBankNames(sort,0))
-		return;
-
-reload:
-	
-	newBankNum=-1;	
-	fn[0]=0;
-	if(bankNum<0 || bankNum>=waveData.bankCount)
-		strcpy(fn,SYNTH_DEFAULT_WAVE_BANK);
-	else
-		strcpy(fn,waveData.bankNames[bankNum]);
-	for(i=0;i<waveData.bankCount;++i)
-	{
-		if(!strcasecmp(fn,waveData.bankNames[i]))
-		{
-			newBankNum=i;
-			break;
-		}
-	}
-	if(newBankNum<0) // in case bank not found, reload default wave and bank
-	{
-		rprintf(0,"Error: abx %d bank %s not found!\n",abx,fn);
-		bankNum=-1;
-		goto reload;
-	}
-
-	strcpy(currentPreset.oscBank[abx],waveData.bankNames[newBankNum]);
-
-	synth_refreshCurWaveNames(abx,sort);
-
-	newWaveNum=-1;
-	fn[0]=0;
-	if(waveNum<0 || waveNum>=waveData.curWaveCount)
-		strcpy(fn,SYNTH_DEFAULT_WAVE_NAME);
-	else
-		strcpy(fn,waveData.curWaveNames[waveNum]);
-	for(i=0;i<waveData.curWaveCount;++i)
-	{
-		if(!strcasecmp(fn,waveData.curWaveNames[i]))
-		{
-			newWaveNum=i;
-			break;
-		}
-	}
-	if(newWaveNum<0) // in case wave not found, reload default wave and bank
-	{
-		rprintf(0,"Error: abx %d waveform %s not found!\n",abx,fn);
-		bankNum=-1;
-		waveNum=-1;
-		goto reload;
-	}
-
-	strcpy(currentPreset.oscWave[abx],waveData.curWaveNames[newWaveNum]);
-	
-	if (oriBankNum!=newBankNum || oriWaveNum!=newWaveNum)
-	{
-#ifdef DEBUG
-		rprintf(0,"reloadLegacyBankWaveIndexes abx %d from %d/%d to %d/%d\n",abx,oriBankNum,oriWaveNum,newBankNum,newWaveNum);
-#endif
-		currentPreset.steppedParameters[abx2bsp[abx]]=newBankNum;
-		currentPreset.steppedParameters[abx2wsp[abx]]=newWaveNum;
-	}
-}
-
 int synth_getBankCount(void)
 {
 	return waveData.bankCount;
@@ -651,7 +566,7 @@ int8_t synth_refreshBankNames(int8_t sort, int8_t force)
 	
 	waveData.bankCount=0;
 
-	if((res=f_opendir(&waveData.curDir,WAVEDATA_PATH)))
+	if((res=f_opendir(&waveData.curDir,SYNTH_WAVEDATA_PATH)))
 	{
 		rprintf(0,"f_opendir res=%d\n",res);
 		return 0;
@@ -694,7 +609,7 @@ void synth_refreshCurWaveNames(abx_t abx, int8_t sort)
 	FRESULT res;
 	char fn[128];
 	
-	strcpy(fn,WAVEDATA_PATH "/");
+	strcpy(fn,SYNTH_WAVEDATA_PATH "/");
 	strcat(fn,currentPreset.oscBank[abx]);
 	
 	if(!strcmp(waveData.curWaveBank,fn) && waveData.curWaveSorted==sort && waveData.curWaveABX==abx) // already loaded and same state
@@ -753,7 +668,7 @@ void synth_refreshWaveforms(abx_t abx)
 	int32_t smpCnt=0, chanCnt=0;
 	int16_t data[WTOSC_MAX_SAMPLES];
 	
-	strcpy(fn,WAVEDATA_PATH "/");
+	strcpy(fn,SYNTH_WAVEDATA_PATH "/");
 	strcat(fn,currentPreset.oscBank[abx]);
 	strcat(fn,"/");
 	strcat(fn,currentPreset.oscWave[abx]);
@@ -1020,24 +935,20 @@ void synth_init(void)
 	lfo_init(&synth.lfo[0]);
 	lfo_init(&synth.lfo[1]);
 
-	// load settings from storage
-	
-	if(!settings_load())
-		settings_loadDefault();
+	// load settings from storage & load static stuff
 
+	settings_load();
 	synth_refreshBankNames(1,1);
-	
-	// upgrade presets from before storing bank/wave names
-	preset_upgradeBankWaveStorage();
-	
+
 	// load last preset & do a full refresh
-	
-	if(!preset_loadCurrent(settings.presetNumber))
-		preset_loadDefault(1);
+
+	preset_loadCurrent(settings.presetNumber);
 	ui_setPresetModified(0);
 
 	synth_refreshFullState(1);
 
+	// set USB mode
+	
 	usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
 }
 

@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "version.h"
 #include "rprintf.h"
 #include "serial.h"
 #include "lpc177x_8x_gpio.h"
@@ -312,9 +313,9 @@ int main(void)
 
 		clear(1);
 		clear(2);
-		sendString(1,"GliGli's BootLoader");
+		sendString(1,synthBLName);
 		setPos(1,0,1);
-		sendString(1,"Build " __DATE__ " " __TIME__);
+		sendString(1,synthVersion);
 		sendString(2,"Press 1 to go into USB disk mode");
 		setPos(2,0,1);
 		sendString(2,"Press 2 to flash " FLASH_FILE_PATH);

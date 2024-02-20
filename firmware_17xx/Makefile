@@ -79,6 +79,7 @@ SYSTEM_SRC+=system/serial.c
 SYSTEM_SRC+=system/syscalls.c
 SYSTEM_SRC+=system/hd44780.c
 SYSTEM_SRC+=system/xt26g.c
+SYSTEM_SRC+=system/version.c
 
 XNORMIDI_SRC=xnormidi/midi.c
 XNORMIDI_SRC+=xnormidi/midi_device.c
@@ -370,7 +371,7 @@ gccversion :
 	@$(CC) --version
 
 # Program the device.  - lpc21isp will not work for SAM7
-program: $(LPC21ISP_FLASHFILE)
+program:
 	-$(LPC21ISP_KILL)
 	$(LPC21ISP) $(LPC21ISP_OPTIONS) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(DEBUG_UART_BAUD) $(LPC21ISP_XTAL)
 
@@ -474,5 +475,5 @@ clean_list :
 
 
 # Listing of phony targets.
-.PHONY : all begin finish end sizebefore sizeafter gccversion build elf hex clean clean_list program
+.PHONY : all begin finish end sizebefore sizeafter gccversion build elf hex clean clean_list program system/version.c
 

@@ -40,7 +40,7 @@ enum uiPage_e
 enum uiCustomParamNumber_e
 {
 	cnNone=0,cnAMod,cnAHld,cnLoad,cnSave,cnMidC,cnTune,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
-	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnPack,cnNPrs,cnNVal,cnUsbM,cnCtst,
+	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnNPrs,cnNVal,cnUsbM,cnCtst,
 	cnWEnT,cnFEnT,cnAEnT,
 };
 
@@ -219,7 +219,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		/* 2nd row of pots */
-		{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=20,.custPotAdd=0},
+		{.type=ptCust,.number=cnSBnk,.shortName="SBnk",.longName="Sequencer memory Bank",.custPotMul=SEQ_BANK_COUNT,.custPotAdd=0},
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
@@ -770,7 +770,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 					}
 					break;
 				default:
-					if(continuousParametersZeroCentered[prm->number])
+					if(continuousParametersZeroCentered[prm->number].param)
 					{
 						tmp=SCAN_POT_FROM_16BITS(value+INT16_MIN);
 						srprintf(dv,tmp>=0?"% 4d":"% 3d",tmp);
@@ -864,7 +864,6 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 				case cnLNxt:
 				case cnPanc:
 				case cnLBas:
-				case cnPack:
 					value=0;
 					break;
 				case cnNPrs:
@@ -924,7 +923,7 @@ static char * getDisplayFulltext(int8_t source)
 		// scale
 		v=(v*LCD_WIDTH)/UINT16_MAX;
 
-		if(continuousParametersZeroCentered[prm->number])
+		if(continuousParametersZeroCentered[prm->number].param)
 		{
 			// zero centered bargraph			
 			for(int i=0;i<LCD_WIDTH;++i)
@@ -1112,7 +1111,7 @@ static int32_t getParameterValueCount(const struct uiParam_s * prm)
 					valCount=synth_getCurWaveCount();
 					break;
 				default:
-					valCount=steppedParametersSteps[prm->number];
+					valCount=steppedParametersSteps[prm->number].param;
 			}
 			break;
 		case ptCust:
@@ -1213,7 +1212,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				case ptCont:
 					potSetting=data;
 
-					if(continuousParametersZeroCentered[prm->number])
+					if(continuousParametersZeroCentered[prm->number].param)
 						potSetting=addDeadband(potSetting, &panelDeadband);
 
 					potQuantum=SCAN_POT_TO_16BITS(1);
@@ -1413,9 +1412,6 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					synth_refreshWaveforms(abx);
 				change=1;
 				break;
-			case cnPack:
-				preset_packAndRemoveDuplicates();
-				break;
 			case cnNPrs:
 				ui.kpInputValue=0;
 				ui.kpInputPot=-1;
@@ -1566,7 +1562,10 @@ static void handleSlowUpdates(void)
 				sendString(2,"USB Disk mode, press any button to quit");
 				usb_setMode(umMSC,usbMSCCallback);
 
+				// reload settings & load static stuff
+				settings_load();
 				synth_refreshBankNames(1,1);
+
 				synth_refreshFullState(1);
 				ui.pendingScreenClear=1;
 			}
@@ -1670,9 +1669,9 @@ void ui_init(void)
 		
 	// welcome message
 
-	sendString(1,"GliGli's OverCycler");
+	sendString(1,synthName);
 	setPos(1,0,1);
-	sendString(1,"Build " __DATE__ " " __TIME__);
+	sendString(1,synthVersion);
 	rprintf(1,"Sampling at %d Hz", SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 	setPos(2,0,1);
 }

@@ -7,7 +7,10 @@
 
 typedef enum
 {
-	symInternal=0,symMIDI=1,symUSB=2
+	symInternal=0,symMIDI=1,symUSB=2,
+			
+	// /!\ this must stay last
+	symCount
 } syncMode_t;
 
 void clock_updateSpeed(void);

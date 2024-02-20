@@ -10,7 +10,6 @@
 #include "seq.h"
 
 #include "../xnormidi/midi_device.h"
-#include "../xnormidi/midi.h"
 
 #define NOTE_TRANSPOSE_OFFSET -12
 
@@ -237,7 +236,7 @@ static int8_t setSteppedParameter(steppedParameter_t param, uint8_t value, int8_
 	uint16_t v=value;
 	
 	if(!isRaw)
-		v=(v*steppedParametersSteps[param])>>7;
+		v=(v*steppedParametersSteps[param].param)>>7;
 
 	if(currentPreset.steppedParameters[param]!=v)
 	{
@@ -408,7 +407,7 @@ static void ccEvent(MidiDevice * device, uint8_t channel, uint8_t control, uint8
 			if(midi.isNrpnStepped[port])
 			{
 				steppedParameter_t s=midi.currentNrpn[port];
-				change=setSteppedParameter(s,MIN(steppedParametersSteps[s]-1,currentPreset.steppedParameters[s]+1),1);
+				change=setSteppedParameter(s,MIN(steppedParametersSteps[s].param-1,currentPreset.steppedParameters[s]+1),1);
 			}
 			else
 			{
@@ -560,8 +559,7 @@ void midi_update(void)
 			
 			settings_save();		
 
-			if(!preset_loadCurrent(settings.presetNumber))
-				preset_loadDefault(1);
+			preset_loadCurrent(settings.presetNumber);
 			ui_setPresetModified(0);	
 
 			synth_refreshFullState(1);
