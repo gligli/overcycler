@@ -18,8 +18,6 @@
 #include "synth/ui.h"
 #include "synth/utils.h"
 
-#define STORAGE_PATH "/STORAGE"
-
 usbMode_t usbMode = umNone;
 FATFS fatFS;
 
@@ -50,119 +48,6 @@ void delay_us(uint32_t count)
 void delay_ms(uint32_t count)
 {
 	delay_us(1000*count);
-}
-
-void storage_write(uint32_t pageIdx, uint8_t *buf)
-{
-	FIL f;
-	char fn[_MAX_LFN];
-	UINT bw;
-	
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
-
-#ifdef DEBUG
-	rprintf(0,"storage_write %d %s\n",pageIdx,fn);
-#endif		
-
-	if(f_open(&f,fn,FA_WRITE|FA_CREATE_ALWAYS))
-		return;
-	f_write(&f,buf,STORAGE_PAGE_SIZE,&bw);
-	f_close(&f);
-
-#ifdef DEBUG
-	if(bw!=STORAGE_PAGE_SIZE)
-		rprintf(0,"storage_write %d bytes\n",bw);
-#endif		
-}
-
-void storage_read(uint32_t pageIdx, uint8_t *buf)
-{
-	FIL f;
-	char fn[_MAX_LFN];
-	UINT br;
-
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
-
-#ifdef DEBUG
-	rprintf(0,"storage_read %d %s\n",pageIdx,fn);
-#endif		
-
-	memset(buf,0,STORAGE_PAGE_SIZE);
-
-	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
-		return;
-	f_read(&f,buf,STORAGE_PAGE_SIZE,&br);
-	f_close(&f);
-
-#ifdef DEBUG
-	if(br!=STORAGE_PAGE_SIZE)
-		rprintf(0,"storage_read %d bytes\n",br);
-#endif		
-}
-
-void storage_delete(uint32_t pageIdx)
-{
-	char fn[_MAX_LFN];
-
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
-
-#ifdef DEBUG
-	rprintf(0,"storage_delete %d %s\n",pageIdx,fn);
-#endif		
-
-	f_unlink(fn);
-}
-
-int8_t storage_pageExists(uint32_t pageIdx)
-{
-#ifdef DEBUG
-	rprintf(0,"storage_pageExists %d\n",pageIdx);
-#endif		
-	
-	FIL f;
-	char fn[_MAX_LFN];
-
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
-	
-	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
-		return 0;
-	
-	f_close(&f);
-	
-	return 1;
-}
-
-int8_t storage_samePage(uint32_t pageIdx, uint32_t pageIdx2)
-{
-	FIL f,f2;
-	char fn[_MAX_LFN];
-	uint8_t buf[64],buf2[64];
-	UINT br,br2;
-	int8_t same=1;
-
-#ifdef DEBUG
-	rprintf(0,"storage_samePage %d %d\n",pageIdx,pageIdx2);
-#endif		
-
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx);
-	if(f_open(&f,fn,FA_READ|FA_OPEN_EXISTING))
-		return 0;
-	
-	srprintf(fn,STORAGE_PATH "/page_%04x.bin",pageIdx2);
-	if(f_open(&f2,fn,FA_READ|FA_OPEN_EXISTING))
-		return 0;
-	
-	do
-	{
-		f_read(&f,buf,sizeof(buf),&br);
-		f_read(&f2,buf2,sizeof(buf2),&br2);
-		same&=memcmp(buf,buf2,sizeof(buf))==0;
-	}while(same && br == sizeof(buf) && br2 == sizeof(buf2));
-
-	f_close(&f);
-	f_close(&f2);
-	
-	return same;
 }
 
 void usb_setMode(usbMode_t mode, usb_MSC_continue_callback_t usbMSCContinue)
@@ -243,7 +128,7 @@ int main(void)
 		for(;;);
 	}
 
-	if((res=f_mkdir(STORAGE_PATH)))
+	if((res=f_mkdir(SYNTH_WAVEDATA_PATH)))
 	{
 		if(res==FR_NO_FILESYSTEM)
 		{
@@ -258,7 +143,7 @@ int main(void)
 			rprintf(0,"done!");
 			rprintf(1,"done!");
 
-			if((res=f_mkdir(STORAGE_PATH)))
+			if((res=f_mkdir(SYNTH_WAVEDATA_PATH)))
 			{
 				rprintf(0,"f_mkdir res=%d\n",res);
 				rprintf(1,"Error: f_mkdir res=%d",res);
