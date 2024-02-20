@@ -65,7 +65,7 @@ static inline void __restore_irq_stub(uint32_t basepri)
 
 typedef enum
 {
-	umNone=-1,umPowerOnly=0,umMIDI=1,umMSC=2
+	umNone=-1,umPowerOnly=0,umMSC=1,umMIDI=2
 } usbMode_t;
 
 typedef int8_t (*usb_MSC_continue_callback_t)(void); // return 0 to quit USB MSC mode
