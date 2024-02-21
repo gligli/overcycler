@@ -46,6 +46,7 @@ inline uint16_t lerp16(uint16_t a,uint16_t b,uint32_t x)
 	return a+((x*(b-a))>>16);
 }
 
+// max frac shift = 12
 inline uint16_t herp(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, int32_t prev3, int8_t frac_shift)
 {
 	uint16_t r;
@@ -67,6 +68,7 @@ inline uint16_t herp(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, in
 	return r;
 }
 
+// phase is 20 bits, from bit 4 to bit 23
 inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t interpolate)
 {
 	if(interpolate==2)
@@ -74,7 +76,7 @@ inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t int
 		uint8_t ci,p1i,p2i,p3i;
 		int32_t x,c,p1,p2,p3;
 		
-		x=UINT16_MAX-(phase&0xffff);
+		x=4095-((phase>>4)&4095);
 		p1i=phase>>16;
 
 		ci=p1i;
@@ -94,7 +96,7 @@ inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t int
 		p2=lookup[p2i];
 		p3=lookup[p3i];
 
-		return herp(x,c,p1,p2,p3,16);
+		return herp(x,c,p1,p2,p3,12);
 	}
 	else if(interpolate==1)
 	{
