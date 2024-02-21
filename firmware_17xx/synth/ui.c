@@ -1191,7 +1191,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				potSetting=MIN(*forcedValue,valueCount-1);
 				break;
 			case ptCust:
-				potSetting=MIN(SCAN_POT_TO_16BITS(*forcedValue),prm->custPotMul+prm->custPotAdd-1);
+				potSetting=MIN(*forcedValue,prm->custPotMul+prm->custPotAdd-1);
 				break;
 			default:
 				/* nothing */;
