@@ -768,17 +768,20 @@ static inline void computeGlide(uint16_t * out, const uint16_t target, const uin
 
 static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 {
+	uint32_t phase;
+	
 	switch(cv)
 	{
 	case cvCutoff:
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
-		value>>=2; // limit VCA output level to 4Vpp
-		value=computeShape(value<<8,vcaLinearizationCurve,2);
+		phase=(value<<9)/5; // limit VCA output level to 4Vpp
+		value=computeShape(phase,vcaLinearizationCurve,2);
 		break;
 	case cvNoiseVol:
-		value=computeShape(value<<8,vcNoiseLinearizationCurve,2);
+		phase=value<<8;
+		value=computeShape(phase,vcNoiseLinearizationCurve,2);
 		break;
 	case cvResonance:
 		value>>=1;
