@@ -776,7 +776,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
-		phase=(value<<9)/5; // limit VCA output level to 4Vpp
+		phase=value<<8;
 		value=computeShape(phase,vcaLinearizationCurve,2);
 		break;
 	case cvNoiseVol:
