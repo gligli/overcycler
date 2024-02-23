@@ -793,7 +793,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 	return value;
 }
 
-FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value)
+FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value, int8_t noDblBuf)
 {
 	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
 	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
@@ -826,7 +826,7 @@ FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value)
 		return;
 	}
 	
-	dacspi_setCVValue(channel,v);
+	dacspi_setCVValue(channel,v,noDblBuf);
 }
 
 static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
@@ -844,7 +844,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	vf=filterVal;
 	vf+=scaleU16S16(synth.filEnvs[v].output,filEnvAmt);
 	vf+=synth.filterNoteCV[v];
-	synth_refreshCV(v,cvCutoff,vf);
+	synth_refreshCV(v,cvCutoff,vf,0);
 
 	// oscs
 	
@@ -879,7 +879,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	synth_refreshCV(v,cvAmp,vamp);
+	synth_refreshCV(v,cvAmp,vamp,0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1051,10 +1051,10 @@ void synth_updateCVsEvent(void)
 		// compensate resonance lowering volume by abjusting pre filter mixer level
 	resoFactor=(30*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
 	
-	synth_refreshCV(-1,cvResonance,resVal);
-	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
-	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
-	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
+	synth_refreshCV(-1,cvResonance,resVal,0);
+	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol),0);
+	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol),0);
+	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol),0);
 
 	// lfos
 		

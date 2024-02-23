@@ -155,9 +155,19 @@ FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 	dacspi.oscCommands[buffer+dacspi.curUpdatedHalf][channel]=(value>>4)|oscChannelCommand[channel];
 }
 
-FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value)
+FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf)
 {
-	dacspi.cvCommands[channel+dacspi.curUpdatedHalf]=(value>>4)|((channel&7)<<12);
+	uint16_t cmd=(value>>4)|((channel&7)<<12);
+	
+	if(noDblBuf)
+	{
+		dacspi.cvCommands[channel]=cmd;
+		dacspi.cvCommands[channel+DACSPI_CV_COUNT]=cmd;
+	}
+	else
+	{
+		dacspi.cvCommands[channel+dacspi.curUpdatedHalf]=cmd;
+	}
 }
 
 void dacspi_init(void)

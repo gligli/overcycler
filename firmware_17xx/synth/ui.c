@@ -1540,7 +1540,7 @@ static void handleSlowUpdates(void)
 			{
 				// temporarily silence voices
 				for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-					synth_refreshCV(v,cvAmp, 0);					
+					synth_refreshCV(v,cvAmp,0,1);					
 
 				settings_save();                
 				if(!preset_loadCurrent(settings.presetNumber))

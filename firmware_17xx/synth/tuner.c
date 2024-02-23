@@ -32,10 +32,10 @@ static uint16_t extrapolateUpperOctavesTunes(int8_t voice, int8_t oct)
 
 static LOWERCODESIZE void prepareSynth(void)
 {
-	synth_refreshCV(-1,cvResonance,0);
-	synth_refreshCV(-1,cvNoiseVol,0);
-	synth_refreshCV(-1,cvAVol,0);
-	synth_refreshCV(-1,cvBVol,0);
+	synth_refreshCV(-1,cvResonance,0,1);
+	synth_refreshCV(-1,cvNoiseVol,0,1);
+	synth_refreshCV(-1,cvAVol,0,1);
+	synth_refreshCV(-1,cvBVol,0,1);
 }
 
 static NOINLINE LOWERCODESIZE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
@@ -81,7 +81,7 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 	{
 		estimate|=bit;
 
-		synth_refreshCV(voice,cvCutoff,estimate);
+		synth_refreshCV(voice,cvCutoff,estimate,1);
 		delay_ms(25); // wait analog hardware stabilization	
 
 		p=measureAudioPeriod(2);
@@ -114,7 +114,7 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 
 	// open VCA
 
-	synth_refreshCV(voice,cvAmp,UINT16_MAX);
+	synth_refreshCV(voice,cvAmp,UINT16_MAX,1);
 	
 	// tune
 
@@ -129,7 +129,7 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 	
 	// close VCA
 
-	synth_refreshCV(voice,cvAmp,0);
+	synth_refreshCV(voice,cvAmp,0,1);
 }
 
 NOINLINE uint16_t tuner_computeCVFromNote(int8_t voice, uint8_t note, uint8_t nextInterp, cv_t cv)
@@ -199,10 +199,10 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 			
 			// init
 		
-		synth_refreshCV(-1,cvResonance,UINT16_MAX);
+		synth_refreshCV(-1,cvResonance,UINT16_MAX,1);
 	
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
-			synth_refreshCV(v,cvCutoff,UINT16_MAX);
+			synth_refreshCV(v,cvCutoff,UINT16_MAX,1);
 	
 			// filters
 		
@@ -211,9 +211,9 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 
 		// finish
 		
-		synth_refreshCV(-1,cvResonance,0);
+		synth_refreshCV(-1,cvResonance,0,1);
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
-			synth_refreshCV(v,cvAmp,0);
+			synth_refreshCV(v,cvAmp,0,1);
 		scan_setMode(0);
 	}
 }

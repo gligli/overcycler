@@ -17,6 +17,6 @@
 
 void dacspi_init(void);
 void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value); // 16bit value
-void dacspi_setCVValue(int channel, uint16_t value); // 16bit value
+void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf); // 16bit value
 
 #endif
