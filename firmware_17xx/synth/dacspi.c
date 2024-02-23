@@ -27,8 +27,6 @@
 		GPDMA_DMACCxConfig_TransferType(2) | \
 		GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_CV_COUNT 16
-
 #define DACSPI_CV_CHANNEL 6
 
 static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
@@ -67,21 +65,24 @@ static const uint32_t oscChannelCommand[SYNTH_VOICE_COUNT*2] =
 static struct
 {
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
-	uint16_t cvCommands[DACSPI_CV_COUNT];
+	uint16_t cvCommands[DACSPI_CV_COUNT*2];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
+	int curUpdatedHalf;
 } dacspi EXT_RAM;
 
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
 	static uint8_t phase=0;
-	int8_t secondHalfPlaying=marker>=DACSPI_BUFFER_COUNT/2;
 	
 	LPC_GPDMA->IntTCClear=LPC_GPDMA->IntTCStat; // acknowledge interrupt
 
 	// when second half is playing, update first and vice-versa
-
-	synth_updateDACsEvent(secondHalfPlaying?0:DACSPI_BUFFER_COUNT/2,DACSPI_BUFFER_COUNT/2);
+	dacspi.curUpdatedHalf=(marker>=DACSPI_BUFFER_COUNT/2)?0:DACSPI_BUFFER_COUNT/2;
+	
+	// update Oscillators
+	
+	synth_updateDACsEvent(0,DACSPI_BUFFER_COUNT/2);
 	
 	// update CVs @ 4Khz
 
@@ -116,10 +117,13 @@ static void buildLLIs(int buffer, int channel)
 	
 	if(isCVChannel)
 	{
+		int cvDacChannel=(buffer>>1)&7;
+		int half=(buffer>=DACSPI_BUFFER_COUNT/2)?DACSPI_CV_COUNT:0;
+
 		if(muxChannel==0)
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[(buffer>>1)&7];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+half];
 		else
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+((buffer>>1)&7)];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+half];
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(1) |
 			GPDMA_DMACCxControl_SWidth(1) |
@@ -127,7 +131,9 @@ static void buildLLIs(int buffer, int channel)
 	}
 	else
 	{
-		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][(muxChannel-1)*2];
+		int voice=muxChannel-1;
+		
+		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][voice*2];
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(2) |
 			GPDMA_DMACCxControl_SWidth(1) |
@@ -146,12 +152,12 @@ static void buildLLIs(int buffer, int channel)
 
 FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 {
-	dacspi.oscCommands[buffer][channel]=(value>>4)|oscChannelCommand[channel];
+	dacspi.oscCommands[buffer+dacspi.curUpdatedHalf][channel]=(value>>4)|oscChannelCommand[channel];
 }
 
 FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value)
 {
-	dacspi.cvCommands[channel]=(value>>4)|((channel&7)<<12);
+	dacspi.cvCommands[channel+dacspi.curUpdatedHalf]=(value>>4)|((channel&7)<<12);
 }
 
 void dacspi_init(void)
@@ -168,7 +174,7 @@ void dacspi_init(void)
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
 
 	// cv DACs init
-	for(i=0;i<DACSPI_CV_COUNT;i+=4)
+	for(i=0;i<DACSPI_CV_COUNT*2;i+=4)
 	{
 		dacspi.cvCommands[i+0]=0b1110000000000000; // data reset
 		dacspi.cvCommands[i+1]=0b1100000000000000; // set all channels power
@@ -258,10 +264,10 @@ void dacspi_init(void)
 	LPC_GPDMACH0->CControl=lli[0][0].Control;
 
 	LPC_GPDMACH0->CConfig=DACSPI_DMACONFIG;
-
+	
 	// wait until all CV DACs inits are processed
 	while(marker!=markerSource[0]);
-	while(marker!=markerSource[DACSPI_BUFFER_COUNT/2]);
+	while(marker!=markerSource[DACSPI_BUFFER_COUNT-1]);
 	
 	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
 }

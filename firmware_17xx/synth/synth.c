@@ -983,13 +983,6 @@ void synth_update(void)
 // @ 500Hz on 8 phases from from dacspi update
 void synth_tickTimerEvent(uint8_t phase)
 {
-	static int32_t resoFactor=0, resVal=0;
-
-	auto uint32_t getResonanceCompensatedCV(continuousParameter_t cp, cv_t cv)
-	{
-		return scaleU16U16(currentPreset.continuousParameters[cp],(getStaticCV(cv)-INT16_MIN))*resoFactor/256;
-	}
-		
 	switch(phase)
 	{
 		case 0:
@@ -1023,27 +1016,14 @@ void synth_tickTimerEvent(uint8_t phase)
 			}
 			break;
 		case 5:
-			// compensate resonance lowering volume by abjusting pre filter mixer level
-			resVal=currentPreset.continuousParameters[cpResonance];
-			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
-			resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
-			resVal=__USAT(resVal,16);
-			resoFactor=(30*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
+			refreshLfoSettings();
 			break;
 		case 6:
-			// global CVs update
-			synth_refreshCV(-1,cvResonance,resVal);
-			synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
-			synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
-			synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
+			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
 			break;
 		case 7:
 			// 500hz tick counter
 			++currentTick;
-
-			// misc
-			refreshLfoSettings();
-			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
 			break;
 		default:
 			/* nothing */;
@@ -1054,6 +1034,27 @@ void synth_tickTimerEvent(uint8_t phase)
 void synth_updateCVsEvent(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
+	int32_t resoFactor=0, resVal=0;
+	
+	// global CVs update
+
+	auto uint32_t getResonanceCompensatedCV(continuousParameter_t cp, cv_t cv)
+	{
+		return scaleU16U16(currentPreset.continuousParameters[cp],(getStaticCV(cv)-INT16_MIN))*resoFactor/256;
+	}
+		
+	resVal=currentPreset.continuousParameters[cpResonance];
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOResAmt],synth.lfo[0].output);
+	resVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2ResAmt],synth.lfo[1].output);
+	resVal=__USAT(resVal,16);
+
+		// compensate resonance lowering volume by abjusting pre filter mixer level
+	resoFactor=(30*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
+	
+	synth_refreshCV(-1,cvResonance,resVal);
+	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol));
+	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol));
+	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol));
 
 	// lfos
 		
