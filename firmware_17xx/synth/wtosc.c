@@ -150,7 +150,8 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 		aliasing_s>>=6;
 	}
 	
-	width=(width*30+UINT16_MAX)/32;
+	width=MAX(UINT16_MAX/32,width);
+	width=MIN((31*UINT16_MAX)/32,width);
 	width>>=16-WIDTH_MOD_BITS;
 
 	crossover_s=crossover;
@@ -163,7 +164,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	
 	frequency=cvToFrequency(pitch)*o->halfSampleCount;
 
-	sampleRate[0]=frequency/(((1<<WIDTH_MOD_BITS)-1)-width);
+	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
 	
 	increment[0]=1+(sampleRate[0]/MAX_SAMPLERATE);
