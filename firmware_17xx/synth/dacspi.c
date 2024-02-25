@@ -65,11 +65,10 @@ static const uint32_t oscChannelCommand[SYNTH_VOICE_COUNT*2] =
 static struct
 {
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
-	uint16_t cvCommands[DACSPI_CV_COUNT*2];
+	uint16_t cvCommands[DACSPI_BUFFER_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
-	int curUpdatedHalf;
+	int curSet;
 } dacspi EXT_RAM;
-
 
 __attribute__ ((used)) void DMA_IRQHandler(void)
 {
@@ -78,22 +77,23 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	LPC_GPDMA->IntTCClear=LPC_GPDMA->IntTCStat; // acknowledge interrupt
 
 	// when second half is playing, update first and vice-versa
-	dacspi.curUpdatedHalf=(marker>=DACSPI_BUFFER_COUNT/2)?0:DACSPI_BUFFER_COUNT/2;
-	
-	// update Oscillators
-	
-	synth_updateDACsEvent(0,DACSPI_BUFFER_COUNT/2);
-	
-	// update CVs @ 4Khz
+	dacspi.curSet=(marker>=DACSPI_BUFFER_COUNT/2)?0:DACSPI_BUFFER_COUNT/2;
 
+	// update CVs and DACs (in 2 sets of 16)
+	
 	synth_updateCVsEvent();
+	synth_updateOscsEvent(0,DACSPI_BUFFER_COUNT/4);
+
+	dacspi.curSet+=DACSPI_CV_COUNT;
+	synth_updateCVsEvent();
+	synth_updateOscsEvent(0,DACSPI_BUFFER_COUNT/4);
 
 	// update timer @ 500Hz
 
 	synth_tickTimerEvent(phase);
 
 	++phase;
-	if(phase>=8)
+	if(phase>=4)
 		phase=0;
 }
 
@@ -118,12 +118,12 @@ static void buildLLIs(int buffer, int channel)
 	if(isCVChannel)
 	{
 		int cvDacChannel=(buffer>>1)&7;
-		int half=(buffer>=DACSPI_BUFFER_COUNT/2)?DACSPI_CV_COUNT:0;
+		int cvSet=buffer&~(DACSPI_CV_COUNT-1);
 
 		if(muxChannel==0)
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+half];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+cvSet];
 		else
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+half];
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+cvSet];
 		lli[lliPos][1].Control=
 			GPDMA_DMACCxControl_TransferSize(1) |
 			GPDMA_DMACCxControl_SWidth(1) |
@@ -152,7 +152,7 @@ static void buildLLIs(int buffer, int channel)
 
 FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 {
-	dacspi.oscCommands[buffer+dacspi.curUpdatedHalf][channel]=(value>>4)|oscChannelCommand[channel];
+	dacspi.oscCommands[buffer+dacspi.curSet][channel]=(value>>4)|oscChannelCommand[channel];
 }
 
 FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf)
@@ -161,12 +161,12 @@ FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf)
 	
 	if(noDblBuf)
 	{
-		dacspi.cvCommands[channel]=cmd;
-		dacspi.cvCommands[channel+DACSPI_CV_COUNT]=cmd;
+		for(int set=0;set<DACSPI_BUFFER_COUNT;set+=DACSPI_CV_COUNT)
+			dacspi.cvCommands[channel+set]=cmd;
 	}
 	else
 	{
-		dacspi.cvCommands[channel+dacspi.curUpdatedHalf]=cmd;
+		dacspi.cvCommands[channel+dacspi.curSet]=cmd;
 	}
 }
 
@@ -184,7 +184,7 @@ void dacspi_init(void)
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
 
 	// cv DACs init
-	for(i=0;i<DACSPI_CV_COUNT*2;i+=4)
+	for(i=0;i<DACSPI_BUFFER_COUNT;i+=4)
 	{
 		dacspi.cvCommands[i+0]=0b1110000000000000; // data reset
 		dacspi.cvCommands[i+1]=0b1100000000000000; // set all channels power

@@ -58,7 +58,7 @@ typedef enum
 
 void synth_tickTimerEvent(uint8_t phase);
 void synth_updateCVsEvent(void);
-void synth_updateDACsEvent(int32_t start, int32_t count);
+void synth_updateOscsEvent(int32_t start, int32_t count);
 void synth_uartMIDIEvent(uint8_t data);
 void synth_usbMIDIEvent(uint8_t data);
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, uint8_t flags);

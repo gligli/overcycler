@@ -980,28 +980,24 @@ void synth_update(void)
 // Synth internal events
 ////////////////////////////////////////////////////////////////////////////////
 
-// @ 500Hz on 8 phases from from dacspi update
+// @ 500Hz on 4 phases from from dacspi update
 void synth_tickTimerEvent(uint8_t phase)
 {
 	switch(phase)
 	{
 		case 0:
+			// bit inputs (footswitch)
+			handleBitInputs();
 			// midi
 			midi_processInput();
 			break;
 		case 1:
-			// bit inputs (footswitch)
-			handleBitInputs();
-			break;
-		case 2:
 			// assigner
 			handleFinishedVoices();
-			break;
-		case 3:
 			// clocking
 			clock_update();
 			break;
-		case 4:
+		case 2:
 			// glide
 			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
 			{
@@ -1015,13 +1011,9 @@ void synth_tickTimerEvent(uint8_t phase)
 				}
 			}
 			break;
-		case 5:
+		case 3:
 			refreshLfoSettings();
-			break;
-		case 6:
 			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
-			break;
-		case 7:
 			// 500hz tick counter
 			++currentTick;
 			break;
@@ -1133,8 +1125,8 @@ void synth_updateCVsEvent(void)
 		refreshVoice(v,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,synth.partState.wmodMask);
 }
 
-#define PROC_UPDATE_DACS_VOICE(v) \
-FORCEINLINE static void updateDACsVoice##v(int32_t start, int32_t end) \
+#define PROC_UPDATE_OSCS_VOICE(v) \
+FORCEINLINE static void updateOscsVoice##v(int32_t start, int32_t end) \
 { \
 	uint32_t syncResets=0; /* /!\ this won't work if count > 32 */ \
 	wtosc_update(&synth.osc[v][0],start,end,osmMaster,&syncResets); \
@@ -1142,23 +1134,23 @@ FORCEINLINE static void updateDACsVoice##v(int32_t start, int32_t end) \
 	wtosc_update(&synth.osc[v][1],start,end,osmSlave,&syncResets); \
 }
 
-PROC_UPDATE_DACS_VOICE(0);
-PROC_UPDATE_DACS_VOICE(1);
-PROC_UPDATE_DACS_VOICE(2);
-PROC_UPDATE_DACS_VOICE(3);
-PROC_UPDATE_DACS_VOICE(4);
-PROC_UPDATE_DACS_VOICE(5);
+PROC_UPDATE_OSCS_VOICE(0);
+PROC_UPDATE_OSCS_VOICE(1);
+PROC_UPDATE_OSCS_VOICE(2);
+PROC_UPDATE_OSCS_VOICE(3);
+PROC_UPDATE_OSCS_VOICE(4);
+PROC_UPDATE_OSCS_VOICE(5);
 
-void synth_updateDACsEvent(int32_t start, int32_t count)
+void synth_updateOscsEvent(int32_t start, int32_t count)
 {
 	int32_t end=start+count-1;
 
-	updateDACsVoice0(start,end);
-	updateDACsVoice1(start,end);
-	updateDACsVoice2(start,end);
-	updateDACsVoice3(start,end);
-	updateDACsVoice4(start,end);
-	updateDACsVoice5(start,end);
+	updateOscsVoice0(start,end);
+	updateOscsVoice1(start,end);
+	updateOscsVoice2(start,end);
+	updateOscsVoice3(start,end);
+	updateOscsVoice4(start,end);
+	updateOscsVoice5(start,end);
 }
 
 void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t velocity, uint8_t flags)
