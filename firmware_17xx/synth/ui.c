@@ -60,12 +60,12 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 	{
 		/* 1st row of pots */
 		{.type=ptStep,.number=spABank_Unsaved,.shortName="ABnk",.longName="Osc A Bank"},
-		{.type=ptStep,.number=spBBank_Unsaved,.shortName="BBnk",.longName="Osc B Bank"},
+		{.type=ptStep,.number=spAWave_Unsaved,.shortName="AWav",.longName="Osc A Waveform"},
 		{.type=ptCont,.number=cpAFreq,.shortName="AFrq",.longName="Osc A Frequency"},
 		{.type=ptCont,.number=cpNoiseVol,.shortName="NVol",.longName="Noise Volume"},
 		{.type=ptCont,.number=cpAVol,.shortName="AVol",.longName="Osc A Volume"},
 		/* 2nd row of pots */
-		{.type=ptStep,.number=spAWave_Unsaved,.shortName="AWav",.longName="Osc A Waveform"},
+		{.type=ptStep,.number=spBBank_Unsaved,.shortName="BBnk",.longName="Osc B Bank"},
 		{.type=ptStep,.number=spBWave_Unsaved,.shortName="BWav",.longName="Osc B Waveform"},
 		{.type=ptCont,.number=cpBFreq,.shortName="BFrq",.longName="Osc B Frequency"},
 		{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
@@ -430,7 +430,7 @@ static void setLcdContrast(uint8_t contrast)
 	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*400/UI_MAX_LCD_CONTRAST);
 }
 
-static void drawABCD(int lcd)
+static void drawA(int lcd)
 {
 	sendChar(lcd, 0b01110);
 	sendChar(lcd, 0b11011);
@@ -440,7 +440,10 @@ static void drawABCD(int lcd)
 	sendChar(lcd, 0b10101);
 	sendChar(lcd, 0b10101);
 	sendChar(lcd, 0b01110);
+}
 
+static void drawB(int lcd)
+{
 	sendChar(lcd, 0b01110);
 	sendChar(lcd, 0b10011);
 	sendChar(lcd, 0b10101);
@@ -449,7 +452,10 @@ static void drawABCD(int lcd)
 	sendChar(lcd, 0b10101);
 	sendChar(lcd, 0b10011);
 	sendChar(lcd, 0b01110);
+}
 
+static void drawC(int lcd)
+{
 	sendChar(lcd, 0b01110);
 	sendChar(lcd, 0b11011);
 	sendChar(lcd, 0b10101);
@@ -458,7 +464,10 @@ static void drawABCD(int lcd)
 	sendChar(lcd, 0b10101);
 	sendChar(lcd, 0b11011);
 	sendChar(lcd, 0b01110);
+}
 
+static void drawD(int lcd)
+{
 	sendChar(lcd, 0b01110);
 	sendChar(lcd, 0b10011);
 	sendChar(lcd, 0b10101);
@@ -498,8 +507,16 @@ static void drawPresetModified(int lcd, int8_t force)
 		}
 		else
 		{
-			for(i=0;i<16;++i)
+			for(i=0;i<4;++i)
+			{
+				sendChar(lcd, 0b00001);
 				sendChar(lcd, 0b00000);
+			}
+			for(i=0;i<4;++i)
+			{
+				sendChar(lcd, 0b10000);
+				sendChar(lcd, 0b00000);
+			}
 		}
 	
 		old_pm=ui.presetModified;
@@ -521,28 +538,28 @@ static void drawVisualEnv(int lcd, int8_t voicePair, int8_t force)
 			if(ve>=i)
 				veb|=(1<<i);
 
-		sendChar(lcd, ((veb>>27) & 0x1e));
-		sendChar(lcd, ((veb>>23) & 0x1e));
-		sendChar(lcd, ((veb>>16) & 0x1e));
-		sendChar(lcd, ((veb>>15) & 0x1e));
-		sendChar(lcd, ((veb>>11) & 0x1e));
-		sendChar(lcd, ((veb>>7) & 0x1e));
-		sendChar(lcd, ((veb>>3) & 0x1e));
-		sendChar(lcd, ((veb<<1) & 0x1e));
+		sendChar(lcd, ((veb>>27) & 0x1e) | 0b00001);
+		sendChar(lcd, ((veb>>23) & 0x1e) | 0b00000);
+		sendChar(lcd, ((veb>>16) & 0x1e) | 0b00001);
+		sendChar(lcd, ((veb>>15) & 0x1e) | 0b00000);
+		sendChar(lcd, ((veb>>11) & 0x1e) | 0b00001);
+		sendChar(lcd, ((veb>> 7) & 0x1e) | 0b00000);
+		sendChar(lcd, ((veb>> 3) & 0x1e) | 0b00001);
+		sendChar(lcd, ((veb<< 1) & 0x1e) | 0b00000);
 
 		veb=0;
 		for(i=0;i<32;++i)
 			if(ve2>=i)
 				veb|=(1<<i);
 
-		sendChar(lcd, ((veb>>28) & 0xf));
-		sendChar(lcd, ((veb>>24) & 0xf));
-		sendChar(lcd, ((veb>>20) & 0xf));
-		sendChar(lcd, ((veb>>16) & 0xf));
-		sendChar(lcd, ((veb>>12) & 0xf));
-		sendChar(lcd, ((veb>>8) & 0xf));
-		sendChar(lcd, ((veb>>4) & 0xf));
-		sendChar(lcd, ((veb) & 0xf));
+		sendChar(lcd, ((veb>>28) & 0xf) | 0b10000);
+		sendChar(lcd, ((veb>>24) & 0xf) | 0b00000);
+		sendChar(lcd, ((veb>>20) & 0xf) | 0b10000);
+		sendChar(lcd, ((veb>>16) & 0xf) | 0b00000);
+		sendChar(lcd, ((veb>>12) & 0xf) | 0b10000);
+		sendChar(lcd, ((veb>> 8) & 0xf) | 0b00000);
+		sendChar(lcd, ((veb>> 4) & 0xf) | 0b10000);
+		sendChar(lcd, ((veb    ) & 0xf) | 0b00000);
 		
 		old_ve[voicePair]=ve;
 		old_ve[voicePair+1]=ve2;
@@ -1768,27 +1785,33 @@ void ui_update(void)
 		if(ui.pendingScreenClear)
 		{
 			hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
-			drawABCD(1);
+			drawA(1);
+			drawB(1);
+			hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
+			drawC(2);
+			drawD(2);
 		}
 		
 			// text
 		
+		const uint8_t buttonsOffsets[]={0,1,0,1};
+		const uint8_t buttonsLCDs[]={1,1,2,2};
+		const char buttonsChars[]={'\x00','\x01','\x00','\x01'};
 		for(i=kbA;i<=kbD;++i)
 		{
 			if(getUiParameter(i)->type!=ptNone)
 			{
-				int pos=5+(i-kbA)*9;
+				int pos=buttonsOffsets[i-kbA];
+				int lcd=buttonsLCDs[i-kbA];
 				
-				setPos(2,pos,0);
-				sendString(2,getDisplayValue(i,NULL));
+				setPos(lcd,36,pos);
+				sendString(lcd,getDisplayValue(i,NULL));
 
 				if(ui.pendingScreenClear)
 				{
-					setPos(1,pos,0);
-					sendChar(1,i-kbA+'\x00');
-
-					setPos(1,pos,1);
-					sendString(1,getName(i,0));
+					setPos(lcd,30,pos);
+					sendChar(lcd,buttonsChars[i-kbA]);
+					sendString(lcd,getName(i,0));
 				}
 			}
 		}
@@ -1797,37 +1820,33 @@ void ui_update(void)
 
 			// CGRAM update ("preset modified", visual envelopes)
 		
-		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
-		drawVisualEnv(2,0,ui.pendingScreenClear);
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+32);
+		drawPresetModified(1,ui.pendingScreenClear);
+		
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16);
+		drawVisualEnv(1,0,ui.pendingScreenClear);
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16);
 		drawVisualEnv(2,2,ui.pendingScreenClear);
 		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+32);
 		drawVisualEnv(2,4,ui.pendingScreenClear);
 
-		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+48);
-		drawPresetModified(2,ui.pendingScreenClear);
-		
 			// actual "text"
 		
 		if(ui.pendingScreenClear)
 		{
-			setPos(2,16,1); sendChar(2,'\x00');
-			setPos(2,23,1); sendChar(2,'\x01');
-			setPos(2,14,1); sendChar(2,'\x02');
-			setPos(2,25,1); sendChar(2,'\x03');
-			setPos(2, 7,1); sendChar(2,'\x04');
-			setPos(2,32,1); sendChar(2,'\x05');
-
-			setPos(2, 5,1); sendChar(2,'\x06');
-			setPos(2, 6,1); sendChar(2,'\x07');
+			setPos(1,28,0); sendChar(1,'\x04'); sendChar(1,'\x05');
+			setPos(1,28,1); sendChar(1,'\x02'); sendChar(1,'\x03');
+			setPos(2,28,0); sendChar(2,'\x02'); sendChar(2,'\x03');
+			setPos(2,28,1); sendChar(2,'\x04'); sendChar(2,'\x05');
 		}
 		
 		// pots
 		
+		const uint8_t potsOffsets[SCAN_POT_COUNT/2]={0,6,12,18,24};
 		for(i=0;i<SCAN_POT_COUNT/2;++i)
 		{
-			setPos(1,i*9,1);
-			setPos(2,i*9,0);
+			setPos(1,potsOffsets[i],1);
+			setPos(2,potsOffsets[i],0);
 
 			sendString(1,getDisplayValue(-i-1,NULL));
 			sendString(2,getDisplayValue(-i-1-SCAN_POT_COUNT/2,NULL));
@@ -1837,8 +1856,8 @@ void ui_update(void)
 		{
 			for(i=0;i<SCAN_POT_COUNT/2;++i)
 			{
-				setPos(1,i*9,0);
-				setPos(2,i*9,1);
+				setPos(1,potsOffsets[i],0);
+				setPos(2,potsOffsets[i],1);
 
 				sendString(1,getName(-i-1,0));
 				sendString(2,getName(-i-1-SCAN_POT_COUNT/2,0));
