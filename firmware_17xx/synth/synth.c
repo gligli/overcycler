@@ -1041,7 +1041,7 @@ void synth_updateCVsEvent(void)
 	resVal=__USAT(resVal,16);
 
 		// compensate resonance lowering volume by abjusting pre filter mixer level
-	resoFactor=(30*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
+	resoFactor=(35*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
 	
 	synth_refreshCV(-1,cvResonance,resVal,0);
 	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol),0);
