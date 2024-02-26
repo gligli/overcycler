@@ -447,6 +447,21 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	f_close(&f);
 }
 
+LOWERCODESIZE int8_t preset_fileExists(uint16_t number)
+{
+	FIL f;
+	FRESULT res;
+	char fn[256];
+	srprintf(fn,SYNTH_PRESETS_PATH "/preset_%04d.conf",number);
+	
+	res=f_open(&f,fn,FA_READ|FA_OPEN_EXISTING);
+	if(res)
+		return res!=FR_NO_FILE;
+
+	f_close(&f);
+	return 1;
+}
+
 LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 {
 	int8_t i;

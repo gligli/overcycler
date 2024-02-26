@@ -121,6 +121,7 @@ void settings_save(void);
 
 int8_t preset_loadCurrent(uint16_t number);
 void preset_saveCurrent(uint16_t number);
+int8_t preset_fileExists(uint16_t number);
 
 void preset_loadDefault(int8_t makeSound);
 void settings_loadDefault(void);

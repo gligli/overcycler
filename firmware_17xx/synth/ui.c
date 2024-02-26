@@ -18,9 +18,8 @@
 #define LCD_WIDTH 40
 #define LCD_HEIGHT 4
 
-#define ACTIVE_SOURCE_TIMEOUT (TICKER_HZ)
-
-#define SLOW_UPDATE_TIMEOUT (TICKER_HZ/5)
+#define ACTIVE_SOURCE_TIMEOUT TICKER_HZ
+#define SLOW_UPDATE_TIMEOUT TICKER_HZ
 
 #define PANEL_DEADBAND 2048
 
@@ -293,8 +292,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnLoad,.shortName="Load",.longName="Load preset"},
 		{.type=ptCust,.number=cnSave,.shortName="Save",.longName="Save preset"},
-		{.type=ptCust,.number=cnLPrv,.shortName="Prev",.longName="Load previous preset",.values={""}},
-		{.type=ptCust,.number=cnLNxt,.shortName="Next",.longName="Load next preset",.values={""}},
+		{.type=ptCust,.number=cnLPrv,.shortName="Prev",.longName="Load previous preset"},
+		{.type=ptCust,.number=cnLNxt,.shortName="Next",.longName="Load next preset"},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNPrs,.shortName="NPrs",.longName="Set preset number digits"},
 	},
@@ -320,6 +319,7 @@ static struct
 
 	int8_t presetModified;
 	int8_t presetModifiedWarning;
+	int8_t presetExistsWarning;
 	int8_t usbMSC;
 	
 	int8_t seqRecordingTrack;
@@ -879,6 +879,10 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 					break;
 				case cnLPrv:
 				case cnLNxt:
+					if(ui.activeSourceTimeout<=currentTick) // display number only in fullscreen
+						strcpy(dv,"    ");
+					value=settings.presetNumber;
+					break;
 				case cnPanc:
 				case cnLBas:
 					value=0;
@@ -980,6 +984,11 @@ static char * getDisplayFulltext(int8_t source)
 	{
 		if(ui.presetModified && ui.presetModifiedWarning==prm->number)
 			strcpy(dv,"Warning: preset modified, press again");
+	}
+	else if (prm->type==ptCust && prm->number==cnSave)
+	{
+		if(ui.presetExistsWarning)
+			strcpy(dv,"Warning: preset exists, press again");
 	}
 	else if (prm->type==ptCust && prm->number==cnNVal)
 	{
@@ -1332,8 +1341,17 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnLoad:
 				if(!setPresetModifiedWarning(prm->number))
 					break;
-				/* fall through */
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number+0x80;
+				break;
 			case cnSave:
+				data=preset_fileExists(settings.presetNumber);
+				if(data && !ui.presetExistsWarning)
+				{
+					ui.presetExistsWarning=1;
+					break;
+				}
+				ui.presetExistsWarning=0;
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
@@ -1414,7 +1432,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
 				data=(data+1000)%1000;
 				settings.presetNumber=data;
-				ui.slowUpdateTimeout=0;
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=0x80+cnLoad;
 				break;
 			case cnPanc:
@@ -1563,6 +1581,7 @@ static void handleSlowUpdates(void)
 				if(!preset_loadCurrent(settings.presetNumber))
 					preset_loadDefault(1);
 				ui_setPresetModified(0);	
+				ui.presetExistsWarning=0;
 
 				synth_refreshFullState(1);
 			}
