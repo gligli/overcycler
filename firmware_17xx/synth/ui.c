@@ -149,7 +149,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpLFOFreq,.shortName="1Spd",.longName="LFO1 Speed (BPM)"},
 		{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
 		{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
-		{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
+		{.type=ptNone},
 		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
 		/* 2nd row of pots */
 		{.type=ptCont,.number=cpLFOPitchAmt,.shortName="1Pit",.longName="Pitch LFO1 Amount"},
@@ -158,8 +158,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpLFOResAmt,.shortName="1Res",.longName="Filter resonance LFO1 Amount"},
 		{.type=ptCont,.number=cpLFOAmpAmt,.shortName="1Amp",.longName="Amplifier LFO1 Amount"},
 		/* buttons (A,B,C,D,#,*) */
-		{.type=ptNone},
-		{.type=ptNone},
+		{.type=ptStep,.number=spLFOSpeed,.shortName="1Spd",.longName="LFO1 Speed multiplier",.values={"  x1","  x2","  x4","  x8"}},
+		{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
@@ -171,7 +171,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpLFO2Freq,.shortName="2Spd",.longName="LFO2 Speed (BPM)"},
 		{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
 		{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
-		{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},
+		{.type=ptNone},
 		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
 		/* 2nd row of pots */
 		{.type=ptCont,.number=cpLFO2PitchAmt,.shortName="2Pit",.longName="Pitch LFO2 Amount"},
@@ -180,8 +180,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpLFO2ResAmt,.shortName="2Res",.longName="Filter resonance LFO2 Amount"},
 		{.type=ptCont,.number=cpLFO2AmpAmt,.shortName="2Amp",.longName="Amplifier LFO2 Amount"},
 		/* buttons (A,B,C,D,#,*) */
-		{.type=ptNone},
-		{.type=ptNone},
+		{.type=ptStep,.number=spLFO2Speed,.shortName="2Spd",.longName="LFO2 Speed multiplier",.values={"  x1","  x2","  x4","  x8"}},
+		{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},

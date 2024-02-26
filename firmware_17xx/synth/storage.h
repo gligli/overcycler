@@ -35,7 +35,7 @@ typedef enum
 	spABank_Unsaved=0,spAWave_Unsaved=1,spAWModType=2,spAWModEnvEn_Legacy=3,
 	spBBank_Unsaved=4,spBWave_Unsaved=5,spBWModType=6,spBWModEnvEn_Legacy=7,
 	
-	spLFOShape=8,spLFOShift_Legacy=9,spLFOTargets=10,
+	spLFOShape=8,spLFOSpeed=9,spLFOTargets=10,
 	
 	spFilEnvSlow=11,spAmpEnvSlow=12,
 	
@@ -49,7 +49,7 @@ typedef enum
 	spAXOvrBank_Unsaved=21,spAXOvrWave_Unsaved=22,
 	spFilEnvLin=23,
 	
-	spLFO2Shape=24,spLFO2Shift_Legacy=25,spLFO2Targets=26,spVoiceCount=27,
+	spLFO2Shape=24,spLFO2Speed=25,spLFO2Targets=26,spVoiceCount=27,
 	
 	spPresetType=28, spPresetStyle=29,
 	

@@ -334,6 +334,9 @@ static void refreshLfoSettings(void)
 	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
 	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
 	
+	lfo_setSpeedShift(&synth.lfo[0],currentPreset.steppedParameters[spLFOSpeed]);
+	lfo_setSpeedShift(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Speed]);
+
 	// wait modulationDelayTickCount then progressively increase over
 	// modulationDelayTickCount time, following an exponential curve
 	dlyAmt=0;
