@@ -11,7 +11,7 @@
 
 #define MAX_SAMPLERATE (CLOCK/TICK_RATE)
 
-#define WIDTH_MOD_BITS 10
+#define WIDTH_MOD_BITS 12
 #define FRAC_SHIFT 12
 
 static uint16_t incModLUT[WTOSC_IMLUT_COUNT][WTOSC_MAX_SAMPLES/2] EXT_RAM;
@@ -132,7 +132,8 @@ void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xov
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
 {
-	uint32_t sampleRate[2], frequency;
+	uint64_t frequency;
+	uint32_t sampleRate[2];
 	int32_t increment[2], period[2], aliasing_s, crossover_s;
 	int8_t imlut=WTOSC_CHANNEL_TO_IMLUT(o->channel);
 	
@@ -162,7 +163,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover)
 		return;	
 	
-	frequency=cvToFrequency(pitch)*o->halfSampleCount;
+	frequency=(uint64_t)cvToFrequency(pitch)*o->halfSampleCount;
 
 	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
@@ -190,8 +191,8 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	o->width=width;
 	o->aliasing=aliasing_s;
 	
-//	 if(!o->channel)
-//		 rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->pitch,CLOCK/period[0],CLOCK/period[1]);
+//	if(!o->channel)
+//		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->pitch,sampleRate[0],sampleRate[1]);
 }
 
 FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets)
