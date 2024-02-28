@@ -78,7 +78,7 @@ const struct midiCC_s midiCCs[128]={
 	{ccNone},
 	/* CC 40-47 */
 	{ccNone},
-	{ccFree},
+	{ccStepped,spLFO2Speed},
 	{ccNone},
 	{ccNone},
 	{ccContinuousCoarse,cpLFOFreq},
@@ -118,7 +118,7 @@ const struct midiCC_s midiCCs[128]={
 	{ccContinuousCoarse,cpWModRel},
 	{ccContinuousCoarse,cpWModBEnv},
 	{ccContinuousCoarse,cpWModVelocity},
-	{ccFree},
+	{ccStepped,spLFOSpeed},
 	{ccStepped,spABank_Unsaved},
 	{ccStepped,spAWave_Unsaved},
 	/* CC 80-87 */
