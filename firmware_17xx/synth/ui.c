@@ -1882,6 +1882,13 @@ void ui_update(void)
 				sendString(2,getName(-i-1-SCAN_POT_COUNT/2,0));
 			}
 		}
+		
+		// special case for the presets page
+		
+		if(ui.pendingScreenClear && ui.activePage==upPresets)
+		{
+			setPos(1,0,0); sendString(1,"*:Set preset number digits");
+		}
 	}
 
 	ui.pendingScreenClear=0;
