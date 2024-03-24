@@ -52,7 +52,7 @@ static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 };
 
 
-static const uint32_t oscChannelCommand[SYNTH_VOICE_COUNT*2] = 
+static const uint16_t oscChannelCommand[SYNTH_VOICE_COUNT*2] = 
 {
 	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
 	DACSPI_CMD_SET_A,DACSPI_CMD_SET_B,
@@ -279,5 +279,5 @@ void dacspi_init(void)
 	while(marker!=markerSource[0]);
 	while(marker!=markerSource[DACSPI_BUFFER_COUNT-1]);
 	
-	rprintf(0,"sampling at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE);
+	rprintf(0,"sampling at %d Hz, cv update at %d Hz\n",SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE, DACSPI_UPDATE_HZ);
 }
