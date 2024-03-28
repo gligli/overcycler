@@ -68,6 +68,37 @@ inline uint16_t herp(int32_t alpha, int32_t cur, int32_t prev, int32_t prev2, in
 	return r;
 }
 
+void resample(const uint16_t * src, uint16_t * dst, uint16_t src_samples, uint16_t dst_samples)
+{
+	if(src_samples==dst_samples)
+	{
+		memcpy(dst,src,src_samples*sizeof(uint16_t));
+	}
+	else
+	{
+		const int8_t frac_shift=13;
+		int32_t counter=0, increment=(src_samples<<frac_shift)/dst_samples;
+		int32_t c,p1,p2,p3;
+		
+		p1=src[(src_samples-((increment*1)>>frac_shift))%src_samples];
+		p2=src[(src_samples-((increment*2)>>frac_shift))%src_samples];
+		p3=src[(src_samples-((increment*3)>>frac_shift))%src_samples];
+		
+		for(uint16_t ds=0;ds<dst_samples;++ds)
+		{
+			c=src[counter>>frac_shift];
+			
+			*dst++=herp(counter&((1<<frac_shift)-1),c,p1,p2,p3,frac_shift);
+
+			p3=p2;
+			p2=p1;
+			p1=c;
+			
+			counter+=increment;
+		}
+	}
+}
+
 // phase is 20 bits, from bit 4 to bit 23
 inline uint16_t computeShape(uint32_t phase, const uint16_t lookup[], int8_t interpolate)
 {

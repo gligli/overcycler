@@ -29,7 +29,7 @@ static struct
 	// During note entry:
 	uint8_t addTies; // how many ties to add
 	uint8_t noteOns; // how many keys are down
-} seq;
+} seq EXT_RAM;
 
 
 static int8_t anyTrackPlaying(void)

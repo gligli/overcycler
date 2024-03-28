@@ -687,7 +687,7 @@ void synth_refreshWaveforms(abx_t abx)
 			smpCnt=wave_reader_get_num_samples(&wr);
 			smpCnt=MIN(smpCnt,WTOSC_MAX_SAMPLES);
 		}
-		
+	
 		chanCnt=wave_reader_get_num_channels(&wr);
 		
 		wave_reader_get_samples(&wr,smpCnt,data);
@@ -705,14 +705,12 @@ void synth_refreshWaveforms(abx_t abx)
 			d=data[i*chanCnt+chanOffset];
 			d=(d*(INT16_MAX-WTOSC_SAMPLES_GUARD_BAND))>>15;
 			d-=INT16_MIN;
-			waveData.sampleData[abx][i]=d;
+			data[i]=d;
 		}
 		
-		// fill the rest of the buffer with neutral value (in case crossover with longer waveform)
-		for(i=smpCnt;i<WTOSC_MAX_SAMPLES;++i)
-			waveData.sampleData[abx][i]=HALF_RANGE;
+		resample(data,waveData.sampleData[abx],smpCnt,WTOSC_MAX_SAMPLES);
 		
-		waveData.sampleCount[abx]=smpCnt; 
+		waveData.sampleCount[abx]=WTOSC_MAX_SAMPLES; 
 	}
 	
 	// also recompute bank/wave indexes

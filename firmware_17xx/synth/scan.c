@@ -55,7 +55,7 @@ static struct
 	scan_event_callback_t eventCallback;
 	
 	int8_t pendingSPIFlush;
-} scan;
+} scan EXT_RAM;
 
 static const uint8_t keypadButtonCode[kbCount]=
 {

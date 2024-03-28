@@ -184,7 +184,7 @@ static struct
 	int8_t currentNrpn[mpCount];
 	uint32_t presetTimeout;
 	uint32_t pendingBankWaveTimeout[abxCount];
-} midi;
+} midi EXT_RAM;
 
 static uint16_t combineBytes(uint8_t first, uint8_t second)
 {

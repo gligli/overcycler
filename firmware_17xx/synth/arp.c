@@ -28,7 +28,7 @@ static struct
 
 	int8_t hold;
 	arpMode_t mode;
-} arp;
+} arp EXT_RAM;
 
 static int8_t isEmpty(void)
 {
