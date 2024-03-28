@@ -3,11 +3,7 @@
 
 #include "synth.h"
 
-// for incModLUT optimisation
-#define WTOSC_IMLUT_COUNT 2
-#define WTOSC_CHANNEL_TO_IMLUT(channel) ((channel)&1)
-
-#define WTOSC_MAX_SAMPLES 2400 // samples
+#define WTOSC_SAMPLE_COUNT 2400 // samples
 #define WTOSC_CV_SEMITONE 256
 #define WTOSC_HIGHEST_NOTE 120
 #define WTOSC_SAMPLES_GUARD_BAND 4600 // about -1.3 decibels
@@ -22,8 +18,6 @@ struct wtosc_s
 	
 	int32_t counter;
 	int32_t phase;
-	int32_t sampleCount;
-	int32_t halfSampleCount;
 
 	int32_t curSample,prevSample,prevSample2,prevSample3;
 	
@@ -45,7 +39,7 @@ void wtosc_init(struct wtosc_s * o, int32_t channel);
 // data must be persistent and be filled with values in the range
 // WTOSC_SAMPLES_GUARD_BAND..65535-WTOSC_SAMPLES_GUARD_BAND
 // this is because hermite interpolation will overshoot on sharp transitions
-void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData, uint16_t sampleCount);
+void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData);
 void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover);
 void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets);
 

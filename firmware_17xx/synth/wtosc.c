@@ -14,8 +14,8 @@
 #define WIDTH_MOD_BITS 12
 #define FRAC_SHIFT 12
 
-static uint16_t incModLUT[WTOSC_IMLUT_COUNT][WTOSC_MAX_SAMPLES/2] EXT_RAM;
-static uint16_t incModLUTHalfSampleCount[WTOSC_IMLUT_COUNT]={0};
+static uint16_t incModLUT[WTOSC_SAMPLE_COUNT/2] EXT_RAM;
+static int8_t incModLUT_done=0;
 
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
@@ -46,7 +46,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 {
 	int32_t curPeriod,curIncrement;
 	
-	if(o->phase>=o->halfSampleCount)
+	if(o->phase>=WTOSC_SAMPLE_COUNT/2)
 	{
 		curPeriod=o->period[1];
 		curIncrement=o->increment[1];
@@ -63,7 +63,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 
 	if(o->phase<0)
 	{
-		o->phase+=o->sampleCount;
+		o->phase+=WTOSC_SAMPLE_COUNT;
 
 		updatePeriodIncrement(o,1);
 	
@@ -90,44 +90,31 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 
 void wtosc_init(struct wtosc_s * o, int32_t channel)
 {
+	if(!incModLUT_done)
+	{
+		uint16_t *p=&incModLUT[0];
+		for(uint16_t i=0;i<WTOSC_SAMPLE_COUNT/2;++i)
+		{
+			uint16_t inc=i+1;
+			while((WTOSC_SAMPLE_COUNT/2)%inc) ++inc;
+			*p++=inc;
+		}
+		incModLUT_done=1;
+	}	
+
 	memset(o,0,sizeof(struct wtosc_s));
 
 	o->channel=channel;
 	
-	wtosc_setSampleData(o,NULL,NULL,WTOSC_MAX_SAMPLES);
+	wtosc_setSampleData(o,NULL,NULL);
 	wtosc_setParameters(o,MIDDLE_C_NOTE*WTOSC_CV_SEMITONE,HALF_RANGE,HALF_RANGE,0);
 	updatePeriodIncrement(o,1);
 }
 
-void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData, uint16_t sampleCount)
+void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData)
 {
-	int8_t imlut=WTOSC_CHANNEL_TO_IMLUT(o->channel);
-	
-	o->sampleCount=sampleCount;
-	o->halfSampleCount=sampleCount>>1;
-
-	if(sampleCount<=WTOSC_MAX_SAMPLES)
-	{
-		o->mainData=mainData;
-		o->crossoverData=xovrData;
-	}
-	else
-	{
-		o->mainData=NULL;
-		o->crossoverData=NULL;
-	}
-
-	if(o->mainData && incModLUTHalfSampleCount[imlut]!=o->halfSampleCount)
-	{
-		uint16_t *p=&incModLUT[imlut][0];
-		for(uint16_t i=0;i<o->halfSampleCount;++i)
-		{
-			uint16_t inc=i+1;
-			while(o->halfSampleCount%inc) ++inc;
-			*p++=inc;
-		}
-		incModLUTHalfSampleCount[imlut]=o->halfSampleCount;
-	}	
+	o->mainData=mainData;
+	o->crossoverData=xovrData;
 }
 
 void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
@@ -135,7 +122,6 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	uint64_t frequency;
 	uint32_t sampleRate[2];
 	int32_t increment[2], period[2], aliasing_s, crossover_s;
-	int8_t imlut=WTOSC_CHANNEL_TO_IMLUT(o->channel);
 	
 	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
 	
@@ -163,7 +149,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover)
 		return;	
 	
-	frequency=(uint64_t)cvToFrequency(pitch)*o->halfSampleCount;
+	frequency=(uint64_t)cvToFrequency(pitch)*WTOSC_SAMPLE_COUNT/2;
 
 	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
@@ -171,11 +157,11 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	increment[0]=1+(sampleRate[0]/MAX_SAMPLERATE);
 	increment[1]=1+(sampleRate[1]/MAX_SAMPLERATE);
 
-	if(increment[0]<o->halfSampleCount) increment[0]=incModLUT[imlut][increment[0]];
-	if(increment[1]<o->halfSampleCount) increment[1]=incModLUT[imlut][increment[1]];
+	if(increment[0]<WTOSC_SAMPLE_COUNT/2) increment[0]=incModLUT[increment[0]];
+	if(increment[1]<WTOSC_SAMPLE_COUNT/2) increment[1]=incModLUT[increment[1]];
 	
-	increment[0]=MIN(o->sampleCount,increment[0]+aliasing_s);
-	increment[1]=MIN(o->sampleCount,increment[1]+aliasing_s);
+	increment[0]=MIN(WTOSC_SAMPLE_COUNT,increment[0]+aliasing_s);
+	increment[1]=MIN(WTOSC_SAMPLE_COUNT,increment[1]+aliasing_s);
 	period[0]=CLOCK/(sampleRate[0]/increment[0]);
 	period[1]=CLOCK/(sampleRate[1]/increment[1]);	
 	
@@ -206,7 +192,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	updatePeriodIncrement(o,2);
 	
-	curHalf=o->phase>=o->halfSampleCount?1:0;
+	curHalf=o->phase>=WTOSC_SAMPLE_COUNT/2?1:0;
 	alphaDiv=o->period[curHalf];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)

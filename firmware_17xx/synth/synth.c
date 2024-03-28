@@ -44,8 +44,7 @@ static struct
 	abx_t curWaveABX;
 	char curWaveBank[128];
 	
-	uint16_t sampleData[abxCount][WTOSC_MAX_SAMPLES];
-	uint16_t sampleCount[abxCount];
+	uint16_t sampleData[abxCount][WTOSC_SAMPLE_COUNT];
 
 	DIR curDir;
 	FILINFO curFile;
@@ -421,11 +420,6 @@ static void refreshMisc(void)
 
 	// WaveMod mask
 
-	uint16_t scA,scB;
-
-	scA=waveData.sampleCount[abxAMain];
-	scB=waveData.sampleCount[abxBMain];
-	
 	synth.partState.wmodMask=0;
 	if(currentPreset.steppedParameters[spAWModType]==wmAliasing)
 		synth.partState.wmodMask|=1;
@@ -436,10 +430,7 @@ static void refreshMisc(void)
 	if(currentPreset.steppedParameters[spAWModType]==wmCrossOver ||
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
-	{
 		synth.partState.wmodMask|=8;
-		scA=MAX(waveData.sampleCount[abxAMain],waveData.sampleCount[abxACrossover]);
-	}
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
 		synth.partState.wmodMask|=16;
@@ -450,17 +441,14 @@ static void refreshMisc(void)
 	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver ||
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
-	{
 		synth.partState.wmodMask|=128;
-		scB=MAX(waveData.sampleCount[abxBMain],waveData.sampleCount[abxBCrossover]);
-	}
 	
 	// waveforms
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover],scA);
-		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover],scB);
+		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover]);
+		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover]);
 	}
 }
 
@@ -522,7 +510,7 @@ int32_t synth_getVisualEnvelope(int8_t voice)
 uint16_t * synth_getWaveformData(abx_t abx, uint16_t * sampleCount)
 {
 	if(sampleCount)
-		*sampleCount=waveData.sampleCount[abx];
+		*sampleCount=WTOSC_SAMPLE_COUNT;
 	return &waveData.sampleData[abx][0];
 }
 
@@ -669,7 +657,7 @@ void synth_refreshWaveforms(abx_t abx)
 	wave_reader wr;
 	int32_t d;
 	int32_t smpCnt=0, chanCnt=0;
-	int16_t data[WTOSC_MAX_SAMPLES];
+	int16_t data[WTOSC_SAMPLE_COUNT];
 	
 	strcpy(fn,SYNTH_WAVEDATA_PATH "/");
 	strcat(fn,currentPreset.oscBank[abx]);
@@ -685,7 +673,7 @@ void synth_refreshWaveforms(abx_t abx)
 		if(wave_reader_get_format(&wr)==1 && wave_reader_get_sample_bits(&wr)==16) // linear 16Bits PCM
 		{
 			smpCnt=wave_reader_get_num_samples(&wr);
-			smpCnt=MIN(smpCnt,WTOSC_MAX_SAMPLES);
+			smpCnt=MIN(smpCnt,WTOSC_SAMPLE_COUNT);
 		}
 	
 		chanCnt=wave_reader_get_num_channels(&wr);
@@ -708,9 +696,7 @@ void synth_refreshWaveforms(abx_t abx)
 			data[i]=d;
 		}
 		
-		resample(data,waveData.sampleData[abx],smpCnt,WTOSC_MAX_SAMPLES);
-		
-		waveData.sampleCount[abx]=WTOSC_MAX_SAMPLES; 
+		resample(data,waveData.sampleData[abx],smpCnt,WTOSC_SAMPLE_COUNT);
 	}
 	
 	// also recompute bank/wave indexes
@@ -914,9 +900,6 @@ void synth_init(void)
 	waveData.curFile.lfname=waveData.lfname;
 	waveData.curFile.lfsize=sizeof(waveData.lfname);
 
-	for(i=0;i<4;++i)
-		waveData.sampleCount[i]=0;
-	
 	// init subsystems
 	// ui_init() done in main.c
 	dacspi_init();
