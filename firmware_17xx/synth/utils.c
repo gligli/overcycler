@@ -76,7 +76,7 @@ void resample(const uint16_t * src, uint16_t * dst, uint16_t src_samples, uint16
 	}
 	else
 	{
-		const int8_t frac_shift=13;
+		const int8_t frac_shift=14;
 		int32_t counter=0, increment=(src_samples<<frac_shift)/dst_samples;
 		int32_t c,p1,p2,p3;
 		

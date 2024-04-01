@@ -11,7 +11,7 @@
 
 #define MAX_SAMPLERATE (CLOCK/TICK_RATE)
 
-#define WIDTH_MOD_BITS 12
+#define WIDTH_MOD_BITS 14
 #define FRAC_SHIFT 12
 
 static uint16_t incModLUT[WTOSC_SAMPLE_COUNT/2] EXT_RAM;
@@ -129,12 +129,12 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	aliasing_s+=INT16_MIN;
 	if(aliasing_s>=0)
 	{
-		aliasing_s>>=9;
+		aliasing_s>>=8;
 	}
 	else
 	{
 		aliasing_s=-aliasing_s;
-		aliasing_s>>=6;
+		aliasing_s>>=4;
 	}
 	
 	width=MAX(UINT16_MAX/32,width);
@@ -149,7 +149,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover)
 		return;	
 	
-	frequency=(uint64_t)cvToFrequency(pitch)*WTOSC_SAMPLE_COUNT/2;
+	frequency=(uint64_t)cvToFrequency(pitch)*(WTOSC_SAMPLE_COUNT/2);
 
 	sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 	sampleRate[1]=frequency/width;
