@@ -148,7 +148,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* 1st row of pots */
 		{.type=ptCont,.number=cpLFOFreq,.shortName="1Spd",.longName="LFO1 Speed (BPM)"},
 		{.type=ptCont,.number=cpLFOAmt,.shortName="1Amt",.longName="LFO1 Amount (base)"},
-		{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
+		{.type=ptStep,.number=spLFOShape,.shortName="1Wav",.longName="LFO1 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
 		{.type=ptNone},
 		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
 		/* 2nd row of pots */
@@ -170,7 +170,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* 1st row of pots */
 		{.type=ptCont,.number=cpLFO2Freq,.shortName="2Spd",.longName="LFO2 Speed (BPM)"},
 		{.type=ptCont,.number=cpLFO2Amt,.shortName="2Amt",.longName="LFO2 Amount (base)"},
-		{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={" Sqr"," Tri","Rand","Sine","Nois"," Saw","RSaw"}},
+		{.type=ptStep,.number=spLFO2Shape,.shortName="2Wav",.longName="LFO2 Waveform",.values={"Sqr ","Tri ","Rand","Sine","Nois","Saw ","RSaw"}},
 		{.type=ptNone},
 		{.type=ptCont,.number=cpModDelay,.shortName="MDly",.longName="Modulation Delay"},
 		/* 2nd row of pots */
@@ -256,15 +256,15 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 	/* Miscellaneous page (9) */
 	{
 		/* 1st row of pots */
-		{.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={" Min"," Low","High","Full"}},
-		{.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={" 3rd"," 5th"," Oct"}},
-		{.type=ptStep,.number=spPressureRange,.shortName="PRng",.longName="Pressure Range",.values={" Min"," Low","High","Full"}},
+		{.type=ptStep,.number=spModwheelRange,.shortName="MRng",.longName="Modwheel Range",.values={"Min ","Low ","High","Full"}},
+		{.type=ptStep,.number=spBenderRange,.shortName="BRng",.longName="Bender Range",.values={"3rd ","5th ","Oct "}},
+		{.type=ptStep,.number=spPressureRange,.shortName="PRng",.longName="Pressure Range",.values={"Min","Low","High","Full"}},
 		{.type=ptCust,.number=cnMidC,.shortName="MidC",.longName="Midi Channel",.custPotMul=17,.custPotAdd=0},
-		{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={" Int","MIDI", " USB"},.custPotMul=3,.custPotAdd=0},
+		{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
 		/* 2nd row of pots */
 		{.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
-		{.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None"," Pit"," Fil"," Vol","XOvr"}},
-		{.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None"," Pit"," Fil"," Vol","XOvr","LFO1","LFO2"}},
+		{.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None","Pit ","Fil ","Vol ","XOvr"}},
+		{.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None","Pit ","Fil ","Vol ","XOvr","LFO1","LFO2"}},
 		{.type=ptCust,.number=cnCtst,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
 		{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode",.values={"None","Disk","MIDI"},.custPotMul=3,.custPotAdd=0},
 		/* buttons (A,B,C,D,#,*) */
