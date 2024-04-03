@@ -188,7 +188,12 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	int32_t alphaDiv,curHalf;
 	
 	if(!o->mainData)
+	{
+		// silence DAC
+		for(buf=startBuffer;buf<=endBuffer;++buf)
+			dacspi_setOscValue(buf,o->channel,HALF_RANGE);
 		return;
+	}
 	
 	updatePeriodIncrement(o,2);
 	
@@ -222,7 +227,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		
 		r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 		
-		// send value to DACs
+		// send value to DAC
 
 		dacspi_setOscValue(buf,o->channel,r);
 	}

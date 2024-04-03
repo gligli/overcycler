@@ -447,8 +447,15 @@ static void refreshMisc(void)
 	
 	for(int i=0;i<SYNTH_VOICE_COUNT;++i)
 	{
-		wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover]);
-		wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover]);
+		if (currentPreset.continuousParameters[cpAVol]>SCAN_POT_DEAD_ZONE)
+			wtosc_setSampleData(&synth.osc[i][0],waveData.sampleData[abxAMain],waveData.sampleData[abxACrossover]);
+		else
+			wtosc_setSampleData(&synth.osc[i][0],NULL,NULL);
+			
+		if (currentPreset.continuousParameters[cpBVol]>SCAN_POT_DEAD_ZONE)
+			wtosc_setSampleData(&synth.osc[i][1],waveData.sampleData[abxBMain],waveData.sampleData[abxBCrossover]);
+		else
+			wtosc_setSampleData(&synth.osc[i][1],NULL,NULL);
 	}
 }
 
