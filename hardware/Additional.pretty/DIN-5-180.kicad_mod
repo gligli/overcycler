@@ -1,0 +1,174 @@
+(footprint "DIN-5-180"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "TruConnect 5 Way 180 degree DIN PCB Socket (20-0551)")
+	(tags "Connector, MIDI")
+	(property "Reference" "J**"
+		(at 0 12.192 0)
+		(layer "F.SilkS")
+		(uuid "478de82c-9712-476c-a0ae-2c249e37aaa9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "DIN-5"
+		(at 0 -11.684 0)
+		(layer "F.Fab")
+		(uuid "2574d7dd-a4eb-4ddb-b3c6-6b307365bd08")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "766af8ce-2f36-439c-b235-d66da6944714")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7208e6ef-5cf4-4399-8c2a-234b9c6e1de3")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "af7e2d4b-f22e-4727-8ce4-f7c9d51c5b9f")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -9.5 -10.5)
+		(end -9.5 10.5)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "432a952e-a69e-48a1-91a5-bc02620a6871")
+	)
+	(fp_line
+		(start -9.5 -10.5)
+		(end 9.5 -10.5)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "05ee9430-73cb-4ee6-baa7-d34a921660e6")
+	)
+	(fp_line
+		(start -9.5 10.5)
+		(end 9.5 10.5)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "338dd0cc-de6b-421b-bfc7-f1c053837be0")
+	)
+	(fp_line
+		(start 9.5 10.5)
+		(end 9.5 -10.5)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "f752c1fc-252d-4a50-8ced-0a76a0d6919b")
+	)
+	(pad "" thru_hole circle
+		(at -6.5 -5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "a7044057-b710-4df0-babd-cae15355b043")
+	)
+	(pad "" thru_hole circle
+		(at -6.5 5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "c8e94a1b-333f-4d59-b6d3-88ad74e1842c")
+	)
+	(pad "1" thru_hole circle
+		(at 3 7.5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "4cdf2377-49ec-4359-8a86-7d0c1d245d3b")
+	)
+	(pad "2" thru_hole circle
+		(at 3 0)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "7d6daca6-c284-490d-9068-017db77db816")
+	)
+	(pad "3" thru_hole circle
+		(at 3 -7.5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "d171f458-f07f-4766-8044-6da19f8086ef")
+	)
+	(pad "4" thru_hole circle
+		(at 5.5 5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "67c73c06-8f56-4552-803f-2babe71cd9a6")
+	)
+	(pad "5" thru_hole circle
+		(at 5.5 -5)
+		(size 2.5 2.5)
+		(drill 1.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "341b5e46-ad05-42f5-8a29-7673c46789d4")
+	)
+	(model "${KIPRJMOD}/models/din-5-jack.step"
+		(offset
+			(xyz -9.5 0 10)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 90)
+		)
+	)
+)
