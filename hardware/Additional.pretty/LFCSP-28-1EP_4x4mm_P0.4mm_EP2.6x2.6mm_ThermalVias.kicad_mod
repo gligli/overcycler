@@ -27,7 +27,7 @@
 			)
 		)
 	)
-	(property "Footprint" ""
+	(property "Footprint" "LFCSP-28-1EP_4x4mm_P0.4mm_EP2.6x2.6mm_ThermalVias"
 		(at 0 0 0)
 		(unlocked yes)
 		(layer "F.Fab")
@@ -460,14 +460,6 @@
 		(roundrect_rratio 0.25)
 		(uuid "feec506e-af51-4a6f-8828-3a65a4e361ee")
 	)
-	(pad "25" smd rect
-		(at 0 0)
-		(size 2.5 2.5)
-		(property pad_prop_heatsink)
-		(layers "B.Cu")
-		(zone_connect 2)
-		(uuid "c27a15d3-14d9-41e7-9c1f-e06375fe7901")
-	)
 	(pad "26" smd roundrect
 		(at -0.4 -2)
 		(size 0.2 0.875)
@@ -533,6 +525,14 @@
 		(layers "*.Cu")
 		(remove_unused_layers no)
 		(uuid "b100254c-0e2e-4dd2-8ef1-edc1a337d8df")
+	)
+	(pad "29" smd rect
+		(at 0 0)
+		(size 2.5 2.5)
+		(property pad_prop_heatsink)
+		(layers "B.Cu")
+		(zone_connect 2)
+		(uuid "c27a15d3-14d9-41e7-9c1f-e06375fe7901")
 	)
 	(pad "29" smd rect
 		(at 0 0)

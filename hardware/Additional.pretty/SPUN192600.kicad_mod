@@ -28,7 +28,7 @@
 			)
 		)
 	)
-	(property "Footprint" ""
+	(property "Footprint" "SPUN192600"
 		(at 0 0 0)
 		(unlocked yes)
 		(layer "F.Fab")
@@ -86,6 +86,86 @@
 		(fill none)
 		(layer "F.SilkS")
 		(uuid "570f96cd-be71-4ae7-9af4-1d90ff07e2a9")
+	)
+	(fp_line
+		(start -1.4 -29.3)
+		(end -1.4 -19.17)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "a0e8193e-3cbd-4779-a857-b6cdcd866b06")
+	)
+	(fp_line
+		(start -1.4 -19.17)
+		(end -1.4 -15.47)
+		(stroke
+			(width 0.1)
+			(type dot)
+		)
+		(layer "F.Fab")
+		(uuid "d8e1c458-d3b3-48c8-8584-04c66e44b897")
+	)
+	(fp_line
+		(start -1.4 -15.47)
+		(end 7.4 -15.47)
+		(stroke
+			(width 0.1)
+			(type dot)
+		)
+		(layer "F.Fab")
+		(uuid "ef6cb653-a91a-4bc1-8a65-b364ae91ce98")
+	)
+	(fp_line
+		(start 7.4 -29.3)
+		(end -1.4 -29.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "accc8aa5-167e-4508-a4f2-2635e909ebdd")
+	)
+	(fp_line
+		(start 7.4 -29.3)
+		(end 7.4 -19.17)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "014e63cd-b144-48cd-97a0-51ecd63c00ef")
+	)
+	(fp_line
+		(start 7.4 -25.6)
+		(end -1.4 -25.6)
+		(stroke
+			(width 0.1)
+			(type dot)
+		)
+		(layer "F.Fab")
+		(uuid "4e4f99c2-9fac-4752-b037-fe99053e28d4")
+	)
+	(fp_line
+		(start 7.4 -19.17)
+		(end -1.4 -19.17)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.Fab")
+		(uuid "8d00e84b-e4bd-4ffe-9bfa-65690fab1e77")
+	)
+	(fp_line
+		(start 7.4 -19.17)
+		(end 7.4 -15.47)
+		(stroke
+			(width 0.1)
+			(type dot)
+		)
+		(layer "F.Fab")
+		(uuid "fc1913c1-b157-4207-a91a-65b8ca235bca")
 	)
 	(fp_text user "${REFERENCE}"
 		(at 0 2.5 0)
