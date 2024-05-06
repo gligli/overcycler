@@ -27,7 +27,7 @@
 			)
 		)
 	)
-	(property "Footprint" ""
+	(property "Footprint" "IA0505S-2W"
 		(at 0 0 0)
 		(unlocked yes)
 		(layer "F.Fab")
