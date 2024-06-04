@@ -51,8 +51,7 @@ struct hd44780_driver {
 	void (*puts)(struct hd44780_data *lcd, const char *str);
 
 	/* low level, not to be used */
-	int (*read)(struct hd44780_data *lcd, int rs);
-	void (*write_cmd)(struct hd44780_data *lcd, int cmd);
+	void (*write_cmd)(struct hd44780_data *lcd, int cmd, int long_delay);
 };
 
 extern const struct hd44780_driver hd44780_driver;

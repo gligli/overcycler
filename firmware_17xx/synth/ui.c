@@ -666,7 +666,7 @@ static void drawWaveform(abx_t abx)
 	
 	for(int lcd=1;lcd<=2;++lcd)
 	{
-		hd44780_driver.write_cmd(lcd==1?&ui.lcd1:&ui.lcd2,CMD_CGRAM_ADDR);
+		hd44780_driver.write_cmd(lcd==1?&ui.lcd1:&ui.lcd2,CMD_CGRAM_ADDR,0);
 		
 		for(int8_t i=0;i<vcgramCount[lcd-1];++i)
 		{		
@@ -1673,21 +1673,21 @@ void ui_init(void)
 	// init screen
 	
 	ui.lcd1.port = 2;
-	ui.lcd1.pins.d4 = 1;
-	ui.lcd1.pins.d5 = 0;
-	ui.lcd1.pins.d6 = 2;
-	ui.lcd1.pins.d7 = 3;
-	ui.lcd1.pins.rs = 4;
+	ui.lcd1.pins.d4 = 3;
+	ui.lcd1.pins.d5 = 2;
+	ui.lcd1.pins.d6 = 1;
+	ui.lcd1.pins.d7 = 0;
+	ui.lcd1.pins.rs = 6;
 	ui.lcd1.pins.rw = 5;
-	ui.lcd1.pins.e = 6;
+	ui.lcd1.pins.e = 4;
 	ui.lcd1.caps = HD44780_CAPS_2LINES;
 
 	ui.lcd2.port = 2;
-	ui.lcd2.pins.d4 = 1;
-	ui.lcd2.pins.d5 = 0;
-	ui.lcd2.pins.d6 = 2;
-	ui.lcd2.pins.d7 = 3;
-	ui.lcd2.pins.rs = 4;
+	ui.lcd2.pins.d4 = 3;
+	ui.lcd2.pins.d5 = 2;
+	ui.lcd2.pins.d6 = 1;
+	ui.lcd2.pins.d7 = 0;
+	ui.lcd2.pins.rs = 6;
 	ui.lcd2.pins.rw = 5;
 	ui.lcd2.pins.e = 7;
 	ui.lcd2.caps = HD44780_CAPS_2LINES;
@@ -1803,10 +1803,10 @@ void ui_update(void)
 
 		if(ui.pendingScreenClear)
 		{
-			hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR);
+			hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR,0);
 			drawA(1);
 			drawB(1);
-			hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR);
+			hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR,0);
 			drawC(2);
 			drawD(2);
 		}
@@ -1839,14 +1839,14 @@ void ui_update(void)
 
 			// CGRAM update ("preset modified", visual envelopes)
 		
-		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+32);
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+32,0);
 		drawPresetModified(1,ui.pendingScreenClear);
 		
-		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16);
+		hd44780_driver.write_cmd(&ui.lcd1,CMD_CGRAM_ADDR+16,0);
 		drawVisualEnv(1,0,ui.pendingScreenClear);
-		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16);
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+16,0);
 		drawVisualEnv(2,2,ui.pendingScreenClear);
-		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+32);
+		hd44780_driver.write_cmd(&ui.lcd2,CMD_CGRAM_ADDR+32,0);
 		drawVisualEnv(2,4,ui.pendingScreenClear);
 
 			// actual "text"

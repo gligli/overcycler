@@ -38,81 +38,18 @@ static void lcd_put(struct hd44780_data *lcd, int rs, int data)
 	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
 }
 
-int lcd_read(struct hd44780_data *lcd, int rs)
+static void lcd_cmd(struct hd44780_data *lcd, int cmd, int long_delay)
 {
-	int tmp;
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d4, 0);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d5, 0);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d6, 0);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d7, 0);
-
-	if(rs)
-		GPIO_SetValue(lcd->port, 1<<lcd->pins.rs);
-	else
-		GPIO_ClearValue(lcd->port, 1<<lcd->pins.rs);
-	GPIO_SetValue(lcd->port, 1<<lcd->pins.rw);
-	HALF_CYCLE_DELAY();
-	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	HALF_CYCLE_DELAY();
-
-	int gv;
-	gv = GPIO_ReadValue(lcd->port);
-	tmp = 0;
-	tmp |= ((gv&(1<<lcd->pins.d4))>>lcd->pins.d4) << 4;
-	tmp |= ((gv&(1<<lcd->pins.d5))>>lcd->pins.d5) << 5;
-	tmp |= ((gv&(1<<lcd->pins.d6))>>lcd->pins.d6) << 6;
-	tmp |= ((gv&(1<<lcd->pins.d7))>>lcd->pins.d7) << 7;
-	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
-
-	HALF_CYCLE_DELAY();
-	GPIO_SetValue(lcd->port, 1<<lcd->pins.e);
-	HALF_CYCLE_DELAY();
-
-	gv = GPIO_ReadValue(lcd->port);
-	tmp |= ((gv&(1<<lcd->pins.d4))>>lcd->pins.d4) << 0;
-	tmp |= ((gv&(1<<lcd->pins.d5))>>lcd->pins.d5) << 1;
-	tmp |= ((gv&(1<<lcd->pins.d6))>>lcd->pins.d6) << 2;
-	tmp |= ((gv&(1<<lcd->pins.d7))>>lcd->pins.d7) << 3;
-	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
-
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d4, 1);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d5, 1);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d6, 1);
-	GPIO_SetDir(lcd->port, 1<<lcd->pins.d7, 1);
-
-	return tmp;
-}
-
-static void lcd_cmd(struct hd44780_data *lcd, int cmd)
-{
-	int timeout = 1000;
-	while (--timeout) {
-		/* bits 0-6 are address, that might be useful too */
-		if ((lcd_read(lcd, 0) & 0x80) == 0)
-			break;
-		DELAY_100NS();
-	}
-	if (timeout == 0)
-		rprintf(0, "%s, timeouted at cmd %x\n", __func__, cmd);
-
 	lcd_put(lcd, 0, cmd>>4);
 	lcd_put(lcd, 0, cmd&0xf);
+	delay_us(long_delay?1520:37);
 }
 
 static void lcd_data(struct hd44780_data *lcd, int cmd)
 {
-	int timeout = 1000;
-	while (--timeout) {
-		/* bits 0-6 are address, that might be useful too */
-		if ((lcd_read(lcd, 0) & 0x80) == 0)
-			break;
-		DELAY_100NS();
-	}
-	if (timeout == 0)
-		rprintf(0, "%s, timeouted at cmd %x\n", __func__, cmd);
-
 	lcd_put(lcd, 1, cmd>>4);
 	lcd_put(lcd, 1, cmd&0xf);
+	delay_us(37);
 }
 
 static void lcd_init(struct hd44780_data *lcd)
@@ -142,42 +79,42 @@ static void lcd_init(struct hd44780_data *lcd)
 		tmp |= 1<<3;
 	if (lcd->caps & HD44780_CAPS_5X10)
 		tmp |= 1<<2;
-	lcd_cmd(lcd, CMD_FUNCTION_SET | tmp);
-	lcd_cmd(lcd, CMD_DISPLAY_ON_OFF); /* display, cursor and blink off */
-	lcd_cmd(lcd, CMD_CLEAR);
+	lcd_cmd(lcd, CMD_FUNCTION_SET | tmp, 0);
+	lcd_cmd(lcd, CMD_DISPLAY_ON_OFF, 0); /* display, cursor and blink off */
+	lcd_cmd(lcd, CMD_CLEAR, 1);
 
-	lcd_cmd(lcd, CMD_ENTRY_MODE | HD44780_ENTRY_INC);
+	lcd_cmd(lcd, CMD_ENTRY_MODE | HD44780_ENTRY_INC, 0);
 }
 
 
 static void lcd_clear(struct hd44780_data *lcd)
 {
-	lcd_cmd(lcd, CMD_CLEAR);
+	lcd_cmd(lcd, CMD_CLEAR, 1);
 }
 
 static void lcd_home(struct hd44780_data *lcd)
 {
-	lcd_cmd(lcd, CMD_HOME);
+	lcd_cmd(lcd, CMD_HOME, 1);
 }
 
 static void lcd_entry_mode(struct hd44780_data *lcd, int mode)
 {
-	lcd_cmd(lcd, CMD_ENTRY_MODE | (mode&0x3));
+	lcd_cmd(lcd, CMD_ENTRY_MODE | (mode&0x3), 0);
 }
 
 static void lcd_onoff(struct hd44780_data *lcd, int features)
 {
-	lcd_cmd(lcd, CMD_DISPLAY_ON_OFF | (features&0x7));
+	lcd_cmd(lcd, CMD_DISPLAY_ON_OFF | (features&0x7), 0);
 }
 
 static void lcd_shift(struct hd44780_data *lcd, int shift)
 {
-	lcd_cmd(lcd, CMD_SHIFT | (shift&0xc));
+	lcd_cmd(lcd, CMD_SHIFT | (shift&0xc), 0);
 }
 
 static void lcd_set_position(struct hd44780_data *lcd, int pos)
 {
-	lcd_cmd(lcd, CMD_DDRAM_ADDR | (pos&0x7f));
+	lcd_cmd(lcd, CMD_DDRAM_ADDR | (pos&0x7f), 0);
 }
 
 static void lcd_puts(struct hd44780_data *lcd, const char *str)
@@ -198,6 +135,5 @@ const struct hd44780_driver hd44780_driver = {
 	.write = lcd_data,
 	.puts = lcd_puts,
 
-	.read = lcd_read,
 	.write_cmd = lcd_cmd,
 };
