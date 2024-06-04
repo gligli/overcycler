@@ -909,7 +909,7 @@ void synth_init(void)
 
 	// init subsystems
 	// ui_init() done in main.c
-	dacspi_init();
+//	dacspi_init();
 	scan_init();
 	tuner_init();
 	assigner_init();

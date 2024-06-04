@@ -100,21 +100,21 @@ void initLcd(void)
 	// init screen
 	
 	lcd1.port = 2;
-	lcd1.pins.d4 = 1;
-	lcd1.pins.d5 = 0;
-	lcd1.pins.d6 = 2;
-	lcd1.pins.d7 = 3;
-	lcd1.pins.rs = 4;
+	lcd1.pins.d4 = 3;
+	lcd1.pins.d5 = 2;
+	lcd1.pins.d6 = 1;
+	lcd1.pins.d7 = 0;
+	lcd1.pins.rs = 6;
 	lcd1.pins.rw = 5;
-	lcd1.pins.e = 6;
+	lcd1.pins.e = 4;
 	lcd1.caps = HD44780_CAPS_2LINES;
 
 	lcd2.port = 2;
-	lcd2.pins.d4 = 1;
-	lcd2.pins.d5 = 0;
-	lcd2.pins.d6 = 2;
-	lcd2.pins.d7 = 3;
-	lcd2.pins.rs = 4;
+	lcd2.pins.d4 = 3;
+	lcd2.pins.d5 = 2;
+	lcd2.pins.d6 = 1;
+	lcd2.pins.d7 = 0;
+	lcd2.pins.rs = 6;
 	lcd2.pins.rw = 5;
 	lcd2.pins.e = 7;
 	lcd2.caps = HD44780_CAPS_2LINES;
@@ -163,15 +163,12 @@ static void readKeypad(void)
 
 	for(row=0;row<4;++row)
 	{
-		LPC_GPIO0->FIOSETH=0b1111<<3;
-		LPC_GPIO0->FIOCLRH=(8>>row)<<3;
-		delay_us(10);
-		col[row]=0;
+		LPC_GPIO0->FIOSET2=0b11110000;
+		LPC_GPIO0->FIOCLR2=0b00010000<<row;
 		
-		col[row]|=((LPC_GPIO0->FIOPIN1>>2)&1)?0:1;
-		col[row]|=((LPC_GPIO4->FIOPIN3>>5)&1)?0:2;
-		col[row]|=((LPC_GPIO4->FIOPIN3>>4)&1)?0:4;
-		col[row]|=((LPC_GPIO2->FIOPIN1>>5)&1)?0:8;
+		delay_us(10);
+	
+		col[row]=(~LPC_GPIO0->FIOPIN2)&0b1111;
 	}
 	
 	for(key=0;key<kbCount;++key)
@@ -196,21 +193,21 @@ void initKeypad(void)
 
 	// init keypad
 	
-	PINSEL_ConfigPin(0,22,0); // R1
+	PINSEL_ConfigPin(0,16,0); // C1
+	PINSEL_ConfigPin(0,17,0); // C2
+	PINSEL_ConfigPin(0,18,0); // C3
+	PINSEL_ConfigPin(0,19,0); // C4
+	PINSEL_ConfigPin(0,20,0); // R1
 	PINSEL_ConfigPin(0,21,0); // R2
-	PINSEL_ConfigPin(0,20,0); // R3
-	PINSEL_ConfigPin(0,19,0); // R4
-	PINSEL_ConfigPin(0,10,0); // C1
-	PINSEL_ConfigPin(4,29,0); // C2
-	PINSEL_ConfigPin(4,28,0); // C3
-	PINSEL_ConfigPin(2,13,0); // C4
-	PINSEL_SetPinMode(0,10,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(4,29,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(4,28,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(2,13,PINSEL_BASICMODE_PULLUP);
+	PINSEL_ConfigPin(0,22,0); // R3
+	PINSEL_ConfigPin(0,23,0); // R4
+	PINSEL_SetPinMode(0,16,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,17,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,18,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,19,PINSEL_BASICMODE_PULLUP);
 
-	GPIO_SetValue(0,0b1111ul<<19);
-	GPIO_SetDir(0,0b1111ul<<19,1);
+	GPIO_SetValue(0,0b1111ul<<20);
+	GPIO_SetDir(0,0b1111ul<<20,1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

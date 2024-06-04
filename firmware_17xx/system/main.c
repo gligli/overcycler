@@ -152,8 +152,6 @@ int main(void)
 		}
 	}
 	
-	for(;;);
-	
 	rprintf(0,"synth init...\n");
 
 	synth_init();

@@ -23,10 +23,10 @@
 #define POT_TIMEOUT_THRESHOLD SCAN_POT_TO_16BITS(3)
 #define POT_TIMEOUT (TICKER_HZ)
 
-#define POTSCAN_PIN_CS 8
-#define POTSCAN_PIN_DOUT 4
-#define POTSCAN_PIN_DIN 1
-#define POTSCAN_PIN_CLK 0
+#define POTSCAN_PIN_CLK 20
+#define POTSCAN_PIN_CS 21
+#define POTSCAN_PIN_DOUT 23
+#define POTSCAN_PIN_DIN 24
 
 #define POTSCAN_PRE_DIV 12
 #define POTSCAN_SPI_FREQUENCY 80000
@@ -69,14 +69,14 @@ static void buildLLIs(int pot, int smp)
 	int lliPos=smp*SCAN_POT_COUNT+pot;
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&scan.potCommands[pot];
-	lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP2->DR;
+	lli[lliPos][0].DstAddr=(uint32_t)&LPC_SSP0->DR;
 	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 	lli[lliPos][0].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(1) |
 		GPDMA_DMACCxControl_DWidth(1);
 
-	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP2->DR;
+	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP0->DR;
 	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-1)%(POT_SAMPLES*SCAN_POT_COUNT)];
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(POT_SAMPLES*SCAN_POT_COUNT)][0];
 	lli[lliPos][1].Control=
@@ -94,10 +94,10 @@ static void readPots(void)
 	if(scan.pendingSPIFlush)
 	{
 		// ensure the FIFO stays empty for proper lli function
-		while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+		while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
 		{
 			// flush received data
-			SSP_ReceiveData(LPC_SSP2);
+			SSP_ReceiveData(LPC_SSP0);
 		}
 		
 		// enough for a full loop of the llis
@@ -157,15 +157,12 @@ static void readKeypad(void)
 
 	for(row=0;row<4;++row)
 	{
-		LPC_GPIO0->FIOSETH=0b1111<<3;
-		LPC_GPIO0->FIOCLRH=(8>>row)<<3;
-		delay_us(10);
-		col[row]=0;
+		LPC_GPIO0->FIOSET2=0b11110000;
+		LPC_GPIO0->FIOCLR2=0b00010000<<row;
 		
-		col[row]|=((LPC_GPIO0->FIOPIN1>>2)&1)?0:1;
-		col[row]|=((LPC_GPIO4->FIOPIN3>>5)&1)?0:2;
-		col[row]|=((LPC_GPIO4->FIOPIN3>>4)&1)?0:4;
-		col[row]|=((LPC_GPIO2->FIOPIN1>>5)&1)?0:8;
+		delay_us(10);
+	
+		col[row]=(~LPC_GPIO0->FIOPIN2)&0b1111;
 	}
 	
 	for(key=0;key<kbCount;++key)
@@ -188,19 +185,19 @@ static void readKeypad(void)
 
 static uint16_t readADC(uint16_t channel)
 {
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET)
+	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_TXFIFO_EMPTY)==RESET)
 	{
 		// wait until previous data is transferred
 	}
 	
-	SSP_SendData(LPC_SSP2,channel<<(SCAN_ADC_BITS-4));
+	SSP_SendData(LPC_SSP0,channel<<(SCAN_ADC_BITS-4));
 
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
 	{
 		// wait for new data
 	}
 
-	uint16_t res=SSP_ReceiveData(LPC_SSP2);
+	uint16_t res=SSP_ReceiveData(LPC_SSP0);
 	
 	// wait TLV2556 tConvert
 	
@@ -217,30 +214,30 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 	// reset
 	TIM_Cmd(LPC_TIM2,DISABLE);
 	LPC_GPDMACH1->CConfig=0;
-	SSP_Cmd(LPC_SSP2,DISABLE);
+	SSP_Cmd(LPC_SSP0,DISABLE);
 
 	// init SSP
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_CR0_DSS(SCAN_ADC_BITS);
 	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
-	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
-	SSP_Cmd(LPC_SSP2,ENABLE);
+	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
+	SSP_Cmd(LPC_SSP0,ENABLE);
 
 	// config CFGR2 for external reference
 
-	SSP_SendData(LPC_SSP2,0b11111100<<(SCAN_ADC_BITS-8));
+	SSP_SendData(LPC_SSP0,0b11111100<<(SCAN_ADC_BITS-8));
 
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_TXFIFO_EMPTY)==RESET ||
-			SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
+	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_TXFIFO_EMPTY)==RESET ||
+			SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
 	{
 		// wait until previous sent data is transferred & wait for new received data
 	}
 
-	while(SSP_GetStatus(LPC_SSP2,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
 	{
 		// flush received data
-		SSP_ReceiveData(LPC_SSP2);
+		SSP_ReceiveData(LPC_SSP0);
 	}
 
 	if(isSmpMasterMixMode)
@@ -360,35 +357,35 @@ void scan_init(void)
 
 	// init TLV2556 ADC
 	
-	PINSEL_ConfigPin(1,POTSCAN_PIN_CS,4); // CS
-	PINSEL_ConfigPin(1,POTSCAN_PIN_DOUT,4); // DOUT
-	PINSEL_ConfigPin(1,POTSCAN_PIN_DIN,4); // DIN
-	PINSEL_ConfigPin(1,POTSCAN_PIN_CLK,4); // CLK
+	PINSEL_ConfigPin(1,POTSCAN_PIN_CLK,5); // CLK
+	PINSEL_ConfigPin(1,POTSCAN_PIN_CS,3); // CS
+	PINSEL_ConfigPin(1,POTSCAN_PIN_DOUT,5); // DOUT
+	PINSEL_ConfigPin(1,POTSCAN_PIN_DIN,5); // DIN
 	
 	// init keypad
 	
-	PINSEL_ConfigPin(0,22,0); // R1
+	PINSEL_ConfigPin(0,16,0); // C1
+	PINSEL_ConfigPin(0,17,0); // C2
+	PINSEL_ConfigPin(0,18,0); // C3
+	PINSEL_ConfigPin(0,19,0); // C4
+	PINSEL_ConfigPin(0,20,0); // R1
 	PINSEL_ConfigPin(0,21,0); // R2
-	PINSEL_ConfigPin(0,20,0); // R3
-	PINSEL_ConfigPin(0,19,0); // R4
-	PINSEL_ConfigPin(0,10,0); // C1
-	PINSEL_ConfigPin(4,29,0); // C2
-	PINSEL_ConfigPin(4,28,0); // C3
-	PINSEL_ConfigPin(2,13,0); // C4
-	PINSEL_SetPinMode(0,10,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(4,29,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(4,28,PINSEL_BASICMODE_PULLUP);
-	PINSEL_SetPinMode(2,13,PINSEL_BASICMODE_PULLUP);
+	PINSEL_ConfigPin(0,22,0); // R3
+	PINSEL_ConfigPin(0,23,0); // R4
+	PINSEL_SetPinMode(0,16,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,17,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,18,PINSEL_BASICMODE_PULLUP);
+	PINSEL_SetPinMode(0,19,PINSEL_BASICMODE_PULLUP);
 
-	GPIO_SetValue(0,0b1111ul<<19);
-	GPIO_SetDir(0,0b1111ul<<19,1);
+	GPIO_SetValue(0,0b1111ul<<20);
+	GPIO_SetDir(0,0b1111ul<<20,1);
 	
 	// init pot scan TMR / DMA
 	
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCGPDMA,ENABLE);
 
 	LPC_SC->DMAREQSEL|=1<<DMA_CHANNEL_SSP1_TX__T2_MAT_0;
-//	LPC_GPDMA->DMACConfig=GPDMA_DMACConfig_E;
+	LPC_GPDMA->Config=GPDMA_DMACConfig_E;
 
 	// start
 	
