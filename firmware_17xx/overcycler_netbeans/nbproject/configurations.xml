@@ -36,6 +36,7 @@
         <in>fattime.c</in>
         <in>ff.c</in>
         <in>nand.c</in>
+        <in>nor.c</in>
       </df>
       <df name="synth">
         <in>adsr.c</in>
@@ -65,7 +66,7 @@
         <in>syscalls.c</in>
         <in>system_LPC177x_8x.c</in>
         <in>version.c</in>
-        <in>xt26g.c</in>
+        <in>w25q.c</in>
       </df>
       <df name="usb">
         <in>msc_bot.c</in>
@@ -112,7 +113,6 @@
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-march=armv7-m -O4 -std=gnu99"/>
-        <element flagsID="1" commonFlags="-std=gnu99 -Os"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -324,6 +324,7 @@
       <item path="../fat_nand/ccsbcs.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../fat_nand</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -331,6 +332,7 @@
       <item path="../fat_nand/diskio.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../fat_nand</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -338,6 +340,7 @@
       <item path="../fat_nand/fattime.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../fat_nand</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -345,14 +348,20 @@
       <item path="../fat_nand/ff.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
-      <item path="../fat_nand/nand.c" ex="false" tool="0" flavor2="3">
+      <item path="../fat_nand/nor.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
-            <pElem>../drivers</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat_nand</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -361,6 +370,10 @@
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -369,6 +382,10 @@
       <item path="../synth/arp.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -377,6 +394,10 @@
       <item path="../synth/assigner.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -385,6 +406,10 @@
       <item path="../synth/clock.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -393,6 +418,10 @@
       <item path="../synth/dacspi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../drivers</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
@@ -403,6 +432,10 @@
       <item path="../synth/lfo.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -411,6 +444,10 @@
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
             <pElem>../synth</pElem>
@@ -422,6 +459,10 @@
       <item path="../synth/scan.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../drivers</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
@@ -432,6 +473,10 @@
       <item path="../synth/seq.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -440,6 +485,10 @@
       <item path="../synth/storage.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../fat_nand</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
@@ -450,6 +499,10 @@
       <item path="../synth/synth.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../fat_nand</pElem>
             <pElem>../drivers</pElem>
             <pElem>../synth</pElem>
@@ -461,6 +514,8 @@
       <item path="../synth/tuner.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -470,6 +525,8 @@
       <item path="../synth/uart_midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
@@ -480,6 +537,10 @@
       <item path="../synth/ui.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../drivers</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
@@ -490,6 +551,10 @@
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -499,6 +564,7 @@
       <item path="../synth/wave_reader.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
             <pElem>../fat_nand</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
@@ -508,6 +574,10 @@
       <item path="../synth/wtosc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../synth</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -517,13 +587,14 @@
         <cTool flags="0">
           <incDir>
             <pElem>..</pElem>
-            <pElem>../system</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../system/hd44780.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -533,6 +604,8 @@
       <item path="../system/main.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../fat_nand</pElem>
             <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
@@ -545,6 +618,7 @@
       <item path="../system/rprintf.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -553,6 +627,8 @@
       <item path="../system/serial.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -562,6 +638,10 @@
       <item path="../system/syscalls.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
@@ -570,6 +650,8 @@
       <item path="../system/system_LPC177x_8x.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -577,26 +659,18 @@
         </cTool>
       </item>
       <item path="../system/version.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
-          <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat_nand</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>BOOT_MAX_SIZE=65536</Elem>
-            <Elem>DEBUG_UART_BAUD=57600</Elem>
-            <Elem>LPC1778</Elem>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="../system/xt26g.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="../system/w25q.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="0">
+          <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../system</pElem>
             <pElem>..</pElem>
@@ -624,6 +698,8 @@
       <item path="../usb/usb_midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>../synth</pElem>
@@ -658,6 +734,8 @@
       <item path="../usb/usbhw_lpc.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
             <pElem>../usb</pElem>
             <pElem>../system</pElem>
@@ -702,6 +780,8 @@
       <item path="../xnormidi/midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../xnormidi/bytequeue</pElem>
             <pElem>../xnormidi</pElem>
             <pElem>..</pElem>
@@ -728,14 +808,17 @@
       <folder path="0/drivers">
         <cTool>
           <incDir>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/fat_nand">
+      <folder path="0/xnormidi">
         <cTool>
           <incDir>
-            <pElem>../fat_nand</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
           </incDir>
         </cTool>
       </folder>

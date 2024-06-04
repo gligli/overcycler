@@ -43,12 +43,12 @@
 #include "usb_type.h"
 #include "usb_debug.h"
 
-#include "nand.h"
+#include "../system/w25q.h"
 #include "diskio.h"
 #include "msc_scsi.h"
 
 
-#define BLOCKSIZE		NAND_EMULATED_SECTOR_SIZE
+#define BLOCKSIZE		W25Q_SECTOR_SIZE
 
 // SBC2 mandatory SCSI commands
 #define	SCSI_CMD_TEST_UNIT_READY	0x00

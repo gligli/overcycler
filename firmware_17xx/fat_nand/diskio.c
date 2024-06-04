@@ -8,7 +8,7 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"
-#include "nand.h"
+#include "nor.h"
 
 // in makefile #define WITH_USB_MS   1
 
@@ -25,7 +25,7 @@ DSTATUS usb_status = STA_NOINIT;
 /* Correspondence between physical drive number and physical drive.      */
 /*-----------------------------------------------------------------------*/
 
-#define NAND	0
+#define NOR		0
 #define USB		1
 #define ATA		2
 
@@ -58,8 +58,8 @@ DSTATUS disk_initialize(BYTE drv /* Physical drive nmuber (0..) */
 		// translate the result code here
 		return stat;
 
-	case NAND:
-		stat = nand_disk_initialize();
+	case NOR:
+		stat = nor_disk_initialize();
 		return stat;
 
 	case USB:
@@ -108,8 +108,8 @@ DSTATUS disk_status(BYTE drv /* Physical drive number (0..) */
 
 		return stat;
 
-	case NAND:
-		stat = nand_disk_status();
+	case NOR:
+		stat = nor_disk_status();
 		return stat;
 
 	case USB:
@@ -147,8 +147,8 @@ DRESULT disk_read(BYTE drv, /* Physical drive number (0..) */
 		// translate the result code here
 		return res;
 
-	case NAND:
-		res = nand_disk_read(buff, sector, count);
+	case NOR:
+		res = nor_disk_read(buff, sector, count);
 		return res;
 
 	case USB:
@@ -200,8 +200,8 @@ DRESULT disk_write(BYTE drv, /* Physical drive number (0..) */
 		// translate the result code here
 		return res;
 
-	case NAND:
-		res = nand_disk_write(buff, sector, count);
+	case NOR:
+		res = nor_disk_write(buff, sector, count);
 		return res;
 
 	case USB:
@@ -245,8 +245,8 @@ void *buff /* Buffer to send/receive control data */
 		// post-process here
 		return res;
 
-	case NAND:
-		res = nand_disk_ioctl(ctrl, buff);
+	case NOR:
+		res = nor_disk_ioctl(ctrl, buff);
 		return res;
 
 	case USB:

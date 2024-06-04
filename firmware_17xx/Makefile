@@ -60,7 +60,7 @@ FAT_SRC=fat_nand/diskio.c
 FAT_SRC+=fat_nand/fattime.c
 FAT_SRC+=fat_nand/ff.c
 FAT_SRC+=fat_nand/ccsbcs.c
-FAT_SRC+=fat_nand/nand.c
+FAT_SRC+=fat_nand/nor.c
 
 USB_SRC=usb/usbinit.c
 USB_SRC+=usb/usbstdreq.c
@@ -78,7 +78,7 @@ SYSTEM_SRC+=system/rprintf.c
 SYSTEM_SRC+=system/serial.c
 SYSTEM_SRC+=system/syscalls.c
 SYSTEM_SRC+=system/hd44780.c
-SYSTEM_SRC+=system/xt26g.c
+SYSTEM_SRC+=system/w25q.c
 SYSTEM_SRC+=system/version.c
 
 XNORMIDI_SRC=xnormidi/midi.c
