@@ -543,7 +543,15 @@ DEBUG_LED_ON(9);
 
     // handle device interrupts
     dwStatus = LPC_USB->USBDevIntSt;
-    
+	
+    if (dwStatus & ERR_INT) {
+        // clear int
+        LPC_USB->USBDevIntClr = ERR_INT;
+		// get error status
+		bStat = USBHwCmdRead(CMD_DEV_READ_ERROR_STATUS);
+		DBG("\nUSBHwISR: ERR_INT_%x_\n",bStat);
+    }
+	
     // frame interrupt
     if (dwStatus & FRAME) {
         // clear int

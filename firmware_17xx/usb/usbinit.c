@@ -38,7 +38,7 @@
 
 
 /** data storage area for standard requests */
-static U8	abStdReqData[8];
+static U8	abStdReqData[MAX_PACKET_SIZE];
 
 
 /**
