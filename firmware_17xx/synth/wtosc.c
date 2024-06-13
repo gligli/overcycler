@@ -189,9 +189,21 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	
 	if(!o->mainData)
 	{
-		// silence DAC
 		for(buf=startBuffer;buf<=endBuffer;++buf)
+		{
+			// counter update
+
+			o->counter-=TICK_RATE;
+
+			// counter underflow management
+
+			if(o->counter<0)
+				alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncResets);
+
+			// silence DAC
+			
 			dacspi_setOscValue(buf,o->channel,HALF_RANGE);
+		}
 		return;
 	}
 	
