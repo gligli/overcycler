@@ -30,12 +30,13 @@
 #define DACSPI_CV_CHANNEL 6
 
 static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
+static EXT_RAM GPDMA_LLI_Type cvLli[DACSPI_BUFFER_COUNT][4];
 static EXT_RAM volatile uint8_t marker;
 static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
 static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 {
-	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOCLR,5},
+	{SPIMUX_VAL(1,0,1),(uint32_t)&LPC_GPIO1->FIOSET,5},
 	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,1},
 	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOSET,3},
 	{SPIMUX_VAL(0,0,1),(uint32_t)&LPC_GPIO1->FIOCLR,2},
@@ -48,7 +49,7 @@ static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 	{SPIMUX_VAL(0,0,1),(uint32_t)&LPC_GPIO1->FIOCLR,2},
 	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOSET,6},
 	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOCLR,4},
-	{SPIMUX_VAL(0,1,1),(uint32_t)&LPC_GPIO1->FIOSET,7},
+	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,7},
 };
 
 
@@ -65,8 +66,9 @@ static const uint16_t oscChannelCommand[SYNTH_VOICE_COUNT*2] =
 static struct
 {
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
-	uint16_t cvCommands[DACSPI_BUFFER_COUNT];
+	uint32_t cvCommands[DACSPI_BUFFER_COUNT];
 	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
+	uint16_t cr0Pre, cr0Post, sselPre, sselPost;
 	int curSet;
 } dacspi EXT_RAM;
 
@@ -106,48 +108,90 @@ static void buildLLIs(int buffer, int channel)
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.spiMuxCommands[muxIndex][0];
 	lli[lliPos][0].DstAddr=dacspi.spiMuxCommands[muxIndex][1];
-	lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
 	lli[lliPos][0].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(2) |
 		GPDMA_DMACCxControl_DWidth(2);
 
-	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP0->DR;
-	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
-	
 	if(isCVChannel)
 	{
-		int cvDacChannel=(buffer>>1)&7;
-		int cvSet=buffer&~(DACSPI_CV_COUNT-1);
+		lli[lliPos][0].NextLLI=(uint32_t)&cvLli[buffer][0];
 
-		if(muxChannel==0)
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+cvSet];
-		else
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+cvSet];
-		lli[lliPos][1].Control=
+		cvLli[buffer][0].NextLLI=(uint32_t)&cvLli[buffer][1];
+		cvLli[buffer][1].NextLLI=(uint32_t)&lli[lliPos][1];
+
+		cvLli[buffer][0].SrcAddr=(uint32_t)&dacspi.cr0Pre;
+		cvLli[buffer][1].SrcAddr=(uint32_t)&dacspi.sselPre;
+
+		cvLli[buffer][0].DstAddr=(uint32_t)&LPC_SSP2->CR0;
+		cvLli[buffer][1].DstAddr=(uint32_t)&LPC_IOCON->P1_8;
+
+		cvLli[buffer][0].Control=
+		cvLli[buffer][1].Control=
 			GPDMA_DMACCxControl_TransferSize(1) |
 			GPDMA_DMACCxControl_SWidth(1) |
 			GPDMA_DMACCxControl_DWidth(1);
 	}
 	else
 	{
+		lli[lliPos][0].NextLLI=(uint32_t)&lli[lliPos][1];
+	}
+	
+	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP2->DR;
+	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
+	lli[lliPos][1].Control=
+		GPDMA_DMACCxControl_TransferSize(2) |
+		GPDMA_DMACCxControl_SWidth(1) |
+		GPDMA_DMACCxControl_DWidth(1) |
+		GPDMA_DMACCxControl_SI;
+
+	if(isCVChannel)
+	{
+		int cvDacChannel=(buffer>>1)&7;
+		int cvSet=buffer&~(DACSPI_CV_COUNT-1);
+		
+		if(muxChannel==0)
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+cvSet];
+		else
+			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+cvSet];
+	}
+	else
+	{
 		int voice=muxChannel-1;
 		
 		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.oscCommands[buffer][voice*2];
-		lli[lliPos][1].Control=
-			GPDMA_DMACCxControl_TransferSize(2) |
-			GPDMA_DMACCxControl_SWidth(1) |
-			GPDMA_DMACCxControl_DWidth(1) |
-			GPDMA_DMACCxControl_SI;
 	}
 	
 	lli[lliPos][2].SrcAddr=(uint32_t)&markerSource[buffer];
 	lli[lliPos][2].DstAddr=(uint32_t)&marker;
-	lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
 	lli[lliPos][2].Control=
 		GPDMA_DMACCxControl_TransferSize(isCVChannel?DACSPI_CV_CHANNEL_WAIT_STATES:DACSPI_OSC_CHANNEL_WAIT_STATES) |
 		GPDMA_DMACCxControl_SWidth(0) |
 		GPDMA_DMACCxControl_DWidth(0);
+
+	if(isCVChannel)
+	{
+		lli[lliPos][2].NextLLI=(uint32_t)&cvLli[buffer][2];
+		
+		cvLli[buffer][2].NextLLI=(uint32_t)&cvLli[buffer][3];
+		cvLli[buffer][3].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+		
+		cvLli[buffer][2].SrcAddr=(uint32_t)&dacspi.sselPost;
+		cvLli[buffer][3].SrcAddr=(uint32_t)&dacspi.cr0Post;
+
+		cvLli[buffer][2].DstAddr=(uint32_t)&LPC_IOCON->P1_8;
+		cvLli[buffer][3].DstAddr=(uint32_t)&LPC_SSP2->CR0;
+
+		cvLli[buffer][2].Control=
+		cvLli[buffer][3].Control=
+			GPDMA_DMACCxControl_TransferSize(1) |
+			GPDMA_DMACCxControl_SWidth(1) |
+			GPDMA_DMACCxControl_DWidth(1);
+	}
+	else
+	{
+		lli[lliPos][2].NextLLI=(uint32_t)&lli[(lliPos+1)%(DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT)][0];
+	}
 }
 
 FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
@@ -157,7 +201,7 @@ FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 
 FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf)
 {
-	uint16_t cmd=(value>>4)|((channel&7)<<12);
+	uint32_t cmd=(0x100|((channel&0xf)<<4)|(value>>12))|((value&0xfff)<<16);
 	
 	if(noDblBuf)
 	{
@@ -178,19 +222,10 @@ void dacspi_init(void)
 	
 	TIM_Cmd(LPC_TIM3,DISABLE);
 	LPC_GPDMACH0->CConfig=0;
-	SSP_Cmd(LPC_SSP0,DISABLE);
+	SSP_Cmd(LPC_SSP2,DISABLE);
 
 	memset(&dacspi,0,sizeof(dacspi));
 	memcpy(dacspi.spiMuxCommands,spiMuxCommandsConst,sizeof(spiMuxCommandsConst));
-
-	// cv DACs init
-	for(i=0;i<DACSPI_BUFFER_COUNT;i+=4)
-	{
-		dacspi.cvCommands[i+0]=0b1110000000000000; // data reset
-		dacspi.cvCommands[i+1]=0b1100000000000000; // set all channels power
-		dacspi.cvCommands[i+2]=0b1010000000000000; // /LDAC low
-		dacspi.cvCommands[i+3]=0b1000000000000011; // 0..Vdd range
-	}
 
 	// init SPI mux
 
@@ -202,12 +237,9 @@ void dacspi_init(void)
 	
 	// SSP pins
 
-	PINSEL_ConfigPin(1,20,5);
-	PINSEL_ConfigPin(1,21,3);
-	PINSEL_ConfigPin(1,24,5);
-	
-	LPC_GPIO1->FIODIR2|=0x20;
-	LPC_GPIO1->FIOMASK2&=~0x20;
+	PINSEL_ConfigPin(1,0,4);
+	PINSEL_ConfigPin(1,1,4);
+	PINSEL_ConfigPin(1,8,4);
 	
 	// SSP
 
@@ -215,9 +247,19 @@ void dacspi_init(void)
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_DATABIT_16;
 	SSP_ConfigStruct.ClockRate=20000000;
-	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
-	SSP_DMACmd(LPC_SSP0,SSP_DMA_TX,ENABLE);
-	SSP_Cmd(LPC_SSP0,ENABLE);
+	SSP_Init(LPC_SSP2,&SSP_ConfigStruct);
+	SSP_DMACmd(LPC_SSP2,SSP_DMA_TX,ENABLE);
+	SSP_Cmd(LPC_SSP2,ENABLE);
+	
+	dacspi.cr0Pre=SSP_CPHA_SECOND|SSP_CPOL_HI|SSP_DATABIT_12|(LPC_SSP2->CR0&0xff00);
+	dacspi.cr0Post=LPC_SSP2->CR0;
+
+	dacspi.sselPre=0;
+	dacspi.sselPost=4;
+		
+	LPC_GPIO1->FIOCLR=SPIMUX_VAL(1,1,1);
+	GPIO_SetDir(SPIMUX_PORT_ABC,1<<8,1);
+	GPIO_ClearValue(SPIMUX_PORT_ABC,1<<8);
 
 	// prepare LLIs
 

@@ -789,8 +789,8 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 
 FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value, int8_t noDblBuf)
 {
-	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={5,6,7,9,10,11};
-	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={2,3,4,13,14,15};
+	static const uint8_t ampVoice2CV[SYNTH_VOICE_COUNT]={0,1,2,3,8,9};
+	static const uint8_t cutoffVoice2CV[SYNTH_VOICE_COUNT]={4,15,14,13,12,11};
 	uint16_t v,channel;
 	
 	value=__USAT(value,16);
@@ -802,19 +802,19 @@ FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value, int8_t n
 		channel=ampVoice2CV[voice];
 		break;
 	case cvNoiseVol:
-		channel=8;
+		channel=10;
 		break;
 	case cvResonance:
-		channel=12;
+		channel=5;
 		break;
 	case cvCutoff:
 		channel=cutoffVoice2CV[voice];
 		break;
 	case cvAVol:
-		channel=1;
+		channel=6;
 		break;
 	case cvBVol:
-		channel=0;
+		channel=7;
 		break;
 	default:
 		return;
@@ -909,7 +909,7 @@ void synth_init(void)
 
 	// init subsystems
 	// ui_init() done in main.c
-//	dacspi_init();
+	dacspi_init();
 	scan_init();
 	tuner_init();
 	assigner_init();
