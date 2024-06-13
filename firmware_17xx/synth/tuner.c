@@ -43,7 +43,7 @@ static NOINLINE LOWERCODESIZE uint32_t measureAudioPeriod(uint8_t periods) // in
 	uint32_t tzCnt=0;
 	uint8_t prev;
 		
-#define MAP_BUF_LEN 3200
+#define MAP_BUF_LEN 6400
 #define MAP_BUF_MIDDLE 128
 	uint8_t buf[MAP_BUF_LEN];
 
@@ -74,8 +74,8 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 
 	tgtp=(TUNER_TICK<<(16-nthC))/TUNER_LOWEST_HERTZ;
 	
-	estimate=0;
-	bit=0x8000;
+	estimate=0x8000;
+	bit=0x4000;
 
 	for(i=0;i<12;++i) // 12bit dac
 	{
@@ -84,7 +84,7 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 		synth_refreshCV(voice,cvCutoff,estimate,1);
 		delay_ms(25); // wait analog hardware stabilization	
 
-		p=measureAudioPeriod(2);
+		p=measureAudioPeriod(1);
 
 		// adjust estimate
 		if (p<tgtp)
