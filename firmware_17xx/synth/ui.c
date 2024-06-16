@@ -1442,10 +1442,8 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnLBas:
 				if(!setPresetModifiedWarning(prm->number))
 					break;
-				preset_loadDefault(1);
-				for(abx_t abx=0;abx<abxCount;++abx)
-					synth_refreshWaveforms(abx);
-				change=1;
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case cnNPrs:
 				ui.kpInputValue=0;
@@ -1582,6 +1580,19 @@ static void handleSlowUpdates(void)
 					preset_loadDefault(1);
 				ui_setPresetModified(0);	
 				ui.presetExistsWarning=0;
+
+				synth_refreshFullState(1);
+			}
+			break;
+		case 0x80+cnLBas:
+			BLOCK_INT(1)
+			{
+				// temporarily silence voices
+				for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+					synth_refreshCV(v,cvAmp,0,1);					
+
+				preset_loadDefault(1);
+				ui_setPresetModified(1);
 
 				synth_refreshFullState(1);
 			}
