@@ -13738,7 +13738,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.lcsc.com/datasheet/lcsc_datasheet_2210141730_JETEKPS-IA0505S-2W_C5198614.pdf"
+		(property "Datasheet" "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2004151709_rlt-IA0505S-2W_C512062.pdf"
 			(at 173.99 58.42 0)
 			(effects
 				(font
@@ -13756,7 +13756,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "JETEKPS"
+		(property "Manufacturer" "RLT"
 			(at 184.15 60.96 0)
 			(effects
 				(font
@@ -13765,7 +13765,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C5198614"
+		(property "LCSC" "C512062"
 			(at 184.15 63.5 0)
 			(effects
 				(font
