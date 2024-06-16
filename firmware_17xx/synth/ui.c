@@ -427,7 +427,7 @@ static void setPos(int lcd, int col, int row)
 
 static void setLcdContrast(uint8_t contrast)
 {
-	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*400/UI_MAX_LCD_CONTRAST);
+	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*300/UI_MAX_LCD_CONTRAST);
 }
 
 static void drawA(int lcd)
