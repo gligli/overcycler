@@ -128,7 +128,7 @@ const char * notesNames[12]=
 
 static int32_t getStaticCV(cv_t cv)
 {
-	static const modulationTarget_t cv2mod[cvCount]={modVolume,modVolume,modFilter,modNone,modPitch,modPitch,modCrossOver,modNone,modNone};
+	static const modulationTarget_t cv2mod[cvCount]={modVolume,modVolume,modFilter,modNone,modPitch,modPitch,modCrossOver,modNone,modVolume};
 	modulationTarget_t mod=cv2mod[cv];
 	int32_t res=0;
 	
