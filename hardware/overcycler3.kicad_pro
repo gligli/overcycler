@@ -48,7 +48,7 @@
         "silk_text_thickness": 0.15,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.0
+          "min_clearance": 0.35
         }
       },
       "diff_pair_dimensions": [
@@ -91,19 +91,16 @@
         "silk_over_copper|323470131|100420443|ba98331f-bb99-4f04-bbc4-54c75a5bd550|00000000-0000-0000-0000-000000000000",
         "silk_overlap|208054678|143908319|376cb4b2-fb9b-43b6-b360-d3a6e0659bbf|aebabf7d-2875-4206-b73f-43f3ec43113e",
         "silk_overlap|218424607|101849750|74a6a76e-21a7-43bd-bd71-63159bd2c57f|a010ee2f-91a7-461f-b739-731fdd8f9b94",
-        "silk_overlap|218474559|96810369|c725f297-d44e-4d36-abdd-2e7f755c8848|fd4c5d42-b617-4ac8-a28d-8d38b7d1ae88",
         "silk_overlap|218665035|100350369|52de6083-ed34-4e8b-b350-159e63fdecc6|9f2c5f82-8849-4145-ad78-8b7faaf001c1",
         "silk_overlap|218665035|102890369|a010ee2f-91a7-461f-b739-731fdd8f9b94|f7fae1fc-8ebc-4d37-acbf-6a0f3ce7f8d2",
         "silk_overlap|218712002|97810369|c725f297-d44e-4d36-abdd-2e7f755c8848|7488ce6e-bca9-4fad-b50e-8c989558257a",
         "silk_overlap|232206464|101890369|350605bf-c267-4195-8af1-ffbdcb205e18|cd6b77fd-7a70-4670-91cf-b3ae533c4381",
         "silk_overlap|232682002|97810369|cefc7b52-f527-43f5-8eab-9bb0988d3289|4eb2d086-781c-492d-b3b6-e16269708c39",
-        "silk_overlap|232682654|102795130|350605bf-c267-4195-8af1-ffbdcb205e18|ae02c9ce-0d6d-42ed-9829-71c94f25d8aa",
         "silk_overlap|232685835|100350369|52179978-599d-4910-8552-3c947193ab85|e6f870ad-c102-4cbb-b22e-a114dcf44a1c",
         "silk_overlap|263762814|101849750|327e2614-d006-4e85-9bb0-b6f37a14f984|ec396ef7-8cff-4468-9457-a49bed3b343a",
         "silk_overlap|263797654|102795130|ec396ef7-8cff-4468-9457-a49bed3b343a|402206c6-5694-4a2e-b1a7-31493de9d2db",
         "silk_overlap|277479607|99309750|679deb27-5862-4ed0-9d7e-f15053f3fdbe|2c2548c4-70e5-4cf7-bb46-49bc0cd3737f",
         "silk_overlap|277529559|96769750|32f0d746-d515-47ef-8a3a-d58628f8670b|ad09b131-2d3f-447f-8f86-5bd870c7ae8d",
-        "silk_overlap|277767002|97810369|ad09b131-2d3f-447f-8f86-5bd870c7ae8d|9c9065d2-dbc3-4caf-8802-c47579565fb2",
         "silk_overlap|308594607|99309750|784412ed-1f28-49e9-8fd4-64e0d258f3d1|d057b3c1-8b09-4754-b8eb-0c6cc8c796e8",
         "silk_overlap|308644559|96810369|f38981a1-05f4-4370-a3f1-d4216270a6ed|ce3faf35-b62b-42a8-833b-0c58b14425f7",
         "silk_overlap|308835035|100350369|784412ed-1f28-49e9-8fd4-64e0d258f3d1|0c0258c7-dc0e-48db-9131-fce8ebb99fae",
@@ -135,6 +132,7 @@
         "footprint_type_mismatch": "ignore",
         "hole_clearance": "error",
         "hole_near_hole": "error",
+        "holes_co_located": "warning",
         "invalid_outline": "error",
         "isolated_copper": "warning",
         "item_on_disabled_layer": "error",
@@ -245,7 +243,7 @@
           "spacing": 1.0
         },
         "diff_pair_skew_defaults": {
-          "corner_radius_percentage": 80,
+          "corner_radius_percentage": 100,
           "corner_style": 1,
           "max_amplitude": 1.0,
           "min_amplitude": 0.2,
@@ -616,7 +614,7 @@
       "plot": "Gerber/",
       "pos_files": "",
       "specctra_dsn": "overcycler3.dsn",
-      "step": "",
+      "step": "overcycler3.step",
       "svg": "",
       "vrml": ""
     },
@@ -624,6 +622,7 @@
   },
   "schematic": {
     "annotate_start_num": 0,
+    "bom_export_filename": "",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
       "field_delimiter": ",",

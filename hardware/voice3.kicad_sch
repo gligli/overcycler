@@ -3398,7 +3398,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4680e")
-		(property "Reference" "C67"
+		(property "Reference" "C65"
 			(at 128.27 88.9 0)
 			(effects
 				(font
@@ -3459,28 +3459,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C65")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C67")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C71")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C75")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C69")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C65")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C71")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C73")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C75")
 					(unit 1)
 				)
 			)
@@ -3495,7 +3495,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4680f")
-		(property "Reference" "C48"
+		(property "Reference" "C46"
 			(at 128.27 96.52 0)
 			(effects
 				(font
@@ -3556,28 +3556,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C46")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C48")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C52")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C56")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C50")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C46")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C52")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C54")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C56")
 					(unit 1)
 				)
 			)
@@ -3592,7 +3592,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46810")
-		(property "Reference" "C49"
+		(property "Reference" "C47"
 			(at 123.19 104.14 0)
 			(effects
 				(font
@@ -3653,28 +3653,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C47")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C49")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C53")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C57")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C51")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C47")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C53")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C55")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C57")
 					(unit 1)
 				)
 			)
@@ -3689,7 +3689,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46811")
-		(property "Reference" "C68"
+		(property "Reference" "C66"
 			(at 123.19 111.76 0)
 			(effects
 				(font
@@ -3750,28 +3750,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C66")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C68")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C72")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C76")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C70")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C66")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C72")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C74")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C76")
 					(unit 1)
 				)
 			)
@@ -3786,7 +3786,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46812")
-		(property "Reference" "R100"
+		(property "Reference" "R99"
 			(at 110.998 104.14 90)
 			(effects
 				(font
@@ -3845,28 +3845,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R99")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R100")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R102")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R104")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R101")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R99")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R102")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R103")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R104")
 					(unit 1)
 				)
 			)
@@ -3881,7 +3881,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46814")
-		(property "Reference" "R69"
+		(property "Reference" "R65"
 			(at 109.982 124.46 90)
 			(effects
 				(font
@@ -3940,28 +3940,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R65")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R69")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R77")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R85")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R73")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R65")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R77")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R81")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R85")
 					(unit 1)
 				)
 			)
@@ -3977,7 +3977,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46815")
-		(property "Reference" "R106"
+		(property "Reference" "R105"
 			(at 99.06 146.812 90)
 			(effects
 				(font
@@ -4036,28 +4036,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R105")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R106")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R108")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R110")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R107")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R105")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R108")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R109")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R110")
 					(unit 1)
 				)
 			)
@@ -4072,7 +4072,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46816")
-		(property "Reference" "R70"
+		(property "Reference" "R66"
 			(at 99.06 114.808 90)
 			(effects
 				(font
@@ -4131,28 +4131,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R66")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R70")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R78")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R86")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R74")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R66")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R78")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R82")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R86")
 					(unit 1)
 				)
 			)
@@ -4167,7 +4167,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46817")
-		(property "Reference" "R71"
+		(property "Reference" "R67"
 			(at 125.222 125.73 90)
 			(effects
 				(font
@@ -4226,28 +4226,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R67")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R71")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R79")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R87")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R75")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R67")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R79")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R83")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R87")
 					(unit 1)
 				)
 			)
@@ -4262,7 +4262,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46819")
-		(property "Reference" "C59"
+		(property "Reference" "C58"
 			(at 173.99 97.79 0)
 			(effects
 				(font
@@ -4323,28 +4323,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C58")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C59")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C61")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C63")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C60")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C58")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C61")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C62")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C63")
 					(unit 1)
 				)
 			)
@@ -4359,7 +4359,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4681a")
-		(property "Reference" "R93"
+		(property "Reference" "R92"
 			(at 169.672 107.95 90)
 			(effects
 				(font
@@ -4418,28 +4418,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R92")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R93")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R95")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R97")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R94")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R92")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R95")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R96")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R97")
 					(unit 1)
 				)
 			)
@@ -4454,7 +4454,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46826")
-		(property "Reference" "U11"
+		(property "Reference" "U10"
 			(at 64.77 80.01 0)
 			(effects
 				(font
@@ -4553,28 +4553,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "U10")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "U11")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "U13")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "U15")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "U12")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "U10")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "U13")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "U14")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "U15")
 					(unit 1)
 				)
 			)
@@ -4589,7 +4589,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46827")
-		(property "Reference" "R122"
+		(property "Reference" "R119"
 			(at 100.33 84.328 90)
 			(effects
 				(font
@@ -4648,28 +4648,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R119")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R122")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R128")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R134")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R125")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R119")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R128")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R131")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R134")
 					(unit 1)
 				)
 			)
@@ -4684,7 +4684,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46828")
-		(property "Reference" "C89"
+		(property "Reference" "C87"
 			(at 83.82 85.09 0)
 			(effects
 				(font
@@ -4745,28 +4745,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C87")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C89")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C94")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C98")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C90")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C87")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C94")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C96")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C98")
 					(unit 1)
 				)
 			)
@@ -4781,7 +4781,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4682b")
-		(property "Reference" "C100"
+		(property "Reference" "C88"
 			(at 83.82 95.25 0)
 			(effects
 				(font
@@ -4842,28 +4842,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C88")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C100")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C95")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C99")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C91")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C88")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C95")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C97")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C99")
 					(unit 1)
 				)
 			)
@@ -4878,7 +4878,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4682c")
-		(property "Reference" "R124"
+		(property "Reference" "R121"
 			(at 100.33 94.488 90)
 			(effects
 				(font
@@ -4937,28 +4937,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R121")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R124")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R130")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R136")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R127")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R121")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R130")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R133")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R136")
 					(unit 1)
 				)
 			)
@@ -4973,7 +4973,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4682d")
-		(property "Reference" "R114"
+		(property "Reference" "R113"
 			(at 100.33 74.168 90)
 			(effects
 				(font
@@ -5015,7 +5015,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17475"
+		(property "LCSC" "C17560"
 			(at 100.33 74.168 0)
 			(effects
 				(font
@@ -5032,28 +5032,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R113")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R114")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R116")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R118")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R115")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R113")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R116")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R117")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R118")
 					(unit 1)
 				)
 			)
@@ -5068,7 +5068,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4682e")
-		(property "Reference" "R123"
+		(property "Reference" "R120"
 			(at 105.918 104.14 90)
 			(effects
 				(font
@@ -5110,7 +5110,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17475"
+		(property "LCSC" "C17837"
 			(at 105.918 104.14 0)
 			(effects
 				(font
@@ -5127,28 +5127,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R120")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R123")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R129")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R135")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R126")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R120")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R129")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R132")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R135")
 					(unit 1)
 				)
 			)
@@ -5157,7 +5157,7 @@
 	(symbol
 		(lib_id "Amplifier_Operational:LM13700")
 		(at 218.44 96.52 0)
-		(unit 3)
+		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -5265,29 +5265,29 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "IC1")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "IC1")
-					(unit 3)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "IC2")
-					(unit 3)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "IC3")
 					(unit 3)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "IC2")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "IC1")
-					(unit 1)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "IC2")
+					(unit 3)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "IC3")
 					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "IC3")
+					(unit 3)
 				)
 			)
 		)
@@ -5301,7 +5301,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46843")
-		(property "Reference" "R51"
+		(property "Reference" "R48"
 			(at 210.82 123.698 90)
 			(effects
 				(font
@@ -5360,28 +5360,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R48")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R51")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R55")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R59")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R52")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R48")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R55")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R56")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R59")
 					(unit 1)
 				)
 			)
@@ -5396,7 +5396,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46844")
-		(property "Reference" "R32"
+		(property "Reference" "R29"
 			(at 217.678 133.35 90)
 			(effects
 				(font
@@ -5455,28 +5455,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R29")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R32")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R36")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R40")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R33")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R29")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R36")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R37")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R40")
 					(unit 1)
 				)
 			)
@@ -5491,7 +5491,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46845")
-		(property "Reference" "C21"
+		(property "Reference" "C20"
 			(at 227.33 134.62 0)
 			(effects
 				(font
@@ -5552,28 +5552,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C20")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C21")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C23")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C25")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C22")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C20")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C23")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C24")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C25")
 					(unit 1)
 				)
 			)
@@ -5588,7 +5588,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46848")
-		(property "Reference" "R24"
+		(property "Reference" "R23"
 			(at 235.712 104.14 90)
 			(effects
 				(font
@@ -5647,28 +5647,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R23")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R24")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R26")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R28")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R25")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R23")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R26")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R27")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R28")
 					(unit 1)
 				)
 			)
@@ -5683,7 +5683,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f46849")
-		(property "Reference" "R31"
+		(property "Reference" "R30"
 			(at 248.412 106.68 90)
 			(effects
 				(font
@@ -5742,28 +5742,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R30")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R31")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R35")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R39")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R34")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R30")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R35")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R38")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R39")
 					(unit 1)
 				)
 			)
@@ -5779,7 +5779,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4684d")
-		(property "Reference" "C8"
+		(property "Reference" "C7"
 			(at 255.27 97.79 0)
 			(effects
 				(font
@@ -5797,7 +5797,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+		(property "Footprint" "Additional:CP_EIA-3528-21_Kemet-B"
 			(at 252.73 99.06 0)
 			(effects
 				(font
@@ -5840,28 +5840,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C7")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C8")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C10")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C12")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C9")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C7")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C10")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C11")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C12")
 					(unit 1)
 				)
 			)
@@ -5876,7 +5876,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f4684e")
-		(property "Reference" "R72"
+		(property "Reference" "R68"
 			(at 190.5 97.028 90)
 			(effects
 				(font
@@ -5935,28 +5935,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R68")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R72")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R80")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R88")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R76")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R68")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R80")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R84")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R88")
 					(unit 1)
 				)
 			)
@@ -5971,7 +5971,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f73e3b")
-		(property "Reference" "C35"
+		(property "Reference" "C33"
 			(at 115.57 125.73 0)
 			(effects
 				(font
@@ -6032,28 +6032,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "C33")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "C35")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "C39")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "C43")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "C37")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "C33")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "C39")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "C41")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "C43")
 					(unit 1)
 				)
 			)
@@ -6068,7 +6068,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "159da482-cbab-4e9e-9a6d-e544ebea1ecb")
-		(property "Reference" "R50"
+		(property "Reference" "R49"
 			(at 203.962 91.44 90)
 			(effects
 				(font
@@ -6127,28 +6127,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R49")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R50")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R54")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R58")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R53")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R49")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R54")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R57")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R58")
 					(unit 1)
 				)
 			)
@@ -6216,20 +6216,20 @@
 					(reference "#PWR099")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0115")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0131")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0147")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0163")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0115")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0147")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6301,20 +6301,20 @@
 					(reference "#PWR0106")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0122")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0138")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0154")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0170")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0122")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0154")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6440,20 +6440,20 @@
 					(reference "IC1")
 					(unit 2)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "IC2")
-					(unit 4)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "IC1")
 					(unit 4)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "IC3")
-					(unit 2)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "IC2")
+					(unit 2)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "IC2")
+					(unit 4)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "IC3")
 					(unit 2)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6525,20 +6525,20 @@
 					(reference "#PWR092")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0108")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0124")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0140")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0156")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0108")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0140")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6665,20 +6665,20 @@
 					(reference "U3")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "U6")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "U4")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "U7")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "U5")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "U6")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "U7")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6750,20 +6750,20 @@
 					(reference "#PWR0141")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0143")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0157")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0159")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0173")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0143")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0159")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6835,20 +6835,20 @@
 					(reference "#PWR093")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR095")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0109")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0111")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0125")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR095")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0111")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -6920,20 +6920,20 @@
 					(reference "#PWR098")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0114")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0130")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0146")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0161")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0114")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0146")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7005,20 +7005,20 @@
 					(reference "#PWR0100")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0116")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0132")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0148")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0164")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0116")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0148")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7090,20 +7090,20 @@
 					(reference "#PWR0105")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0121")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0137")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0153")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0169")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0121")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0153")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7122,7 +7122,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9cc3be1c-41c9-4047-bee9-c4391242a932")
-		(property "Reference" "R43"
+		(property "Reference" "R42"
 			(at 203.962 76.2 90)
 			(effects
 				(font
@@ -7181,28 +7181,28 @@
 		)
 		(instances
 			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
+					(reference "R42")
+					(unit 1)
+				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "R43")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "R45")
-					(unit 1)
-				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
-					(reference "R47")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "R44")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f45aaf"
-					(reference "R42")
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "R45")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
 					(reference "R46")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
+					(reference "R47")
 					(unit 1)
 				)
 			)
@@ -7270,20 +7270,20 @@
 					(reference "#PWR094")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0110")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0126")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0142")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0158")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0110")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0142")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7355,20 +7355,20 @@
 					(reference "#PWR096")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0112")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0128")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0144")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0160")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0112")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0144")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7440,20 +7440,20 @@
 					(reference "#PWR0101")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0117")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0133")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0149")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0165")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0117")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0149")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7525,20 +7525,20 @@
 					(reference "#PWR097")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0113")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0129")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0145")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0151")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0113")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0145")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7610,20 +7610,20 @@
 					(reference "#PWR091")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0107")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0123")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0139")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0155")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0107")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0139")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"
@@ -7695,20 +7695,20 @@
 					(reference "#PWR0103")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
-					(reference "#PWR0104")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f47c7a"
 					(reference "#PWR0119")
 					(unit 1)
 				)
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
-					(reference "#PWR0120")
-					(unit 1)
-				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f483f4"
 					(reference "#PWR0135")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d7e"
+					(reference "#PWR0104")
+					(unit 1)
+				)
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d84"
+					(reference "#PWR0120")
 					(unit 1)
 				)
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/00000000-0000-0000-0000-000055f48d8a"

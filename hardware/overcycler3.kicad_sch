@@ -10276,7 +10276,7 @@
 		(uuid "bb36d950-f6e6-448f-a505-4051bdbf7f55")
 	)
 	(junction
-		(at 133.35 226.06)
+		(at 130.81 226.06)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "bb61cdef-8550-4a53-bcac-1839f365a06b")
@@ -11275,7 +11275,7 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 210.82) (xy 133.35 212.09)
+			(xy 130.81 210.82) (xy 130.81 212.09)
 		)
 		(stroke
 			(width 0)
@@ -13305,7 +13305,7 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 224.79) (xy 133.35 226.06)
+			(xy 130.81 224.79) (xy 130.81 226.06)
 		)
 		(stroke
 			(width 0)
@@ -13555,7 +13555,7 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 226.06) (xy 147.32 226.06)
+			(xy 130.81 226.06) (xy 147.32 226.06)
 		)
 		(stroke
 			(width 0)
@@ -14505,7 +14505,7 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 226.06) (xy 133.35 226.06)
+			(xy 118.11 226.06) (xy 130.81 226.06)
 		)
 		(stroke
 			(width 0)
@@ -16258,7 +16258,7 @@
 		)
 		(uuid "050f699d-4d68-4bdc-888c-504cff655b2d")
 	)
-	(label "KP_2_R2"
+	(label "KP_2_C2"
 		(at 186.69 85.09 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16291,7 +16291,7 @@
 		)
 		(uuid "074a906e-0d0e-4bc3-9d19-385d38ec1c13")
 	)
-	(label "KP_7_C3"
+	(label "KP_7_R3"
 		(at 186.69 97.79 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16401,6 +16401,17 @@
 		)
 		(uuid "17f6d022-a55d-4a3f-9184-39aeb00b5513")
 	)
+	(label "LCD_DB6"
+		(at 265.43 41.91 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "1afe6236-0cbc-4f30-b8b3-aac57c11da09")
+	)
 	(label "P_4"
 		(at 22.86 229.87 0)
 		(fields_autoplaced yes)
@@ -16456,7 +16467,7 @@
 		)
 		(uuid "2309efad-38ec-441d-9da9-060be80e6cbf")
 	)
-	(label "KP_5_C1"
+	(label "KP_5_R1"
 		(at 110.49 259.08 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16511,7 +16522,7 @@
 		)
 		(uuid "2add463a-3572-4c72-9ded-8057a127cff5")
 	)
-	(label "LCD_DB4"
+	(label "LCD_DB5"
 		(at 265.43 49.53 180)
 		(fields_autoplaced yes)
 		(effects
@@ -16520,7 +16531,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2b52f05c-5e91-4257-930e-267052be24d3")
+		(uuid "2cfdb2ee-a288-49c2-86f3-fc2bdc182a67")
 	)
 	(label "OUT_V3"
 		(at 274.32 189.23 0)
@@ -16577,7 +16588,7 @@
 		)
 		(uuid "33e2a080-58de-4913-806c-7b00a94f7c80")
 	)
-	(label "KP_3_R3"
+	(label "KP_3_C3"
 		(at 186.69 87.63 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16588,7 +16599,7 @@
 		)
 		(uuid "34debf67-d896-4a4c-869e-a766b6c192f7")
 	)
-	(label "KP_8_C4"
+	(label "KP_8_R4"
 		(at 186.69 100.33 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16620,17 +16631,6 @@
 			(justify right bottom)
 		)
 		(uuid "38f792ff-0748-491d-898a-ed73ee75f780")
-	)
-	(label "LCD_DB7"
-		(at 265.43 41.91 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "39d32d1f-a8a9-4a71-9965-9f94784dff10")
 	)
 	(label "DAC_FC0"
 		(at 26.67 44.45 0)
@@ -16708,17 +16708,6 @@
 			(justify left bottom)
 		)
 		(uuid "423f0da8-47bb-4445-9c25-d5577c7e64ce")
-	)
-	(label "LCD_DB5"
-		(at 265.43 46.99 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "441e2611-055b-4d46-a2b2-c0ace764f885")
 	)
 	(label "DAC_VCA3"
 		(at 143.51 119.38 180)
@@ -16808,7 +16797,7 @@
 		)
 		(uuid "5021e290-e45f-4fdd-b1d5-65e4d1dfef7c")
 	)
-	(label "KP_6_C2"
+	(label "KP_6_R2"
 		(at 110.49 261.62 0)
 		(fields_autoplaced yes)
 		(effects
@@ -16829,17 +16818,6 @@
 			(justify left bottom)
 		)
 		(uuid "5289601e-79e6-49a5-b93f-f95d7250792f")
-	)
-	(label "LCD_RW"
-		(at 265.43 54.61 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "54496364-1190-4e49-8f26-1e204e492f04")
 	)
 	(label "P_1"
 		(at 22.86 114.3 0)
@@ -16918,7 +16896,7 @@
 		)
 		(uuid "61b83e7d-998c-46f2-8f2f-db129f9ba461")
 	)
-	(label "KP_1_R1"
+	(label "KP_1_C1"
 		(at 110.49 248.92 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17116,7 +17094,7 @@
 		)
 		(uuid "82fdbea1-06bf-42e5-92b4-0f744b61647b")
 	)
-	(label "KP_2_R2"
+	(label "KP_2_C2"
 		(at 110.49 251.46 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17182,7 +17160,7 @@
 		)
 		(uuid "8d246539-c368-4462-8f18-ddee741ab383")
 	)
-	(label "KP_5_C1"
+	(label "KP_5_R1"
 		(at 186.69 92.71 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17226,7 +17204,7 @@
 		)
 		(uuid "9293c346-5e96-42b0-9601-5800ba2d9e96")
 	)
-	(label "KP_3_R3"
+	(label "KP_3_C3"
 		(at 110.49 254 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17248,7 +17226,7 @@
 		)
 		(uuid "96505e50-71dc-4124-b06b-c7eefc1b728f")
 	)
-	(label "KP_4_R4"
+	(label "KP_4_C4"
 		(at 186.69 90.17 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17391,7 +17369,7 @@
 		)
 		(uuid "a5a70805-d93a-4d14-ab22-c444e7a30035")
 	)
-	(label "KP_8_C4"
+	(label "KP_8_R4"
 		(at 110.49 266.7 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17523,8 +17501,8 @@
 		)
 		(uuid "b57da854-4f86-462e-9fea-fd5294c80d33")
 	)
-	(label "LCD_DB6"
-		(at 265.43 44.45 180)
+	(label "LCD_DB4"
+		(at 265.43 46.99 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -17532,7 +17510,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bbc014fc-4437-48ba-8726-3e42e0f50b6b")
+		(uuid "b671086a-5322-48e9-a23d-ce13161f7cd6")
 	)
 	(label "SPI_CS2"
 		(at 68.58 171.45 180)
@@ -17589,7 +17567,7 @@
 		)
 		(uuid "c4e1739f-f0bb-4695-a544-e4a8d655df73")
 	)
-	(label "KP_1_R1"
+	(label "KP_1_C1"
 		(at 186.69 82.55 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17599,6 +17577,17 @@
 			(justify left bottom)
 		)
 		(uuid "c6726a46-61f6-4451-9f5d-681bab711497")
+	)
+	(label "LCD_RW"
+		(at 265.43 52.07 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "c82a1b08-60b3-4051-b2f3-2b518ebd9a8a")
 	)
 	(label "SPI_CS4"
 		(at 26.67 68.58 0)
@@ -17611,17 +17600,6 @@
 		)
 		(uuid "cb8700a9-a95a-4fe7-b603-58f1d1e60829")
 	)
-	(label "LCD_E1"
-		(at 265.43 52.07 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "cd0bf9f6-697b-42a3-8900-8c0a037bc666")
-	)
 	(label "DAC_VCA1"
 		(at 71.12 49.53 0)
 		(fields_autoplaced yes)
@@ -17632,6 +17610,17 @@
 			(justify left bottom)
 		)
 		(uuid "d1b00c86-b188-4d29-861c-2ca207c74604")
+	)
+	(label "LCD_DB7"
+		(at 265.43 44.45 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d1fbdc4e-5e1f-4ea1-85bc-2c98c549f7f9")
 	)
 	(label "ADC_SPI_MOSI"
 		(at 186.69 166.37 0)
@@ -17722,7 +17711,7 @@
 		(uuid "e3565367-7e62-4196-af99-38ec2910621c")
 	)
 	(label "PROG_BOOT"
-		(at 120.65 226.06 0)
+		(at 118.11 226.06 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -17731,6 +17720,17 @@
 			(justify left bottom)
 		)
 		(uuid "e7af4afc-377b-464f-8329-f8abce42f96d")
+	)
+	(label "LCD_E1"
+		(at 265.43 54.61 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ed6d58d2-46dd-4ced-845d-0f16a89ea74d")
 	)
 	(label "SPI_MUX_A"
 		(at 186.69 140.97 0)
@@ -17798,7 +17798,7 @@
 		)
 		(uuid "f3267056-738f-44cf-8c5c-d2ef4abbbcfc")
 	)
-	(label "KP_4_R4"
+	(label "KP_4_C4"
 		(at 110.49 256.54 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17842,7 +17842,7 @@
 		)
 		(uuid "f7ab71f8-73d3-46ea-8274-5f4f89fae257")
 	)
-	(label "KP_7_C3"
+	(label "KP_7_R3"
 		(at 110.49 264.16 0)
 		(fields_autoplaced yes)
 		(effects
@@ -17864,7 +17864,7 @@
 		)
 		(uuid "f7f87cdb-46e0-4644-bba1-a4f865ec189a")
 	)
-	(label "KP_6_C2"
+	(label "KP_6_R2"
 		(at 186.69 95.25 0)
 		(fields_autoplaced yes)
 		(effects
@@ -20991,7 +20991,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+		(property "Footprint" "Additional:CP_EIA-3528-21_Kemet-B"
 			(at 311.15 124.46 0)
 			(effects
 				(font
@@ -21216,7 +21216,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "Additional:D_SOD-123"
 			(at 351.79 88.9 0)
 			(effects
 				(font
@@ -21295,7 +21295,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "Additional:D_SOD-123"
 			(at 351.79 77.47 0)
 			(effects
 				(font
@@ -21371,7 +21371,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "Additional:D_SOD-123"
 			(at 351.79 104.14 0)
 			(effects
 				(font
@@ -21447,7 +21447,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "Additional:D_SOD-123"
 			(at 351.79 115.57 0)
 			(effects
 				(font
@@ -22127,7 +22127,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+		(property "Footprint" "Additional:CP_EIA-3528-21_Kemet-B"
 			(at 383.54 99.06 0)
 			(effects
 				(font
@@ -22397,7 +22397,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3528-21_Kemet-B"
+		(property "Footprint" "Additional:CP_EIA-3528-21_Kemet-B"
 			(at 278.13 107.95 0)
 			(effects
 				(font
@@ -22515,7 +22515,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 133.35 210.82 0)
+		(at 130.81 210.82 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -22523,7 +22523,7 @@
 		(dnp no)
 		(uuid "01aff70d-1636-478c-8953-bba3799a6afb")
 		(property "Reference" "#PWR045"
-			(at 133.35 214.63 0)
+			(at 130.81 214.63 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22532,7 +22532,7 @@
 			)
 		)
 		(property "Value" "+3V3"
-			(at 133.35 207.01 0)
+			(at 130.81 207.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22540,7 +22540,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 133.35 210.82 0)
+			(at 130.81 210.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22549,7 +22549,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 133.35 210.82 0)
+			(at 130.81 210.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22558,7 +22558,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 133.35 210.82 0)
+			(at 130.81 210.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -24776,15 +24776,6 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C157981"
-			(at 90.17 242.5699 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
 		(pin "4"
 			(uuid "173c3037-8fb7-4547-bb0b-fd8bf3d4b58e")
 		)
@@ -25012,7 +25003,7 @@
 	)
 	(symbol
 		(lib_id "Additional:R")
-		(at 133.35 218.44 0)
+		(at 130.81 218.44 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -25020,7 +25011,7 @@
 		(dnp no)
 		(uuid "43f81e42-518d-4a92-a935-2c67e6b5456b")
 		(property "Reference" "R112"
-			(at 135.382 218.44 90)
+			(at 132.842 218.44 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -25028,7 +25019,7 @@
 			)
 		)
 		(property "Value" "1k"
-			(at 133.35 218.44 90)
+			(at 130.81 218.44 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -25036,7 +25027,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 131.572 218.44 90)
+			(at 129.032 218.44 90)
 			(effects
 				(font
 					(size 0.762 0.762)
@@ -25045,7 +25036,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 133.35 218.44 0)
+			(at 130.81 218.44 0)
 			(effects
 				(font
 					(size 0.762 0.762)
@@ -25053,7 +25044,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 133.35 218.44 0)
+			(at 130.81 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -25062,7 +25053,7 @@
 			)
 		)
 		(property "LCSC" "C17513"
-			(at 135.382 218.44 0)
+			(at 132.842 218.44 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -25611,7 +25602,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SOD-123"
+		(property "Footprint" "Additional:D_SOD-123"
 			(at 365.76 39.37 0)
 			(effects
 				(font
@@ -25848,7 +25839,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C157972"
+		(property "LCSC" "C7465591"
 			(at 124.46 256.54 0)
 			(effects
 				(font
@@ -25916,7 +25907,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_IDC:IDC-Header_2x08_P2.54mm_Vertical"
+		(property "Footprint" "Additional:IDC-Header_2x08_P2.54mm_Vertical_Mirrored"
 			(at 163.83 256.54 0)
 			(effects
 				(font
@@ -26933,15 +26924,6 @@
 		)
 		(property "Description" "Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 87.63 222.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C157981"
-			(at 90.17 220.9799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -28559,7 +28541,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C40877"
+		(property "LCSC" "     C40877"
 			(at 152.4 218.44 0)
 			(effects
 				(font
@@ -28782,7 +28764,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A"
+		(property "Footprint" "Additional:CP_EIA-3216-18_Kemet-A"
 			(at 74.93 137.16 0)
 			(effects
 				(font
@@ -29979,7 +29961,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C2962011"
+		(property "LCSC" "  C2962011"
 			(at 231.14 261.62 0)
 			(effects
 				(font
