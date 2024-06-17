@@ -19,8 +19,8 @@
 #define KEYPAD_DEBOUNCE_THRESHOLD 2
 
 #define POT_SAMPLES 5
-#define POT_UNLOCK_THRESHOLD SCAN_POT_TO_16BITS(6)
-#define POT_TIMEOUT_THRESHOLD SCAN_POT_TO_16BITS(3)
+#define POT_UNLOCK_THRESHOLD scan_potTo16bits(6)
+#define POT_TIMEOUT_THRESHOLD scan_potTo16bits(3)
 #define POT_TIMEOUT (TICKER_HZ)
 
 #define POTSCAN_PIN_CLK 20
@@ -115,7 +115,7 @@ static void readPots(void)
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
 			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
-			tmpSmp[smp]=SCAN_POT_TO_16BITS(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12)));
+			tmpSmp[smp]=scan_potTo16bits(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12)));
 		}
 		
 		// sort values
@@ -340,6 +340,16 @@ void scan_resetPotLocking(void)
 void scan_setScanEventCallback(scan_event_callback_t callback)
 {
 	scan.eventCallback=callback;
+}
+
+int scan_potTo16bits(int x)
+{
+	return ((int)roundf((((float)x)*UINT16_MAX)/SCAN_POT_MAX_VALUE));
+}
+
+int scan_potFrom16bits(int x)
+{
+	return ((int)roundf((((float)x)*SCAN_POT_MAX_VALUE)/UINT16_MAX));
 }
 
 void scan_init(void)

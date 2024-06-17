@@ -255,11 +255,11 @@ LOWERCODESIZE static void getSafeIntValue(struct loadLL_s *ll, const char * name
 LOWERCODESIZE static void getContinuousValue(struct loadLL_s *ll, continuousParameter_t cp)
 {
 	const struct namedParam_s *np=&continuousParametersZeroCentered[cp];
-	int v=SCAN_POT_FROM_16BITS(currentPreset.continuousParameters[cp]);
+	int v=scan_potFrom16bits(currentPreset.continuousParameters[cp]);
 	getIntValue(ll,np->name,&v,sizeof(v));
 
-	v=SCAN_POT_TO_16BITS(v);
-	if(np->param) v-=INT16_MIN;
+	if(np->param) v+=(SCAN_POT_MAX_VALUE+1)/2;
+	v=scan_potTo16bits(v);
 	
 	currentPreset.continuousParameters[cp]=MAX(0,MIN(UINT16_MAX,v));
 }
@@ -433,7 +433,7 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 		if(continuousParametersZeroCentered[cp].name)
 			f_printf(&f,"%s" SAVE_INT,
 				continuousParametersZeroCentered[cp].name,
-				SCAN_POT_FROM_16BITS(currentPreset.continuousParameters[cp]+(continuousParametersZeroCentered[cp].param?INT16_MIN:0)));
+				scan_potFrom16bits(currentPreset.continuousParameters[cp]+(continuousParametersZeroCentered[cp].param?INT16_MIN:0)));
 
 	for(steppedParameter_t sp=0;sp<spCount;++sp)
 		if(steppedParametersSteps[sp].name)
@@ -479,9 +479,9 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpCutoff]=UINT16_MAX;
 	currentPreset.continuousParameters[cpFilEnvAmt]=HALF_RANGE;
 	currentPreset.continuousParameters[cpAmpSus]=UINT16_MAX;
-	currentPreset.continuousParameters[cpLFOPitchAmt]=SCAN_POT_TO_16BITS(100);
-	currentPreset.continuousParameters[cpLFOFreq]=SCAN_POT_TO_16BITS(5*60);
-	currentPreset.continuousParameters[cpLFO2Freq]=SCAN_POT_TO_16BITS(5*60);
+	currentPreset.continuousParameters[cpLFOPitchAmt]=scan_potTo16bits(100);
+	currentPreset.continuousParameters[cpLFOFreq]=scan_potTo16bits(5*60);
+	currentPreset.continuousParameters[cpLFO2Freq]=scan_potTo16bits(5*60);
 
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
 	currentPreset.steppedParameters[spModwheelRange]=1; // low

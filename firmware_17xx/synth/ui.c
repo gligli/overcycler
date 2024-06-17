@@ -782,19 +782,19 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 							srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
 							break;
 						default:
-							srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(value));
+							srprintf(dv,"% 4d",scan_potFrom16bits(value));
 							break;
 					}
 					break;
 				default:
 					if(continuousParametersZeroCentered[prm->number].param)
 					{
-						tmp=SCAN_POT_FROM_16BITS(value+INT16_MIN);
+						tmp=scan_potFrom16bits(value+INT16_MIN);
 						srprintf(dv,tmp>=0?"% 4d":"% 3d",tmp);
 					}
 					else
 					{
-						srprintf(dv,"% 4d",SCAN_POT_FROM_16BITS(value));
+						srprintf(dv,"% 4d",scan_potFrom16bits(value));
 					}
 			}
 			break;
@@ -1211,7 +1211,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		switch(prm->type)
 		{
 			case ptCont:
-				potSetting=SCAN_POT_TO_16BITS(*forcedValue);
+				potSetting=scan_potTo16bits(*forcedValue);
 				break;
 			case ptStep:
 				potSetting=MIN(*forcedValue,valueCount-1);
@@ -1241,7 +1241,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					if(continuousParametersZeroCentered[prm->number].param)
 						potSetting=addDeadband(potSetting, &panelDeadband);
 
-					potQuantum=SCAN_POT_TO_16BITS(1);
+					potQuantum=scan_potTo16bits(1);
 					break;
 				case ptStep:
 					potSetting=(valueCount*data)>>16;

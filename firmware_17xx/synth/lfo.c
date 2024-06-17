@@ -17,7 +17,7 @@ static void updateSpeed(struct lfo_s * lfo)
 {
 	int32_t spd;
 	
-	spd=((1LL<<24)*SCAN_POT_FROM_16BITS(lfo->bpmCV))/(DACSPI_UPDATE_HZ*30);
+	spd=((1LL<<24)*scan_potFrom16bits(lfo->bpmCV))/(DACSPI_UPDATE_HZ*30);
 	spd<<=lfo->speedShift;
 
 	lfo->speed=spd;
