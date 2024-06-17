@@ -40,7 +40,7 @@ enum uiCustomParamNumber_e
 {
 	cnNone=0,cnAMod,cnAHld,cnLoad,cnSave,cnMidC,cnTune,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
 	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnNPrs,cnNVal,cnUsbM,cnCtst,
-	cnWEnT,cnFEnT,cnAEnT,
+	cnWEnT,cnFEnT,cnAEnT,cnHelp,
 };
 
 struct uiParam_s
@@ -270,7 +270,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnLBas,.shortName="LBas",.longName="Load basic preset",.values={""}},
 		{.type=ptCust,.number=cnPanc,.shortName="Panc",.longName="All voices off (MIDI panic)",.values={""}},
-		{.type=ptNone},
+		{.type=ptCust,.number=cnHelp,.shortName="Help",.longName="Return to help page",.values={""}},
 		{.type=ptCust,.number=cnTune,.shortName="Tune",.longName="Tune filters",.values={""}},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
@@ -885,6 +885,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 					break;
 				case cnPanc:
 				case cnLBas:
+				case cnHelp:
 					value=0;
 					break;
 				case cnNPrs:
@@ -1503,6 +1504,10 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				currentPreset.steppedParameters[spAmpEnvSlow]=data&1;
 				currentPreset.steppedParameters[spAmpEnvLin]=data>>1;
 				change=1;
+				break;
+			case cnHelp:
+				ui.activePage=upNone;
+				ui.pendingScreenClear=1;
 				break;
 		}
 		break;
