@@ -37,7 +37,7 @@
 		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_SSP1_TX__T2_MAT_0) | \
 		GPDMA_DMACCxConfig_TransferType(2)
 
-#define MIXSCAN_SPI_FREQUENCY 8000000
+#define MIXSCAN_SPI_FREQUENCY (SCAN_MASTERMIX_SAMPLERATE*SCAN_ADC_BITS*2)
 #define MIXSCAN_ADC_CHANNEL 10
 
 static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
@@ -251,7 +251,7 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 		tm.ResetOnMatch=ENABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=DACSPI_TICK_RATE-1; // same rate as dacspi
+		tm.MatchValue=SYNTH_MASTER_CLOCK/SCAN_MASTERMIX_SAMPLERATE-1;
 	}
 	else
 	{

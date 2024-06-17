@@ -6,6 +6,7 @@
 #define SCAN_POT_COUNT 10
 #define SCAN_POT_MAX_VALUE 999
 #define SCAN_POT_DEAD_ZONE 512
+#define SCAN_MASTERMIX_SAMPLERATE 10000
 
 enum scanKeypadButton_e
 {

@@ -9,7 +9,7 @@
 #include "scan.h"
 #include "dacspi.h"
 
-#define TUNER_TICK (SYNTH_MASTER_CLOCK/DACSPI_TICK_RATE)
+#define TUNER_SR_BUF_DIV 20 // divide the sample rate by this and you get the buffer length, this is also the lowest theoretical tunable frequency
 
 #define TUNER_MIDDLE_C_HERTZ 261.63
 #define TUNER_LOWEST_HERTZ (TUNER_MIDDLE_C_HERTZ/16)
@@ -38,44 +38,41 @@ static LOWERCODESIZE void prepareSynth(void)
 	synth_refreshCV(-1,cvBVol,0,1);
 }
 
-static NOINLINE LOWERCODESIZE uint32_t measureAudioPeriod(uint8_t periods) // in TUNER_TICK ticks
+static NOINLINE LOWERCODESIZE uint32_t measureThruZeroCount(void)
 {
 	uint32_t tzCnt=0;
 	uint8_t prev;
 		
-#define MAP_BUF_LEN 6400
-#define MAP_BUF_MIDDLE 128
+#define MAP_BUF_LEN (SCAN_MASTERMIX_SAMPLERATE/TUNER_SR_BUF_DIV)
+#define MAP_BUF_HALF_RANGE 128
 	uint8_t buf[MAP_BUF_LEN];
 
-	for(uint8_t p=0;p<periods;++p)
-	{
-		scan_sampleMasterMix(MAP_BUF_LEN,buf);
+	scan_sampleMasterMix(MAP_BUF_LEN,buf);
 
-		prev=buf[0];
-		for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
-		{
+	prev=buf[0];
+	for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
+	{
 			uint8_t sample=buf[pos];
 			
-			if ((prev<=MAP_BUF_MIDDLE&&sample>MAP_BUF_MIDDLE) || (prev>=MAP_BUF_MIDDLE&&sample<MAP_BUF_MIDDLE))
-				++tzCnt;
+		if ((prev<=MAP_BUF_HALF_RANGE&&sample>MAP_BUF_HALF_RANGE) || (prev>=MAP_BUF_HALF_RANGE&&sample<MAP_BUF_HALF_RANGE))
+			++tzCnt;
 
-			prev=sample;
-		}
+		prev=sample;
 	}
 	
-	return ((periods*MAP_BUF_LEN*2)<<16)/tzCnt;
+	return tzCnt;
 }
 
 static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 {
 	int8_t i;
 	uint16_t estimate,bit;
-	uint32_t p,tgtp;
+	uint32_t tzCnt,targetTzCnt;
 
-	tgtp=(TUNER_TICK<<(16-nthC))/TUNER_LOWEST_HERTZ;
+	targetTzCnt=TUNER_LOWEST_HERTZ*(2<<nthC)/TUNER_SR_BUF_DIV; // 2 because 2 thru zero per waveform period
 	
-	estimate=0x8000;
-	bit=0x4000;
+	estimate=0;
+	bit=0x8000;
 
 	for(i=0;i<12;++i) // 12bit dac
 	{
@@ -84,10 +81,10 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 		synth_refreshCV(voice,cvCutoff,estimate,1);
 		delay_ms(25); // wait analog hardware stabilization	
 
-		p=measureAudioPeriod(1);
+		tzCnt=measureThruZeroCount();
 
 		// adjust estimate
-		if (p<tgtp)
+		if (tzCnt>targetTzCnt)
 			estimate&=~bit;
 
 		// on to finer changes
@@ -97,7 +94,7 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 	settings.tunes[nthC][voice]=estimate;
 
 #ifdef DEBUG
-	rprintf(0, "cv %d per %d theo %d\n",estimate,p,tgtp);
+	rprintf(0, "cv %d tzCnt %d targetTzCnt %d\n",estimate,tzCnt,targetTzCnt);
 #endif
 }
 
@@ -114,7 +111,7 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 
 	// open VCA
 
-	synth_refreshCV(voice,cvAmp,UINT16_MAX,1);
+	synth_refreshCV(voice,cvAmp,UINT16_MAX/2,1);
 	
 	// tune
 

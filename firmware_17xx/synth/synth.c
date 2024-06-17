@@ -770,15 +770,12 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		value=UINT16_MAX-value;
 		break;
 	case cvAmp:
-		phase=(value<<8)/6; // limit VCA output level to 5Vpp
+		phase=value<<8;
 		value=computeShape(phase,vcaLinearizationCurve,2);
 		break;
 	case cvNoiseVol:
 		phase=value<<8;
 		value=computeShape(phase,vcNoiseLinearizationCurve,2);
-		break;
-	case cvResonance:
-		value>>=1;
 		break;
 	default:
 		/* nothing */;
@@ -873,7 +870,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	synth_refreshCV(v,cvAmp,vamp,0);
+	synth_refreshCV(v,cvAmp,vamp/6,0); // limit VCA output level to avoid saturating the voices mixer
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1034,7 +1031,7 @@ void synth_updateCVsEvent(void)
 		// compensate resonance lowering volume by abjusting pre filter mixer level
 	resoFactor=(35*UINT16_MAX+170*(uint32_t)MAX(0,resVal-2500))/(100*256);
 	
-	synth_refreshCV(-1,cvResonance,resVal,0);
+	synth_refreshCV(-1,cvResonance,resVal>>1,0); // half scale is already oscillating
 	synth_refreshCV(-1,cvAVol,getResonanceCompensatedCV(cpAVol,cvAVol),0);
 	synth_refreshCV(-1,cvBVol,getResonanceCompensatedCV(cpBVol,cvBVol),0);
 	synth_refreshCV(-1,cvNoiseVol,getResonanceCompensatedCV(cpNoiseVol,cvNoiseVol),0);
