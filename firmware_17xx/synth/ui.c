@@ -30,7 +30,7 @@ enum uiParamType_e
 
 enum uiPage_e
 {
-	upNone=-1,upOscs,upWMod,upFil,upAmp,upLFO1,upLFO2,upArp,upSeqPlay,upSeqRec,upMisc,upPresets,
+	upHelp,upOscs,upWMod,upFil,upAmp,upLFO1,upLFO2,upArp,upSeqPlay,upSeqRec,upMisc,upPresets,
 
 	// /!\ this must stay last
 	upCount
@@ -55,6 +55,28 @@ struct uiParam_s
 
 const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] = // [pages][pot/key num]
 {
+	/* Help page (startup) */
+	{
+		/* 1st row of pots */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* 2nd row of pots */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		/* buttons (A,B,C,D,#,*) */
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptNone},
+		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
+		{.type=ptNone},
+	},
 	/* Oscillators page (1) */
 	{
 		/* 1st row of pots */
@@ -1187,7 +1209,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		ui.lastInputPot=potnum;
 
 	// nothing to do -> return
-	if(ui.activePage==upNone || prm->type==ptNone)
+	if(prm->type==ptNone)
 		return;
 	
 	// fullscreen display
@@ -1507,7 +1529,8 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				change=1;
 				break;
 			case cnHelp:
-				ui.activePage=upNone;
+				ui.activePage=upHelp;
+				ui.activeSourceTimeout=0;
 				ui.pendingScreenClear=1;
 				break;
 		}
@@ -1673,7 +1696,7 @@ void ui_init(void)
 {
 	memset(&ui,0,sizeof(ui));
 	
-	ui.activePage=upNone;
+	ui.activePage=upHelp;
 	ui.activeSource=INT8_MAX;
 	ui.pendingScreenClear=1;
 	ui.presetModifiedWarning=-1;
@@ -1682,7 +1705,7 @@ void ui_init(void)
 	ui.kpInputDecade=-1;
 	ui.kpInputPot=-1;
 	ui.settingsModifiedTimeout=UINT32_MAX;
-	ui.activeSourceTimeout=UINT32_MAX;
+	ui.activeSourceTimeout=0;
 	ui.slowUpdateTimeout=UINT32_MAX;
 
 	precalcDeadband(&panelDeadband);
@@ -1766,18 +1789,7 @@ void ui_update(void)
 	setPos(1,0,0);
 	setPos(2,0,0);
 
-	if(ui.activePage==upNone)
-	{
-		if(ui.pendingScreenClear)
-		{
-			sendString(1,"1:Oscillators   2:WaveMod    3:Filter   ");
-			sendString(1,"4:Amplifier     5:LFO1       6:LFO2     ");
-			sendString(2,"7:Arpeggiator   8:Sequencer  9:Misc.    ");
-			sendString(2,"*:Set digits    0:Presets    #:Transpose");
-		}
-		delay_ms(2);
-	}
-	else if(fsDisp) // fullscreen display
+	if(fsDisp) // fullscreen display
 	{
 		char * dv;
 		int32_t v;
@@ -1809,6 +1821,19 @@ void ui_update(void)
 		{
 			drawWaveform(sp2abx[prm->number]);
 		}
+	}
+	else if(ui.activePage==upHelp)
+	{
+		ui.activeSource=INT8_MAX;
+
+		if(ui.pendingScreenClear)
+		{
+			sendString(1,"1:Oscillators   2:WaveMod    3:Filter   ");
+			sendString(1,"4:Amplifier     5:LFO1       6:LFO2     ");
+			sendString(2,"7:Arpeggiator   8:Sequencer  9:Misc.    ");
+			sendString(2,"*:Set digits    0:Presets    #:Transpose");
+		}
+		delay_ms(2);
 	}
 	else
 	{
