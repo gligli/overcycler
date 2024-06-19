@@ -55,6 +55,7 @@
         <in>tuner.c</in>
         <in>uart_midi.c</in>
         <in>ui.c</in>
+        <in>ui_pages.h</in>
         <in>utils.c</in>
         <in>wave_reader.c</in>
         <in>wtosc.c</in>
@@ -550,6 +551,8 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="../synth/ui_pages.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
