@@ -1165,7 +1165,8 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	
 	if (ui.kpInputDecade>=0)
 	{
-		handleKeypadInput(source);
+		if(source>=kb0)
+			handleKeypadInput(source);
 		return;
 	}
 
