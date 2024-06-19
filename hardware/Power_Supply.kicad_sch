@@ -4834,7 +4834,7 @@
 	)
 	(wire
 		(pts
-			(xy 63.5 55.88) (xy 104.14 55.88)
+			(xy 63.5 55.88) (xy 80.01 55.88)
 		)
 		(stroke
 			(width 0)
@@ -5724,6 +5724,16 @@
 	)
 	(wire
 		(pts
+			(xy 92.71 58.42) (xy 104.14 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a68d0367-b8c3-48b0-87a3-c2b8b5f83f6f")
+	)
+	(wire
+		(pts
 			(xy 148.59 119.38) (xy 148.59 120.65)
 		)
 		(stroke
@@ -5851,6 +5861,16 @@
 			(type default)
 		)
 		(uuid "b5f75523-571e-4e39-867c-1a0531da0a08")
+	)
+	(wire
+		(pts
+			(xy 92.71 55.88) (xy 104.14 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b61338ca-5872-4b41-83de-29acda968dc7")
 	)
 	(wire
 		(pts
@@ -6154,7 +6174,7 @@
 	)
 	(wire
 		(pts
-			(xy 63.5 58.42) (xy 104.14 58.42)
+			(xy 63.5 58.42) (xy 80.01 58.42)
 		)
 		(stroke
 			(width 0)
@@ -6713,6 +6733,17 @@
 		)
 		(uuid "02106721-b685-4fe5-8909-7d61085bc543")
 	)
+	(label "UD-"
+		(at 95.25 58.42 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "129868f3-26e2-4810-89c9-93662dc3bbd1")
+	)
 	(label "USB_5V"
 		(at 166.37 33.02 0)
 		(fields_autoplaced yes)
@@ -6724,8 +6755,8 @@
 		)
 		(uuid "44314a68-0491-4ad9-a01b-4707c7658e11")
 	)
-	(label "UD+"
-		(at 64.77 55.88 0)
+	(label "D+"
+		(at 66.04 55.88 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6733,9 +6764,9 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "69883be0-deb6-4f03-a853-db3b631204c7")
+		(uuid "54343e4b-bb8e-4020-a133-cf0371ef3ced")
 	)
-	(label "D-"
+	(label "DD-"
 		(at 135.89 58.42 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6757,8 +6788,8 @@
 		)
 		(uuid "7b292f37-93ee-40bf-bbe8-bfb33531e73d")
 	)
-	(label "UD-"
-		(at 64.77 58.42 0)
+	(label "D-"
+		(at 66.04 58.42 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6766,9 +6797,9 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b2203708-8791-4941-9ca5-55b604f9915c")
+		(uuid "7e94e288-c5f9-49b7-868d-44488ed9e4b4")
 	)
-	(label "D+"
+	(label "DD+"
 		(at 135.89 55.88 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6778,6 +6809,17 @@
 			(justify left bottom)
 		)
 		(uuid "cbf80a55-2572-418a-8542-89e62e8d0d3b")
+	)
+	(label "UD+"
+		(at 95.25 55.88 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d7792c7e-c294-4c7c-9b28-5d511b1cd047")
 	)
 	(global_label "USB_D+"
 		(shape output)
@@ -6972,6 +7014,81 @@
 			(project "overcycler3"
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
 					(reference "C18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Additional:R")
+		(at 86.36 55.88 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "010534e7-9949-4aef-99bd-5921b473a1fc")
+		(property "Reference" "R1"
+			(at 86.36 53.848 90)
+			(effects
+				(font
+					(size 1.016 1.016)
+				)
+			)
+		)
+		(property "Value" "24"
+			(at 86.36 55.88 90)
+			(effects
+				(font
+					(size 1.016 1.016)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 86.36 54.102 90)
+			(effects
+				(font
+					(size 0.762 0.762)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 86.36 55.88 0)
+			(effects
+				(font
+					(size 0.762 0.762)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 86.36 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" " C25804"
+			(at 86.36 57.912 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2004b5a3-6609-484c-a8a7-32abe4eae887")
+		)
+		(pin "2"
+			(uuid "0b059f2d-b837-4ca4-b5fa-dd513f0cfedf")
+		)
+		(instances
+			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
+					(reference "R1")
 					(unit 1)
 				)
 			)
@@ -7345,6 +7462,81 @@
 			(project "overcycler3"
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
 					(reference "C78")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Additional:R")
+		(at 86.36 58.42 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "099fb41b-5095-40a0-8b2e-a35dd75ba291")
+		(property "Reference" "R2"
+			(at 86.36 60.452 90)
+			(effects
+				(font
+					(size 1.016 1.016)
+				)
+			)
+		)
+		(property "Value" "24"
+			(at 86.36 58.42 90)
+			(effects
+				(font
+					(size 1.016 1.016)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 86.36 56.642 90)
+			(effects
+				(font
+					(size 0.762 0.762)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 86.36 58.42 0)
+			(effects
+				(font
+					(size 0.762 0.762)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 86.36 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" " C25804"
+			(at 86.36 60.452 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "074717b2-bc7a-4812-862b-4bdf71ac10b7")
+		)
+		(pin "2"
+			(uuid "c415f5e9-7218-470e-96cc-e278a0b6c789")
+		)
+		(instances
+			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -11835,7 +12027,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 144.78 56.642 90)
 			(effects
 				(font
@@ -11861,7 +12053,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17634"
+		(property "LCSC" "C23140"
 			(at 144.78 60.452 0)
 			(effects
 				(font
@@ -12898,7 +13090,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 144.78 54.102 90)
 			(effects
 				(font
@@ -12924,7 +13116,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17634"
+		(property "LCSC" "C23140"
 			(at 144.78 57.912 0)
 			(effects
 				(font
