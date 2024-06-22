@@ -7036,7 +7036,7 @@
 				)
 			)
 		)
-		(property "Value" "24"
+		(property "Value" "33"
 			(at 86.36 55.88 90)
 			(effects
 				(font
@@ -7070,7 +7070,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" " C25804"
+		(property "LCSC" "C23140"
 			(at 86.36 57.912 0)
 			(effects
 				(font
@@ -7484,7 +7484,7 @@
 				)
 			)
 		)
-		(property "Value" "24"
+		(property "Value" "33"
 			(at 86.36 58.42 90)
 			(effects
 				(font
@@ -7518,7 +7518,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" " C25804"
+		(property "LCSC" "C23140"
 			(at 86.36 60.452 0)
 			(effects
 				(font
