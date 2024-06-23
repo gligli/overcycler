@@ -64,6 +64,7 @@
 #define INACK_BI		(1<<5)			/**< interrupt on NACK for bulk in */
 #define INACK_BO		(1<<6)			/**< interrupt on NACK for bulk out */
 
+void USBHwPreinit		(void);
 void USBHwISR			(void);
 void USBHwNakIntEnable	(U8 bIntBits);
 void USBHwConnect		(BOOL fConnect);

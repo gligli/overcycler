@@ -284,6 +284,8 @@ int main(void)
 	int res,mode=-1;
 	
 	__disable_irq();
+	USBHwPreinit(); // needs to be done ASAP at boot
+
 	delay_ms(500);
 
 	init_serial0(DEBUG_UART_BAUD);

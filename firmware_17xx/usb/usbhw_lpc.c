@@ -617,6 +617,21 @@ DEBUG_LED_OFF(9);
 }
 
 
+/**
+ * Pre-initialises the USB hardware
+ * 
+ * Sets the USB differential pair to low state to mark USB as disconnected for the host.
+ */
+void USBHwPreinit (void)
+{
+#ifdef LPC1778	
+	/* P0.29, P0.30 pulled low to disconnect */
+	LPC_GPIO0->FIODIR |= (1<<29) | (1<<30); // GPIO as output
+	LPC_IOCON->P0_29 = 0x400; // GPIO mode / open drain mode
+	LPC_IOCON->P0_30 = 0x400;
+#endif
+}
+
 
 /**
     Initialises the USB hardware
