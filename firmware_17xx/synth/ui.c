@@ -1083,7 +1083,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case cnTune:
-				assigner_panicOff(); // KLUDGE: to work around a strange CV update bug in the tuner
+				assigner_setVoiceMask(0); // ensure no note playing during tuning
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
@@ -1333,6 +1333,7 @@ static void handleSlowUpdates(void)
 			setPos(2,0,1);
 			tuner_tuneSynth();
 			settings_save();
+			synth_refreshFullState(0);
 			ui.pendingScreenClear=1;
 			break;
 		case 0x80+cnUsbM:
