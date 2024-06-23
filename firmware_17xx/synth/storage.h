@@ -67,7 +67,7 @@ typedef enum
 
 typedef enum
 {
-	ptOther, ptPercussive, ptBass, ptPad, ptKeys, ptStabs, ptLead, ptArpeggios
+	ptOther, ptBass, ptPad, ptStrings, ptBrass, ptKeys, ptLead, ptArpeggios
 }presetType_t;
 
 typedef enum

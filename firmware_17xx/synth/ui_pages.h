@@ -293,7 +293,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
-		{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Perc","Bass","Pad ","Keys","Stab","Lead","Arpg"}},
+		{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Bass","Pad","Strn","Brass","Keys","Lead","Arpg"}},
 		{.type=ptStep,.number=spPresetStyle,.shortName="Styl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnLoad,.shortName="Load",.longName="Load preset"},
