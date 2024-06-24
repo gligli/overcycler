@@ -56,7 +56,7 @@ struct hd44780_data lcd1, lcd2;
 
 static void setLcdContrast(uint8_t contrast)
 {
-	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*400/UI_MAX_LCD_CONTRAST);
+	DAC_UpdateValue(0,(UI_MAX_LCD_CONTRAST-MIN(contrast,UI_MAX_LCD_CONTRAST))*300/UI_MAX_LCD_CONTRAST);
 }
 
 static int sendChar(int lcd, int ch)
