@@ -118,7 +118,7 @@ const struct namedParam_s steppedParametersSteps[spCount] =
 };
 
 struct settings_s settings EXT_RAM;
-struct preset_s currentPreset EXT_RAM;
+struct preset_s currentPreset;
 
 struct loadLL_s
 {

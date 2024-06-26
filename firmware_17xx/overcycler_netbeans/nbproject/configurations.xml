@@ -47,6 +47,7 @@
         <in>clock.c</in>
         <in>dacspi.c</in>
         <in>lfo.c</in>
+        <in>lfo_lookups.h</in>
         <in>midi.c</in>
         <in>scan.c</in>
         <in>seq.c</in>
@@ -444,6 +445,8 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="../synth/lfo_lookups.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
