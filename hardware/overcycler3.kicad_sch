@@ -21191,7 +21191,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C81598"
+		(property "LCSC" "C7420318"
 			(at 354.33 88.9 0)
 			(effects
 				(font
@@ -21270,7 +21270,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C81598"
+		(property "LCSC" "C7420318"
 			(at 354.33 77.47 0)
 			(effects
 				(font
@@ -21346,7 +21346,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C81598"
+		(property "LCSC" "C7420318"
 			(at 354.33 104.14 0)
 			(effects
 				(font
@@ -21422,7 +21422,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C81598"
+		(property "LCSC" "C7420318"
 			(at 354.33 115.57 0)
 			(effects
 				(font
@@ -24591,6 +24591,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C157981"
+			(at 90.17 242.5699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "4"
 			(uuid "173c3037-8fb7-4547-bb0b-fd8bf3d4b58e")
 		)
@@ -25444,7 +25453,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C81598"
+		(property "LCSC" "C7420318"
 			(at 363.22 39.37 0)
 			(effects
 				(font
@@ -25665,7 +25674,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C7465591"
+		(property "LCSC" "C157972"
 			(at 124.46 256.54 0)
 			(effects
 				(font
@@ -26762,6 +26771,15 @@
 		)
 		(property "Description" "Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 87.63 222.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C157981"
+			(at 90.17 220.9799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -28444,7 +28462,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "     C40877"
+		(property "LCSC" "C40877"
 			(at 152.4 218.44 0)
 			(effects
 				(font
@@ -29857,7 +29875,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "  C2962011"
+		(property "LCSC" "C2962011"
 			(at 231.14 261.62 0)
 			(effects
 				(font
