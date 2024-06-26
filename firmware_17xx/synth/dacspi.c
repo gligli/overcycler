@@ -27,8 +27,6 @@
 		GPDMA_DMACCxConfig_TransferType(2) | \
 		GPDMA_DMACCxConfig_ITC
 
-#define DACSPI_CV_CHANNEL 6
-
 static EXT_RAM GPDMA_LLI_Type lli[DACSPI_BUFFER_COUNT*DACSPI_CHANNEL_COUNT][3];
 static EXT_RAM GPDMA_LLI_Type cvLli[DACSPI_BUFFER_COUNT][4];
 static EXT_RAM volatile uint8_t marker;
