@@ -3,10 +3,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "lfo.h"
+#include "lfo_lookups.h"
 #include "scan.h"
 #include "dacspi.h"
-
-static uint16_t sineShape[256];
 
 static void updateIncrement(struct lfo_s * lfo)
 {
@@ -105,12 +104,7 @@ const char * lfo_shapeName(lfoShape_t shape)
 
 void lfo_init(struct lfo_s * lfo)
 {
-	int16_t i;
-	
 	memset(lfo,0,sizeof(struct lfo_s));
-	
-	for(i=0;i<256;++i)
-		sineShape[i]=(cosf((i/255.0f+1.0f)*M_PI)+1.0f)/2.0f*65535.0f;
 }
 
 inline void lfo_update(struct lfo_s * l)
