@@ -400,6 +400,10 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 			srprintf(buf,"voicePattern%d",i);
 			getSafeIntValue(ll,buf,&currentPreset.voicePattern[i],sizeof(currentPreset.voicePattern[i]),0,UINT8_MAX);
 		}
+		
+		// reset wheels/pressure
+		synth_pressureEvent(0);
+		synth_wheelEvent(0,0,3);
 	}
 	
 	preset_loadDefault(1);
