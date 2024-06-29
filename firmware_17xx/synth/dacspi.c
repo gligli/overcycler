@@ -32,7 +32,7 @@ static EXT_RAM GPDMA_LLI_Type cvLli[DACSPI_BUFFER_COUNT][4];
 static EXT_RAM volatile uint8_t marker;
 static EXT_RAM uint8_t markerSource[DACSPI_BUFFER_COUNT];
 
-static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
+static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT][3] =
 {
 	{SPIMUX_VAL(1,0,1),(uint32_t)&LPC_GPIO1->FIOSET,5},
 	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,1},
@@ -41,13 +41,6 @@ static const uint32_t spiMuxCommandsConst[DACSPI_CHANNEL_COUNT*2][3] =
 	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOSET,6},
 	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOCLR,4},
 	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,0},
-	{SPIMUX_VAL(1,0,1),(uint32_t)&LPC_GPIO1->FIOSET,5},
-	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,1},
-	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOSET,3},
-	{SPIMUX_VAL(0,0,1),(uint32_t)&LPC_GPIO1->FIOCLR,2},
-	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOSET,6},
-	{SPIMUX_VAL(0,1,0),(uint32_t)&LPC_GPIO1->FIOCLR,4},
-	{SPIMUX_VAL(1,0,0),(uint32_t)&LPC_GPIO1->FIOCLR,7},
 };
 
 
@@ -65,7 +58,7 @@ static struct
 {
 	uint16_t oscCommands[DACSPI_BUFFER_COUNT][SYNTH_VOICE_COUNT*2];
 	uint32_t cvCommands[DACSPI_BUFFER_COUNT];
-	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT*2][3];
+	uint32_t spiMuxCommands[DACSPI_CHANNEL_COUNT][3];
 	uint16_t cr0Pre, cr0Post, sselPre, sselPost;
 	int curSet;
 } dacspi EXT_RAM;
@@ -100,9 +93,9 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 static void buildLLIs(int buffer, int channel)
 {
 	int lliPos=buffer*DACSPI_CHANNEL_COUNT+channel;
-	int muxIndex=lliPos%(DACSPI_CHANNEL_COUNT*2);
+	int muxIndex=lliPos%DACSPI_CHANNEL_COUNT;
 	int muxChannel=dacspi.spiMuxCommands[muxIndex][2];
-	int8_t isCVChannel=muxChannel==0 || muxChannel==7;
+	int8_t isCVChannel=muxChannel==0;
 	
 	lli[lliPos][0].SrcAddr=(uint32_t)&dacspi.spiMuxCommands[muxIndex][0];
 	lli[lliPos][0].DstAddr=dacspi.spiMuxCommands[muxIndex][1];
@@ -145,13 +138,7 @@ static void buildLLIs(int buffer, int channel)
 
 	if(isCVChannel)
 	{
-		int cvDacChannel=(buffer>>1)&7;
-		int cvSet=buffer&~(DACSPI_CV_COUNT-1);
-		
-		if(muxChannel==0)
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[cvDacChannel+cvSet];
-		else
-			lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[8+cvDacChannel+cvSet];
+		lli[lliPos][1].SrcAddr=(uint32_t)&dacspi.cvCommands[buffer];
 	}
 	else
 	{
