@@ -131,10 +131,9 @@ static void buildLLIs(int buffer, int channel)
 	lli[lliPos][1].DstAddr=(uint32_t)&LPC_SSP2->DR;
 	lli[lliPos][1].NextLLI=(uint32_t)&lli[lliPos][2];
 	lli[lliPos][1].Control=
-		GPDMA_DMACCxControl_TransferSize(2) |
-		GPDMA_DMACCxControl_SWidth(1) |
-		GPDMA_DMACCxControl_DWidth(1) |
-		GPDMA_DMACCxControl_SI;
+		GPDMA_DMACCxControl_TransferSize(1) |
+		GPDMA_DMACCxControl_SWidth(2) |
+		GPDMA_DMACCxControl_DWidth(1);
 
 	if(isCVChannel)
 	{
