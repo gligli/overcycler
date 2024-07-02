@@ -22831,7 +22831,7 @@
 				)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "2k2"
 			(at 312.42 152.4 90)
 			(effects
 				(font
@@ -22865,7 +22865,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17520"
 			(at 312.42 154.432 0)
 			(effects
 				(font
@@ -28670,7 +28670,7 @@
 				)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "2k2"
 			(at 312.42 176.53 90)
 			(effects
 				(font
@@ -28704,7 +28704,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17414"
+		(property "LCSC" "C17520"
 			(at 312.42 178.562 0)
 			(effects
 				(font
