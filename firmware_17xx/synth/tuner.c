@@ -9,7 +9,7 @@
 #include "scan.h"
 #include "dacspi.h"
 
-#define TUNER_SR_BUF_DIV 20 // divide the sample rate by this and you get the buffer length, this is also the lowest theoretical tunable frequency
+#define TUNER_SR_BUF_DIV 4 // divide the sample rate by this and you get the buffer length, this is also the lowest theoretical tunable frequency
 
 #define TUNER_MIDDLE_C_HERTZ 261.63
 #define TUNER_LOWEST_HERTZ (TUNER_MIDDLE_C_HERTZ/16)
@@ -111,7 +111,7 @@ static LOWERCODESIZE void tuneFilter(int8_t voice)
 
 	// open VCA
 
-	synth_refreshCV(voice,cvAmp,UINT16_MAX/2,1);
+	synth_refreshCV(voice,cvAmp,UINT16_MAX,1);
 	
 	// tune
 
@@ -196,10 +196,10 @@ LOWERCODESIZE void tuner_tuneSynth(void)
 			
 			// init
 		
-		synth_refreshCV(-1,cvResonance,UINT16_MAX,1);
+		synth_refreshCV(-1,cvResonance,UINT16_MAX/2,1);
 	
 		for(v=0;v<SYNTH_VOICE_COUNT;++v)
-			synth_refreshCV(v,cvCutoff,UINT16_MAX,1);
+			synth_refreshCV(v,cvCutoff,UINT16_MAX/2,1);
 	
 			// filters
 		

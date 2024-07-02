@@ -75,11 +75,11 @@ __attribute__ ((used)) void DMA_IRQHandler(void)
 	// update CVs and DACs (in 2 sets of 16)
 	
 	synth_updateCVsEvent();
-	synth_updateOscsEvent(0,DACSPI_BUFFER_COUNT/4);
+	synth_updateOscsEvent(dacspi.curSet,DACSPI_BUFFER_COUNT/4);
 
 	dacspi.curSet+=DACSPI_CV_COUNT;
 	synth_updateCVsEvent();
-	synth_updateOscsEvent(0,DACSPI_BUFFER_COUNT/4);
+	synth_updateOscsEvent(dacspi.curSet,DACSPI_BUFFER_COUNT/4);
 
 	// update timer @ 500Hz
 
@@ -180,7 +180,7 @@ static void buildLLIs(int buffer, int channel)
 
 FORCEINLINE void dacspi_setOscValue(int32_t buffer, int channel, uint16_t value)
 {
-	dacspi.oscCommands[buffer+dacspi.curSet][channel]=(value>>4)|oscChannelCommand[channel];
+	dacspi.oscCommands[buffer][channel]=(value>>4)|oscChannelCommand[channel];
 }
 
 FORCEINLINE void dacspi_setCVValue(int channel, uint16_t value, int8_t noDblBuf)
