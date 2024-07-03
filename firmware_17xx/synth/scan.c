@@ -18,10 +18,10 @@
 
 #define KEYPAD_DEBOUNCE_THRESHOLD 2
 
-#define POT_SAMPLES 5
+#define POT_SAMPLES 6
 #define POT_UNLOCK_THRESHOLD scan_potTo16bits(6)
 #define POT_TIMEOUT_THRESHOLD scan_potTo16bits(3)
-#define POT_TIMEOUT (TICKER_HZ)
+#define POT_TIMEOUT (TICKER_HZ/2)
 
 #define POTSCAN_PIN_CLK 20
 #define POTSCAN_PIN_CS 21
@@ -29,7 +29,7 @@
 #define POTSCAN_PIN_DIN 24
 
 #define POTSCAN_PRE_DIV 12
-#define POTSCAN_SPI_FREQUENCY 80000
+#define POTSCAN_SPI_FREQUENCY 2500000
 #define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
 
 #define POTSCAN_DMACONFIG \
@@ -53,8 +53,6 @@ static struct
 	int8_t keypadState[kbCount];
 	
 	scan_event_callback_t eventCallback;
-	
-	int8_t pendingSPIFlush;
 } scan EXT_RAM;
 
 static const uint8_t keypadButtonCode[kbCount]=
@@ -77,8 +75,8 @@ static void buildLLIs(int pot, int smp)
 		GPDMA_DMACCxControl_DWidth(1);
 
 	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP0->DR;
-	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-1)%(POT_SAMPLES*SCAN_POT_COUNT)];
-	lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(POT_SAMPLES*SCAN_POT_COUNT)][0];
+	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-2)%(POT_SAMPLES*SCAN_POT_COUNT)];
+	lli[lliPos][1].NextLLI=(lliPos+1>=POT_SAMPLES*SCAN_POT_COUNT)?0:(uint32_t)&lli[lliPos+1][0];
 	lli[lliPos][1].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(1) |
@@ -91,31 +89,22 @@ static void readPots(void)
 	int pot;
 	uint16_t tmpSmp[POT_SAMPLES];
 
-	if(scan.pendingSPIFlush)
+	// wait for lli pot scan to finish
+	while(LPC_GPDMACH1->CConfig&GPDMA_DMACCxConfig_E)
 	{
-		// ensure the FIFO stays empty for proper lli function
-		while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
-		{
-			// flush received data
-			SSP_ReceiveData(LPC_SSP0);
-		}
-		
-		// enough for a full loop of the llis
-		delay_ms(20);
-		
-		scan.pendingSPIFlush=0;
+		DELAY_100NS();
 	}
 	
 	// read pots from TLV2556 ADC
 
 	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
-		// convert 10 bits samples to 0..999 and back to 16 bits full scale
+		// convert 10 bits samples to 0..999
 
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
 			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
-			tmpSmp[smp]=scan_potTo16bits(MAX(0,MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]-12)));
+			tmpSmp[smp]=scan_potTo16bits(MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]));
 		}
 		
 		// sort values
@@ -124,7 +113,7 @@ static void readPots(void)
 		
 		// median
 	
-		new=tmpSmp[POT_SAMPLES/2];
+		new=((uint32_t)tmpSmp[2]+(uint32_t)tmpSmp[3])>>1;
 		
 		// ignore small changes
 
@@ -147,6 +136,22 @@ static void readPots(void)
 			if(scan.eventCallback) scan.eventCallback(-pot-1);
 		}
 	}
+	
+	// start new lli pot scan
+	
+	// ensure the FIFO stays empty for proper lli function
+	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+	{
+		// flush received data
+		SSP_ReceiveData(LPC_SSP0);
+	}
+
+	LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
+	LPC_GPDMACH1->CDestAddr=lli[0][0].DstAddr;
+	LPC_GPDMACH1->CLLI=lli[0][0].NextLLI;
+	LPC_GPDMACH1->CControl=lli[0][0].Control;
+
+	LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
 }
 
 static void readKeypad(void)
@@ -265,16 +270,6 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
 		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY)-1;
-
-		// init GPDMA channel
-		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
-		LPC_GPDMACH1->CDestAddr=lli[0][0].DstAddr;
-		LPC_GPDMACH1->CLLI=lli[0][0].NextLLI;
-		LPC_GPDMACH1->CControl=lli[0][0].Control;
-
-		LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
-		
-		scan.pendingSPIFlush=1;
 	}
 
 	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
