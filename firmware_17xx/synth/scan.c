@@ -12,7 +12,8 @@
 #include "dacspi.h"
 #include "main.h"
 
-#define SCAN_ADC_BITS 10
+#define SCAN_ADC_BITS 12
+#define SCAN_SPI_FREQUENCY 2500000
 
 #define DMA_CHANNEL_SSP1_TX__T2_MAT_0 4
 
@@ -29,15 +30,13 @@
 #define POTSCAN_PIN_DIN 24
 
 #define POTSCAN_PRE_DIV 12
-#define POTSCAN_SPI_FREQUENCY 2500000
-#define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
+#define POTSCAN_FREQUENCY (SCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
 
 #define POTSCAN_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
 		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_SSP1_TX__T2_MAT_0) | \
 		GPDMA_DMACCxConfig_TransferType(2)
 
-#define MIXSCAN_SPI_FREQUENCY (SCAN_MASTERMIX_SAMPLERATE*SCAN_ADC_BITS*2)
 #define MIXSCAN_ADC_CHANNEL 10
 
 static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
@@ -104,7 +103,6 @@ static void readPots(void)
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
 			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
-			tmpSmp[smp]=scan_potTo16bits(MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]));
 		}
 		
 		// sort values
@@ -114,6 +112,7 @@ static void readPots(void)
 		// median
 	
 		new=((uint32_t)tmpSmp[2]+(uint32_t)tmpSmp[3])>>1;
+		new=scan_potTo16bits(MIN(SCAN_POT_MAX_VALUE,new>>(SCAN_ADC_BITS-10)));
 		
 		// ignore small changes
 
@@ -190,19 +189,23 @@ static void readKeypad(void)
 
 static uint16_t readADC(uint16_t channel)
 {
-	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_TXFIFO_EMPTY)==RESET)
-	{
-		// wait until previous data is transferred
-	}
+	// wait timer
 	
-	SSP_SendData(LPC_SSP0,channel<<(SCAN_ADC_BITS-4));
+	while(!(LPC_TIM2->IR&TIM_IR_CLR(TIM_MR0_INT)))
+		/* nothing */;
 
-	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==RESET)
-	{
-		// wait for new data
-	}
-
-	uint16_t res=SSP_ReceiveData(LPC_SSP0);
+	TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
+	
+	// read/write SPI
+	
+	SSP_DATA_SETUP_Type sds;
+	uint16_t res=0,trs=channel<<(SCAN_ADC_BITS-4);
+	
+	sds.length=1;
+	sds.tx_data=&trs;
+	sds.rx_data=&res;
+	
+	SSP_ReadWrite(LPC_SSP0,&sds,SSP_TRANSFER_POLLING);
 	
 	// wait TLV2556 tConvert
 	
@@ -225,7 +228,7 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_CR0_DSS(SCAN_ADC_BITS);
-	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
+	SSP_ConfigStruct.ClockRate=SCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP0,ENABLE);
 
@@ -256,13 +259,13 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 		tm.ResetOnMatch=ENABLE;
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
-		tm.MatchValue=SYNTH_MASTER_CLOCK/SCAN_MASTERMIX_SAMPLERATE-1;
+		tm.MatchValue=SYNTH_MASTER_CLOCK/(SCAN_MASTERMIX_SAMPLERATE*4)-1; // 4x upsampling
 	}
 	else
 	{
 		// init timer
 		tim.PrescaleOption=TIM_PRESCALE_TICKVAL;
-		tim.PrescaleValue=POTSCAN_PRE_DIV-1;
+		tim.PrescaleValue=POTSCAN_PRE_DIV;
 
 		tm.MatchChannel=0;
 		tm.IntOnMatch=DISABLE;
@@ -278,10 +281,10 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 	TIM_Cmd(LPC_TIM2,ENABLE);
 }
 
-void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
+void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 {
 	int32_t mini=UINT16_MAX,maxi=0,extents;
-	uint8_t *buf;
+	uint16_t *buf;
 	
 	// ensure no spurious reads from other channels
 	
@@ -293,12 +296,10 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 	buf=buffer;
 	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
-		while(!(LPC_TIM2->IR&TIM_IR_CLR(TIM_MR0_INT)))
-			/* nothing */;
-		
-		TIM_ClearIntPending(LPC_TIM2,TIM_MR0_INT);
-		
-		uint8_t sample=readADC(MIXSCAN_ADC_CHANNEL)>>(SCAN_ADC_BITS-8);
+		uint16_t sample=readADC(MIXSCAN_ADC_CHANNEL)+ // because 4x upsampling
+						readADC(MIXSCAN_ADC_CHANNEL)+
+						readADC(MIXSCAN_ADC_CHANNEL)+
+						readADC(MIXSCAN_ADC_CHANNEL);
 		
 		mini=MIN(mini,sample);
 		maxi=MAX(maxi,sample);
@@ -314,9 +315,9 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint8_t * buffer)
 	buf=buffer;
 	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
-		uint8_t sample=*buf;
+		uint16_t sample=*buf;
 		
-		sample=(((int32_t)sample-mini)<<8)/extents;
+		sample=(((int32_t)sample-mini)<<16)/extents;
 		
 		*buf++=sample;
 	}
@@ -396,7 +397,7 @@ void scan_init(void)
 	
 	scan_setMode(0);	
 	
-	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,POTSCAN_SPI_FREQUENCY);
+	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,SCAN_SPI_FREQUENCY);
  }
 
 void scan_update(void)

@@ -41,18 +41,18 @@ static LOWERCODESIZE void prepareSynth(void)
 static NOINLINE LOWERCODESIZE uint32_t measureThruZeroCount(void)
 {
 	uint32_t tzCnt=0;
-	uint8_t prev;
+	uint16_t prev;
 		
 #define MAP_BUF_LEN (SCAN_MASTERMIX_SAMPLERATE/TUNER_SR_BUF_DIV)
-#define MAP_BUF_HALF_RANGE 128
-	uint8_t buf[MAP_BUF_LEN];
+#define MAP_BUF_HALF_RANGE (-INT16_MIN)
+	uint16_t buf[MAP_BUF_LEN];
 
 	scan_sampleMasterMix(MAP_BUF_LEN,buf);
 
 	prev=buf[0];
 	for(uint16_t pos=0;pos<MAP_BUF_LEN;++pos)
 	{
-			uint8_t sample=buf[pos];
+		uint16_t sample=buf[pos];
 			
 		if ((prev<=MAP_BUF_HALF_RANGE&&sample>MAP_BUF_HALF_RANGE) || (prev>=MAP_BUF_HALF_RANGE&&sample<MAP_BUF_HALF_RANGE))
 			++tzCnt;
