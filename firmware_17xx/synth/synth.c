@@ -870,7 +870,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	synth_refreshCV(v,cvAmp,vamp,0);
+	synth_refreshCV(v,cvAmp,vamp>>1,0); // half scale to avoid VCA clipping
 }
 
 ////////////////////////////////////////////////////////////////////////////////
