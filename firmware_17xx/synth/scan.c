@@ -21,7 +21,7 @@
 #define POT_SAMPLES 6
 #define POT_UNLOCK_THRESHOLD scan_potTo16bits(6)
 #define POT_TIMEOUT_THRESHOLD scan_potTo16bits(3)
-#define POT_TIMEOUT (TICKER_HZ/2)
+#define POT_TIMEOUT TICKER_HZ
 
 #define POTSCAN_PIN_CLK 20
 #define POTSCAN_PIN_CS 21
