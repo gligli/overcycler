@@ -460,7 +460,7 @@ static int8_t setPresetModifiedWarning(enum uiCustomParamNumber_e cp)
 		ui.presetModifiedWarning=cp;
 		return 0;
 	}
-	ui.presetModifiedWarning=-1;
+	ui_setPresetModified(0);
 	return 1;
 }
 
@@ -1068,6 +1068,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnLoad:
 				if(!setPresetModifiedWarning(prm->number))
 					break;
+				
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
@@ -1079,11 +1080,14 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 					break;
 				}
 				ui.presetExistsWarning=0;
+				ui_setPresetModified(0);
+				
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case cnTune:
 				assigner_setVoiceMask(0); // ensure no note playing during tuning
+				
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
@@ -1159,6 +1163,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
 				data=(data+1000)%1000;
 				settings.presetNumber=data;
+				
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=0x80+cnLoad;
 				break;
@@ -1169,6 +1174,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			case cnLBas:
 				if(!setPresetModifiedWarning(prm->number))
 					break;
+				
 				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
@@ -1297,8 +1303,6 @@ static void handleSlowUpdates(void)
 			break;
 		case 0x80+cnSave:
 			preset_saveCurrent(settings.presetNumber);
-			settings_save();                
-			ui_setPresetModified(0);	
 			break;
 		case 0x80+cnLoad:
 			BLOCK_INT(1)
