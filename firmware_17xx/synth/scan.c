@@ -12,8 +12,7 @@
 #include "dacspi.h"
 #include "main.h"
 
-#define SCAN_ADC_BITS 12
-#define SCAN_SPI_FREQUENCY 2500000
+#define SCAN_ADC_BITS 10
 
 #define DMA_CHANNEL_SSP1_TX__T2_MAT_0 4
 
@@ -30,13 +29,15 @@
 #define POTSCAN_PIN_DIN 24
 
 #define POTSCAN_PRE_DIV 12
-#define POTSCAN_FREQUENCY (SCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
+#define POTSCAN_SPI_FREQUENCY 80000
+#define POTSCAN_FREQUENCY (POTSCAN_SPI_FREQUENCY/(SCAN_ADC_BITS*SCAN_POT_COUNT*2))
 
 #define POTSCAN_DMACONFIG \
 		GPDMA_DMACCxConfig_E | \
 		GPDMA_DMACCxConfig_SrcPeripheral(DMA_CHANNEL_SSP1_TX__T2_MAT_0) | \
 		GPDMA_DMACCxConfig_TransferType(2)
 
+#define MIXSCAN_SPI_FREQUENCY (SCAN_MASTERMIX_SAMPLERATE*4*SCAN_ADC_BITS*2)
 #define MIXSCAN_ADC_CHANNEL 10
 
 static EXT_RAM GPDMA_LLI_Type lli[POT_SAMPLES*SCAN_POT_COUNT][2];
@@ -52,6 +53,8 @@ static struct
 	int8_t keypadState[kbCount];
 	
 	scan_event_callback_t eventCallback;
+	
+	int8_t pendingSPIFlush;
 } scan EXT_RAM;
 
 static const uint8_t keypadButtonCode[kbCount]=
@@ -74,8 +77,8 @@ static void buildLLIs(int pot, int smp)
 		GPDMA_DMACCxControl_DWidth(1);
 
 	lli[lliPos][1].SrcAddr=(uint32_t)&LPC_SSP0->DR;
-	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-2)%(POT_SAMPLES*SCAN_POT_COUNT)];
-	lli[lliPos][1].NextLLI=(lliPos+1>=POT_SAMPLES*SCAN_POT_COUNT)?0:(uint32_t)&lli[lliPos+1][0];
+	lli[lliPos][1].DstAddr=(uint32_t)&scan.potSamples[(lliPos+POT_SAMPLES*SCAN_POT_COUNT-1)%(POT_SAMPLES*SCAN_POT_COUNT)];
+	lli[lliPos][1].NextLLI=(uint32_t)&lli[(lliPos+1)%(POT_SAMPLES*SCAN_POT_COUNT)][0];
 	lli[lliPos][1].Control=
 		GPDMA_DMACCxControl_TransferSize(1) |
 		GPDMA_DMACCxControl_SWidth(1) |
@@ -88,21 +91,31 @@ static void readPots(void)
 	int pot;
 	uint16_t tmpSmp[POT_SAMPLES];
 
-	// wait for lli pot scan to finish
-	while(LPC_GPDMACH1->CConfig&GPDMA_DMACCxConfig_E)
+	if(scan.pendingSPIFlush)
 	{
-		DELAY_100NS();
+		// ensure the FIFO stays empty for proper lli function
+		while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
+		{
+			// flush received data
+			SSP_ReceiveData(LPC_SSP0);
+		}
+		
+		// enough for a full loop of the llis
+		delay_ms(20);
+		
+		scan.pendingSPIFlush=0;
 	}
 	
 	// read pots from TLV2556 ADC
 
 	for(pot=0;pot<SCAN_POT_COUNT;++pot)
 	{
-		// convert 10 bits samples to 0..999
+		// convert 10 bits samples to 0..999 and back to 16 bits full scale
 
 		for(int smp=0;smp<POT_SAMPLES;++smp)
 		{
 			tmpSmp[smp]=scan.potSamples[smp*SCAN_POT_COUNT+pot];
+			tmpSmp[smp]=scan_potTo16bits(MIN(SCAN_POT_MAX_VALUE,tmpSmp[smp]));
 		}
 		
 		// sort values
@@ -112,7 +125,6 @@ static void readPots(void)
 		// median
 	
 		new=((uint32_t)tmpSmp[2]+(uint32_t)tmpSmp[3])>>1;
-		new=scan_potTo16bits(MIN(SCAN_POT_MAX_VALUE,new>>(SCAN_ADC_BITS-10)));
 		
 		// ignore small changes
 
@@ -135,22 +147,6 @@ static void readPots(void)
 			if(scan.eventCallback) scan.eventCallback(-pot-1);
 		}
 	}
-	
-	// start new lli pot scan
-	
-	// ensure the FIFO stays empty for proper lli function
-	while(SSP_GetStatus(LPC_SSP0,SSP_STAT_RXFIFO_NOTEMPTY)==SET)
-	{
-		// flush received data
-		SSP_ReceiveData(LPC_SSP0);
-	}
-
-	LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
-	LPC_GPDMACH1->CDestAddr=lli[0][0].DstAddr;
-	LPC_GPDMACH1->CLLI=lli[0][0].NextLLI;
-	LPC_GPDMACH1->CControl=lli[0][0].Control;
-
-	LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
 }
 
 static void readKeypad(void)
@@ -228,7 +224,7 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 	SSP_CFG_Type SSP_ConfigStruct;
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 	SSP_ConfigStruct.Databit=SSP_CR0_DSS(SCAN_ADC_BITS);
-	SSP_ConfigStruct.ClockRate=SCAN_SPI_FREQUENCY;
+	SSP_ConfigStruct.ClockRate=isSmpMasterMixMode?MIXSCAN_SPI_FREQUENCY:POTSCAN_SPI_FREQUENCY;
 	SSP_Init(LPC_SSP0,&SSP_ConfigStruct);
 	SSP_Cmd(LPC_SSP0,ENABLE);
 
@@ -273,6 +269,16 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 		tm.StopOnMatch=DISABLE;
 		tm.ExtMatchOutputType=0;
 		tm.MatchValue=SYNTH_MASTER_CLOCK/POTSCAN_PRE_DIV/(SCAN_POT_COUNT*POTSCAN_FREQUENCY)-1;
+
+		// init GPDMA channel
+		LPC_GPDMACH1->CSrcAddr=lli[0][0].SrcAddr;
+		LPC_GPDMACH1->CDestAddr=lli[0][0].DstAddr;
+		LPC_GPDMACH1->CLLI=lli[0][0].NextLLI;
+		LPC_GPDMACH1->CControl=lli[0][0].Control;
+
+		LPC_GPDMACH1->CConfig=POTSCAN_DMACONFIG;
+		
+		scan.pendingSPIFlush=1;
 	}
 
 	TIM_Init(LPC_TIM2,TIM_TIMER_MODE,&tim);
@@ -397,7 +403,7 @@ void scan_init(void)
 	
 	scan_setMode(0);	
 	
-	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,SCAN_SPI_FREQUENCY);
+	rprintf(0,"pots scan at %d Hz, spi %d Hz\n",POTSCAN_FREQUENCY,POTSCAN_SPI_FREQUENCY);
  }
 
 void scan_update(void)
