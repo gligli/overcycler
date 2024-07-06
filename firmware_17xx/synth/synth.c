@@ -79,8 +79,10 @@ static struct
 		uint16_t modulationDelayTickCount;
 
 		uint8_t wmodMask;
-		uint32_t syncResetsMask;
 		int32_t oldCrossOver;
+		
+		syncMode_t syncMode;
+		int16_t syncPositions[DACSPI_BUFFER_COUNT/2];
 	} partState;
 } synth;
 
@@ -883,6 +885,8 @@ void synth_init(void)
 	
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
+	for(i=0;i<DACSPI_BUFFER_COUNT/2;++i)
+		synth.partState.syncPositions[i]=INT16_MIN;
 	waveData.bankSorted=-1;
 	waveData.curWaveSorted=-1;
 	waveData.curWaveABX=-1;
@@ -1001,7 +1005,7 @@ void synth_tickTimerEvent(uint8_t phase)
 			break;
 		case 3:
 			refreshLfoSettings();
-			synth.partState.syncResetsMask=currentPreset.steppedParameters[spOscSync]?UINT32_MAX:0;
+			synth.partState.syncMode=currentPreset.steppedParameters[spOscSync]?osmMaster:osmNone;
 			// 500hz tick counter
 			++currentTick;
 			break;
@@ -1116,10 +1120,8 @@ FORCEINLINE void synth_updateCVsEvent(void)
 #define PROC_UPDATE_OSCS_VOICE(v) \
 FORCEINLINE static void updateOscsVoice##v(int32_t start, int32_t end) \
 { \
-	uint32_t syncResets=0; /* /!\ this won't work if count > 32 */ \
-	wtosc_update(&synth.osc[v][0],start,end,osmMaster,&syncResets); \
-	syncResets&=synth.partState.syncResetsMask; \
-	wtosc_update(&synth.osc[v][1],start,end,osmSlave,&syncResets); \
+	wtosc_update(&synth.osc[v][0],start,end,synth.partState.syncMode,synth.partState.syncPositions); \
+	wtosc_update(&synth.osc[v][1],start,end,osmSlave,synth.partState.syncPositions); \
 }
 
 PROC_UPDATE_OSCS_VOICE(0);

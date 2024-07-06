@@ -42,7 +42,7 @@ static FORCEINLINE void updatePeriodIncrement(struct wtosc_s * o, int8_t type)
 	}
 }
 
-static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, uint32_t * syncResets)
+static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
 {
 	int32_t curPeriod,curIncrement;
 	
@@ -69,7 +69,9 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	
 		// sync (master side)
 		if(syncMode==osmMaster)
-			*syncResets|=(1<<bufIdx);
+		{
+			syncPositions[bufIdx]=o->counter-curPeriod;
+		}
 	}
 
 	if(o->aliasing) // we want aliasing, so make interpolation less effective !
@@ -181,7 +183,7 @@ void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, 
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->pitch,sampleRate[0],sampleRate[1]);
 }
 
-FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, uint32_t * syncResets)
+FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, int16_t *syncPositions)
 {
 	uint16_t r;
 	int32_t buf;
@@ -198,7 +200,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 			// counter underflow management
 
 			if(o->counter<0)
-				alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncResets);
+				alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncPositions);
 
 			// silence DAC
 			
@@ -222,18 +224,19 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 		
 		if(syncMode==osmSlave)
 		{
-			if(*syncResets&1)
+			int16_t *sp=&syncPositions[buf-startBuffer];
+			if(*sp>INT16_MIN)
 			{
-				o->phase=-1;
-				o->counter=-1;
+				o->phase=0;
+				o->counter=*sp;
+				*sp=INT16_MIN;
 			}
-			*syncResets>>=1;
 		}
 
 		// counter underflow management
 		
 		if(o->counter<0)
-			alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncResets);
+			alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncPositions);
 
 		// interpolate
 		
