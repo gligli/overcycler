@@ -1084,6 +1084,8 @@ FORCEINLINE void synth_updateCVsEvent(void)
 	filEnvAmt+=INT16_MIN;
 
 	wmodAVal=currentPreset.continuousParameters[cpABaseWMod];
+	if(currentPreset.steppedParameters[spAWModType]==wmFrequency)
+		wmodAVal=((wmodAVal-HALF_RANGE)>>1)+HALF_RANGE; // half scale for freq mod
 	if(currentPreset.steppedParameters[spLFOTargets]&otA)
 		wmodAVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otA)
@@ -1091,6 +1093,8 @@ FORCEINLINE void synth_updateCVsEvent(void)
 	wmodAVal+=getStaticCV(cvCrossOver);
 
 	wmodBVal=currentPreset.continuousParameters[cpBBaseWMod];
+	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
+		wmodBVal=((wmodBVal-HALF_RANGE)>>1)+HALF_RANGE; // half scale for freq mod
 	if(currentPreset.steppedParameters[spLFOTargets]&otB)
 		wmodBVal+=scaleU16S16(currentPreset.continuousParameters[cpLFOWModAmt],synth.lfo[0].output);
 	if(currentPreset.steppedParameters[spLFO2Targets]&otB)
