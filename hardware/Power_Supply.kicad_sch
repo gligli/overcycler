@@ -7161,83 +7161,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:CP")
-		(at 242.57 55.88 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "036ca1df-9f4c-4064-b902-63766864d322")
-		(property "Reference" "C26"
-			(at 243.84 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10uF"
-			(at 243.84 58.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Additional:CP_EIA-3216-18_Kemet-A"
-			(at 242.57 55.88 0)
-			(effects
-				(font
-					(size 1.524 1.524)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 242.57 55.88 0)
-			(effects
-				(font
-					(size 1.524 1.524)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 242.57 55.88 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C7171"
-			(at 243.84 53.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "62a2405c-42ec-49f1-8631-581f13d9d2d8")
-		)
-		(pin "2"
-			(uuid "37c54772-3801-4daf-a2ee-e96c71444aaf")
-		)
-		(instances
-			(project "overcycler3"
-				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
-					(reference "C26")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+5V")
 		(at 207.01 39.37 0)
 		(unit 1)
@@ -10308,6 +10231,83 @@
 			(project "overcycler3"
 				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
 					(reference "C30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Additional:CP")
+		(at 242.57 55.88 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "86580969-1d4f-4adf-9426-91ff0299caed")
+		(property "Reference" "C26"
+			(at 243.84 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "47u"
+			(at 243.84 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 242.57 55.88 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 242.57 55.88 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 242.57 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C96123"
+			(at 243.84 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6d9edd42-186d-40ce-a2cf-302cbf591a5c")
+		)
+		(pin "2"
+			(uuid "b950d913-2831-4369-8564-72d6c8019458")
+		)
+		(instances
+			(project "overcycler3"
+				(path "/f3616c1d-a98e-4f9d-ac17-0c5545b71bc4/347aba77-50ac-4a87-997c-5d48101c82e0"
+					(reference "C26")
 					(unit 1)
 				)
 			)
