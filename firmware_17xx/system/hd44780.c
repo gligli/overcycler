@@ -7,8 +7,6 @@
 
 #define HALF_CYCLE_DELAY() DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();DELAY_100NS();
 
-/* there are actually read commands/data too, but we won't use that.. for now... maybe BF is important */
-
 static void lcd_put(struct hd44780_data *lcd, int rs, int data)
 {
 	if(rs)
@@ -42,18 +40,26 @@ static void lcd_cmd(struct hd44780_data *lcd, int cmd, int long_delay)
 {
 	lcd_put(lcd, 0, cmd>>4);
 	lcd_put(lcd, 0, cmd&0xf);
-	delay_us(long_delay?1520:37);
+	delay_us(long_delay?2000:38);
 }
 
 static void lcd_data(struct hd44780_data *lcd, int cmd)
 {
 	lcd_put(lcd, 1, cmd>>4);
 	lcd_put(lcd, 1, cmd&0xf);
-	delay_us(37);
+	delay_us(38);
 }
 
 static void lcd_init(struct hd44780_data *lcd)
 {
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.rs);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.rw);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.e);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.d4);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.d5);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.d6);
+	GPIO_ClearValue(lcd->port, 1<<lcd->pins.d7);
+	
 	GPIO_SetDir(lcd->port, 1<<lcd->pins.rs, 1);
 	GPIO_SetDir(lcd->port, 1<<lcd->pins.rw, 1);
 	GPIO_SetDir(lcd->port, 1<<lcd->pins.e, 1);
@@ -64,14 +70,14 @@ static void lcd_init(struct hd44780_data *lcd)
 
 	/* reset sequence */
 	lcd_put(lcd, 0, 3);
-	delay_us(4100);
+	delay_us(5000);
 	lcd_put(lcd, 0, 3);
-	delay_us(100);
+	delay_us(1000);
+	lcd_put(lcd, 0, 3);
+	delay_us(1000);
 
-	lcd_put(lcd, 0, 3);
-	delay_us(37);
 	lcd_put(lcd, 0, 2);
-	delay_us(37);
+	delay_us(38);
 
 	/* ok, in 4-bit mode now */
 	int tmp = 0;
