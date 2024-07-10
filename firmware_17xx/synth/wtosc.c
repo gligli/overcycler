@@ -193,6 +193,8 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	{
 		for(buf=startBuffer;buf<=endBuffer;++buf)
 		{
+			int32_t bufIdx=buf-startBuffer;
+
 			// counter update
 
 			o->counter-=TICK_RATE;
@@ -200,7 +202,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 			// counter underflow management
 
 			if(o->counter<0)
-				alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncPositions);
+				alphaDiv=handleCounterUnderflow(o,bufIdx,syncMode,syncPositions);
 
 			// silence DAC
 			
@@ -214,36 +216,62 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	curHalf=o->phase>=WTOSC_SAMPLE_COUNT/2?1:0;
 	alphaDiv=o->period[curHalf];
 
-	for(buf=startBuffer;buf<=endBuffer;++buf)
+	if(syncMode==osmSlave)
 	{
-		// counter update
-		
-		o->counter-=TICK_RATE;
-		
-		// sync (slave side)
-		
-		if(syncMode==osmSlave)
+		for(buf=startBuffer;buf<=endBuffer;++buf)
 		{
-			int16_t *sp=&syncPositions[buf-startBuffer];
+			int32_t bufIdx=buf-startBuffer;
+			
+			// counter update
+
+			o->counter-=TICK_RATE;
+
+			// sync (slave side)
+
+			int16_t *sp=&syncPositions[bufIdx];
 			if(*sp>INT16_MIN)
 			{
 				o->phase=0;
 				o->counter=*sp;
 				*sp=INT16_MIN;
 			}
+
+			// counter underflow management
+
+			if(o->counter<0)
+				alphaDiv=handleCounterUnderflow(o,bufIdx,osmNone,NULL);
+
+			// interpolate
+
+			r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+
+			// send value to DAC
+
+			dacspi_setOscValue(buf,o->channel,r);
 		}
+	}
+	else
+	{
+		for(buf=startBuffer;buf<=endBuffer;++buf)
+		{
+			int32_t bufIdx=buf-startBuffer;
 
-		// counter underflow management
-		
-		if(o->counter<0)
-			alphaDiv=handleCounterUnderflow(o,buf-startBuffer,syncMode,syncPositions);
+			// counter update
 
-		// interpolate
-		
-		r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
-		
-		// send value to DAC
+			o->counter-=TICK_RATE;
 
-		dacspi_setOscValue(buf,o->channel,r);
+			// counter underflow management
+
+			if(o->counter<0)
+				alphaDiv=handleCounterUnderflow(o,bufIdx,syncMode,syncPositions);
+
+			// interpolate
+
+			r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+
+			// send value to DAC
+
+			dacspi_setOscValue(buf,o->channel,r);
+		}
 	}
 }
