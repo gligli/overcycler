@@ -130,10 +130,13 @@ static void readPots(void)
 
 		if(abs(new-scan.potValue[pot])>=POT_UNLOCK_THRESHOLD || currentTick<scan.potLockTimeout[pot])
 		{
+			int8_t cbDone=0;
+			
 			if(currentTick>=scan.potLockTimeout[pot])
 			{
 				// out of lock -> current value must be taken into account
 				if(scan.eventCallback) scan.eventCallback(-pot-1);
+				cbDone=1;
 			}			
 			
 			if(abs(new-scan.potLockValue[pot])>=POT_TIMEOUT_THRESHOLD)
@@ -143,8 +146,11 @@ static void readPots(void)
 			}
 
 			scan.potValue[pot]=new;
-			
-			if(scan.eventCallback) scan.eventCallback(-pot-1);
+
+			if(!cbDone)
+			{
+				if(scan.eventCallback) scan.eventCallback(-pot-1);
+			}
 		}
 	}
 }
