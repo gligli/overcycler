@@ -1016,7 +1016,7 @@ void synth_tickTimerEvent(uint8_t phase)
 }
 
 // @ 4Khz from dacspi update
-FORCEINLINE void synth_updateCVsEvent(void)
+void synth_updateCVsEvent(void)
 {
 	int32_t val,pitchAVal,pitchBVal,wmodAVal,wmodBVal,filterVal,ampVal,wmodAEnvAmt,wmodBEnvAmt,filEnvAmt;
 	int32_t resoFactor=0, resVal=0;
@@ -1136,7 +1136,7 @@ PROC_UPDATE_OSCS_VOICE(3);
 PROC_UPDATE_OSCS_VOICE(4);
 PROC_UPDATE_OSCS_VOICE(5);
 
-FORCEINLINE void synth_updateOscsEvent(int32_t start, int32_t count)
+void synth_updateOscsEvent(int32_t start, int32_t count)
 {
 	int32_t end=start+count-1;
 
