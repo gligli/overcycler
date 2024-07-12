@@ -1,4 +1,95 @@
-23590459746105207
+23612807361407264
+Additional
+CP_EIA-3216-18_Kemet-A
+Tantalum Capacitor SMD Kemet-A (3216-18 Metric), IPC_7351 nominal, (Body size from: http://www.kemet.com/Lists/ProductCatalog/Attachments/253/KEM_TC101_STD.pdf), generated with kicad-footprint-generator
+capacitor tantalum
+0
+2
+2
+Additional
+CP_EIA-3528-21_Kemet-B
+Tantalum Capacitor SMD Kemet-B (3528-21 Metric), IPC_7351 nominal, (Body size from: http://www.kemet.com/Lists/ProductCatalog/Attachments/253/KEM_TC101_STD.pdf), generated with kicad-footprint-generator
+capacitor tantalum
+0
+2
+2
+Additional
+CP_EIA-7343-43_Kemet-X
+Tantalum Capacitor SMD Kemet-X (7343-43 Metric), IPC_7351 nominal, (Body size from: http://www.kemet.com/Lists/ProductCatalog/Attachments/253/KEM_TC101_STD.pdf), generated with kicad-footprint-generator
+capacitor tantalum
+0
+2
+2
+Additional
+DIN-5-180
+TruConnect 5 Way 180 degree DIN PCB Socket (20-0551)
+Connector, MIDI
+0
+7
+5
+Additional
+D_SOD-123
+SOD-123
+SOD-123
+0
+2
+2
+Additional
+HOOYA DIN-504-M10
+TruConnect 5 Way 180 degree DIN PCB Socket (20-0551)
+Connector, MIDI
+0
+7
+5
+Additional
+IA0505S-2W
+XP_POWER  IAxxxxS, SIP, (https://www.xppower.com/pdfs/SF_IA.pdf), generated with kicad-footprint-generator
+XP_POWER  IAxxxxS SIP DCDC-Converter
+0
+5
+5
+Additional
+IB0503LSY
+XP_POWER  IAxxxxS, SIP, (https://www.xppower.com/pdfs/SF_IA.pdf), generated with kicad-footprint-generator
+XP_POWER  IAxxxxS SIP DCDC-Converter
+0
+4
+4
+Additional
+IDC-Header_2x08_P2.54mm_Vertical_Mirrored
+Through hole IDC box header, 2x08, 2.54mm pitch, DIN 41651 / IEC 60603-13, double rows, https://docs.google.com/spreadsheets/d/16SsEcesNF15N3Lb4niX7dcUr-NY5_MFPQhobNuNppn4/edit#gid=0
+Through hole vertical IDC box header THT 2x08 2.54mm double row
+0
+16
+16
+Additional
+Jack_6.35mm_HOOYA_PJ-609AE_Horizontal
+M Series, 6.35mm (1/4in) stereo jack, switched, full threaded nose, straight PCB pins, gold plated contacts, https://www.neutrik.com/en/product/nmj6hfd2-au
+neutrik jack m
+0
+6
+6
+Additional
+LFCSP-28-1EP_4x4mm_P0.4mm_EP2.6x2.6mm_ThermalVias
+LFCSP, 24 Pin (https://www.analog.com/media/en/package-pcb-resources/package/pkg_pdf/lfcspcp/cp_24_7.pdf), generated with kicad-footprint-generator ipc_noLead_generator.py
+LFCSP NoLead
+0
+43
+29
+Additional
+SPUN192600
+
+
+0
+6
+6
+Additional
+SSOP-16_3.9x4.9mm_P0.635mm
+SSOP16: plastic shrink small outline package; 16 leads; body width 3.9 mm; lead pitch 0.635; (see NXP SSOP-TSSOP-VSO-REFLOW.pdf and sot519-1_po.pdf)
+SSOP 0.635
+0
+16
+16
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
