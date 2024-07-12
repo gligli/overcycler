@@ -140,15 +140,15 @@ IC1,LM13700,SO-16_3.9x9.9mm_P1.27mm,125.282,-54.53975,90.0,top
 IC2,LM13700,SO-16_3.9x9.9mm_P1.27mm,170.367,-54.53975,90.0,top
 IC3,LM13700,SO-16_3.9x9.9mm_P1.27mm,215.452,-54.53975,90.0,top
 J1,DIN-5_180degree,HOOYA DIN-504-M10,116.84,-7.74,-90.0,top
-J10,Control_Down,JST_PH_B7B-PH-K_1x07_P2.00mm_Vertical,12.312,-148.48725,-90.0,top
-J2,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,85.855,-9.72,90.0,top
-J3,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,178.855,-9.72,90.0,top
-J4,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,209.855,-9.72,90.0,top
+J10,Control_Down,JST_PH_B7B-PH-K_1x07_P2.00mm_Vertical,12.312,-148.48725,90.0,top
+J2,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,85.855,-9.72,-90.0,top
+J3,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,178.855,-9.72,-90.0,top
+J4,AudioJack3_Switch,Jack_6.35mm_HOOYA_PJ-609AE_Horizontal,209.855,-9.72,-90.0,top
 J5,USB_B,USB_B_Lumberg_2411_02_Horizontal,54.84,-9.4575,180.0,top
 J6,FT232,PinSocket_1x06_P2.54mm_Vertical,76.637,-79.76975,90.0,top
-J7,Control_Up,JST_PH_B7B-PH-K_1x07_P2.00mm_Vertical,12.312,-109.11725,-90.0,top
-J8,Display,IDC-Header_2x08_P2.54mm_Vertical_Mirrored,64.5395,-123.26725,-90.0,top
-J9,Keyboard,JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical,188.8625,-139.93,0.0,top
+J7,Control_Up,JST_PH_B7B-PH-K_1x07_P2.00mm_Vertical,12.312,-109.11725,90.0,top
+J8,Display,IDC-Header_2x08_P2.54mm_Vertical_Mirrored,64.5395,-123.26725,-180.0,top
+J9,Keyboard,JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical,188.8625,-139.93,180.0,top
 L1,10u,L_0805_2012Metric,38.347,-119.30975,90.0,top
 OC1,6N139,DIP-8_W7.62mm,69.9595,-58.50725,180.0,top
 PS1,IA0505S-2W,IA0505S-2W,20.27,-44.0,0.0,top
