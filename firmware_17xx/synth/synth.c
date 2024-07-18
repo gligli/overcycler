@@ -270,7 +270,7 @@ static void refreshAssignerSettings(void)
  
 	assigner_setPattern(currentPreset.voicePattern,currentPreset.steppedParameters[spUnison]);
 	assigner_setPriority(currentPreset.steppedParameters[spAssignerPriority]);
-	assigner_setVoiceMask(vc2msk[currentPreset.steppedParameters[spVoiceCount]]);
+	assigner_setVoiceMask(vc2msk[currentPreset.steppedParameters[spVoiceCount]]&settings.voiceMask);
 }
 
 static void refreshEnvSettings(int8_t type)
