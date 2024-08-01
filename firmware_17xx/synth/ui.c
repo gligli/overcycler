@@ -1421,22 +1421,22 @@ void ui_init(void)
 	// init screen
 	
 	ui.lcd1.port = 2;
-	ui.lcd1.pins.d4 = 3;
-	ui.lcd1.pins.d5 = 2;
-	ui.lcd1.pins.d6 = 1;
-	ui.lcd1.pins.d7 = 0;
+	ui.lcd1.pins.d4 = 2;
+	ui.lcd1.pins.d5 = 3;
+	ui.lcd1.pins.d6 = 0;
+	ui.lcd1.pins.d7 = 1;
 	ui.lcd1.pins.rs = 6;
-	ui.lcd1.pins.rw = 5;
-	ui.lcd1.pins.e = 4;
+	ui.lcd1.pins.rw = 4;
+	ui.lcd1.pins.e = 5;
 	ui.lcd1.caps = HD44780_CAPS_2LINES;
 
 	ui.lcd2.port = 2;
-	ui.lcd2.pins.d4 = 3;
-	ui.lcd2.pins.d5 = 2;
-	ui.lcd2.pins.d6 = 1;
-	ui.lcd2.pins.d7 = 0;
+	ui.lcd2.pins.d4 = 2;
+	ui.lcd2.pins.d5 = 3;
+	ui.lcd2.pins.d6 = 0;
+	ui.lcd2.pins.d7 = 1;
 	ui.lcd2.pins.rs = 6;
-	ui.lcd2.pins.rw = 5;
+	ui.lcd2.pins.rw = 4;
 	ui.lcd2.pins.e = 7;
 	ui.lcd2.caps = HD44780_CAPS_2LINES;
 	

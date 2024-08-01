@@ -100,22 +100,22 @@ void initLcd(void)
 	// init screen
 	
 	lcd1.port = 2;
-	lcd1.pins.d4 = 3;
-	lcd1.pins.d5 = 2;
-	lcd1.pins.d6 = 1;
-	lcd1.pins.d7 = 0;
+	lcd1.pins.d4 = 2;
+	lcd1.pins.d5 = 3;
+	lcd1.pins.d6 = 0;
+	lcd1.pins.d7 = 1;
 	lcd1.pins.rs = 6;
-	lcd1.pins.rw = 5;
-	lcd1.pins.e = 4;
+	lcd1.pins.rw = 4;
+	lcd1.pins.e = 5;
 	lcd1.caps = HD44780_CAPS_2LINES;
 
 	lcd2.port = 2;
-	lcd2.pins.d4 = 3;
-	lcd2.pins.d5 = 2;
-	lcd2.pins.d6 = 1;
-	lcd2.pins.d7 = 0;
+	lcd2.pins.d4 = 2;
+	lcd2.pins.d5 = 3;
+	lcd2.pins.d6 = 0;
+	lcd2.pins.d7 = 1;
 	lcd2.pins.rs = 6;
-	lcd2.pins.rw = 5;
+	lcd2.pins.rw = 4;
 	lcd2.pins.e = 7;
 	lcd2.caps = HD44780_CAPS_2LINES;
 	
