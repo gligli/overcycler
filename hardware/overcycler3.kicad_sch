@@ -1260,141 +1260,6 @@
 				)
 			)
 		)
-		(symbol "Additional:DIODE"
-			(pin_numbers hide)
-			(pin_names
-				(offset 1.016) hide)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "D"
-				(at -1.867 2.54 90)
-				(effects
-					(font
-						(size 1.016 1.016)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" ""
-				(at 0.673 2.54 90)
-				(effects
-					(font
-						(size 1.016 1.016)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.524 1.524)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "~"
-				(at 2.5781 2.54 90)
-				(effects
-					(font
-						(size 1.524 1.524)
-					)
-					(justify left)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "LCSC" ""
-				(at 0 2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "D? S*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "DIODE_0_1"
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.27 -1.27)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.27 1.27) (xy 1.27 0) (xy -1.27 -1.27)
-					)
-					(stroke
-						(width 0)
-						(type solid)
-					)
-					(fill
-						(type outline)
-					)
-				)
-			)
-			(symbol "DIODE_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 3.81)
-					(name "A"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 3.81)
-					(name "K"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.016 1.016)
-							)
-						)
-					)
-				)
-			)
-		)
 		(symbol "Additional:LPC1778FBD144"
 			(pin_names
 				(offset 1.016)
@@ -8698,6 +8563,168 @@
 				)
 			)
 		)
+		(symbol "Diode:1N4148"
+			(pin_numbers hide)
+			(pin_names hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "1N4148"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "100V 0.15A standard switching diode, DO-35"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Sim.Device" "D"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Sim.Pins" "1=K 2=A"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "D*DO?35*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "1N4148_0_1"
+				(polyline
+					(pts
+						(xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0) (xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "1N4148_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Isolator:6N139"
 			(pin_names
 				(offset 1.016) hide)
@@ -12514,7 +12541,7 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 72.39) (xy 351.79 69.85)
+			(xy 351.79 69.85) (xy 351.79 73.66)
 		)
 		(stroke
 			(width 0)
@@ -13114,7 +13141,7 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 110.49) (xy 351.79 109.22)
+			(xy 351.79 107.95) (xy 351.79 111.76)
 		)
 		(stroke
 			(width 0)
@@ -13304,7 +13331,7 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 93.98) (xy 351.79 96.52)
+			(xy 351.79 92.71) (xy 351.79 96.52)
 		)
 		(stroke
 			(width 0)
@@ -13744,7 +13771,7 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 128.27) (xy 351.79 120.65)
+			(xy 351.79 119.38) (xy 351.79 128.27)
 		)
 		(stroke
 			(width 0)
@@ -14034,7 +14061,7 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 82.55) (xy 351.79 83.82)
+			(xy 351.79 81.28) (xy 351.79 85.09)
 		)
 		(stroke
 			(width 0)
@@ -14964,7 +14991,7 @@
 	)
 	(wire
 		(pts
-			(xy 365.76 49.53) (xy 365.76 44.45)
+			(xy 365.76 43.18) (xy 365.76 49.53)
 		)
 		(stroke
 			(width 0)
@@ -15344,6 +15371,16 @@
 	)
 	(wire
 		(pts
+			(xy 365.76 29.21) (xy 365.76 35.56)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db1e993d-b925-4a8c-aadd-dfb5573fecb3")
+	)
+	(wire
+		(pts
 			(xy 78.74 236.22) (xy 82.55 236.22)
 		)
 		(stroke
@@ -15664,6 +15701,16 @@
 	)
 	(wire
 		(pts
+			(xy 351.79 96.52) (xy 351.79 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e664d019-03c3-43eb-bcec-df5f07670c81")
+	)
+	(wire
+		(pts
 			(xy 22.86 127) (xy 31.75 127)
 		)
 		(stroke
@@ -15964,16 +16011,6 @@
 	)
 	(wire
 		(pts
-			(xy 351.79 96.52) (xy 351.79 99.06)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f55645ed-49c5-455f-ab9d-c58e667cf2fc")
-	)
-	(wire
-		(pts
 			(xy 217.17 222.25) (xy 219.71 222.25)
 		)
 		(stroke
@@ -16011,16 +16048,6 @@
 			(type default)
 		)
 		(uuid "f6ed63e5-f7b2-4ef4-8503-e4294e2467b3")
-	)
-	(wire
-		(pts
-			(xy 365.76 29.21) (xy 365.76 34.29)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f73fa362-1af9-41cb-ba34-ca462395cebb")
 	)
 	(wire
 		(pts
@@ -21140,8 +21167,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:DIODE")
-		(at 351.79 88.9 270)
+		(lib_id "Diode:1N4148")
+		(at 351.79 88.9 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -21149,7 +21176,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f1ea6b")
 		(property "Reference" "D4"
-			(at 354.33 88.9 0)
+			(at 349.25 88.9 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21157,7 +21184,7 @@
 			)
 		)
 		(property "Value" "1N4148"
-			(at 349.25 88.9 0)
+			(at 356.108 88.9 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21168,21 +21195,21 @@
 			(at 351.79 88.9 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 354.33 91.4781 90)
+		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+			(at 351.79 88.9 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
-				(justify left)
+				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100V 0.15A standard switching diode, DO-35"
 			(at 351.79 88.9 0)
 			(effects
 				(font
@@ -21192,7 +21219,25 @@
 			)
 		)
 		(property "LCSC" "C7420318"
-			(at 354.33 88.9 0)
+			(at 349.25 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 351.79 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 351.79 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21216,52 +21261,50 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:DIODE")
-		(at 351.79 77.47 270)
+		(lib_id "Diode:1N4148")
+		(at 351.79 77.47 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "00000000-0000-0000-0000-000055f1ea78")
 		(property "Reference" "D2"
-			(at 354.33 75.603 90)
+			(at 349.25 77.47 90)
 			(effects
 				(font
 					(size 1.016 1.016)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "1N4148"
-			(at 354.33 78.143 90)
+			(at 353.06 77.47 90)
 			(effects
 				(font
 					(size 1.016 1.016)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Additional:D_SOD-123"
 			(at 351.79 77.47 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 354.33 80.0481 90)
+		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+			(at 351.79 77.47 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
-				(justify left)
+				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100V 0.15A standard switching diode, DO-35"
 			(at 351.79 77.47 0)
 			(effects
 				(font
@@ -21271,7 +21314,25 @@
 			)
 		)
 		(property "LCSC" "C7420318"
-			(at 354.33 77.47 0)
+			(at 349.25 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 351.79 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 351.79 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21295,8 +21356,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:DIODE")
-		(at 351.79 104.14 270)
+		(lib_id "Diode:1N4148")
+		(at 351.79 104.14 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -21304,7 +21365,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f1ea7e")
 		(property "Reference" "D5"
-			(at 354.33 104.14 0)
+			(at 349.25 104.14 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21312,7 +21373,7 @@
 			)
 		)
 		(property "Value" "1N4148"
-			(at 349.25 104.14 0)
+			(at 356.108 104.14 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21323,21 +21384,21 @@
 			(at 351.79 104.14 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 354.33 106.7181 90)
+		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+			(at 351.79 104.14 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
-				(justify left)
+				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100V 0.15A standard switching diode, DO-35"
 			(at 351.79 104.14 0)
 			(effects
 				(font
@@ -21347,7 +21408,25 @@
 			)
 		)
 		(property "LCSC" "C7420318"
-			(at 354.33 104.14 0)
+			(at 349.25 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 351.79 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 351.79 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21371,8 +21450,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:DIODE")
-		(at 351.79 115.57 270)
+		(lib_id "Diode:1N4148")
+		(at 351.79 115.57 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -21380,7 +21459,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000055f1ea84")
 		(property "Reference" "D3"
-			(at 354.33 115.57 0)
+			(at 349.25 115.57 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21388,7 +21467,7 @@
 			)
 		)
 		(property "Value" "1N4148"
-			(at 349.25 115.57 0)
+			(at 356.108 115.57 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -21399,21 +21478,21 @@
 			(at 351.79 115.57 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 354.33 118.1481 90)
+		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+			(at 351.79 115.57 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
-				(justify left)
+				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100V 0.15A standard switching diode, DO-35"
 			(at 351.79 115.57 0)
 			(effects
 				(font
@@ -21423,7 +21502,25 @@
 			)
 		)
 		(property "LCSC" "C7420318"
-			(at 354.33 115.57 0)
+			(at 349.25 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 351.79 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 351.79 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -25402,8 +25499,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Additional:DIODE")
-		(at 365.76 39.37 90)
+		(lib_id "Diode:1N4148")
+		(at 365.76 39.37 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -25411,7 +25508,7 @@
 		(dnp no)
 		(uuid "4ebe3484-08e4-4a93-afd4-8c54489e40f0")
 		(property "Reference" "D1"
-			(at 363.22 39.37 0)
+			(at 363.22 39.37 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -25419,7 +25516,7 @@
 			)
 		)
 		(property "Value" "1N4148"
-			(at 368.3 39.37 0)
+			(at 370.078 39.37 90)
 			(effects
 				(font
 					(size 1.016 1.016)
@@ -25430,21 +25527,21 @@
 			(at 365.76 39.37 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
-			(at 363.22 36.7919 90)
+		(property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/1N4148_1N4448.pdf"
+			(at 365.76 39.37 0)
 			(effects
 				(font
-					(size 1.524 1.524)
+					(size 1.27 1.27)
 				)
-				(justify left)
+				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "100V 0.15A standard switching diode, DO-35"
 			(at 365.76 39.37 0)
 			(effects
 				(font
@@ -25454,7 +25551,25 @@
 			)
 		)
 		(property "LCSC" "C7420318"
-			(at 363.22 39.37 0)
+			(at 368.3 39.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Device" "D"
+			(at 365.76 39.37 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 365.76 39.37 0)
 			(effects
 				(font
 					(size 1.27 1.27)
