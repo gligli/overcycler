@@ -248,7 +248,7 @@
 		(uuid "3ea8d381-2884-4493-a631-0d00c072c3e5")
 	)
 	(fp_text user "A"
-		(at 2.3368 0 0)
+		(at 2.921 0 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "52f1872b-ba1b-47ea-8df2-4af51b0726a9")
@@ -257,11 +257,10 @@
 				(size 1 1)
 				(thickness 0.1)
 			)
-			(justify left)
 		)
 	)
 	(fp_text user "K"
-		(at -2.36 0 0)
+		(at -2.921 0 0)
 		(unlocked yes)
 		(layer "F.SilkS")
 		(uuid "5a9d6e23-ecf9-4aea-959e-e2310c7874c6")
@@ -270,7 +269,6 @@
 				(size 1 1)
 				(thickness 0.1)
 			)
-			(justify right)
 		)
 	)
 	(fp_text user "${REFERENCE}"
