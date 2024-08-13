@@ -9204,7 +9204,7 @@
 				)
 			)
 		)
-		(symbol "Transistor_BJT:BC858"
+		(symbol "Transistor_BJT:BC856"
 			(pin_names
 				(offset 0) hide)
 			(exclude_from_sim no)
@@ -9219,7 +9219,7 @@
 					(justify left)
 				)
 			)
-			(property "Value" "BC858"
+			(property "Value" "BC856"
 				(at 5.08 0 0)
 				(effects
 					(font
@@ -9249,7 +9249,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "0.1A Ic, 30V Vce, PNP Transistor, SOT-23"
+			(property "Description" "0.1A Ic, 65V Vce, PNP Transistor, SOT-23"
 				(at 0 0 0)
 				(effects
 					(font
@@ -9276,7 +9276,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "BC858_0_1"
+			(symbol "BC856_0_1"
 				(polyline
 					(pts
 						(xy 0.635 0.635) (xy 2.54 2.54)
@@ -9337,7 +9337,7 @@
 					)
 				)
 			)
-			(symbol "BC858_1_1"
+			(symbol "BC856_1_1"
 				(pin input line
 					(at -5.08 0 0)
 					(length 5.715)
@@ -22667,7 +22667,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Transistor_BJT:BC858")
+		(lib_id "Transistor_BJT:BC856")
 		(at 292.1 100.33 270)
 		(unit 1)
 		(exclude_from_sim no)
@@ -22684,8 +22684,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "BC858B"
-			(at 293.37 104.648 0)
+		(property "Value" "BC856B"
+			(at 292.608 105.156 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22714,7 +22714,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "0.1A Ic, 30V Vce, PNP Transistor, SOT-23"
+		(property "Description" "0.1A Ic, 65V Vce, PNP Transistor, SOT-23"
 			(at 292.1 100.33 0)
 			(effects
 				(font
@@ -22723,7 +22723,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C549539"
+		(property "LCSC" "C165609"
 			(at 292.1 100.33 0)
 			(effects
 				(font
