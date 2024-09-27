@@ -113,13 +113,13 @@ void wtosc_init(struct wtosc_s * o, int32_t channel)
 	updatePeriodIncrement(o,1);
 }
 
-void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData)
+FORCEINLINE void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, uint16_t * xovrData)
 {
 	o->mainData=mainData;
 	o->crossoverData=xovrData;
 }
 
-void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
+FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
 {
 	uint64_t frequency;
 	uint32_t sampleRate[2];

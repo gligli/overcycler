@@ -42,7 +42,7 @@ static void handlePhaseOverflow(struct lfo_s * l)
 	}
 }
 
-void LOWERCODESIZE lfo_setCVs(struct lfo_s * lfo, uint16_t bpm, uint16_t lvl)
+void lfo_setCVs(struct lfo_s * lfo, uint16_t bpm, uint16_t lvl)
 {
 	lfo->levelCV=lvl;
 
@@ -54,17 +54,14 @@ void LOWERCODESIZE lfo_setCVs(struct lfo_s * lfo, uint16_t bpm, uint16_t lvl)
 	}
 }
 
-void LOWERCODESIZE lfo_setShape(struct lfo_s * lfo, lfoShape_t shape)
+void lfo_setShape(struct lfo_s * lfo, lfoShape_t shape)
 {
 	lfo->shape=shape;
-	
-	if(lfo->noise==0)
-		srandom(currentTick);
 	
 	lfo->noise=random();
 }
 
-void LOWERCODESIZE lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift)
+void lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift)
 {
 	if(shift!=lfo->speedShift)
 	{

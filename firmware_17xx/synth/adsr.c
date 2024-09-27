@@ -42,9 +42,9 @@ static uint32_t getPhaseInc(uint8_t v)
 {
 	uint32_t r=0;
 	
-	r|=(uint32_t)pgm_read_byte(&phaseLookupLo[v]);
-	r|=(uint32_t)pgm_read_byte(&phaseLookupMid[v])<<8;
-	r|=(uint32_t)pgm_read_byte(&phaseLookupHi[v])<<16;
+	r|=(uint32_t)phaseLookupLo[v];
+	r|=(uint32_t)phaseLookupMid[v]<<8;
+	r|=(uint32_t)phaseLookupHi[v]<<16;
 	
 	return r;
 }
@@ -140,7 +140,7 @@ static NOINLINE void handlePhaseOverflow(struct adsr_s * a)
 	}
 }
 
-LOWERCODESIZE void adsr_setCVs(struct adsr_s * adsr, uint16_t atk, uint16_t dec, uint16_t sus, uint16_t rls, uint16_t lvl, uint8_t mask)
+void adsr_setCVs(struct adsr_s * adsr, uint16_t atk, uint16_t dec, uint16_t sus, uint16_t rls, uint16_t lvl, uint8_t mask)
 {
 	int8_t m=mask&0x80;
 	
@@ -220,7 +220,7 @@ inline void adsr_setShape(struct adsr_s * adsr, int8_t isExp, int8_t isLoop)
 	}
 }
 
-LOWERCODESIZE void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift)
+void adsr_setSpeedShift(struct adsr_s * adsr, int8_t shift)
 {
 	adsr->speedShift=shift;
 	

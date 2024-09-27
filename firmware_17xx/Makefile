@@ -270,7 +270,7 @@ LDFLAGS += $(patsubst %,-l%,$(EXTRA_LIBS))
 #
 # Settings and variables:
 LPC21ISP = ./lpc21isp
-LPC21ISP_KILL = /cygdrive/c/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
+LPC21ISP_KILL = C:/windows/system32/taskkill.exe -f -im lpc21isp.exe && sleep 0.2s
 LPC21ISP_PORT = com1
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).bin

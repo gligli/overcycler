@@ -23,7 +23,6 @@
 #include "lpc177x_8x_gpio.h"
 #include "lpc177x_8x_pinsel.h"
 #include "wave_reader.h"
-#include "main.h"
 
 #define BIT_INPUT_FOOTSWITCH (1<<26)
 
@@ -777,7 +776,7 @@ static FORCEINLINE uint16_t adjustCV(cv_t cv, uint32_t value)
 		break;
 	case cvNoiseVol:
 		phase=value<<8;
-		value=computeShape(phase,vcNoiseLinearizationCurve,2);
+		value=computeShape(phase,vcNoiseLinearizationCurve,1);
 		break;
 	default:
 		/* nothing */;
@@ -883,6 +882,8 @@ void synth_init(void)
 {
 	int i;
 	
+	srandom(0x42381337);
+
 	memset(&synth,0,sizeof(synth));
 	memset(&waveData,0,sizeof(waveData));
 	for(i=0;i<DACSPI_BUFFER_COUNT/2;++i)

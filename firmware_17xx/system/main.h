@@ -27,13 +27,6 @@
 #include "version.h"
 #include "ff.h"
 
-//AVR compatibility
-#define PROGMEM
-#define pgm_read_byte(addr) (*(uint8_t*)(addr))
-#define print(s) rprintf(0,s)
-#define phex(x) rprintf(0,"%x",(int)x)
-#define phex16(x) phex(x)
-
 // assumes 120Mhz clock
 #define DELAY_50NS() asm volatile ("nop\nnop\nnop\nnop\nnop\nnop")
 #define DELAY_100NS() {DELAY_50NS();DELAY_50NS();}

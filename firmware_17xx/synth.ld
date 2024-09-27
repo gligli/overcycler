@@ -146,6 +146,7 @@ SECTIONS
     . = ALIGN (8);
     _edata = .;
   } >ram AT>rom
+
   .bss :
   {
 	__bss_start__ = .;
@@ -157,7 +158,7 @@ SECTIONS
 	__bss_end__ = .;
     _end = .;
     __end = .;
-  } >ram AT>rom
+  } >ram
 
   .ext_ram (NOLOAD):
   {

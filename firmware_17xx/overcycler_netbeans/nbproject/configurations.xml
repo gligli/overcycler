@@ -37,9 +37,6 @@
         <in>ff.c</in>
         <in>nor.c</in>
       </df>
-      <df name="iap">
-        <in>sbl_iap.c</in>
-      </df>
       <df name="synth">
         <in>adsr.c</in>
         <in>arp.c</in>
@@ -47,7 +44,6 @@
         <in>clock.c</in>
         <in>dacspi.c</in>
         <in>lfo.c</in>
-        <in>lfo_lookups.h</in>
         <in>midi.c</in>
         <in>scan.c</in>
         <in>seq.c</in>
@@ -56,13 +52,11 @@
         <in>tuner.c</in>
         <in>uart_midi.c</in>
         <in>ui.c</in>
-        <in>ui_pages.h</in>
         <in>utils.c</in>
         <in>wave_reader.c</in>
         <in>wtosc.c</in>
       </df>
       <df name="system">
-        <in>boot.c</in>
         <in>core_cm3.c</in>
         <in>hd44780.c</in>
         <in>main.c</in>
@@ -111,14 +105,14 @@
   <confs>
     <conf name="Default" type="0">
       <toolsSet>
-        <compilerSet>default</compilerSet>
+        <compilerSet>MHV_AVR|MinGW</compilerSet>
         <dependencyChecking>false</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
         <prependToolCollectionPath>false</prependToolCollectionPath>
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-march=armv7-m -O4 -std=gnu99"/>
-        <element flagsID="1" commonFlags="-march=armv7-m -Os -std=gnu99"/>
+        <element flagsID="1" commonFlags="-std=gnu99 -Os"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -328,30 +322,34 @@
         </cTool>
       </item>
       <item path="../fat/ccsbcs.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
+            <pElem>../fat</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../fat/diskio.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
+            <pElem>../fat</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../fat/fattime.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
+            <pElem>../fat</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="../fat/ff.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
+            <pElem>../fat</pElem>
             <pElem>..</pElem>
           </incDir>
         </cTool>
@@ -359,17 +357,19 @@
       <item path="../fat/nor.c" ex="false" tool="0" flavor2="3">
         <cTool flags="1">
           <incDir>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
-            <pElem>../system</pElem>
             <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../fat</pElem>
           </incDir>
-        </cTool>
-      </item>
-      <item path="../iap/sbl_iap.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+          <preprocessorList>
+            <Elem>BOOT_MAX_SIZE=65536</Elem>
+            <Elem>DEBUG_UART_BAUD=57600</Elem>
+            <Elem>LPC1778</Elem>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="3">
@@ -445,8 +445,6 @@
             <pElem>..</pElem>
           </incDir>
         </cTool>
-      </item>
-      <item path="../synth/lfo_lookups.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../synth/midi.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
@@ -555,8 +553,6 @@
           </incDir>
         </cTool>
       </item>
-      <item path="../synth/ui_pages.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../synth/utils.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
@@ -592,31 +588,11 @@
           </incDir>
         </cTool>
       </item>
-      <item path="../system/boot.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
-          <incDir>
-            <pElem>../system</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat</pElem>
-            <pElem>../usb</pElem>
-            <pElem>../iap</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
-            <pElem>..</pElem>
-          </incDir>
-        </cTool>
-      </item>
       <item path="../system/core_cm3.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
           <incDir>
             <pElem>..</pElem>
-            <pElem>../system</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/hd44780.c" ex="false" tool="0" flavor2="3">
@@ -628,9 +604,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/main.c" ex="false" tool="0" flavor2="3">
@@ -645,9 +618,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/rprintf.c" ex="false" tool="0" flavor2="3">
@@ -657,9 +627,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/serial.c" ex="false" tool="0" flavor2="3">
@@ -671,9 +638,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/syscalls.c" ex="false" tool="0" flavor2="3">
@@ -686,9 +650,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/system_LPC177x_8x.c" ex="false" tool="0" flavor2="3">
@@ -700,19 +661,23 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/version.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="0">
+        <cTool flags="1">
           <incDir>
-            <pElem>../system</pElem>
             <pElem>..</pElem>
+            <pElem>../-Wall</pElem>
+            <pElem>../system</pElem>
+            <pElem>../drivers</pElem>
+            <pElem>../fat</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>BOOT_MAX_SIZE=65536</Elem>
+            <Elem>DEBUG_UART_BAUD=57600</Elem>
             <Elem>LPC1778</Elem>
+            <Elem>ROM_RUN</Elem>
+            <Elem>VECTORS_IN_ROM</Elem>
           </preprocessorList>
         </cTool>
       </item>
@@ -725,9 +690,6 @@
             <pElem>../system</pElem>
             <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../usb/msc_bot.c" ex="false" tool="0" flavor2="3">
@@ -865,42 +827,6 @@
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
             <pElem>../drivers</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/fat">
-        <cTool>
-          <incDir>
-            <pElem>../fat</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/iap">
-        <cTool>
-          <incDir>
-            <pElem>../iap</pElem>
-            <pElem>../system</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
-            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>..</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/synth">
-        <cTool>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/usb">
-        <cTool>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/xnormidi">
@@ -909,9 +835,6 @@
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
             <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>LPC1778</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/xnormidi/bytequeue">
