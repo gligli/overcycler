@@ -41,7 +41,7 @@ inline uint16_t lerp(uint16_t a,uint16_t b,uint8_t x)
 	return a+(((uint32_t)x*(b-a))>>8);
 }
 
-inline uint16_t lerp16(uint16_t a,uint16_t b,uint32_t x)
+inline int32_t lerp16(uint16_t a,uint16_t b,int32_t x)
 {
 	return a+((x*(b-a))>>16);
 }

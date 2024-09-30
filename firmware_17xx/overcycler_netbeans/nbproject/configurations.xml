@@ -112,7 +112,6 @@
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-march=armv7-m -O4 -std=gnu99"/>
-        <element flagsID="1" commonFlags="-std=gnu99 -Os"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>
@@ -355,21 +354,16 @@
         </cTool>
       </item>
       <item path="../fat/nor.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
-            <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/machine</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include/sys</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/arm-none-eabi/include</pElem>
+            <pElem>../../../Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.3 rel1/lib/gcc/arm-none-eabi/12.3.1/include</pElem>
             <pElem>../fat</pElem>
+            <pElem>../system</pElem>
+            <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>BOOT_MAX_SIZE=65536</Elem>
-            <Elem>DEBUG_UART_BAUD=57600</Elem>
-            <Elem>LPC1778</Elem>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../synth/adsr.c" ex="false" tool="0" flavor2="3">
@@ -664,21 +658,11 @@
         </cTool>
       </item>
       <item path="../system/version.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="1">
+        <cTool flags="0">
           <incDir>
-            <pElem>..</pElem>
-            <pElem>../-Wall</pElem>
             <pElem>../system</pElem>
-            <pElem>../drivers</pElem>
-            <pElem>../fat</pElem>
+            <pElem>..</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>BOOT_MAX_SIZE=65536</Elem>
-            <Elem>DEBUG_UART_BAUD=57600</Elem>
-            <Elem>LPC1778</Elem>
-            <Elem>ROM_RUN</Elem>
-            <Elem>VECTORS_IN_ROM</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="../system/w25q.c" ex="false" tool="0" flavor2="3">

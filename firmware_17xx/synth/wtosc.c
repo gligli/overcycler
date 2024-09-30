@@ -33,10 +33,10 @@ static FORCEINLINE void updatePeriodIncrement(struct wtosc_s * o, int8_t type)
 {
 	if(o->pendingUpdate>=type)
 	{
-		o->increment[0]=o->pendingIncrement[0];
-		o->increment[1]=o->pendingIncrement[1];
 		o->period[0]=o->pendingPeriod[0];
 		o->period[1]=o->pendingPeriod[1];
+		o->increment[0]=o->pendingIncrement[0];
+		o->increment[1]=o->pendingIncrement[1];
 		
 		o->pendingUpdate=0;
 	}
@@ -57,8 +57,6 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 		curIncrement=o->increment[0];
 	}
 
-	o->counter+=curPeriod;
-
 	o->phase-=curIncrement;
 
 	if(o->phase<0)
@@ -70,9 +68,11 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 		// sync (master side)
 		if(syncMode==osmMaster)
 		{
-			syncPositions[bufIdx]=o->counter-curPeriod;
+			syncPositions[bufIdx]=o->counter;
 		}
 	}
+
+	o->counter+=curPeriod;
 
 	if(o->aliasing) // we want aliasing, so make interpolation less effective !
 	{
@@ -87,7 +87,7 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	o->prevSample=o->curSample;
 	o->curSample=lerp16(o->mainData[o->phase],o->crossoverData[o->phase],o->crossover);
 	
-	return curPeriod;
+	return (1<<FRAC_SHIFT)/curPeriod;
 }
 
 void wtosc_init(struct wtosc_s * o, int32_t channel)
@@ -167,10 +167,10 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_
 	period[0]=CLOCK/(sampleRate[0]/increment[0]);
 	period[1]=CLOCK/(sampleRate[1]/increment[1]);	
 	
-	o->pendingIncrement[0]=increment[0];
-	o->pendingIncrement[1]=increment[1];
 	o->pendingPeriod[0]=period[0];	
 	o->pendingPeriod[1]=period[1];	
+	o->pendingIncrement[0]=increment[0];
+	o->pendingIncrement[1]=increment[1];
 
 	o->pendingUpdate=(pitch==o->pitch && crossover_s==o->crossover && aliasing_s==o->aliasing)?1:2; // width change needs delayed update (waiting for phase)
 	
@@ -214,7 +214,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 	updatePeriodIncrement(o,2);
 	
 	curHalf=o->phase>=WTOSC_SAMPLE_COUNT/2?1:0;
-	alphaDiv=o->period[curHalf];
+	alphaDiv=(1<<FRAC_SHIFT)/o->period[curHalf];
 
 	if(syncMode==osmSlave)
 	{
@@ -243,7 +243,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 			// interpolate
 
-			r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+			r=herp(o->counter*alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 			// send value to DAC
 
@@ -267,7 +267,7 @@ FORCEINLINE void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t e
 
 			// interpolate
 
-			r=herp((o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+			r=herp(o->counter*alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 			// send value to DAC
 
