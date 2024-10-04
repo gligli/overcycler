@@ -25,6 +25,7 @@ typedef enum
 	
 	cpWModAtt=44,cpWModDec=45,cpWModSus=46,cpWModRel=47,
 	cpWModBEnv=48,cpWModVelocity=49,
+	cpVCALevel=50,
 
 	// /!\ this must stay last
 	cpCount

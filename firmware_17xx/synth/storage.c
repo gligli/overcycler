@@ -71,6 +71,7 @@ const struct namedParam_s continuousParametersZeroCentered[cpCount] =
 	{"cpWModRel",0},
 	{"cpWModBEnv",1},
 	{"cpWModVelocity",0},
+	{"cpVCALevel",0},
 };
 
 const struct namedParam_s steppedParametersSteps[spCount] = 
@@ -486,6 +487,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 	currentPreset.continuousParameters[cpLFOPitchAmt]=scan_potTo16bits(100);
 	currentPreset.continuousParameters[cpLFOFreq]=scan_potTo16bits(5*60);
 	currentPreset.continuousParameters[cpLFO2Freq]=scan_potTo16bits(5*60);
+	currentPreset.continuousParameters[cpVCALevel]=HALF_RANGE;
 
 	currentPreset.steppedParameters[spBenderTarget]=modPitch;
 	currentPreset.steppedParameters[spModwheelRange]=1; // low

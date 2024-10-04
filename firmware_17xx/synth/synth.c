@@ -871,7 +871,7 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 	// amplifier
 	
 	vamp=scaleU16U16(synth.ampEnvs[v].output,ampVal);
-	synth_refreshCV(v,cvAmp,vamp>>1,0); // half scale to avoid VCA clipping
+	synth_refreshCV(v,cvAmp,vamp,0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1079,6 +1079,8 @@ void synth_updateCVsEvent(void)
 
 	ampVal-=scaleU16U16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].levelCV>>1);
 	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].output);
+
+	ampVal=scaleU16U16(ampVal,currentPreset.continuousParameters[cpVCALevel]);
 
 		// misc
 
