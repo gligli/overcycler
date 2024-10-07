@@ -410,8 +410,15 @@ static void drawWaveform(abx_t abx)
 
 	// include waveform name (find spot with less waveform covered)
 	
-	char *s=currentPreset.oscWave[abx];
-	uint8_t sl=strlen(s);
+	char wavName[MAX_FILENAME], *s;
+	strcpy(wavName,currentPreset.oscWave[abx]);
+	
+	// remove file name extension
+	s=strrchr(wavName,'.');
+	if(s)
+		*s='\0';
+	
+	uint8_t sl=strlen(wavName);
 	uint8_t ltup=0,ltdn=0,rtup=0,rtdn=0,best;
 	
 	for(uint8_t x=0;x<sl;++x)
@@ -425,13 +432,13 @@ static void drawWaveform(abx_t abx)
 	best=MAX(MAX(ltup,ltdn),MAX(rtup,rtdn));
 
 	if(best==ltdn)
-		memcpy(&points[3][0],s,sl);
+		memcpy(&points[3][0],wavName,sl);
 	else if (best==rtdn)
-		memcpy(&points[3][LCD_WIDTH-sl],s,sl);
+		memcpy(&points[3][LCD_WIDTH-sl],wavName,sl);
 	else if (best==ltup)
-		memcpy(&points[0][0],s,sl);
+		memcpy(&points[0][0],wavName,sl);
 	else
-		memcpy(&points[0][LCD_WIDTH-sl],s,sl);
+		memcpy(&points[0][LCD_WIDTH-sl],wavName,sl);
 
 	// draw the display
 	
