@@ -23,7 +23,7 @@ enum uiPage_e
 enum uiCustomParamNumber_e
 {
 	cnNone=0,cnAMod,cnAHld,cnLoad,cnSave,cnMidC,cnTune,cnSync,cnAPly,cnBPly,cnSRec,cnBack,cnTiRe,cnClr,
-	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoCp,cnBXoCp,cnLPrv,cnLNxt,cnPanc,cnLBas,cnNPrs,cnNVal,cnUsbM,cnCtst,
+	cnTrspM,cnTrspV,cnSBnk,cnClk,cnAXoSw,cnBXoSw,cnLPrv,cnLNxt,cnPanc,cnLBas,cnNPrs,cnNVal,cnUsbM,cnCtst,
 	cnWEnT,cnFEnT,cnAEnT,cnHelp,
 };
 
@@ -76,8 +76,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpDetune,.shortName="Detn",.longName="Osc A/B Detune"},
 		{.type=ptCont,.number=cpBVol,.shortName="BVol",.longName="Osc B Volume"},
 		/* buttons (A,B,C,D,#,*) */
-		{.type=ptCust,.number=cnAXoCp,.shortName="AXoC",.longName="Copy A bank/wave to A Crossover"},
-		{.type=ptCust,.number=cnBXoCp,.shortName="BXoC",.longName="Copy B bank/wave to B Crossover"},
+		{.type=ptCust,.number=cnAXoSw,.shortName="AXoS",.longName="Swap A bank/wave with A Crossover"},
+		{.type=ptCust,.number=cnBXoSw,.shortName="BXoS",.longName="Swap B bank/wave with B Crossover"},
 		{.type=ptStep,.number=spChromaticPitch,.shortName="FrqM",.longName="Frequency Mode",.values={"Free","Semi","Oct "}},
 		{.type=ptStep,.number=spOscSync,.shortName="Sync",.longName="Oscillator A to B Synchronization",.values={"Off ","On  "}},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},

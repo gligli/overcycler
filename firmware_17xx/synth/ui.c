@@ -592,12 +592,12 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 					else
 						value=settings.seqArpClock;
 					break;
-				case cnAXoCp:
+				case cnAXoSw:
 					value=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
 					value+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
 					srprintf(dv,"%04d",value);
 					break;
-				case cnBXoCp:
+				case cnBXoSw:
 					value=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
 					value+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
 					srprintf(dv,"%04d",value);
@@ -1140,19 +1140,21 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				settings.seqArpClock=potSetting;
 				settingsModified=1;
 				break;
-			case cnAXoCp:
-				currentPreset.steppedParameters[spAXOvrBank_Unsaved]=currentPreset.steppedParameters[spABank_Unsaved];
-				currentPreset.steppedParameters[spAXOvrWave_Unsaved]=currentPreset.steppedParameters[spAWave_Unsaved];
-				strcpy(currentPreset.oscBank[2], currentPreset.oscBank[0]);
-				strcpy(currentPreset.oscWave[2], currentPreset.oscWave[0]);
+			case cnAXoSw:
+				swap8(&currentPreset.steppedParameters[spAXOvrBank_Unsaved],&currentPreset.steppedParameters[spABank_Unsaved]);
+				swap8(&currentPreset.steppedParameters[spAXOvrWave_Unsaved],&currentPreset.steppedParameters[spAWave_Unsaved]);
+				swapstr(currentPreset.oscBank[2],currentPreset.oscBank[0]);
+				swapstr(currentPreset.oscWave[2],currentPreset.oscWave[0]);
+				synth_refreshWaveforms(abxAMain);
 				synth_refreshWaveforms(abxACrossover);
 				change=1;
 				break;
-			case cnBXoCp:
-				currentPreset.steppedParameters[spBXOvrBank_Unsaved]=currentPreset.steppedParameters[spBBank_Unsaved];
-				currentPreset.steppedParameters[spBXOvrWave_Unsaved]=currentPreset.steppedParameters[spBWave_Unsaved];
-				strcpy(currentPreset.oscBank[3], currentPreset.oscBank[1]);
-				strcpy(currentPreset.oscWave[3], currentPreset.oscWave[1]);
+			case cnBXoSw:
+				swap8(&currentPreset.steppedParameters[spBXOvrBank_Unsaved],&currentPreset.steppedParameters[spBBank_Unsaved]);
+				swap8(&currentPreset.steppedParameters[spBXOvrWave_Unsaved],&currentPreset.steppedParameters[spBWave_Unsaved]);
+				swapstr(currentPreset.oscBank[3],currentPreset.oscBank[1]);
+				swapstr(currentPreset.oscWave[3],currentPreset.oscWave[1]);
+				synth_refreshWaveforms(abxBMain);
 				synth_refreshWaveforms(abxBCrossover);
 				change=1;
 				break;

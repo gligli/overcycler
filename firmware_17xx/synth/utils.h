@@ -43,6 +43,9 @@ uint16_t linearCourse(uint16_t v, float ratio, float range); // reverse of expon
 int uint16Compare(const void * a,const void * b); // for qsort
 int stringCompare(const void * a,const void * b); // for qsort
 
+void swap8(uint8_t * a,uint8_t * b);
+void swapstr(char * a,char * b);
+
 void buffer_dump(void * buf, int size);
 
 #endif	/* UTILS_H */

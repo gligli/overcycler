@@ -507,8 +507,16 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 
 	for(abx_t abx=0;abx<abxCount;++abx)
 	{
-		strcpy(currentPreset.oscBank[abx],SYNTH_DEFAULT_WAVE_BANK);
-		strcpy(currentPreset.oscWave[abx],SYNTH_DEFAULT_WAVE_NAME);
+		if(abx<abxACrossover)
+		{
+			strcpy(currentPreset.oscBank[abx],SYNTH_DEFAULT_MAIN_WAVE_BANK);
+			strcpy(currentPreset.oscWave[abx],SYNTH_DEFAULT_MAIN_WAVE_NAME);
+		}
+		else
+		{
+			strcpy(currentPreset.oscBank[abx],SYNTH_DEFAULT_XOVR_WAVE_BANK);
+			strcpy(currentPreset.oscWave[abx],SYNTH_DEFAULT_XOVR_WAVE_NAME);
+		}
 	}
 
 	if(makeSound)

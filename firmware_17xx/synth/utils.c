@@ -204,6 +204,22 @@ int stringCompare(const void * a,const void * b)
 	return strcasecmp((const char*)a,(const char*)b);
 }
 
+void swap8(uint8_t * a,uint8_t * b)
+{
+	uint8_t tmp;
+	tmp=*a;
+	*a=*b;
+	*b=tmp;
+}
+
+void swapstr(char * a,char * b)
+{
+	char tmp[MAX_FILENAME];
+	strcpy(tmp,a);
+	strcpy(a,b);
+	strcpy(b,tmp);
+}
+
 void buffer_dump(void * buf, int size){
 	int i, osize = size;
 	char* cbuf=(char*) buf;
