@@ -43,7 +43,7 @@ typedef enum
 
 typedef enum
 {
-	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4
+	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5
 } wmodTarget_t;
 
 typedef enum

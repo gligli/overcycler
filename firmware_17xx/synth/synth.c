@@ -77,7 +77,7 @@ static struct
 		uint32_t modulationDelayStart;
 		uint16_t modulationDelayTickCount;
 
-		uint8_t wmodMask;
+		uint16_t wmodMask;
 		int32_t oldCrossOver;
 		
 		syncMode_t syncModeMaster,syncModeSlave;
@@ -432,17 +432,21 @@ static void refreshMisc(void)
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
 		synth.partState.wmodMask|=8;
+	if(currentPreset.steppedParameters[spAWModType]==wmFolder)
+		synth.partState.wmodMask|=16;
 
 	if(currentPreset.steppedParameters[spBWModType]==wmAliasing)
-		synth.partState.wmodMask|=16;
+		synth.partState.wmodMask|=256;
 	if(currentPreset.steppedParameters[spBWModType]==wmWidth)
-		synth.partState.wmodMask|=32;
+		synth.partState.wmodMask|=512;
 	if(currentPreset.steppedParameters[spBWModType]==wmFrequency)
-		synth.partState.wmodMask|=64;
+		synth.partState.wmodMask|=1024;
 	if(currentPreset.steppedParameters[spBWModType]==wmCrossOver ||
 			currentPreset.steppedParameters[spBenderTarget]==modCrossOver ||
 			currentPreset.steppedParameters[spPressureTarget]==modCrossOver)
-		synth.partState.wmodMask|=128;
+		synth.partState.wmodMask|=2048;
+	if(currentPreset.steppedParameters[spBWModType]==wmFolder)
+		synth.partState.wmodMask|=4096;
 	
 	// waveforms
 	
@@ -821,7 +825,7 @@ FORCEINLINE void synth_refreshCV(int8_t voice, cv_t cv, uint32_t value, int8_t n
 	dacspi_setCVValue(channel,v,noDblBuf);
 }
 
-static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint8_t wmodMask)
+static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBEnvAmt,int32_t filEnvAmt,int32_t pitchAVal,int32_t pitchBVal,int32_t wmodAVal,int32_t wmodBVal,int32_t filterVal,int32_t ampVal,uint16_t wmodMask)
 {
 	int32_t vpa,vpb,vma,vmb,vf,vamp;
 
@@ -853,20 +857,20 @@ static FORCEINLINE void refreshVoice(int8_t v,int32_t wmodAEnvAmt,int32_t wmodBE
 		vpa+=vma-HALF_RANGE;
 
 	vpb=pitchBVal;
-	if(wmodMask&64)
+	if(wmodMask&1024)
 		vpb+=vmb-HALF_RANGE;
 
 	// osc A
 
 	vpa+=synth.oscANoteCV[v];
 	vpa=__USAT(vpa,16);
-	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE,(wmodMask&8)?vma:HALF_RANGE);
+	wtosc_setParameters(&synth.osc[v][0],vpa,(wmodMask&1)?vma:HALF_RANGE,(wmodMask&2)?vma:HALF_RANGE,(wmodMask&8)?vma:HALF_RANGE,(wmodMask&16)?vma:HALF_RANGE);
 
 	// osc B
 
 	vpb+=synth.oscBNoteCV[v];
 	vpb=__USAT(vpb,16);
-	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&16)?vmb:HALF_RANGE,(wmodMask&32)?vmb:HALF_RANGE,(wmodMask&128)?vmb:HALF_RANGE);
+	wtosc_setParameters(&synth.osc[v][1],vpb,(wmodMask&256)?vmb:HALF_RANGE,(wmodMask&512)?vmb:HALF_RANGE,(wmodMask&2048)?vmb:HALF_RANGE,(wmodMask&4096)?vmb:HALF_RANGE);
 
 	// amplifier
 	

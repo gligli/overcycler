@@ -44,7 +44,7 @@ static FORCEINLINE void updatePeriodIncrement(struct wtosc_s * o, int8_t type)
 
 static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
 {
-	int32_t curPeriod,curIncrement;
+	int32_t curPeriod,curIncrement,smp;
 	
 	if(o->phase>=WTOSC_SAMPLE_COUNT/2)
 	{
@@ -85,8 +85,19 @@ static FORCEINLINE int32_t handleCounterUnderflow(struct wtosc_s * o, int32_t bu
 	}
 	
 	o->prevSample=o->curSample;
-	o->curSample=lerp16(o->mainData[o->phase],o->crossoverData[o->phase],o->crossover);
+
+	smp=lerp16(o->mainData[o->phase],o->crossoverData[o->phase],o->crossover);
 	
+	// wave folder
+	smp+=INT16_MIN;
+	smp*=o->folder;
+	smp=(smp>>2)+(1<<24); // smp = smp * 0.25 + 0.25
+	smp-=(smp+(1<<25))&0xfc000000; // smp -= round(smp)
+	smp^=smp>>31; // smp = abs(smp)
+	smp>>=9;
+
+	o->curSample=smp;
+
 	return (1<<FRAC_SHIFT)/curPeriod;
 }
 
@@ -109,7 +120,7 @@ void wtosc_init(struct wtosc_s * o, int32_t channel)
 	o->channel=channel;
 	
 	wtosc_setSampleData(o,NULL,NULL);
-	wtosc_setParameters(o,MIDDLE_C_NOTE*WTOSC_CV_SEMITONE,HALF_RANGE,HALF_RANGE,0);
+	wtosc_setParameters(o,MIDDLE_C_NOTE*WTOSC_CV_SEMITONE,HALF_RANGE,HALF_RANGE,HALF_RANGE,HALF_RANGE);
 	updatePeriodIncrement(o,1);
 }
 
@@ -119,11 +130,11 @@ FORCEINLINE void wtosc_setSampleData(struct wtosc_s * o, uint16_t * mainData, ui
 	o->crossoverData=xovrData;
 }
 
-FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover)
+FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_t aliasing, uint16_t width, uint16_t crossover, uint16_t folder)
 {
 	uint64_t frequency;
 	uint32_t sampleRate[2];
-	int32_t increment[2], period[2], aliasing_s, crossover_s;
+	int32_t increment[2], period[2], aliasing_s, crossover_s, folder_s;
 	
 	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
 	
@@ -144,11 +155,14 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_
 	width>>=16-WIDTH_MOD_BITS;
 
 	crossover_s=crossover;
-	crossover_s+=INT16_MIN;
-	crossover_s=abs(crossover_s);
+	crossover_s=abs(crossover_s+INT16_MIN);
 	crossover_s=crossover_s<<1;
 	
-	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover)
+	folder_s=folder;
+	folder_s=abs(folder_s+INT16_MIN);
+	folder_s=__USAT((folder_s<<1)+UINT16_MAX/32,16);
+	
+	if(pitch==o->pitch && aliasing_s==o->aliasing && width==o->width && crossover_s==o->crossover && folder_s==o->folder)
 		return;	
 	
 	frequency=(uint64_t)cvToFrequency(pitch)*(WTOSC_SAMPLE_COUNT/2);
@@ -172,12 +186,13 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, uint16_
 	o->pendingIncrement[0]=increment[0];
 	o->pendingIncrement[1]=increment[1];
 
-	o->pendingUpdate=(pitch==o->pitch && crossover_s==o->crossover && aliasing_s==o->aliasing)?1:2; // width change needs delayed update (waiting for phase)
+	o->pendingUpdate=(pitch==o->pitch && aliasing_s==o->aliasing && crossover_s==o->crossover && folder_s==o->folder)?1:2; // width change needs delayed update (waiting for phase)
 	
 	o->pitch=pitch;
-	o->crossover=crossover_s;
 	o->width=width;
 	o->aliasing=aliasing_s;
+	o->crossover=crossover_s;
+	o->folder=folder_s;
 	
 //	if(!o->channel)
 //		rprintf(0,"inc %d %d cv %x rate % 6d % 6d\n",increment[0],increment[1],o->pitch,sampleRate[0],sampleRate[1]);
