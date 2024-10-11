@@ -111,7 +111,7 @@
         <prependToolCollectionPath>false</prependToolCollectionPath>
       </toolsSet>
       <flagsDictionary>
-        <element flagsID="0" commonFlags="-std=c99"/>
+        <element flagsID="0" commonFlags="-march=armv7-m -O4 -std=gnu99"/>
       </flagsDictionary>
       <codeAssistance>
         <includeAdditional>true</includeAdditional>

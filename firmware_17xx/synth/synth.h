@@ -30,7 +30,7 @@
 #define MIDDLE_C_NOTE 60
 
 typedef enum {
-	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvCrossOver=6,cvAmp=7,cvNoiseVol=8,
+	cvAVol=0,cvBVol=1,cvCutoff=2,cvResonance=3,cvAPitch=4,cvBPitch=5,cvWaveMod=6,cvAmp=7,cvNoiseVol=8,
 			
 	// /!\ this must stay last
 	cvCount
@@ -38,12 +38,15 @@ typedef enum {
 
 typedef enum
 {
-	modNone=0,modPitch=1,modFilter=2,modVolume=3,modCrossOver=4,modLFO1=5,modLFO2=6
+	modNone=0,modPitch=1,modFilter=2,modVolume=3,modWaveMod=4,modLFO1=5,modLFO2=6
 } modulationTarget_t;
 
 typedef enum
 {
-	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5
+	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5,
+
+	// /!\ this must stay last
+	wmCount
 } wmodTarget_t;
 
 typedef enum

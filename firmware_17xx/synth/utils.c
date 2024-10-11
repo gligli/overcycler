@@ -41,9 +41,9 @@ inline uint16_t lerp(uint16_t a,uint16_t b,uint8_t x)
 	return a+(((uint32_t)x*(b-a))>>8);
 }
 
-inline int32_t lerp16(uint16_t a,uint16_t b,int32_t x)
+inline uint16_t lerp16(uint16_t a,uint16_t b,uint16_t x)
 {
-	return a+((x*(b-a))>>16);
+	return a+(((uint32_t)x*(b-a))>>16);
 }
 
 // max frac shift = 12

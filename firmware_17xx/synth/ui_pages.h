@@ -269,8 +269,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCust,.number=cnSync,.shortName="Sync",.longName="Sync mode",.values={"Int ","MIDI", "USB "},.custPotMul=3,.custPotAdd=0},
 		/* 2nd row of pots */
 		{.type=ptStep,.number=spModwheelTarget,.shortName="MTgt",.longName="Modwheel Target",.values={"LFO1","LFO2"}},
-		{.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None","Pit ","Fil ","Vol ","XOvr"}},
-		{.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None","Pit ","Fil ","Vol ","XOvr","LFO1","LFO2"}},
+		{.type=ptStep,.number=spBenderTarget,.shortName="BTgt",.longName="Bender Target",.values={"None","Pit ","Fil ","Vol ","WMod"}},
+		{.type=ptStep,.number=spPressureTarget,.shortName="PTgt",.longName="Pressure Target",.values={"None","Pit ","Fil ","Vol ","WMod","LFO1","LFO2"}},
 		{.type=ptCust,.number=cnCtst,.shortName="Ctst",.longName="LCD contrast",.custPotMul=UI_MAX_LCD_CONTRAST+1,.custPotAdd=0},
 		{.type=ptCust,.number=cnUsbM,.shortName="UsbM",.longName="USB Mode",.values={"None","Disk","MIDI"},.custPotMul=3,.custPotAdd=0},
 		/* buttons (A,B,C,D,#,*) */

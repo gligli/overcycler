@@ -101,7 +101,7 @@ static LOWERCODESIZE void tuneOffset(int8_t voice,uint8_t nthC)
 static LOWERCODESIZE void tuneFilter(int8_t voice)
 {
 #ifdef DEBUG		
-	print("\ntuning ");phex(voice);print("\n");
+	rprintf(0, "\ntuning %d\n", voice);
 #endif
 	int8_t nthC;
 	
