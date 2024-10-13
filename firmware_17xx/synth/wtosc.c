@@ -647,7 +647,7 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, wmodTar
 	case wmCrossOver:
 		crossover_s=wmAmount;
 		crossover_s=abs(crossover_s+INT16_MIN);
-		crossover_s=crossover_s<<1;
+		crossover_s=__USAT(crossover_s<<1,16);
 		break;
 	case wmFolder:
 		folder_s=wmAmount;
