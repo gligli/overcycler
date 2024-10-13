@@ -233,23 +233,33 @@ LOWERCODESIZE static const char * getStrValue(struct loadLL_s *ll, const char * 
 		return NULL;
 }
 
-LOWERCODESIZE static void getIntValue(struct loadLL_s *ll, const char * name, void * default_, int size)
+LOWERCODESIZE static void getSafeStrValue(struct loadLL_s *ll, const char * name, char * value, int size, int8_t allowEmpty)
 {
 	const char *sv = getStrValue(ll,name);
-	if(sv && default_)
+	if(sv && value && (sv[0]!='\0' || allowEmpty))
 	{
-		int v=atoi(sv);
-		memcpy(default_,&v,size);
+		value[size-1]='\0';
+		strncpy(value,sv,size-1);
 	}
 }
 
-LOWERCODESIZE static void getSafeIntValue(struct loadLL_s *ll, const char * name, void * default_, int size, int min, int max)
+LOWERCODESIZE static void getIntValue(struct loadLL_s *ll, const char * name, void * value, int size)
 {
 	const char *sv = getStrValue(ll,name);
-	if(sv && default_)
+	if(sv && value)
+	{
+		int v=atoi(sv);
+		memcpy(value,&v,size);
+	}
+}
+
+LOWERCODESIZE static void getSafeIntValue(struct loadLL_s *ll, const char * name, void * value, int size, int min, int max)
+{
+	const char *sv = getStrValue(ll,name);
+	if(sv && value)
 	{
 		int v=MAX(min,MIN(max,atoi(sv)));
-		memcpy(default_,&v,size);
+		memcpy(value,&v,size);
 	}
 }
 
@@ -381,13 +391,15 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	auto void load(struct loadLL_s * ll)
 	{
 		char buf[32];
+		
+		getSafeStrValue(ll,"presetName",currentPreset.presetName,sizeof(currentPreset.presetName),0);
 
 		for(abx_t abx=0;abx<abxCount;++abx)
 		{
 			srprintf(buf,"bank%d",abx);
-			strcpy(currentPreset.oscBank[abx],getStrValue(ll,buf));
+			getSafeStrValue(ll,buf,currentPreset.oscBank[abx],MAX_FILENAME,0);
 			srprintf(buf,"wave%d",abx);
-			strcpy(currentPreset.oscWave[abx],getStrValue(ll,buf));
+			getSafeStrValue(ll,buf,currentPreset.oscWave[abx],MAX_FILENAME,0);
 		}
 
 		for(continuousParameter_t cp=0;cp<cpCount;++cp)
@@ -408,6 +420,7 @@ LOWERCODESIZE int8_t preset_loadCurrent(uint16_t number)
 	}
 	
 	preset_loadDefault(1);
+	currentPreset.loadedPresetNumber=number;
 
 	char fn[256];
 	srprintf(fn,SYNTH_PRESETS_PATH "/preset_%04d.conf",number);
@@ -422,11 +435,15 @@ LOWERCODESIZE void preset_saveCurrent(uint16_t number)
 	FIL f;
 	char buf[256];
 	
+	currentPreset.loadedPresetNumber=number;
+
 	f_mkdir(SYNTH_PRESETS_PATH);
 	
 	srprintf(buf,SYNTH_PRESETS_PATH "/preset_%04d.conf",number);
 	if(prepareConfigFileSave(&f,buf))
 		return;
+
+	f_printf(&f,"presetName" SAVE_STR,currentPreset.presetName);
 
 	for(abx_t abx=0;abx<abxCount;++abx)
 	{
@@ -518,6 +535,8 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 			strcpy(currentPreset.oscWave[abx],SYNTH_DEFAULT_XOVR_WAVE_NAME);
 		}
 	}
+
+	strcpy(currentPreset.presetName,"<no name>");
 
 	if(makeSound)
 	{

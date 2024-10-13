@@ -480,17 +480,17 @@ static const char * getName(int8_t source, int8_t longName)
 	if(longName && prm->longName)
 		return prm->longName;
 	else
-		return "    ";
+		return NULL;
 }
 
 static char * getDisplayValue(int8_t source, int32_t * valueOut)
 {
-	static char dv[10]={0};
+	static char dv[10];
 	const struct uiParam_s * prm=getUiParameter(source);
 	int32_t valCount;
 	int32_t value=INT32_MIN,tmp;
 
-	dv[0]=0;
+	dv[0]='\0';
 	if(valueOut)
 		*valueOut=value;
 	
@@ -654,7 +654,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 			}
 			break;
 		default:
-			strcpy(dv,"    ");
+			/* nothing */;
 	}
 
 	if(valueOut)
@@ -1080,8 +1080,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 				ui.slowUpdateTimeoutNumber=prm->number+0x80;
 				break;
 			case cnSave:
-				data=preset_fileExists(settings.presetNumber);
-				if(data && !ui.presetExistsWarning)
+				if(settings.presetNumber!=currentPreset.loadedPresetNumber && !ui.presetExistsWarning && preset_fileExists(settings.presetNumber))
 				{
 					ui.presetExistsWarning=1;
 					break;
@@ -1572,9 +1571,9 @@ void ui_update(void)
 		
 			// text
 		
-		const uint8_t buttonsOffsets[]={0,1,0,1};
-		const uint8_t buttonsLCDs[]={1,1,2,2};
-		const char buttonsChars[]={'\x00','\x01','\x00','\x01'};
+		static const uint8_t buttonsOffsets[]={0,1,0,1};
+		static const uint8_t buttonsLCDs[]={1,1,2,2};
+		static const char buttonsChars[]={'\x00','\x01','\x00','\x01'};
 		for(i=kbA;i<=kbD;++i)
 		{
 			if(getUiParameter(i)->type!=ptNone)
@@ -1620,7 +1619,7 @@ void ui_update(void)
 		
 		// pots
 		
-		const uint8_t potsOffsets[SCAN_POT_COUNT/2]={0,6,12,18,24};
+		static const uint8_t potsOffsets[SCAN_POT_COUNT/2]={0,6,12,18,24};
 		for(i=0;i<SCAN_POT_COUNT/2;++i)
 		{
 			setPos(1,potsOffsets[i],1);
@@ -1646,7 +1645,15 @@ void ui_update(void)
 		
 		if(ui.pendingScreenClear && ui.activePage==upPresets)
 		{
-			setPos(1,0,0); sendString(1,"*:Set preset number digits");
+			char buf[60];
+			
+			memset(buf,0,sizeof(buf));
+			srprintf(buf,"%03d: %s",currentPreset.loadedPresetNumber,currentPreset.presetName);
+			setPos(1,0,1); sendString(1,&buf[28]);
+			buf[28]='\0';
+			setPos(1,0,0); sendString(1,buf);
+			
+			setPos(2,0,1); sendString(2,"*: Set digits");
 		}
 	}
 
