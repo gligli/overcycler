@@ -13,7 +13,7 @@ struct allocation_s
 	int8_t allocated;
 	int8_t gated;
 	int8_t keyPressed;
-	int8_t internalKeyboard;
+	int8_t fromKeyboard;
 };
 
 static struct
@@ -213,7 +213,7 @@ void assigner_allKeysOff(void)
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		if (!isVoiceDisabled(v) && assigner.allocation[v].gated &&
-		    assigner.allocation[v].internalKeyboard)
+		    assigner.allocation[v].fromKeyboard)
 		{
 			synth_assignerEvent(assigner.allocation[v].note,0,v,assigner.allocation[v].velocity,0);
 		    	assigner.allocation[v].gated=0;
@@ -290,7 +290,7 @@ int8_t FORCEINLINE assigner_getMono(void)
 	return assigner.mono;
 }
 
-void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t keyboard)
+void assigner_assignNote(uint8_t note, int8_t gate, uint16_t velocity, int8_t fromKeyboard)
 {
 	uint32_t timestamp,restoredTimestamp,ts;
 	uint16_t restoredVelocity,vel;
@@ -354,7 +354,7 @@ reassign:
 			assigner.allocation[v].rootNote=note;
 			assigner.allocation[v].note=n;
 			assigner.allocation[v].timestamp=timestamp;
-			assigner.allocation[v].internalKeyboard=keyboard;
+			assigner.allocation[v].fromKeyboard=fromKeyboard;
 
 			synth_assignerEvent(n,1,v,velocity,flags);
 
