@@ -18,7 +18,7 @@ arpMode_t arp_getMode(void);
 int8_t arp_getHold(void);
 void arp_resetCounter(int8_t beatReset);
 
-void arp_assignNote(uint8_t note, int8_t on);
+int8_t arp_assignNote(uint8_t note, int8_t on); // returns nonzero if handled
 
 #endif	/* ARP_H */
 

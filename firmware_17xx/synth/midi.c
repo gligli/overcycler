@@ -299,7 +299,7 @@ static void noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint
 		return;
 	}
 	
-	if(arp_getMode()==amOff)
+	if(!arp_assignNote(note,velocity!=0))
 	{
 		// sequencer note input		
 		if(seq_getMode(0)==smRecording || seq_getMode(1)==smRecording)
@@ -308,10 +308,6 @@ static void noteOnEvent(MidiDevice * device, uint8_t channel, uint8_t note, uint
 		intNote=note+ui_getTranspose();
 		intNote=MAX(0,MIN(127,intNote));
 		assigner_assignNote(intNote,velocity!=0,(((uint32_t)velocity+1)<<9)-1,1);
-	}
-	else
-	{
-		arp_assignNote(note,velocity!=0);
 	}
 }
 
@@ -330,7 +326,7 @@ static void noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note, uin
 
 	note+=NOTE_TRANSPOSE_OFFSET;
 	
-	if(arp_getMode()==amOff)
+	if(!arp_assignNote(note,0))
 	{
 		// sequencer note input		
 		if(seq_getMode(0)==smRecording || seq_getMode(1)==smRecording)
@@ -339,10 +335,6 @@ static void noteOffEvent(MidiDevice * device, uint8_t channel, uint8_t note, uin
 		intNote=note+ui_getTranspose();
 		intNote=MAX(0,MIN(127,intNote));
 		assigner_assignNote(intNote,0,0,1);
-	}
-	else
-	{
-		arp_assignNote(note,0);
 	}
 }
 

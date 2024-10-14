@@ -123,37 +123,48 @@ FORCEINLINE int8_t arp_getHold(void)
 	return arp.hold;
 }
 
-void arp_assignNote(uint8_t note, int8_t on)
+int8_t arp_assignNote(uint8_t note, int8_t on)
 {
 	int16_t i;
+	int8_t handled=0;
 	
 	if(arp.mode==amOff)
-		return;
+		return handled;
 	
 	// We only arpeggiate from the internal keyboard, so we can keep the
 	// note memory size at 128 if we set the keyboard range to 0 and up.
 	note-=SCANNER_BASE_NOTE;
 	if(on)
 	{
-
 		// if this is the first note, make sure the arp will start on it as as soon as we update
-		if(isEmpty()) arp_resetCounter(settings.syncMode==symInternal);
 
-		// assign note			
-		
-		if(arp.mode!=amUpDown)
+		if(isEmpty())
+			arp_resetCounter(settings.syncMode==symInternal);
+
+		if(arp.hold)
 		{
-			for(i=0;i<ARP_NOTE_MEMORY;++i)
-				if(arp.notes[i]==ASSIGNER_NO_NOTE)
-				{
-					arp.notes[i]=note;
-					break;
-				}
+			// don't accept new notes in hold mode
 		}
 		else
 		{
-			arp.notes[note]=note;
-			arp.notes[ARP_LAST_NOTE-note]=note;
+			// assign note			
+
+			if(arp.mode!=amUpDown)
+			{
+				for(i=0;i<ARP_NOTE_MEMORY;++i)
+					if(arp.notes[i]==ASSIGNER_NO_NOTE)
+					{
+						arp.notes[i]=note;
+						break;
+					}
+			}
+			else
+			{
+				arp.notes[note]=note;
+				arp.notes[ARP_LAST_NOTE-note]=note;
+			}
+
+			handled=1;
 		}
 	}
 	else
@@ -167,14 +178,19 @@ void arp_assignNote(uint8_t note, int8_t on)
 				for(i=0;i<ARP_NOTE_MEMORY;++i)
 					if(arp.notes[i]==note)
 					{
+						handled=1;
 						arp.notes[i]|=ARP_NOTE_HELD_FLAG;
 						break;
 					}
 			}
 			else
 			{
-				arp.notes[note]|=ARP_NOTE_HELD_FLAG;
-				arp.notes[ARP_LAST_NOTE-note]|=ARP_NOTE_HELD_FLAG;
+				if(arp.notes[note]==note)
+				{
+					handled=1;
+					arp.notes[note]|=ARP_NOTE_HELD_FLAG;
+					arp.notes[ARP_LAST_NOTE-note]|=ARP_NOTE_HELD_FLAG;
+				}
 			}
 		}
 		else
@@ -186,14 +202,19 @@ void arp_assignNote(uint8_t note, int8_t on)
 				for(i=0;i<ARP_NOTE_MEMORY;++i)
 					if(arp.notes[i]==note)
 					{
+						handled=1;
 						arp.notes[i]=ASSIGNER_NO_NOTE;
 						break;
 					}
 			}
 			else
 			{
-				arp.notes[note]=ASSIGNER_NO_NOTE;
-				arp.notes[ARP_LAST_NOTE-note]=ASSIGNER_NO_NOTE;
+				if(arp.notes[note]==note)
+				{
+					handled=1;
+					arp.notes[note]=ASSIGNER_NO_NOTE;
+					arp.notes[ARP_LAST_NOTE-note]=ASSIGNER_NO_NOTE;
+				}
 			}
 
 			// gate off for last note
@@ -202,6 +223,8 @@ void arp_assignNote(uint8_t note, int8_t on)
 				finishPreviousNote();
 		}
 	}
+	
+	return handled;
 }
 
 void arp_update(void)
