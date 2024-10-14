@@ -1653,7 +1653,7 @@ void ui_update(void)
 			buf[28]='\0';
 			setPos(1,0,0); sendString(1,buf);
 			
-			setPos(2,0,1); sendString(2,"*: Set digits");
+			setPos(2,0,1); sendString(2,"*:Set digits");
 		}
 	}
 
