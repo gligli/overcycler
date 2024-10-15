@@ -166,7 +166,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptStep,.number=spLFOSpeed,.shortName="1Spd",.longName="LFO1 Speed multiplier",.values={"  x1","  x2","  x4","  x8"}},
 		{.type=ptStep,.number=spLFOTargets,.shortName="1Tgt",.longName="LFO1 Osc Target",.values={"None","OscA","OscB","Both"}},
-		{.type=ptNone},
+		{.type=ptStep,.number=spLFOTrig,.shortName="1Trg",.longName="LFO1 Keyboard Trigger",.values={"Free","Trig","HPer","1Per","2Per","4Per","8Per"}},
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
@@ -188,7 +188,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptStep,.number=spLFO2Speed,.shortName="2Spd",.longName="LFO2 Speed multiplier",.values={"  x1","  x2","  x4","  x8"}},
 		{.type=ptStep,.number=spLFO2Targets,.shortName="2Tgt",.longName="LFO2 Osc Target",.values={"None","OscA","OscB","Both"}},
-		{.type=ptNone},
+		{.type=ptStep,.number=spLFO2Trig,.shortName="2Trg",.longName="LFO2 Keyboard Trigger",.values={"Free","Trig","HPer","1Per","2Per","4Per","8Per"}},
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},

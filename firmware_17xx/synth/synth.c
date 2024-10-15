@@ -325,11 +325,12 @@ static void refreshEnvSettings(int8_t type)
 
 static void refreshLfoSettings(void)
 {
+	static const uint8_t lt2per[] = {0,0,1,2,4,8,16};
 	uint16_t lfoAmt,lfo2Amt,dlyAmt;
 	uint32_t elapsed;
 
-	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape]);
-	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape]);
+	lfo_setShape(&synth.lfo[0],currentPreset.steppedParameters[spLFOShape],lt2per[currentPreset.steppedParameters[spLFOTrig]]);
+	lfo_setShape(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Shape],lt2per[currentPreset.steppedParameters[spLFO2Trig]]);
 	
 	lfo_setSpeedShift(&synth.lfo[0],currentPreset.steppedParameters[spLFOSpeed]);
 	lfo_setSpeedShift(&synth.lfo[1],currentPreset.steppedParameters[spLFO2Speed]);
@@ -1154,6 +1155,12 @@ void synth_assignerEvent(uint8_t note, int8_t gate, int8_t voice, uint16_t veloc
 		adsr_setCVs(&synth.filEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
 		velAmt=currentPreset.continuousParameters[cpAmpVelocity];
 		adsr_setCVs(&synth.ampEnvs[voice],0,0,0,0,(UINT16_MAX-velAmt)+scaleU16U16(velocity,velAmt),0x10);
+		
+		// handle LFOs trigger
+		if(currentPreset.steppedParameters[spLFOTrig])
+			lfo_reset(&synth.lfo[0]);
+		if(currentPreset.steppedParameters[spLFO2Trig])
+			lfo_reset(&synth.lfo[1]);
 	}
 }
 

@@ -61,6 +61,8 @@ typedef enum
 	spPressureRange=36,spPressureTarget=37,
 	
 	spBXOvrBank_Unsaved=38,spBXOvrWave_Unsaved=39,
+			
+	spLFOTrig=40, spLFO2Trig=41,
 
 	// /!\ this must stay last
 	spCount

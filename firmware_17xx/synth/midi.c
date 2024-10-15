@@ -34,14 +34,14 @@ const struct midiCC_s midiCCs[128]={
 	/* CC 0-7 */
 	{ccBankCoarse},
 	{ccModWheel},
-	{ccFree},
+	{ccStepped,spLFOTrig},
 	{ccNone},
 	{ccNone},
 	{ccNone},
 	{ccDataCoarse},
 	{ccNone},
 	/* CC 8-15 */
-	{ccFree},
+	{ccStepped,spLFO2Trig},
 	{ccNone},
 	{ccNone},
 	{ccNone},

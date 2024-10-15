@@ -7,12 +7,12 @@
 #include "scan.h"
 #include "dacspi.h"
 
-static void updateIncrement(struct lfo_s * lfo)
+static inline void updateIncrement(struct lfo_s * lfo)
 {
-	lfo->increment=lfo->speed*(1-lfo->halfPeriod*2);
+	lfo->increment=lfo->speed*(1-(lfo->halfPeriodCounter&1)*2);
 }
 
-static void updateSpeed(struct lfo_s * lfo)
+static inline void updateSpeed(struct lfo_s * lfo)
 {
 	int32_t spd;
 	
@@ -22,17 +22,17 @@ static void updateSpeed(struct lfo_s * lfo)
 	lfo->speed=spd;
 }
 
-static void handlePhaseOverflow(struct lfo_s * l)
+static inline void handlePhaseOverflow(struct lfo_s * l)
 {
-	l->halfPeriod=1-l->halfPeriod;
-	l->phase=l->halfPeriod?0x00ffffff:0;
+	++l->halfPeriodCounter;
+	l->phase=(l->halfPeriodCounter&1)?0x00ffffff:0;
 
 	updateIncrement(l);
 
 	switch(l->shape)
 	{
 	case lsPulse:
-		l->rawOutput=l->halfPeriod*UINT16_MAX;
+		l->rawOutput=(l->halfPeriodCounter&1)*UINT16_MAX;
 		break;
 	case lsRand:
 		l->rawOutput=random();
@@ -54,11 +54,10 @@ void lfo_setCVs(struct lfo_s * lfo, uint16_t bpm, uint16_t lvl)
 	}
 }
 
-void lfo_setShape(struct lfo_s * lfo, lfoShape_t shape)
+void lfo_setShape(struct lfo_s * lfo, lfoShape_t shape, uint8_t halfPeriods)
 {
 	lfo->shape=shape;
-	
-	lfo->noise=random();
+	lfo->halfPeriodLimit=halfPeriods;
 }
 
 void lfo_setSpeedShift(struct lfo_s * lfo, int8_t shift)
@@ -99,9 +98,18 @@ const char * lfo_shapeName(lfoShape_t shape)
 	return "";
 }
 
+void lfo_reset(struct lfo_s * lfo)
+{
+	lfo->halfPeriodCounter=0;
+	lfo->phase=0;
+	
+	updateIncrement(lfo);
+}
+
 void lfo_init(struct lfo_s * lfo)
 {
 	memset(lfo,0,sizeof(struct lfo_s));
+	lfo->noise=random();
 }
 
 inline void lfo_update(struct lfo_s * l)
@@ -127,25 +135,34 @@ inline void lfo_update(struct lfo_s * l)
 		break;
 	case lsSaw:
 		l->rawOutput=l->phase>>9;
-		if(l->halfPeriod)
+		if(l->halfPeriodCounter&1)
 			l->rawOutput=UINT16_MAX-l->rawOutput;
 		break;
 	case lsRevSaw:
 		l->rawOutput=l->phase>>9;
-		if(!l->halfPeriod)
+		if(!(l->halfPeriodCounter&1))
 			l->rawOutput=UINT16_MAX-l->rawOutput;
 		break;
 	default:
 		;
 	}
 	
-	// phase increment
-	
-	l->phase+=l->increment;
+	if(!l->halfPeriodLimit || l->halfPeriodCounter<l->halfPeriodLimit)
+	{
+		// phase increment
 
-	// compute output
-	
-	l->output=scaleU16S16(l->levelCV,(int32_t)l->rawOutput+INT16_MIN);
+		l->phase+=l->increment;
+
+		// compute output
+
+		l->output=scaleU16S16(l->levelCV,(int32_t)l->rawOutput+INT16_MIN);
+	}
+	else
+	{
+		// no oscillation -> no output
+		
+		l->output=0;
+	}
 }
 
 

@@ -116,6 +116,8 @@ const struct namedParam_s steppedParametersSteps[spCount] =
 	{"spPressureTarget",7},
 	{NULL,128},
 	{NULL,128},
+	{"spLFOTrig",7},
+	{"spLFO2Trig",7},
 };
 
 struct settings_s settings;
