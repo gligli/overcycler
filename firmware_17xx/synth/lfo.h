@@ -18,7 +18,6 @@ struct lfo_s
 	int32_t increment;	
 	
 	uint16_t levelCV,bpmCV;
-	uint16_t rawOutput;
 	int16_t output;
 	
 	int8_t speedShift;
