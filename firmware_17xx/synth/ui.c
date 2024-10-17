@@ -547,6 +547,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 				case cnLoad:
 				case cnSave:
 					value=settings.presetNumber;
+					srprintf(dv," %03d",value);
 					break;
 				case cnMidC:
 					value=settings.midiReceiveChannel+1;
@@ -1639,7 +1640,7 @@ void ui_update(void)
 			char buf[60];
 			
 			memset(buf,0,sizeof(buf));
-			srprintf(buf,"%03d: %s",currentPreset.loadedPresetNumber,currentPreset.presetName);
+			srprintf(buf,"%03d:%s",currentPreset.loadedPresetNumber,currentPreset.presetName);
 			setPos(1,0,1); sendString(1,&buf[28]);
 			buf[28]='\0';
 			setPos(1,0,0); sendString(1,buf);

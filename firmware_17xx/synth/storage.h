@@ -99,7 +99,7 @@ struct settings_s
 struct preset_s
 {
 	uint16_t loadedPresetNumber;
-	char presetName[52];
+	char presetName[53];
 
 	uint8_t steppedParameters[spCount];
 	uint16_t continuousParameters[cpCount];
