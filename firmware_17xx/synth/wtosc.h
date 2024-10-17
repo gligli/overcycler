@@ -21,14 +21,15 @@ struct wtosc_s
 
 	int32_t curSample,prevSample,prevSample2,prevSample3;
 	
+	int32_t aliasing;
+	int32_t folder;
+	int32_t bitcrush;
 	uint16_t pitch;
 	uint16_t width;
-	int32_t aliasing;
 	uint16_t crossover;
-	int32_t folder;
 	
 	wmodTarget_t wmType;
-	int32_t channel;
+	int8_t channel;
 	int8_t pendingUpdate;
 };
 
@@ -37,7 +38,7 @@ typedef enum
 	osmNone, osmMaster, osmSlave
 } oscSyncMode_t;
 
-void wtosc_init(struct wtosc_s * o, int32_t channel);
+void wtosc_init(struct wtosc_s * o, int8_t channel);
 // data must be persistent and be filled with values in the range
 // WTOSC_SAMPLES_GUARD_BAND..65535-WTOSC_SAMPLES_GUARD_BAND
 // this is because hermite interpolation will overshoot on sharp transitions

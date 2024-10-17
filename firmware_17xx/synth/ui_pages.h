@@ -98,8 +98,8 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCont,.number=cpWModRel,.shortName="WRel",.longName="WaveMod Release"},
 		{.type=ptCont,.number=cpWModVelocity,.shortName="WVel",.longName="WaveMod Velocity"},
 		/* buttons (A,B,C,D,#,*) */
-		{.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr","Fold"}},
-		{.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr","Fold"}},
+		{.type=ptStep,.number=spAWModType,.shortName="AWmT",.longName="Osc A WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr","Fold","BitC"}},
+		{.type=ptStep,.number=spBWModType,.shortName="BWmT",.longName="Osc B WaveMod Type",.values={"None","Grit","Wdth","Freq","XOvr","Fold","BitC"}},
 		{.type=ptCust,.number=cnWEnT,.shortName="WEnT",.longName="WaveMod Envelope Type",.values={"FExp","SExp","FLin","SLin"}},
 		{.type=ptStep,.number=spWModEnvLoop,.shortName="WEnL",.longName="WaveMod Envelope Loop",.values={"Norm","Loop"}},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},

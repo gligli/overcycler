@@ -43,7 +43,7 @@ typedef enum
 
 typedef enum
 {
-	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5,
+	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5,wmBitCrush=6,
 
 	// /!\ this must stay last
 	wmCount

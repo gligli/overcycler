@@ -197,6 +197,40 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmFolder(struct wtosc_s * o, i
 	return (1<<FRAC_SHIFT)/curPeriod;
 }
 
+static FORCEINLINE int32_t handleCounterUnderflow_wmBitCrush(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
+{
+	int32_t curPeriod,curIncrement,smp;
+	
+	curPeriod=o->period[0];
+	curIncrement=o->increment[0];
+	
+	o->phase-=curIncrement;
+
+	handlePhaseUnderflow(o,bufIdx,syncMode,syncPositions);
+
+	o->counter+=curPeriod;
+
+	o->prevSample3=o->prevSample2;
+	o->prevSample2=o->prevSample;
+	o->prevSample=o->curSample;
+
+	smp=o->mainData[o->phase];
+
+	// bit crusher
+	if(o->bitcrush>=0)
+		smp+=INT16_MIN;
+	smp=(smp<<1)+1;
+	smp/=o->bitcrush;
+	smp*=o->bitcrush;
+	smp>>=1;
+	if(o->bitcrush>=0)
+		smp-=INT16_MIN;
+
+	o->curSample=smp;
+
+	return (1<<FRAC_SHIFT)/curPeriod;
+}
+
 static FORCEINLINE void update_slaveSync_noData(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, int16_t *syncPositions)
 {
 	int32_t buf;
@@ -374,6 +408,41 @@ static FORCEINLINE void update_slaveSync_wmFolder(struct wtosc_s * o, int32_t st
 
 		if(o->counter<0)
 			alphaDiv=handleCounterUnderflow_wmFolder(o,bufIdx,osmNone,NULL);
+
+		// interpolate
+
+		r=herp(o->counter*alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+
+		// send value to DAC
+
+		dacspi_setOscValue(buf,o->channel,r);
+	}
+}
+
+static FORCEINLINE void update_slaveSync_wmBitCrush(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, int16_t *syncPositions)
+{
+	uint16_t r;
+	int32_t buf;
+	int32_t alphaDiv;
+
+	alphaDiv=(1<<FRAC_SHIFT)/o->period[0];
+
+	for(buf=startBuffer;buf<=endBuffer;++buf)
+	{
+		int32_t bufIdx=buf-startBuffer;
+
+		// counter update
+
+		o->counter-=TICK_RATE;
+
+		// sync (slave side)
+
+		handleSlaveSync(o,bufIdx,syncPositions);
+
+		// counter underflow management
+
+		if(o->counter<0)
+			alphaDiv=handleCounterUnderflow_wmBitCrush(o,bufIdx,osmNone,NULL);
 
 		// interpolate
 
@@ -580,7 +649,42 @@ static FORCEINLINE void update_masterSync_wmFolder(struct wtosc_s * o, int32_t s
 	}
 }
 
-void wtosc_init(struct wtosc_s * o, int32_t channel)
+static FORCEINLINE void update_masterSync_wmBitCrush(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, int16_t *syncPositions)
+{
+	uint16_t r;
+	int32_t buf;
+	int32_t alphaDiv;
+
+	alphaDiv=(1<<FRAC_SHIFT)/o->period[0];
+
+	for(buf=startBuffer;buf<=endBuffer;++buf)
+	{
+		int32_t bufIdx=buf-startBuffer;
+
+		// counter update
+
+		o->counter-=TICK_RATE;
+
+		// sync (slave side)
+
+		handleSlaveSync(o,bufIdx,syncPositions);
+
+		// counter underflow management
+
+		if(o->counter<0)
+			alphaDiv=handleCounterUnderflow_wmBitCrush(o,bufIdx,syncMode,syncPositions);
+
+		// interpolate
+
+		r=herp(o->counter*alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+
+		// send value to DAC
+
+		dacspi_setOscValue(buf,o->channel,r);
+	}
+}
+
+void wtosc_init(struct wtosc_s * o, int8_t channel)
 {
 	if(!incModLUT_done)
 	{
@@ -613,7 +717,7 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, wmodTar
 {
 	uint64_t frequency;
 	uint32_t sampleRate[2];
-	int32_t increment[2], period[2], aliasing_s, crossover_s, folder_s;
+	int32_t increment[2], period[2], aliasing_s, crossover_s, folder_s, bitcrush_s;
 	uint16_t width;
 	
 	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
@@ -622,6 +726,7 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, wmodTar
 	aliasing_s=0;
 	crossover_s=0;
 	folder_s=UINT16_MAX/32;
+	bitcrush_s=1;
 	
 	switch(wmType)
 	{
@@ -648,6 +753,12 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, wmodTar
 		crossover_s=wmAmount;
 		crossover_s=abs(crossover_s+INT16_MIN);
 		crossover_s=__USAT(crossover_s<<1,16);
+		break;
+	case wmBitCrush:
+		bitcrush_s=wmAmount;
+		bitcrush_s=bitcrush_s+INT16_MIN;
+		if(!bitcrush_s)
+			bitcrush_s=1;
 		break;
 	case wmFolder:
 		folder_s=wmAmount;
@@ -691,6 +802,8 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, wmodTar
 	
 	o->crossover=crossover_s;
 	o->folder=folder_s;
+	o->bitcrush=bitcrush_s;
+	
 	o->wmType=wmType;
 	
 //	if(!o->channel)
@@ -703,12 +816,13 @@ void wtosc_update(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, os
 
 	static const update_t update[wmCount*2*2] = {
 		// (noData; masterSync), (data; masterSync), (noData; slaveSync), (data; slaveSync), 
-		&update_masterSync_noData,	&update_masterSync_wmOff,		&update_slaveSync_noData,	&update_slaveSync_wmOff,
-		&update_masterSync_noData,	&update_masterSync_wmAliasing,	&update_slaveSync_noData,	&update_slaveSync_wmAliasing,
-		&update_masterSync_noData,	&update_masterSync_wmWidth,		&update_slaveSync_noData,	&update_slaveSync_wmWidth,
-		&update_masterSync_noData,	&update_masterSync_wmOff,		&update_slaveSync_noData,	&update_slaveSync_wmOff,
-		&update_masterSync_noData,	&update_masterSync_wmCrossOver,	&update_slaveSync_noData,	&update_slaveSync_wmCrossOver,
-		&update_masterSync_noData,	&update_masterSync_wmFolder,	&update_slaveSync_noData,	&update_slaveSync_wmFolder,
+		update_masterSync_noData,	update_masterSync_wmOff,		update_slaveSync_noData,	update_slaveSync_wmOff,
+		update_masterSync_noData,	update_masterSync_wmAliasing,	update_slaveSync_noData,	update_slaveSync_wmAliasing,
+		update_masterSync_noData,	update_masterSync_wmWidth,		update_slaveSync_noData,	update_slaveSync_wmWidth,
+		update_masterSync_noData,	update_masterSync_wmOff,		update_slaveSync_noData,	update_slaveSync_wmOff,
+		update_masterSync_noData,	update_masterSync_wmCrossOver,	update_slaveSync_noData,	update_slaveSync_wmCrossOver,
+		update_masterSync_noData,	update_masterSync_wmFolder,		update_slaveSync_noData,	update_slaveSync_wmFolder,
+		update_masterSync_noData,	update_masterSync_wmBitCrush,	update_slaveSync_noData,	update_slaveSync_wmBitCrush,
 	};
 	
 	updatePeriodIncrement(o,2);

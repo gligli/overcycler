@@ -78,11 +78,11 @@ const struct namedParam_s steppedParametersSteps[spCount] =
 {
 	{NULL,128},
 	{NULL,128},
-	{"spABaseWMod",6},
+	{"spABaseWMod",7},
 	{NULL,1},
 	{NULL,128},
 	{NULL,128},
-	{"spBBaseWMod",6},
+	{"spBBaseWMod",7},
 	{NULL,1},
 	{"spLFOShape",7},
 	{"spLFOSpeed",4},
