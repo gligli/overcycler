@@ -1347,6 +1347,9 @@ static void handleSlowUpdates(void)
 				sendString(2,"USB Disk mode, press any button to quit");
 				usb_setMode(umMSC,usbMSCCallback);
 
+				setPos(2,0,1);
+				sendString(2,"Quitting USB Disk mode...              ");
+
 				// reload settings & load static stuff
 				settings_load();
 				synth_refreshBankNames(1,1);
