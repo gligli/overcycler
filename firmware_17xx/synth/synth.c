@@ -1051,7 +1051,7 @@ void synth_updateCVsEvent(void)
 	ampVal-=scaleU16U16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].levelCV>>1);
 	ampVal+=scaleU16S16(currentPreset.continuousParameters[cpLFO2AmpAmt],synth.lfo[1].output);
 
-	ampVal=scaleU16U16(ampVal,currentPreset.continuousParameters[cpVCALevel]);
+	ampVal=scaleU16U16(ampVal,currentPreset.continuousParameters[cpAmpLevel]);
 
 		// misc
 

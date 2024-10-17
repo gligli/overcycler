@@ -71,7 +71,7 @@ const struct midiCC_s midiCCs[128]={
 	{ccBankFine},
 	{ccNone},
 	{ccNone},
-	{ccContinuousCoarse,cpVCALevel},
+	{ccContinuousCoarse,cpAmpLevel},
 	{ccNone},
 	{ccNone},
 	{ccDataFine},

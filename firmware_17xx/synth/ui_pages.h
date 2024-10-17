@@ -130,7 +130,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 	/* Amplifier page (4) */
 	{
 		/* 1st row of pots */
-		{.type=ptCont,.number=cpVCALevel,.shortName="VLvl",.longName="VCA Level"},
+		{.type=ptCont,.number=cpAmpLevel,.shortName="ALvl",.longName="Amplifier Level"},
 		{.type=ptCont,.number=cpGlide,.shortName="Glid",.longName="Glide amount"},
 		{.type=ptCont,.number=cpUnisonDetune,.shortName="MDet",.longName="Master unison Detune"},
 		{.type=ptCont,.number=cpMasterTune,.shortName="MTun",.longName="Master Tune"},
