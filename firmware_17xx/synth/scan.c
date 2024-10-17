@@ -295,7 +295,7 @@ void scan_setMode(int8_t isSmpMasterMixMode)
 
 void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 {
-	int32_t mini=UINT16_MAX,maxi=0,extents;
+	uint16_t mini=UINT16_MAX,maxi=0,extents;
 	uint16_t *buf;
 	
 	// ensure no spurious reads from other channels
@@ -323,13 +323,13 @@ void scan_sampleMasterMix(uint16_t sampleCount, uint16_t * buffer)
 	
 	// extend waveform to 0..UINT16_MAX
 	
-	extents=maxi-mini+1;
+	extents=MAX(1,maxi-mini);
 	buf=buffer;
 	for(uint16_t sc=0;sc<sampleCount;++sc)
 	{
 		uint16_t sample=*buf;
 		
-		sample=(((int32_t)sample-mini)<<16)/extents;
+		sample=((sample-mini)*UINT16_MAX)/extents;
 		
 		*buf++=sample;
 	}

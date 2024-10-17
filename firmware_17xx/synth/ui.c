@@ -15,12 +15,13 @@
 #include "dacspi.h"
 #include "clock.h"
 #include "scan.h"
+#include "wtosc.h"
 
 #define LCD_WIDTH 40
 #define LCD_HEIGHT 4
 
 #define ACTIVE_SOURCE_TIMEOUT TICKER_HZ
-#define SLOW_UPDATE_TIMEOUT (8*TICKER_HZ/10)
+#define SLOW_UPDATE_TIMEOUT (TICKER_HZ/2)
 
 #define PANEL_DEADBAND 2048
 
@@ -291,42 +292,29 @@ static void drawVisualEnv(int lcd, int8_t voicePair, int8_t force)
 	}
 }
 
-static void drawWaveform(abx_t abx)
+static inline void drawWaveform(uint16_t * data, const uint16_t smpCnt, char * text)
 {
-	uint16_t smpCnt;
-	uint16_t * data=synth_getWaveformData(abx,&smpCnt);
-	
 	uint8_t points[LCD_HEIGHT][LCD_WIDTH]={{0}};
 	uint8_t vcgram[2][8];
 	uint8_t vcgramCount[2]={0};
 	
 	// transform waveform into LCD chars of 2*3 "pixels" each
-	
-	uint32_t acc=0;
-	uint16_t prevx=0,cnt=0;
-	for(uint16_t i=0;i<smpCnt;++i)
+	const uint16_t cnt=smpCnt/(LCD_WIDTH*2);
+	for(uint8_t i=0;i<LCD_WIDTH*2;++i)
 	{
-		uint16_t x=i*(LCD_WIDTH*2-1)/(smpCnt-1);
+		uint32_t acc=0;
+		for(uint16_t j=0;j<cnt;++j)
+			acc+=*data++;
 		
-		if(x!=prevx)
-		{
-			uint16_t y=acc*(LCD_HEIGHT*3-1)/(UINT16_MAX*cnt);
-			uint16_t lx=x>>1;
-			uint16_t ly=y/3;
+		uint8_t x=i;
+		uint8_t y=(acc*(LCD_HEIGHT*3)/cnt)>>16;
+		uint8_t lx=x>>1;
+		uint8_t ly=y/3;
 
-			prevx=x;
+		x-=lx<<1;
+		y-=ly*3;
 
-			x-=lx<<1;
-			y-=ly*3;
-		
-			points[LCD_HEIGHT-1-ly][lx]|=1<<((y<<1)+x);
-
-			acc=0;
-			cnt=0;
-		}
-		
-		acc+=data[i];
-		++cnt;
+		points[LCD_HEIGHT-1-ly][lx]|=1<<((y<<1)+x);
 	}
 
 	// try to fit all the "pixels" variations per char into a "virtual" CGRAM
@@ -409,36 +397,39 @@ static void drawWaveform(abx_t abx)
 	}
 
 	// include waveform name (find spot with less waveform covered)
-	
-	char wavName[MAX_FILENAME], *s;
-	strcpy(wavName,currentPreset.oscWave[abx]);
-	
-	// remove file name extension
-	s=strrchr(wavName,'.');
-	if(s)
-		*s='\0';
-	
-	uint8_t sl=strlen(wavName);
-	uint8_t ltup=0,ltdn=0,rtup=0,rtdn=0,best;
-	
-	for(uint8_t x=0;x<sl;++x)
+
+	if(text)
 	{
-		ltup+=points[0][x]==' '?1:0;
-		ltdn+=points[3][x]==' '?1:0;
-		rtup+=points[0][LCD_WIDTH-sl+x]==' '?1:0;
-		rtdn+=points[3][LCD_WIDTH-sl+x]==' '?1:0;
+		char wavName[MAX_FILENAME], *s;
+		strcpy(wavName,text);
+
+		// remove file name extension
+		s=strrchr(wavName,'.');
+		if(s)
+			*s='\0';
+
+		uint8_t sl=strlen(wavName);
+		uint8_t ltup=0,ltdn=0,rtup=0,rtdn=0,best;
+
+		for(uint8_t x=0;x<sl;++x)
+		{
+			ltup+=points[0][x]==' '?1:0;
+			ltdn+=points[3][x]==' '?1:0;
+			rtup+=points[0][LCD_WIDTH-sl+x]==' '?1:0;
+			rtdn+=points[3][LCD_WIDTH-sl+x]==' '?1:0;
+		}
+
+		best=MAX(MAX(ltup,ltdn),MAX(rtup,rtdn));
+
+		if(best==ltdn)
+			memcpy(&points[3][0],wavName,sl);
+		else if (best==rtdn)
+			memcpy(&points[3][LCD_WIDTH-sl],wavName,sl);
+		else if (best==ltup)
+			memcpy(&points[0][0],wavName,sl);
+		else
+			memcpy(&points[0][LCD_WIDTH-sl],wavName,sl);
 	}
-
-	best=MAX(MAX(ltup,ltdn),MAX(rtup,rtdn));
-
-	if(best==ltdn)
-		memcpy(&points[3][0],wavName,sl);
-	else if (best==rtdn)
-		memcpy(&points[3][LCD_WIDTH-sl],wavName,sl);
-	else if (best==ltup)
-		memcpy(&points[0][0],wavName,sl);
-	else
-		memcpy(&points[0][LCD_WIDTH-sl],wavName,sl);
 
 	// draw the display
 	
@@ -1535,7 +1526,7 @@ void ui_update(void)
 		}
 		else
 		{
-			drawWaveform(sp2abx[prm->number]);
+			drawWaveform(synth_getWaveformData(sp2abx[prm->number]),WTOSC_SAMPLE_COUNT,currentPreset.oscWave[sp2abx[prm->number]]);
 		}
 	}
 	else if(ui.activePage==upHelp)

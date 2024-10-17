@@ -488,10 +488,8 @@ int32_t synth_getVisualEnvelope(int8_t voice)
 		return -1;
 }
 
-uint16_t * synth_getWaveformData(abx_t abx, uint16_t * sampleCount)
+uint16_t * synth_getWaveformData(abx_t abx)
 {
-	if(sampleCount)
-		*sampleCount=WTOSC_SAMPLE_COUNT;
 	return &waveData.sampleData[abx][0];
 }
 
