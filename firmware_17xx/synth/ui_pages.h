@@ -35,7 +35,10 @@ struct uiParam_s
 	const char * longName;
 	const char * values[8]; // 4 chars + zero termination
 	int32_t custPotMul, custPotAdd;
+	uint8_t flags;
 };
+
+#define UIPF_NO_REACQUIRE 1
 
 const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] = // [pages][pot/key num]
 {
@@ -209,7 +212,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnAMod,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
-		{.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "}},
+		{.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "},.flags=UIPF_NO_REACQUIRE},
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
@@ -230,10 +233,10 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		/* buttons (A,B,C,D,#,*) */
-		{.type=ptCust,.number=cnAPly,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "}},
-		{.type=ptCust,.number=cnBPly,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "}},
+		{.type=ptCust,.number=cnAPly,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "},.flags=UIPF_NO_REACQUIRE},
+		{.type=ptCust,.number=cnBPly,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "},.flags=UIPF_NO_REACQUIRE},
 		{.type=ptNone},
-		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
+		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"},.flags=UIPF_NO_REACQUIRE},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},
@@ -255,7 +258,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptCust,.number=cnTiRe,.shortName="TiRe",.longName="Add Tie/Rest"},
 		{.type=ptCust,.number=cnBack,.shortName="Back",.longName="Back one step"},
 		{.type=ptCust,.number=cnClr,.shortName="Clr ",.longName="Clear sequence"},
-		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"}},
+		{.type=ptCust,.number=cnSRec,.shortName="SRec",.longName="Seq record",.values={"Off ","SeqA","SeqB"},.flags=UIPF_NO_REACQUIRE},
 		{.type=ptCust,.number=cnTrspM,.shortName="Trsp",.longName="Keyboard Transpose",.values={"Off ","Once","On  "}},
 		{.type=ptCust,.number=cnNVal,.shortName="NVal",.longName="Set last potentiometer digits"},
 	},

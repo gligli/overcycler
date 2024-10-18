@@ -36,6 +36,7 @@ static struct
 	int16_t slowUpdateTimeoutNumber;
 	int8_t pendingScreenClear;
 	int8_t lastInputPot;
+	int8_t prevPressedButton;
 	
 	int8_t kpInputDecade,kpInputPot;
 	uint16_t kpInputValue;
@@ -299,6 +300,7 @@ static inline void drawWaveform(uint16_t * data, const uint16_t smpCnt, char * t
 	uint8_t vcgramCount[2]={0};
 	
 	// transform waveform into LCD chars of 2*3 "pixels" each
+	
 	const uint16_t cnt=smpCnt/(LCD_WIDTH*2);
 	for(uint8_t i=0;i<LCD_WIDTH*2;++i)
 	{
@@ -789,6 +791,7 @@ static void handlePageChange(enum scanKeypadButton_e button)
 
 	// cancel ongoing changes
 	ui.lastInputPot=-1;
+	ui.prevPressedButton=-1;
 	ui.kpInputPot=-1;
 	ui.kpInputDecade=-1;
 	ui.activeSourceTimeout=0;
@@ -980,27 +983,44 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			}
 		}
 
-		// lock potentiometers until prev value is reacquired
-		if(source<0)
+		if(!(prm->flags&UIPF_NO_REACQUIRE))
 		{
-			int32_t value,prevValue;
-			getDisplayValue(source,&value);
+			if(source<0)
+			{
+				// lock potentiometers until prev value is reacquired
 
-			prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
+				int32_t value,prevValue;
+				getDisplayValue(source,&value);
 
-			// in case the value is unattainable, detect max pot value
-			if(value>=valueCount && potSetting>=valueCount-1-potQuantum)
-				ui.potsAcquired|=1<<potnum;
+				prevValue=(ui.potsPrevValue[potnum]==INT32_MIN)?potSetting:ui.potsPrevValue[potnum];
 
-			// did we go through the locked value?
-			if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
-				ui.potsAcquired|=1<<potnum;
+				// in case the value is unattainable, detect max pot value
+				if(value>=valueCount && potSetting>=valueCount-1-potQuantum)
+					ui.potsAcquired|=1<<potnum;
 
-			ui.potsPrevValue[potnum]=potSetting;
+				// did we go through the locked value?
+				if(value>=MIN(prevValue,potSetting) && value<=MAX(prevValue,potSetting)+potQuantum)
+					ui.potsAcquired|=1<<potnum;
 
-			// value not acquired -> ignore event
-			if(((ui.potsAcquired>>potnum)&1)==0)
-				return;
+				ui.potsPrevValue[potnum]=potSetting;
+
+				// value not acquired -> ignore event
+				if(((ui.potsAcquired>>potnum)&1)==0)
+					return;
+			}
+			else
+			{
+				// first button press just displays the list of options if there is one
+
+				if(source>=kbA && source<=kbD && valueCount>1)
+				{
+					if(source!=ui.prevPressedButton)
+					{
+						ui.prevPressedButton=source;
+						return;
+					}
+				}				
+			}
 		}
 	}
 
@@ -1413,6 +1433,7 @@ void ui_init(void)
 	ui.presetModifiedWarning=-1;
 	ui.seqRecordingTrack=-1;
 	ui.lastInputPot=-1;
+	ui.prevPressedButton=-1;
 	ui.kpInputDecade=-1;
 	ui.kpInputPot=-1;
 	ui.settingsModifiedTimeout=UINT32_MAX;
