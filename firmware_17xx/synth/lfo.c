@@ -146,7 +146,13 @@ inline void lfo_update(struct lfo_s * l)
 	
 	// compute output
 	
-	if(!l->halfPeriodLimit || l->halfPeriodCounter<l->halfPeriodLimit)
+	if(!l->bpmCV)
+	{
+		// constant output when BPM is zero
+		
+		l->output=l->levelCV>>1;
+	}
+	else if(!l->halfPeriodLimit || l->halfPeriodCounter<l->halfPeriodLimit)
 	{
 		// phase increment
 
