@@ -132,10 +132,10 @@ inline void lfo_update(struct lfo_s * l)
 		rawOutput=(l->noise&UINT16_MAX)+INT16_MIN;
 		break;
 	case lsSaw:
-		rawOutput=l->phase>>9;
+		rawOutput=INT16_MIN+(l->phase>>9);
 		break;
 	case lsRevSaw:
-		rawOutput=-(l->phase>>9);
+		rawOutput=INT16_MAX-(l->phase>>9);
 		break;
 	default:
 		rawOutput=0;
