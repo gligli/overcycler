@@ -175,51 +175,51 @@ static void refreshTunedCVs(void)
 	
 	int32_t add;
 	
+	// get raw values
+
+	mTuneRaw=currentPreset.continuousParameters[cpMasterTune];
+	detuneRaw=currentPreset.continuousParameters[cpDetune];
+	baseCutoffRaw=currentPreset.continuousParameters[cpCutoff];
+	baseAPitch=currentPreset.continuousParameters[cpAFreq]>>2;
+	baseBPitch=currentPreset.continuousParameters[cpBFreq]>>2;
+	unisonDetuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
+	trackRaw=currentPreset.continuousParameters[cpFilKbdAmt];
+	chrom=currentPreset.steppedParameters[spChromaticPitch];
+
+	// compute for oscs & filters
+
+	mTune=(mTuneRaw>>7)+INT8_MIN*2;
+	detune=(detuneRaw>>8)+INT8_MIN;
+	baseCutoff=((uint32_t)baseCutoffRaw*144)>>8; // tuning in C
+
+	baseCutoffNote=baseCutoff>>8;
+	baseANote=baseAPitch>>8; // 64 semitones
+	baseBNote=baseBPitch>>8;
+
+	baseCutoff&=0xff;
+
+	if(chrom>0)
+	{
+		baseAPitch=0;
+		baseBPitch=0;
+
+		if(chrom>1)
+		{
+			baseANote-=baseANote%12;
+			baseBNote-=baseBNote%12;
+		}
+	}
+	else
+	{
+		baseAPitch&=0xff;
+		baseBPitch&=0xff;
+	}
+
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		if (!assigner_getAssignment(v,&note))
-			continue;
+		note=MIDDLE_C_NOTE; // by default, rest the synth on scale middle (prevents analog glitches)
+		assigner_getAssignment(v,&note);
 		
-		// get raw values
-
-		mTuneRaw=currentPreset.continuousParameters[cpMasterTune];
-		detuneRaw=currentPreset.continuousParameters[cpDetune];
-		baseCutoffRaw=currentPreset.continuousParameters[cpCutoff];
-		baseAPitch=currentPreset.continuousParameters[cpAFreq]>>2;
-		baseBPitch=currentPreset.continuousParameters[cpBFreq]>>2;
-		unisonDetuneRaw=currentPreset.continuousParameters[cpUnisonDetune];
-		trackRaw=currentPreset.continuousParameters[cpFilKbdAmt];
-		chrom=currentPreset.steppedParameters[spChromaticPitch];
-
-		// compute for oscs & filters
-
-		mTune=(mTuneRaw>>7)+INT8_MIN*2;
-		detune=(detuneRaw>>8)+INT8_MIN;
-		baseCutoff=((uint32_t)baseCutoffRaw*144)>>8; // tuning in C
-
-		baseCutoffNote=baseCutoff>>8;
-		baseANote=baseAPitch>>8; // 64 semitones
-		baseBNote=baseBPitch>>8;
-
-		baseCutoff&=0xff;
-
-		if(chrom>0)
-		{
-			baseAPitch=0;
-			baseBPitch=0;
-
-			if(chrom>1)
-			{
-				baseANote-=baseANote%12;
-				baseBNote-=baseBNote%12;
-			}
-		}
-		else
-		{
-			baseAPitch&=0xff;
-			baseBPitch&=0xff;
-		}
-
 		// oscs
 		
 		add=getStaticCV(cvAPitch)+mTune-(detune>>1);
