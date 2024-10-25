@@ -154,7 +154,7 @@ void MIDIBulkOut(U8 bEP, U8 bEPStatus)
 	
 	len = USBHwEPRead(bEP, cmdBuf, sizeof(cmdBuf));
 	
-	if(len==sizeof(cmdBuf))
+	if(len>=sizeof(cmdBuf))
 	{
 		for(U8 p = 0; p < code2size[cmdBuf[0] & 0xf]; ++p)
 			synth_usbMIDIEvent(cmdBuf[1+p]);
