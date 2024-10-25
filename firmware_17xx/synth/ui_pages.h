@@ -209,7 +209,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
-		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit # then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnAMod,.shortName="AMod",.longName="Arp Mode",.values={"Off ","UpDn","Rand","Asgn"}},
 		{.type=ptCust,.number=cnAHld,.shortName="AHld",.longName="Arp Hold",.values={"Off ","On "},.flags=UIPF_NO_REACQUIRE},
@@ -231,7 +231,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
-		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit # then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnAPly,.shortName="APly",.longName="Seq A Play/stop",.values={"Stop","Wait","Play","Rec "},.flags=UIPF_NO_REACQUIRE},
 		{.type=ptCust,.number=cnBPly,.shortName="BPly",.longName="Seq B Play/stop",.values={"Stop","Wait","Play","Rec "},.flags=UIPF_NO_REACQUIRE},
@@ -253,7 +253,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
-		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit 7 then a note to change)",.custPotMul=49,.custPotAdd=-24},
+		{.type=ptCust,.number=cnTrspV,.shortName="Trsp",.longName="Transpose (hit # then a note to change)",.custPotMul=49,.custPotAdd=-24},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnTiRe,.shortName="TiRe",.longName="Add Tie/Rest"},
 		{.type=ptCust,.number=cnBack,.shortName="Back",.longName="Back one step"},
