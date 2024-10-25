@@ -14,9 +14,6 @@
 #define WIDTH_MOD_BITS 14
 #define FRAC_SHIFT 12
 
-static uint16_t incModLUT[WTOSC_SAMPLE_COUNT/2] EXT_RAM;
-static int8_t incModLUT_done=0;
-
 static FORCEINLINE uint32_t cvToFrequency(uint32_t cv) // returns the frequency shifted by 8
 {
 	uint32_t v;
@@ -686,19 +683,6 @@ static FORCEINLINE void update_masterSync_wmBitCrush(struct wtosc_s * o, int32_t
 
 void wtosc_init(struct wtosc_s * o, int8_t channel)
 {
-	if(!incModLUT_done)
-	{
-		uint16_t *p=&incModLUT[0];
-		*p++=0;
-		for(uint16_t i=1;i<WTOSC_SAMPLE_COUNT/2;++i)
-		{
-			uint16_t inc=i;
-			while((WTOSC_SAMPLE_COUNT/2)%inc) ++inc;
-			*p++=inc;
-		}
-		incModLUT_done=1;
-	}	
-
 	memset(o,0,sizeof(struct wtosc_s));
 
 	o->channel=channel;
@@ -781,8 +765,8 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, oscWMod
 		increment[0]=1+(sampleRate[0]/MAX_SAMPLERATE);
 		increment[1]=1+(sampleRate[1]/MAX_SAMPLERATE);
 
-		if(increment[0]<WTOSC_SAMPLE_COUNT/2) increment[0]=incModLUT[increment[0]];
-		if(increment[1]<WTOSC_SAMPLE_COUNT/2) increment[1]=incModLUT[increment[1]];
+		increment[0]=oscIncModLUT[increment[0]];
+		increment[1]=oscIncModLUT[increment[1]];
 
 		increment[0]=MIN(WTOSC_SAMPLE_COUNT,increment[0]+aliasing_s);
 		increment[1]=MIN(WTOSC_SAMPLE_COUNT,increment[1]+aliasing_s);
