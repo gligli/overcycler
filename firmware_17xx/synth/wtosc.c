@@ -85,7 +85,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmOff(struct wtosc_s * o, int3
 
 	o->curSample=o->mainData[o->phase];
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow_wmAliasing(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
@@ -106,7 +106,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmAliasing(struct wtosc_s * o,
 
 	o->curSample=o->mainData[o->phase];
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow_wmWidth(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
@@ -136,7 +136,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmWidth(struct wtosc_s * o, in
 
 	o->curSample=o->mainData[o->phase];
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow_wmCrossOver(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
@@ -158,7 +158,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmCrossOver(struct wtosc_s * o
 
 	o->curSample=lerp16(o->mainData[o->phase],o->crossoverData[o->phase],o->crossover);
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 
@@ -191,7 +191,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmFolder(struct wtosc_s * o, i
 
 	o->curSample=smp;
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 static FORCEINLINE int32_t handleCounterUnderflow_wmBitCrush(struct wtosc_s * o, int32_t bufIdx, oscSyncMode_t syncMode, int16_t * syncPositions)
@@ -225,7 +225,7 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmBitCrush(struct wtosc_s * o,
 
 	o->curSample=smp;
 
-	return curPeriod;
+	return (1<<(FRAC_SHIFT*2))/curPeriod;
 }
 
 static FORCEINLINE void update_slaveSync_noData(struct wtosc_s * o, int32_t startBuffer, int32_t endBuffer, oscSyncMode_t syncMode, int16_t *syncPositions)
@@ -246,7 +246,7 @@ static FORCEINLINE void update_slaveSync_wmOff(struct wtosc_s * o, int32_t start
 	int32_t buf;
 	int32_t alphaDiv;
 	
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -267,7 +267,7 @@ static FORCEINLINE void update_slaveSync_wmOff(struct wtosc_s * o, int32_t start
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -282,7 +282,7 @@ static FORCEINLINE void update_slaveSync_wmWidth(struct wtosc_s * o, int32_t sta
 	int32_t alphaDiv,curHalf;
 	
 	curHalf=o->phase>=WTOSC_SAMPLE_COUNT/2?1:0;
-	alphaDiv=o->period[curHalf];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[curHalf];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -303,7 +303,7 @@ static FORCEINLINE void update_slaveSync_wmWidth(struct wtosc_s * o, int32_t sta
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -317,7 +317,7 @@ static FORCEINLINE void update_slaveSync_wmAliasing(struct wtosc_s * o, int32_t 
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -338,7 +338,7 @@ static FORCEINLINE void update_slaveSync_wmAliasing(struct wtosc_s * o, int32_t 
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -352,7 +352,7 @@ static FORCEINLINE void update_slaveSync_wmCrossOver(struct wtosc_s * o, int32_t
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -373,7 +373,7 @@ static FORCEINLINE void update_slaveSync_wmCrossOver(struct wtosc_s * o, int32_t
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -387,7 +387,7 @@ static FORCEINLINE void update_slaveSync_wmFolder(struct wtosc_s * o, int32_t st
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -408,7 +408,7 @@ static FORCEINLINE void update_slaveSync_wmFolder(struct wtosc_s * o, int32_t st
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -422,7 +422,7 @@ static FORCEINLINE void update_slaveSync_wmBitCrush(struct wtosc_s * o, int32_t 
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -443,7 +443,7 @@ static FORCEINLINE void update_slaveSync_wmBitCrush(struct wtosc_s * o, int32_t 
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -480,7 +480,7 @@ static FORCEINLINE void update_masterSync_wmOff(struct wtosc_s * o, int32_t star
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -497,7 +497,7 @@ static FORCEINLINE void update_masterSync_wmOff(struct wtosc_s * o, int32_t star
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -512,7 +512,7 @@ static FORCEINLINE void update_masterSync_wmWidth(struct wtosc_s * o, int32_t st
 	int32_t alphaDiv,curHalf;
 	
 	curHalf=o->phase>=WTOSC_SAMPLE_COUNT/2?1:0;
-	alphaDiv=o->period[curHalf];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[curHalf];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -533,7 +533,7 @@ static FORCEINLINE void update_masterSync_wmWidth(struct wtosc_s * o, int32_t st
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -547,7 +547,7 @@ static FORCEINLINE void update_masterSync_wmAliasing(struct wtosc_s * o, int32_t
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -568,7 +568,7 @@ static FORCEINLINE void update_masterSync_wmAliasing(struct wtosc_s * o, int32_t
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -582,7 +582,7 @@ static FORCEINLINE void update_masterSync_wmCrossOver(struct wtosc_s * o, int32_
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -603,7 +603,7 @@ static FORCEINLINE void update_masterSync_wmCrossOver(struct wtosc_s * o, int32_
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -617,7 +617,7 @@ static FORCEINLINE void update_masterSync_wmFolder(struct wtosc_s * o, int32_t s
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -638,7 +638,7 @@ static FORCEINLINE void update_masterSync_wmFolder(struct wtosc_s * o, int32_t s
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
@@ -652,7 +652,7 @@ static FORCEINLINE void update_masterSync_wmBitCrush(struct wtosc_s * o, int32_t
 	int32_t buf;
 	int32_t alphaDiv;
 
-	alphaDiv=o->period[0];
+	alphaDiv=(1<<(FRAC_SHIFT*2))/o->period[0];
 
 	for(buf=startBuffer;buf<=endBuffer;++buf)
 	{
@@ -673,7 +673,7 @@ static FORCEINLINE void update_masterSync_wmBitCrush(struct wtosc_s * o, int32_t
 
 		// interpolate
 
-		r=herp(((uint32_t)o->counter<<FRAC_SHIFT)/alphaDiv,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
+		r=herp((o->counter*alphaDiv)>>FRAC_SHIFT,o->curSample,o->prevSample,o->prevSample2,o->prevSample3,FRAC_SHIFT);
 
 		// send value to DAC
 
