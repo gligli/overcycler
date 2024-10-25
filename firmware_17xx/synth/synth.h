@@ -43,14 +43,6 @@ typedef enum
 
 typedef enum
 {
-	wmOff=0,wmAliasing=1,wmWidth=2,wmFrequency=3,wmCrossOver=4,wmFolder=5,wmBitCrush=6,
-
-	// /!\ this must stay last
-	wmCount
-} wmodTarget_t;
-
-typedef enum
-{
 	otNone=0,otA=1,otB=2,otBoth=3
 } oscTarget_t;
 
