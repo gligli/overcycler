@@ -689,9 +689,10 @@ void wtosc_init(struct wtosc_s * o, int8_t channel)
 	if(!incModLUT_done)
 	{
 		uint16_t *p=&incModLUT[0];
-		for(uint16_t i=0;i<WTOSC_SAMPLE_COUNT/2;++i)
+		*p++=0;
+		for(uint16_t i=1;i<WTOSC_SAMPLE_COUNT/2;++i)
 		{
-			uint16_t inc=i+1;
+			uint16_t inc=i;
 			while((WTOSC_SAMPLE_COUNT/2)%inc) ++inc;
 			*p++=inc;
 		}
