@@ -638,7 +638,7 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 
 		if(!dv[0])
 		{
-			if(value>=0 && value<UIP_MAX_VALUES)
+			if(value>=0 && value<UIP_MAX_VALUES && prm->values[value])
 				strcpy(dv,prm->values[value]);
 			else
 				srprintf(dv,"% 4d",value);
@@ -738,7 +738,7 @@ static char * getDisplayFulltext(int8_t source)
 		
 		idx=(valCount>maxDisplayableValues)?MAX(0,MIN(valCount-maxDisplayableValues,selectedIdx-(maxDisplayableValues/2))):0;
 		dispCount=0;
-		while(dispCount<maxDisplayableValues && prm->values[idx]!=NULL)
+		while(idx<valCount && dispCount<maxDisplayableValues)
 		{
 			strcat(dv,(idx==selectedIdx)?"\x7e":" ");
 			strcat(dv,prm->values[idx]);
