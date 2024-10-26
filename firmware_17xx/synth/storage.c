@@ -104,7 +104,7 @@ const struct namedParam_s steppedParametersSteps[spCount] =
 	{"spLFO2Speed",4},
 	{"spLFO2Targets",4},
 	{"spVoiceCount",SYNTH_VOICE_COUNT},
-	{"spPresetType",8},
+	{"spPresetType",10},
 	{"spPresetStyle",8},
 	{"spAmpEnvLin",2},
 	{"spFilEnvLoop",2},

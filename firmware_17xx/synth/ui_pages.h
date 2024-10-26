@@ -27,18 +27,19 @@ enum uiCustomParamNumber_e
 	cnWEnT,cnFEnT,cnAEnT,cnHelp,
 };
 
+#define UIP_MAX_VALUES 10
+#define UIPF_NO_REACQUIRE 1
+
 struct uiParam_s
 {
 	enum uiParamType_e type;
 	int8_t number;
 	const char * shortName; // 4 chars + zero termination
 	const char * longName;
-	const char * values[8]; // 4 chars + zero termination
+	const char * values[UIP_MAX_VALUES]; // 4 chars + zero termination
 	int32_t custPotMul, custPotAdd;
 	uint8_t flags;
 };
-
-#define UIPF_NO_REACQUIRE 1
 
 const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] = // [pages][pot/key num]
 {
@@ -296,7 +297,7 @@ const struct uiParam_s uiParameters[upCount][SCAN_POT_COUNT+(kbAsterisk-kbA+1)] 
 		{.type=ptNone},
 		{.type=ptNone},
 		{.type=ptNone},
-		{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Bass","Pad","Strn","Brass","Keys","Lead","Arpg"}},
+		{.type=ptStep,.number=spPresetType,.shortName="Type",.longName="Preset type",.values={"Othr","Bass","Pad","Strn","Brass","Keys","Lead","Arpg","Perc","FX  "}},
 		{.type=ptStep,.number=spPresetStyle,.shortName="Styl",.longName="Preset style",.values={"Othr","Neut","Clen","Real","Slky","Raw ","Hevy","Krch"}},
 		/* buttons (A,B,C,D,#,*) */
 		{.type=ptCust,.number=cnLoad,.shortName="Load",.longName="Load preset"},

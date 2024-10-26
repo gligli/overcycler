@@ -480,175 +480,172 @@ static char * getDisplayValue(int8_t source, int32_t * valueOut)
 {
 	static char dv[10];
 	const struct uiParam_s * prm=getUiParameter(source);
-	int32_t valCount;
 	int32_t value=INT32_MIN,tmp;
 
 	dv[0]='\0';
 	if(valueOut)
 		*valueOut=value;
-	
+
 	switch(prm->type)
 	{
-		case ptCont:
-			value=currentPreset.continuousParameters[prm->number];
-			
-			switch(prm->number)
-			{
-				case cpAFreq:
-				case cpBFreq:
-					switch(currentPreset.steppedParameters[spChromaticPitch])
-					{
-						case 2: // octaves
-							tmp=value>>10;
-							srprintf(dv," %s%d",notesNames[0],tmp/12);
-							break;
-						case 1: // semitones
-							tmp=value>>10;
-							srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
-							break;
-						default:
-							srprintf(dv,"% 4d",scan_potFrom16bits(value));
-							break;
-					}
-					break;
-				default:
-					if(continuousParametersZeroCentered[prm->number].param)
-					{
-						tmp=scan_potFrom16bits(value+INT16_MIN);
-						srprintf(dv,tmp>=0?"% 4d":"% 3d",tmp);
-					}
-					else
-					{
-						srprintf(dv,"% 4d",scan_potFrom16bits(value));
-					}
-			}
-			break;
-		case ptStep:
-		case ptCust:
-			valCount=0;
-			while(valCount<8 && prm->values[valCount]!=NULL)
-				++valCount;
+	case ptCont:
+		value=currentPreset.continuousParameters[prm->number];
 
-			if(prm->type==ptStep)
+		switch(prm->number)
+		{
+		case cpAFreq:
+		case cpBFreq:
+			switch(currentPreset.steppedParameters[spChromaticPitch])
 			{
-				value=currentPreset.steppedParameters[prm->number];
-			}
-			else
-			{
-				switch(prm->number)
-				{
-				case cnNone:
-					value=0;
+				case 2: // octaves
+					tmp=value>>10;
+					srprintf(dv," %s%d",notesNames[0],tmp/12);
 					break;
-				case cnAMod:
-					value=arp_getMode();
-					break;
-				case cnAHld:
-					value=arp_getHold();
-					break;
-				case cnLoad:
-				case cnSave:
-					value=settings.presetNumber;
-					srprintf(dv," %03d",value);
-					break;
-				case cnMidC:
-					value=settings.midiReceiveChannel+1;
-					if(!value)
-						strcpy(dv,"Omni");
-					break;
-				case cnTune:
-					value=0;
-					break;
-				case cnSync:
-					value=settings.syncMode;
-					break;
-				case cnAPly:
-				case cnBPly:
-					value=seq_getMode((prm->number==cnBPly)?1:0);
-					break;
-				case cnSRec:
-					value=ui.seqRecordingTrack+1;
-					break;
-				case cnBack:
-				case cnTiRe:
-				case cnClr:
-					value=0;
-					if(ui.seqRecordingTrack>=0)
-						value=seq_getStepCount(ui.seqRecordingTrack);
-					break;
-				case cnTrspM:
-					value=ui.isTransposing;
-					break;
-				case cnTrspV:
-					value=ui.transpose;
-					tmp=value+MIDDLE_C_NOTE;
+				case 1: // semitones
+					tmp=value>>10;
 					srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
 					break;
-				case cnSBnk:
-					value=settings.sequencerBank;
+				default:
+					srprintf(dv,"% 4d",scan_potFrom16bits(value));
 					break;
-				case cnClk:
-					if(settings.syncMode!=symInternal)
-						value=clock_getSpeed();
-					else
-						value=settings.seqArpClock;
-					break;
-				case cnAXoSw:
-					value=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
-					value+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
-					srprintf(dv,"%04d",value);
-					break;
-				case cnBXoSw:
-					value=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
-					value+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
-					srprintf(dv,"%04d",value);
-					break;
-				case cnLPrv:
-				case cnLNxt:
-					if(ui.activeSourceTimeout<=currentTick) // display number only in fullscreen
-						strcpy(dv,"    ");
-					value=settings.presetNumber;
-					break;
-				case cnPanc:
-				case cnLBas:
-				case cnHelp:
-					value=0;
-					break;
-				case cnNPrs:
-				case cnNVal:
-					value=ui.kpInputValue;
-					srprintf(dv,"%03d ",value);
-					for(int i=0;i<=ui.kpInputDecade;++i)
-						dv[2-i]='_';				
-					break;
-				case cnUsbM:
-					value=ui.usbMSC?umMSC:(settings.usbMIDI?umMIDI:umPowerOnly);
-					break;
-				case cnCtst:
-					value=settings.lcdContrast;
-					break;
-				case cnWEnT:
-					value=currentPreset.steppedParameters[spWModEnvLin]*2+currentPreset.steppedParameters[spWModEnvSlow];
-					break;
-				case cnFEnT:
-					value=currentPreset.steppedParameters[spFilEnvLin]*2+currentPreset.steppedParameters[spFilEnvSlow];
-					break;
-				case cnAEnT:
-					value=currentPreset.steppedParameters[spAmpEnvLin]*2+currentPreset.steppedParameters[spAmpEnvSlow];
-					break;
-				}
-			}
-
-			if(!dv[0])
-			{
-				if(value>=0 && value<valCount)
-					strcpy(dv,prm->values[value]);
-				else
-					srprintf(dv,"% 4d",value);
 			}
 			break;
 		default:
-			/* nothing */;
+			if(continuousParametersZeroCentered[prm->number].param)
+			{
+				tmp=scan_potFrom16bits(value+INT16_MIN);
+				srprintf(dv,tmp>=0?"% 4d":"% 3d",tmp);
+			}
+			else
+			{
+				srprintf(dv,"% 4d",scan_potFrom16bits(value));
+			}
+		}
+		break;
+	case ptStep:
+	case ptCust:
+		if(prm->type==ptStep)
+		{
+			value=currentPreset.steppedParameters[prm->number];
+		}
+		else
+		{
+			switch(prm->number)
+			{
+			case cnNone:
+				value=0;
+				break;
+			case cnAMod:
+				value=arp_getMode();
+				break;
+			case cnAHld:
+				value=arp_getHold();
+				break;
+			case cnLoad:
+			case cnSave:
+				value=settings.presetNumber;
+				srprintf(dv," %03d",value);
+				break;
+			case cnMidC:
+				value=settings.midiReceiveChannel+1;
+				if(!value)
+					strcpy(dv,"Omni");
+				break;
+			case cnTune:
+				value=0;
+				break;
+			case cnSync:
+				value=settings.syncMode;
+				break;
+			case cnAPly:
+			case cnBPly:
+				value=seq_getMode((prm->number==cnBPly)?1:0);
+				break;
+			case cnSRec:
+				value=ui.seqRecordingTrack+1;
+				break;
+			case cnBack:
+			case cnTiRe:
+			case cnClr:
+				value=0;
+				if(ui.seqRecordingTrack>=0)
+					value=seq_getStepCount(ui.seqRecordingTrack);
+				break;
+			case cnTrspM:
+				value=ui.isTransposing;
+				break;
+			case cnTrspV:
+				value=ui.transpose;
+				tmp=value+MIDDLE_C_NOTE;
+				srprintf(dv," %s%d",notesNames[tmp%12],tmp/12);
+				break;
+			case cnSBnk:
+				value=settings.sequencerBank;
+				break;
+			case cnClk:
+				if(settings.syncMode!=symInternal)
+					value=clock_getSpeed();
+				else
+					value=settings.seqArpClock;
+				break;
+			case cnAXoSw:
+				value=currentPreset.steppedParameters[spAXOvrBank_Unsaved]*100;
+				value+=currentPreset.steppedParameters[spAXOvrWave_Unsaved]%100;
+				srprintf(dv,"%04d",value);
+				break;
+			case cnBXoSw:
+				value=currentPreset.steppedParameters[spBXOvrBank_Unsaved]*100;
+				value+=currentPreset.steppedParameters[spBXOvrWave_Unsaved]%100;
+				srprintf(dv,"%04d",value);
+				break;
+			case cnLPrv:
+			case cnLNxt:
+				value=settings.presetNumber;
+				if(ui.activeSourceTimeout<=currentTick) // display number only in fullscreen
+					strcpy(dv,"    ");
+				else
+					srprintf(dv," %03d",value);
+				break;
+			case cnPanc:
+			case cnLBas:
+			case cnHelp:
+				value=0;
+				break;
+			case cnNPrs:
+			case cnNVal:
+				value=ui.kpInputValue;
+				srprintf(dv,"%03d ",value);
+				for(int i=0;i<=ui.kpInputDecade;++i)
+					dv[2-i]='_';				
+				break;
+			case cnUsbM:
+				value=ui.usbMSC?umMSC:(settings.usbMIDI?umMIDI:umPowerOnly);
+				break;
+			case cnCtst:
+				value=settings.lcdContrast;
+				break;
+			case cnWEnT:
+				value=currentPreset.steppedParameters[spWModEnvLin]*2+currentPreset.steppedParameters[spWModEnvSlow];
+				break;
+			case cnFEnT:
+				value=currentPreset.steppedParameters[spFilEnvLin]*2+currentPreset.steppedParameters[spFilEnvSlow];
+				break;
+			case cnAEnT:
+				value=currentPreset.steppedParameters[spAmpEnvLin]*2+currentPreset.steppedParameters[spAmpEnvSlow];
+				break;
+			}
+		}
+
+		if(!dv[0])
+		{
+			if(value>=0 && value<UIP_MAX_VALUES)
+				strcpy(dv,prm->values[value]);
+			else
+				srprintf(dv,"% 4d",value);
+		}
+		break;
+	default:
+		/* nothing */;
 	}
 
 	if(valueOut)
@@ -694,7 +691,7 @@ static char * getDisplayFulltext(int8_t source)
 				dv[i]=(i<v) ? '\xff' : ' ';
 		}
 	}
-	if (prm->type==ptStep &&
+	else if (prm->type==ptStep &&
 			(prm->number==spABank_Unsaved || prm->number==spBBank_Unsaved ||
 			prm->number==spAXOvrBank_Unsaved || prm->number==spBXOvrBank_Unsaved))
 	{
@@ -723,17 +720,30 @@ static char * getDisplayFulltext(int8_t source)
 			strcpy(dv,uiParameters[ui.activePage][ui.kpInputPot].longName);
 	}
 	else
-	{
+	{ 
+		const int32_t maxDisplayableValues=8;
 		char * selected;
-		int32_t valCount;
+		int32_t idx,selectedIdx,valCount,dispCount;
 
-		selected = getDisplayValue(source, NULL);
+		selected=getDisplayValue(source,NULL);
+
+		selectedIdx=0;
 		valCount=0;
-		while(valCount<8 && prm->values[valCount]!=NULL)
+		while(valCount<UIP_MAX_VALUES && prm->values[valCount]!=NULL)
 		{
-			strcat(dv, (strcmp(selected, "") && !strcmp(selected, prm->values[valCount])) ? "\x7e"  : " ");
-			strcat(dv, prm->values[valCount]);
-			++valCount;
+			if(strcmp(selected,"") && !strcmp(selected,prm->values[valCount]))
+				selectedIdx=valCount;
+			++valCount;		
+		}
+		
+		idx=(valCount>maxDisplayableValues)?MAX(0,MIN(valCount-maxDisplayableValues,selectedIdx-(maxDisplayableValues/2))):0;
+		dispCount=0;
+		while(dispCount<maxDisplayableValues && prm->values[idx]!=NULL)
+		{
+			strcat(dv,(idx==selectedIdx)?"\x7e":" ");
+			strcat(dv,prm->values[idx]);
+			++idx;
+			++dispCount;
 		}
 	}
 
@@ -748,38 +758,38 @@ static void handlePageChange(enum scanKeypadButton_e button)
 {
 	switch(button)
 	{
-		case kb1: 
-			ui.activePage=upOscs;
-			break;
-		case kb2: 
-			ui.activePage=upWMod;
-			break;
-		case kb3: 
-			ui.activePage=upFil;
-			break;
-		case kb4: 
-			ui.activePage=upAmp;
-			break;
-		case kb5: 
-			ui.activePage=upLFO1;
-			break;
-		case kb6: 
-			ui.activePage=upLFO2;
-			break;
-		case kb7: 
-			ui.activePage=upArp;
-			break;
-		case kb8: 
-			ui.activePage=ui.seqRecordingTrack<0?upSeqPlay:upSeqRec;
-			break;
-		case kb9: 
-			ui.activePage=upMisc;
-			break;
-		case kb0: 
-			ui.activePage=upPresets;
-			break;
-		default:
-			return;
+	case kb1: 
+		ui.activePage=upOscs;
+		break;
+	case kb2: 
+		ui.activePage=upWMod;
+		break;
+	case kb3: 
+		ui.activePage=upFil;
+		break;
+	case kb4: 
+		ui.activePage=upAmp;
+		break;
+	case kb5: 
+		ui.activePage=upLFO1;
+		break;
+	case kb6: 
+		ui.activePage=upLFO2;
+		break;
+	case kb7: 
+		ui.activePage=upArp;
+		break;
+	case kb8: 
+		ui.activePage=ui.seqRecordingTrack<0?upSeqPlay:upSeqRec;
+		break;
+	case kb9: 
+		ui.activePage=upMisc;
+		break;
+	case kb0: 
+		ui.activePage=upPresets;
+		break;
+	default:
+		return;
 	}
 
 	rprintf(0,"page %d\n",ui.activePage);
@@ -886,7 +896,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	int8_t potnum,change,settingsModified;
 	const struct uiParam_s * prm;
 
-//	rprintf(0,"handleUserInput %d\n",source);
+//	rprintf(0,"scanEvent %d\n",source);
 	
 	// keypad value input mode	
 	
@@ -939,17 +949,17 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 	{
 		switch(prm->type)
 		{
-			case ptCont:
-				potSetting=scan_potTo16bits(*forcedValue);
-				break;
-			case ptStep:
-				potSetting=MIN(*forcedValue,valueCount-1);
-				break;
-			case ptCust:
-				potSetting=MIN(*forcedValue,prm->custPotMul+prm->custPotAdd-1);
-				break;
-			default:
-				/* nothing */;
+		case ptCont:
+			potSetting=scan_potTo16bits(*forcedValue);
+			break;
+		case ptStep:
+			potSetting=MIN(*forcedValue,valueCount-1);
+			break;
+		case ptCust:
+			potSetting=MIN(*forcedValue,prm->custPotMul+prm->custPotAdd-1);
+			break;
+		default:
+			/* nothing */;
 		}
 	}
 	else
@@ -964,22 +974,22 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			data=scan_getPotValue(potnum);
 			switch(prm->type)
 			{
-				case ptCont:
-					potSetting=data;
+			case ptCont:
+				potSetting=data;
 
-					if(continuousParametersZeroCentered[prm->number].param)
-						potSetting=addDeadband(potSetting, &panelDeadband);
+				if(continuousParametersZeroCentered[prm->number].param)
+					potSetting=addDeadband(potSetting, &panelDeadband);
 
-					potQuantum=scan_potTo16bits(1);
-					break;
-				case ptStep:
-					potSetting=(valueCount*data)>>16;
-					break;
-				case ptCust:
-					potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
-					break;
-				default:
-					/* nothing */;
+				potQuantum=scan_potTo16bits(1);
+				break;
+			case ptStep:
+				potSetting=(valueCount*data)>>16;
+				break;
+			case ptCust:
+				potSetting=((prm->custPotMul*data)>>16)+prm->custPotAdd;
+				break;
+			default:
+				/* nothing */;
 			}
 		}
 
@@ -1049,219 +1059,219 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		{
 			switch(prm->number)
 			{
-				case spABank_Unsaved:
-				case spBBank_Unsaved:
-				case spAXOvrBank_Unsaved:
-				case spBXOvrBank_Unsaved:
-					synth_getBankName(data,currentPreset.oscBank[sp2abx[prm->number]]);
+			case spABank_Unsaved:
+			case spBBank_Unsaved:
+			case spAXOvrBank_Unsaved:
+			case spBXOvrBank_Unsaved:
+				synth_getBankName(data,currentPreset.oscBank[sp2abx[prm->number]]);
 
-					// waveform changes
-					ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-					ui.slowUpdateTimeoutNumber=prm->number;
-					break;
-				case spAWave_Unsaved:
-				case spBWave_Unsaved:
-				case spAXOvrWave_Unsaved:
-				case spBXOvrWave_Unsaved:
-					synth_getWaveName(data,currentPreset.oscWave[sp2abx[prm->number]]);
+				// waveform changes
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number;
+				break;
+			case spAWave_Unsaved:
+			case spBWave_Unsaved:
+			case spAXOvrWave_Unsaved:
+			case spBXOvrWave_Unsaved:
+				synth_getWaveName(data,currentPreset.oscWave[sp2abx[prm->number]]);
 
-					// waveform changes
-					ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-					ui.slowUpdateTimeoutNumber=prm->number;
-					break;
-				case spUnison:
-					synth_updateAssignerPattern();
-					break;
+				// waveform changes
+				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+				ui.slowUpdateTimeoutNumber=prm->number;
+				break;
+			case spUnison:
+				synth_updateAssignerPattern();
+				break;
 			}
 		}
 		break;
 	case ptCust:
 		switch(prm->number)
 		{
-			case cnAMod:
-				arp_setMode((arp_getMode()+1)%4,arp_getHold());
+		case cnAMod:
+			arp_setMode((arp_getMode()+1)%4,arp_getHold());
+			break;
+		case cnAHld:
+			arp_setMode(arp_getMode(),!arp_getHold());
+			break;
+		case cnLoad:
+			if(!setPresetModifiedWarning(prm->number))
 				break;
-			case cnAHld:
-				arp_setMode(arp_getMode(),!arp_getHold());
+
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			break;
+		case cnSave:
+			if(settings.presetNumber!=currentPreset.loadedPresetNumber && !ui.presetExistsWarning && preset_fileExists(settings.presetNumber))
+			{
+				ui.presetExistsWarning=1;
 				break;
-			case cnLoad:
-				if(!setPresetModifiedWarning(prm->number))
-					break;
-				
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			}
+			ui.presetExistsWarning=0;
+			ui_setPresetModified(0);
+
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			break;
+		case cnTune:
+			assigner_setVoiceMask(0); // ensure no note playing during tuning
+
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			break;
+		case cnMidC:
+			settings.midiReceiveChannel=potSetting-1;
+			settingsModified=1;
+			break;
+		case cnSync:
+			settings.syncMode=potSetting;
+			settingsModified=1;
+			break;
+		case cnAPly:
+		case cnBPly:
+			data=(prm->number==cnBPly)?1:0;
+			seq_setMode(data,seq_getMode(data)==smPlaying?smOff:smPlaying);
+			if(data==ui.seqRecordingTrack)
+				ui.seqRecordingTrack=-1;
+			break;
+		case cnSRec:
+			ui.seqRecordingTrack=ui.seqRecordingTrack>=1?-1:ui.seqRecordingTrack+1;
+			if(seq_getMode(0)==smRecording) seq_setMode(0,smOff);
+			if(seq_getMode(1)==smRecording) seq_setMode(1,smOff);
+			if(ui.seqRecordingTrack>=0)
+				seq_setMode(ui.seqRecordingTrack,smRecording);
+			handlePageChange(kb8);
+			break;
+		case cnBack:
+			if(ui.seqRecordingTrack>=0)
+				seq_inputNote(SEQ_NOTE_UNDO,1);
+			break;
+		case cnTiRe:
+			if(ui.seqRecordingTrack>=0)
+				seq_inputNote(SEQ_NOTE_STEP,1);
+			break;
+		case cnClr:
+			if(ui.seqRecordingTrack>=0)
+				seq_inputNote(SEQ_NOTE_CLEAR,1);
+			break;
+		case cnTrspM:
+			ui.isTransposing=(ui.isTransposing+1)%3;
+			break;
+		case cnTrspV:
+			ui_setTranspose(potSetting);
+			break;
+		case cnSBnk:
+			settings.sequencerBank=potSetting;
+			settingsModified=1;
+			break;				
+		case cnClk:
+			settings.seqArpClock=potSetting;
+			settingsModified=1;
+			break;
+		case cnAXoSw:
+			swap8(&currentPreset.steppedParameters[spAXOvrBank_Unsaved],&currentPreset.steppedParameters[spABank_Unsaved]);
+			swap8(&currentPreset.steppedParameters[spAXOvrWave_Unsaved],&currentPreset.steppedParameters[spAWave_Unsaved]);
+			swapstr(currentPreset.oscBank[2],currentPreset.oscBank[0]);
+			swapstr(currentPreset.oscWave[2],currentPreset.oscWave[0]);
+			synth_refreshWaveforms(abxAMain);
+			synth_refreshWaveforms(abxACrossover);
+			change=1;
+			break;
+		case cnBXoSw:
+			swap8(&currentPreset.steppedParameters[spBXOvrBank_Unsaved],&currentPreset.steppedParameters[spBBank_Unsaved]);
+			swap8(&currentPreset.steppedParameters[spBXOvrWave_Unsaved],&currentPreset.steppedParameters[spBWave_Unsaved]);
+			swapstr(currentPreset.oscBank[3],currentPreset.oscBank[1]);
+			swapstr(currentPreset.oscWave[3],currentPreset.oscWave[1]);
+			synth_refreshWaveforms(abxBMain);
+			synth_refreshWaveforms(abxBCrossover);
+			change=1;
+			break;
+		case cnLPrv:
+		case cnLNxt:
+			if(!setPresetModifiedWarning(prm->number))
 				break;
-			case cnSave:
-				if(settings.presetNumber!=currentPreset.loadedPresetNumber && !ui.presetExistsWarning && preset_fileExists(settings.presetNumber))
-				{
-					ui.presetExistsWarning=1;
-					break;
-				}
-				ui.presetExistsWarning=0;
-				ui_setPresetModified(0);
-				
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
+			data=(data+1000)%1000;
+			settings.presetNumber=data;
+
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=0x80+cnLoad;
+			break;
+		case cnPanc:
+			assigner_panicOff();
+			synth_refreshFullState(0);
+			break;
+		case cnLBas:
+			if(!setPresetModifiedWarning(prm->number))
 				break;
-			case cnTune:
-				assigner_setVoiceMask(0); // ensure no note playing during tuning
-				
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number+0x80;
-				break;
-			case cnMidC:
-				settings.midiReceiveChannel=potSetting-1;
-				settingsModified=1;
-				break;
-			case cnSync:
-				settings.syncMode=potSetting;
-				settingsModified=1;
-				break;
-			case cnAPly:
-			case cnBPly:
-				data=(prm->number==cnBPly)?1:0;
-				seq_setMode(data,seq_getMode(data)==smPlaying?smOff:smPlaying);
-				if(data==ui.seqRecordingTrack)
-					ui.seqRecordingTrack=-1;
-				break;
-			case cnSRec:
-				ui.seqRecordingTrack=ui.seqRecordingTrack>=1?-1:ui.seqRecordingTrack+1;
-				if(seq_getMode(0)==smRecording) seq_setMode(0,smOff);
-				if(seq_getMode(1)==smRecording) seq_setMode(1,smOff);
-				if(ui.seqRecordingTrack>=0)
-					seq_setMode(ui.seqRecordingTrack,smRecording);
-				handlePageChange(kb8);
-				break;
-			case cnBack:
-				if(ui.seqRecordingTrack>=0)
-					seq_inputNote(SEQ_NOTE_UNDO,1);
-				break;
-			case cnTiRe:
-				if(ui.seqRecordingTrack>=0)
-					seq_inputNote(SEQ_NOTE_STEP,1);
-				break;
-			case cnClr:
-				if(ui.seqRecordingTrack>=0)
-					seq_inputNote(SEQ_NOTE_CLEAR,1);
-				break;
-			case cnTrspM:
-				ui.isTransposing=(ui.isTransposing+1)%3;
-				break;
-			case cnTrspV:
-				ui_setTranspose(potSetting);
-				break;
-			case cnSBnk:
-				settings.sequencerBank=potSetting;
-				settingsModified=1;
-				break;				
-			case cnClk:
-				settings.seqArpClock=potSetting;
-				settingsModified=1;
-				break;
-			case cnAXoSw:
-				swap8(&currentPreset.steppedParameters[spAXOvrBank_Unsaved],&currentPreset.steppedParameters[spABank_Unsaved]);
-				swap8(&currentPreset.steppedParameters[spAXOvrWave_Unsaved],&currentPreset.steppedParameters[spAWave_Unsaved]);
-				swapstr(currentPreset.oscBank[2],currentPreset.oscBank[0]);
-				swapstr(currentPreset.oscWave[2],currentPreset.oscWave[0]);
-				synth_refreshWaveforms(abxAMain);
-				synth_refreshWaveforms(abxACrossover);
-				change=1;
-				break;
-			case cnBXoSw:
-				swap8(&currentPreset.steppedParameters[spBXOvrBank_Unsaved],&currentPreset.steppedParameters[spBBank_Unsaved]);
-				swap8(&currentPreset.steppedParameters[spBXOvrWave_Unsaved],&currentPreset.steppedParameters[spBWave_Unsaved]);
-				swapstr(currentPreset.oscBank[3],currentPreset.oscBank[1]);
-				swapstr(currentPreset.oscWave[3],currentPreset.oscWave[1]);
-				synth_refreshWaveforms(abxBMain);
-				synth_refreshWaveforms(abxBCrossover);
-				change=1;
-				break;
-			case cnLPrv:
-			case cnLNxt:
-				if(!setPresetModifiedWarning(prm->number))
-					break;
-				data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
-				data=(data+1000)%1000;
-				settings.presetNumber=data;
-				
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=0x80+cnLoad;
-				break;
-			case cnPanc:
-				assigner_panicOff();
-				synth_refreshFullState(0);
-				break;
-			case cnLBas:
-				if(!setPresetModifiedWarning(prm->number))
-					break;
-				
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number+0x80;
-				break;
-			case cnNPrs:
-				ui.kpInputValue=0;
-				ui.kpInputPot=-1;
+
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			break;
+		case cnNPrs:
+			ui.kpInputValue=0;
+			ui.kpInputPot=-1;
+			ui.kpInputDecade=2;
+			ui.activeSourceTimeout=UINT32_MAX;
+			break;
+		case cnNVal:
+			ui.kpInputValue=0;
+			ui.kpInputDecade=-1;
+			if(ui.lastInputPot>=0 && uiParameters[ui.activePage][ui.lastInputPot].type!=ptNone)
+			{
+				ui.kpInputPot=ui.lastInputPot;
 				ui.kpInputDecade=2;
 				ui.activeSourceTimeout=UINT32_MAX;
+			}
+			break;
+		case cnUsbM:
+			switch(potSetting)
+			{
+			case umMIDI:
+				settings.usbMIDI=1;
+				ui.usbMSC=0;
 				break;
-			case cnNVal:
-				ui.kpInputValue=0;
-				ui.kpInputDecade=-1;
-				if(ui.lastInputPot>=0 && uiParameters[ui.activePage][ui.lastInputPot].type!=ptNone)
-				{
-					ui.kpInputPot=ui.lastInputPot;
-					ui.kpInputDecade=2;
-					ui.activeSourceTimeout=UINT32_MAX;
-				}
+			case umMSC:
+				ui.usbMSC=1;
 				break;
-			case cnUsbM:
-				switch(potSetting)
-				{
-				case umMIDI:
-					settings.usbMIDI=1;
-					ui.usbMSC=0;
-					break;
-				case umMSC:
-					ui.usbMSC=1;
-					break;
-				default:
-					settings.usbMIDI=0;
-					ui.usbMSC=0;
-				}
-				ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
-				ui.slowUpdateTimeoutNumber=prm->number+0x80;
-				settingsModified=1;
-				break;
-			case cnCtst:
-				settings.lcdContrast=potSetting;
-				settingsModified=1;
-				break;
-			case cnWEnT:
-				getDisplayValue(source,&data);
-				data=(data+1)&3;
-				currentPreset.steppedParameters[spWModEnvSlow]=data&1;
-				currentPreset.steppedParameters[spWModEnvLin]=data>>1;
-				change=1;
-				break;
-			case cnFEnT:
-				getDisplayValue(source,&data);
-				data=(data+1)&3;
-				currentPreset.steppedParameters[spFilEnvSlow]=data&1;
-				currentPreset.steppedParameters[spFilEnvLin]=data>>1;
-				change=1;
-				break;
-			case cnAEnT:
-				getDisplayValue(source,&data);
-				data=(data+1)&3;
-				currentPreset.steppedParameters[spAmpEnvSlow]=data&1;
-				currentPreset.steppedParameters[spAmpEnvLin]=data>>1;
-				change=1;
-				break;
-			case cnHelp:
-				ui.activePage=upHelp;
-				ui.activeSourceTimeout=0;
-				ui.pendingScreenClear=1;
-				break;
+			default:
+				settings.usbMIDI=0;
+				ui.usbMSC=0;
+			}
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeoutNumber=prm->number+0x80;
+			settingsModified=1;
+			break;
+		case cnCtst:
+			settings.lcdContrast=potSetting;
+			settingsModified=1;
+			break;
+		case cnWEnT:
+			getDisplayValue(source,&data);
+			data=(data+1)&3;
+			currentPreset.steppedParameters[spWModEnvSlow]=data&1;
+			currentPreset.steppedParameters[spWModEnvLin]=data>>1;
+			change=1;
+			break;
+		case cnFEnT:
+			getDisplayValue(source,&data);
+			data=(data+1)&3;
+			currentPreset.steppedParameters[spFilEnvSlow]=data&1;
+			currentPreset.steppedParameters[spFilEnvLin]=data>>1;
+			change=1;
+			break;
+		case cnAEnT:
+			getDisplayValue(source,&data);
+			data=(data+1)&3;
+			currentPreset.steppedParameters[spAmpEnvSlow]=data&1;
+			currentPreset.steppedParameters[spAmpEnvLin]=data>>1;
+			change=1;
+			break;
+		case cnHelp:
+			ui.activePage=upHelp;
+			ui.activeSourceTimeout=0;
+			ui.pendingScreenClear=1;
+			break;
 		}
 		break;
 	default:
@@ -1308,77 +1318,77 @@ static void handleSlowUpdates(void)
 	
 	switch(ui.slowUpdateTimeoutNumber)
 	{
-		case spABank_Unsaved:
-		case spBBank_Unsaved:
-		case spAXOvrBank_Unsaved:
-		case spBXOvrBank_Unsaved:
-			synth_refreshCurWaveNames(sp2abx[ui.slowUpdateTimeoutNumber],1);
-			break;
-		case spAWave_Unsaved:
-		case spBWave_Unsaved:
-		case spAXOvrWave_Unsaved:
-		case spBXOvrWave_Unsaved:
-			synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
-			synth_refreshFullState(0);
-			break;
-		case 0x80+cnSave:
-			preset_saveCurrent(settings.presetNumber);
-			break;
-		case 0x80+cnLoad:
-			BLOCK_INT(1)
-			{
-				// temporarily silence voices
-				for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-					synth_refreshCV(v,cvAmp,0,1);					
+	case spABank_Unsaved:
+	case spBBank_Unsaved:
+	case spAXOvrBank_Unsaved:
+	case spBXOvrBank_Unsaved:
+		synth_refreshCurWaveNames(sp2abx[ui.slowUpdateTimeoutNumber],1);
+		break;
+	case spAWave_Unsaved:
+	case spBWave_Unsaved:
+	case spAXOvrWave_Unsaved:
+	case spBXOvrWave_Unsaved:
+		synth_refreshWaveforms(sp2abx[ui.slowUpdateTimeoutNumber]);
+		synth_refreshFullState(0);
+		break;
+	case 0x80+cnSave:
+		preset_saveCurrent(settings.presetNumber);
+		break;
+	case 0x80+cnLoad:
+		BLOCK_INT(1)
+		{
+			// temporarily silence voices
+			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+				synth_refreshCV(v,cvAmp,0,1);					
 
-				settings_save();                
-				if(!preset_loadCurrent(settings.presetNumber))
-					preset_loadDefault(1);
-				ui_setPresetModified(0);	
-				ui.presetExistsWarning=0;
-
-				synth_refreshFullState(1);
-			}
-			break;
-		case 0x80+cnLBas:
-			BLOCK_INT(1)
-			{
-				// temporarily silence voices
-				for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-					synth_refreshCV(v,cvAmp,0,1);					
-
+			settings_save();                
+			if(!preset_loadCurrent(settings.presetNumber))
 				preset_loadDefault(1);
-				ui_setPresetModified(1);
+			ui_setPresetModified(0);	
+			ui.presetExistsWarning=0;
 
-				synth_refreshFullState(1);
-			}
-			break;
-		case 0x80+cnTune:
+			synth_refreshFullState(1);
+		}
+		break;
+	case 0x80+cnLBas:
+		BLOCK_INT(1)
+		{
+			// temporarily silence voices
+			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+				synth_refreshCV(v,cvAmp,0,1);					
+
+			preset_loadDefault(1);
+			ui_setPresetModified(1);
+
+			synth_refreshFullState(1);
+		}
+		break;
+	case 0x80+cnTune:
+		setPos(2,0,1);
+		tuner_tuneSynth();
+		settings_save();
+		synth_refreshFullState(0);
+		ui.pendingScreenClear=1;
+		break;
+	case 0x80+cnUsbM:
+		if(ui.usbMSC)
+		{
 			setPos(2,0,1);
-			tuner_tuneSynth();
-			settings_save();
-			synth_refreshFullState(0);
+			sendString(2,"USB Disk mode, press any button to quit");
+			usb_setMode(umMSC,usbMSCCallback);
+
+			setPos(2,0,1);
+			sendString(2,"Quitting USB Disk mode...              ");
+
+			// reload settings & load static stuff
+			settings_load();
+			synth_refreshBankNames(1,1);
+
+			synth_refreshFullState(1);
 			ui.pendingScreenClear=1;
-			break;
-		case 0x80+cnUsbM:
-			if(ui.usbMSC)
-			{
-				setPos(2,0,1);
-				sendString(2,"USB Disk mode, press any button to quit");
-				usb_setMode(umMSC,usbMSCCallback);
-
-				setPos(2,0,1);
-				sendString(2,"Quitting USB Disk mode...              ");
-
-				// reload settings & load static stuff
-				settings_load();
-				synth_refreshBankNames(1,1);
-
-				synth_refreshFullState(1);
-				ui.pendingScreenClear=1;
-			}
-			usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
-			break;
+		}
+		usb_setMode(settings.usbMIDI?umMIDI:umPowerOnly,NULL);
+		break;
 	}
 
 	ui.slowUpdateTimeout=UINT32_MAX;
