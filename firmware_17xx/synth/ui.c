@@ -1190,11 +1190,12 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 		case cnLNxt:
 			if(!setPresetModifiedWarning(prm->number))
 				break;
+			
 			data=settings.presetNumber+((prm->number==cnLPrv)?-1:1);
 			data=(data+1000)%1000;
 			settings.presetNumber=data;
 
-			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
+			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT*2;
 			ui.slowUpdateTimeoutNumber=0x80+cnLoad;
 			break;
 		case cnPanc:
