@@ -101,7 +101,15 @@ static FORCEINLINE int32_t handleCounterUnderflow_wmAliasing(struct wtosc_s * o,
 
 	o->counter+=curPeriod;
 
-	o->prevSample3=o->prevSample2=o->curSample; // we want aliasing, so make interpolation less effective !
+	if(o->aliasing)
+	{
+		o->prevSample3=o->prevSample2=o->curSample; // we want aliasing, so make interpolation less effective !
+	}
+	else
+	{
+		o->prevSample3=o->prevSample2;
+		o->prevSample2=o->prevSample;
+	}
 	o->prevSample=o->curSample;
 
 	o->curSample=o->mainData[o->phase];
@@ -703,7 +711,7 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, oscWMod
 	uint64_t frequency;
 	uint32_t sampleRate[2];
 	int32_t increment[2], period[2], aliasing_s, crossover_s, folder_s, bitcrush_s;
-	uint16_t width;
+	uint16_t width, wlim;
 	
 	pitch=MIN(WTOSC_HIGHEST_NOTE*WTOSC_CV_SEMITONE,pitch);
 	
@@ -716,9 +724,10 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, oscWMod
 	switch(wmType)
 	{
 	case wmWidth:
+		wlim=pitch>>2;
 		width=wmAmount;
-		width=MAX(UINT16_MAX/32,width);
-		width=MIN((31*UINT16_MAX)/32,width);
+		width=MAX(wlim,width);
+		width=MIN(UINT16_MAX-wlim,width);
 		width>>=16-WIDTH_MOD_BITS;
 		break;
 	case wmAliasing:
@@ -762,8 +771,8 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, oscWMod
 		sampleRate[0]=frequency/((1<<WIDTH_MOD_BITS)-width);
 		sampleRate[1]=frequency/width;
 
-		increment[0]=1+(sampleRate[0]/MAX_SAMPLERATE);
-		increment[1]=1+(sampleRate[1]/MAX_SAMPLERATE);
+		increment[0]=sampleRate[0]/MAX_SAMPLERATE;
+		increment[1]=sampleRate[1]/MAX_SAMPLERATE;
 
 		increment[0]=oscIncModLUT[increment[0]];
 		increment[1]=oscIncModLUT[increment[1]];

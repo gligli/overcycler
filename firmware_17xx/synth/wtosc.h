@@ -5,7 +5,7 @@
 
 #define WTOSC_SAMPLE_COUNT 2400 // samples
 #define WTOSC_CV_SEMITONE 256
-#define WTOSC_HIGHEST_NOTE 120
+#define WTOSC_HIGHEST_NOTE 108
 #define WTOSC_SAMPLES_GUARD_BAND 4600 // about -1.3 decibels
 
 typedef enum
