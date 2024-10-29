@@ -217,8 +217,8 @@ static void refreshTunedCVs(void)
 
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
-		note=MIDDLE_C_NOTE; // by default, rest the synth on scale middle (prevents analog glitches)
-		assigner_getAssignment(v,&note);
+		if(!assigner_getAssignment(v,&note))
+			continue;
 		
 		// oscs
 		
@@ -902,6 +902,14 @@ void synth_init(void)
 	lfo_init(&synth.lfo[0]);
 	lfo_init(&synth.lfo[1]);
 
+	// rest the synth on scale middle (prevents analog glitches)
+	for(i=0;i<SYNTH_VOICE_COUNT;++i)
+	{
+		synth.oscANoteCV[i]=synth.oscATargetCV[i]=tuner_computeCVFromNote(i,MIDDLE_C_NOTE,0,cvAPitch);
+		synth.oscBNoteCV[i]=synth.oscBTargetCV[i]=tuner_computeCVFromNote(i,MIDDLE_C_NOTE,0,cvBPitch);
+		synth.filterNoteCV[i]=synth.filterTargetCV[i]=tuner_computeCVFromNote(i,MIDDLE_C_NOTE,0,cvCutoff);
+	}
+	
 	// load settings from storage & load static stuff
 
 	settings_load();
