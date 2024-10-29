@@ -545,9 +545,7 @@ void midi_update(void)
 	if(currentTick>midi.presetTimeout)
 		BLOCK_INT(1)
 		{
-			// temporarily silence voices
-			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-				synth_refreshCV(v,cvAmp,0,1);
+			synth_silenceSynth();
 			
 			settings_save();		
 

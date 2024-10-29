@@ -81,6 +81,7 @@ int32_t synth_getVisualEnvelope(int8_t voice);
 uint16_t * synth_getWaveformData(abx_t abx);
 void synth_refreshCV(int8_t voice, cv_t cv, uint32_t v, int8_t noDblBuf);
 void synth_updateAssignerPattern(void);
+void synth_silenceSynth(void);
 
 extern volatile uint32_t currentTick; // 500hz
 extern const uint16_t extClockDividers[16];

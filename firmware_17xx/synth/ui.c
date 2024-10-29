@@ -1114,7 +1114,7 @@ static void scanEvent(int8_t source, uint16_t * forcedValue) // source: keypad (
 			ui.slowUpdateTimeoutNumber=prm->number+0x80;
 			break;
 		case cnTune:
-			assigner_setVoiceMask(0); // ensure no note playing during tuning
+			synth_silenceSynth();
 
 			ui.slowUpdateTimeout=currentTick+SLOW_UPDATE_TIMEOUT;
 			ui.slowUpdateTimeoutNumber=prm->number+0x80;
@@ -1338,10 +1338,8 @@ static void handleSlowUpdates(void)
 	case 0x80+cnLoad:
 		BLOCK_INT(1)
 		{
-			// temporarily silence voices
-			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-				synth_refreshCV(v,cvAmp,0,1);					
-
+			synth_silenceSynth();
+			
 			settings_save();                
 			if(!preset_loadCurrent(settings.presetNumber))
 				preset_loadDefault(1);
@@ -1354,10 +1352,8 @@ static void handleSlowUpdates(void)
 	case 0x80+cnLBas:
 		BLOCK_INT(1)
 		{
-			// temporarily silence voices
-			for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
-				synth_refreshCV(v,cvAmp,0,1);					
-
+			synth_silenceSynth();
+			
 			preset_loadDefault(1);
 			ui_setPresetModified(1);
 

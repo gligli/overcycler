@@ -712,6 +712,16 @@ void synth_updateAssignerPattern(void)
 	assigner_getPattern(currentPreset.voicePattern,NULL);
 }
 
+void synth_silenceSynth(void)
+{
+	// temporarily silence voices
+	for(int8_t v=0;v<SYNTH_VOICE_COUNT;++v)
+		synth_refreshCV(v,cvAmp,0,1);
+	
+	assigner_setVoiceMask(0);
+	handleFinishedVoices();
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Speed critical internal code
 ////////////////////////////////////////////////////////////////////////////////
