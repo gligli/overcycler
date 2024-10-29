@@ -538,6 +538,7 @@ LOWERCODESIZE void preset_loadDefault(int8_t makeSound)
 		}
 	}
 
+	currentPreset.loadedPresetNumber=-1;
 	strcpy(currentPreset.presetName,"<no name>");
 
 	if(makeSound)

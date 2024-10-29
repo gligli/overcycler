@@ -98,7 +98,7 @@ struct settings_s
 
 struct preset_s
 {
-	uint16_t loadedPresetNumber;
+	int16_t loadedPresetNumber;
 	char presetName[53];
 
 	uint8_t steppedParameters[spCount];

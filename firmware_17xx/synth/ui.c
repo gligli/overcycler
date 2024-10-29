@@ -1675,7 +1675,14 @@ void ui_update(void)
 			char buf[60];
 			
 			memset(buf,0,sizeof(buf));
-			srprintf(buf,"%03d:%s",currentPreset.loadedPresetNumber,currentPreset.presetName);
+			if(currentPreset.loadedPresetNumber<0)
+			{
+				srprintf(buf,"???:%s",currentPreset.presetName);
+			}
+			else
+			{
+				srprintf(buf,"%03d:%s",currentPreset.loadedPresetNumber,currentPreset.presetName);
+			}
 			setPos(1,0,1); sendString(1,&buf[28]);
 			buf[28]='\0';
 			setPos(1,0,0); sendString(1,buf);
