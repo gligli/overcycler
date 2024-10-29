@@ -778,7 +778,7 @@ FORCEINLINE void wtosc_setParameters(struct wtosc_s * o, uint16_t pitch, oscWMod
 		o->pendingIncrement[0]=increment[0];
 		o->pendingIncrement[1]=increment[1];
 
-		o->pendingUpdate=(width!=o->width)?1:2; // width change needs delayed update (waiting for phase)
+		o->pendingUpdate=(pitch==o->pitch && aliasing_s==o->aliasing)?1:2; // width change alone needs delayed update (waiting for phase)
 
 		o->pitch=pitch;
 		o->width=width;
