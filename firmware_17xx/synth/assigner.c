@@ -177,7 +177,7 @@ static inline int8_t getDispensableVoice(uint8_t note)
 	
 void assigner_voiceDone(int8_t voice)
 {
-	if (voice<0||voice>SYNTH_VOICE_COUNT)
+	if (voice<0 || voice>=SYNTH_VOICE_COUNT)
 		return;
 
 	assigner.allocation[voice].allocated=0;
@@ -189,6 +189,7 @@ void assigner_voiceDone(int8_t voice)
 LOWERCODESIZE static void voicesDone(void)
 {
 	int8_t v;
+	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		if(isVoiceDisabled(v))
@@ -197,6 +198,7 @@ LOWERCODESIZE static void voicesDone(void)
 		assigner_voiceDone(v);
 		assigner.allocation[v].timestamp=0; // reset to voice 0 in case all voices stopped at once
 	}
+	
 	// Release all keys and future holds too. This avoids potential
 	// problems with notes seemingly popping up from nowhere due to
 	// reassignment when future keys are released.
@@ -210,6 +212,7 @@ LOWERCODESIZE static void voicesDone(void)
 void assigner_allKeysOff(void)
 {
 	int8_t v;
+	
 	for(v=0;v<SYNTH_VOICE_COUNT;++v)
 	{
 		if (!isVoiceDisabled(v) && assigner.allocation[v].gated &&
@@ -220,7 +223,8 @@ void assigner_allKeysOff(void)
 		    	assigner.allocation[v].keyPressed=0;
 		}
 	}
-    memset(assigner.noteTimestamps,UINT32_MAX,sizeof(assigner.noteTimestamps));
+	
+	memset(assigner.noteTimestamps,UINT32_MAX,sizeof(assigner.noteTimestamps));
 	assigner.hold=0;
 }
 
